@@ -299,14 +299,14 @@ def main() -> None:
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     processor: DocumentProcessor = DocumentProcessor(
         table_name="federalist_papers",
-        recreate_table=True,
+        recreate_table=False,
         embedder_model_name="Alibaba-NLP/gte-large-en-v1.5",
         book_file_path=epub_file_path,
         postgres_user_name='postgres',
         postgres_password=postgres_password,
         postgres_host='localhost',
         postgres_port=5432,
-        postgres_db_name='postgres',
+        postgres_db_name='bookarchive',
         min_section_size=1000,
     )
 
@@ -318,5 +318,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-# TODO: Be sure that if there is no federalist_papers table, it is created even when recreate_table is False.
