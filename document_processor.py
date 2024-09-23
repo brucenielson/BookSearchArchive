@@ -114,7 +114,7 @@ class DocumentProcessor:
     def __init__(self,
                  table_name: str = 'haystack_pgvector_docs',
                  recreate_table: bool = False,
-                 book_file_path: Optional[str] = None,
+                 file_or_folder_path: Optional[str] = None,
                  postgres_user_name: str = 'postgres',
                  postgres_password: str = None,
                  postgres_host: str = 'localhost',
@@ -129,7 +129,7 @@ class DocumentProcessor:
         Args:
             table_name (str): Name of the table in the Pgvector database.
             recreate_table (bool): Whether to recreate the database table.
-            book_file_path (Optional[str]): Path to the EPUB file to be processed.
+            file_or_folder_path (Optional[str]): Path to the EPUB file to be processed.
             postgres_user_name (str): Username for Postgres database.
             postgres_password (str): Password for Postgres database.
             postgres_host (str): Host address for Postgres database.
@@ -140,12 +140,23 @@ class DocumentProcessor:
         """
 
         # Instance variables
-        self._book_file_path: Optional[str] = book_file_path
         self._table_name: str = table_name
         self._recreate_table: bool = recreate_table
         self._min_section_size = min_section_size
         self._embedder_model_name: Optional[str] = embedder_model_name
         self._sentence_embedder: Optional[SentenceTransformersDocumentEmbedder] = None
+
+        # File paths
+        self._file_or_folder_path: Optional[str] = file_or_folder_path  # New instance variable
+
+        # Determine if the path is a file or directory
+        if self._file_or_folder_path is not None:
+            if Path(self._file_or_folder_path).is_file():
+                self._is_directory = False
+            elif Path(self._file_or_folder_path).is_dir():
+                self._is_directory = True
+            else:
+                raise ValueError("The provided path must be a valid file or directory.")
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -214,13 +225,13 @@ class DocumentProcessor:
     def _load_epub(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         docs: List[ByteStream] = []
         meta: List[Dict[str, str]] = []
-        book: epub.EpubBook = epub.read_epub(self._book_file_path)
+        book: epub.EpubBook = epub.read_epub(self._file_or_folder_path)
         section_num: int = 1
         for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
             section_html: str = section.get_body_content().decode('utf-8')
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
             headings = [heading.get_text().strip() for heading in section_soup.find_all('h1')]
-            title = ' '.join(headings)
+            title = section.id + ' '.join(headings)
             paragraphs: List[Any] = section_soup.find_all('p')
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
@@ -266,24 +277,28 @@ class DocumentProcessor:
         self._doc_convert_pipeline = doc_convert_pipe
 
     def _initialize_document_store(self) -> None:
-        connection_token: Secret = Secret.from_token(self._postgres_connection_str)
-        document_store: PgvectorDocumentStore = PgvectorDocumentStore(
-            connection_string=connection_token,
-            table_name=self._table_name,
-            embedding_dimension=self.embed_dims,
-            vector_function="cosine_similarity",
-            recreate_table=self._recreate_table,
-            search_strategy="hnsw",
-            hnsw_recreate_index_if_exists=True,
-            hnsw_index_name=self._table_name + "_haystack_hnsw_index",
-            keyword_index_name=self._table_name + "_haystack_keyword_index",
-        )
+        def create_doc_store(force_recreate:bool=False) -> PgvectorDocumentStore:
+            connection_token: Secret = Secret.from_token(self._postgres_connection_str)
+            doc_store: PgvectorDocumentStore = PgvectorDocumentStore(
+                connection_string=connection_token,
+                table_name=self._table_name,
+                embedding_dimension=self.embed_dims,
+                vector_function="cosine_similarity",
+                recreate_table=self._recreate_table or force_recreate,
+                search_strategy="hnsw",
+                hnsw_recreate_index_if_exists=True,
+                hnsw_index_name=self._table_name + "_hnsw_index",
+                keyword_index_name=self._table_name + "_keyword_index",
+            )
+            return doc_store
 
+        document_store: PgvectorDocumentStore
+        document_store = create_doc_store()
         self._document_store = document_store
 
         print("Document Count: " + str(document_store.count_documents()))
 
-        if document_store.count_documents() == 0 and self._book_file_path is not None:
+        if document_store.count_documents() == 0 and self._file_or_folder_path is not None:
             sources: List[ByteStream]
             meta: List[Dict[str, str]]
             print("Loading document file")
@@ -295,20 +310,20 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "Federalist Papers.epub"
+    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
-        table_name="federalist_papers",
-        recreate_table=False,
-        embedder_model_name="Alibaba-NLP/gte-large-en-v1.5",
-        book_file_path=epub_file_path,
+        table_name="popperarchive",
+        recreate_table=True,
+        embedder_model_name="BAAI/llm-embedder",  # "Alibaba-NLP/gte-large-en-v1.5",
+        file_or_folder_path=epub_file_path,
         postgres_user_name='postgres',
         postgres_password=postgres_password,
         postgres_host='localhost',
         postgres_port=5432,
-        postgres_db_name='popperarchive',
-        min_section_size=1000,
+        postgres_db_name='postgres',
+        min_section_size=3000,
     )
 
     # Draw images of the pipelines
