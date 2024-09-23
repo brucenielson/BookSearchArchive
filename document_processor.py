@@ -297,6 +297,7 @@ class DocumentProcessor:
 def main() -> None:
     epub_file_path: str = "Federalist Papers.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
+    # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
         table_name="federalist_papers",
         recreate_table=False,
@@ -306,7 +307,7 @@ def main() -> None:
         postgres_password=postgres_password,
         postgres_host='localhost',
         postgres_port=5432,
-        postgres_db_name='bookarchive',
+        postgres_db_name='popperarchive',
         min_section_size=1000,
     )
 
