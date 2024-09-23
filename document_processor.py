@@ -248,9 +248,13 @@ class DocumentProcessor:
 
             # If the total text length is greater than the minimum section size, add the section to the list
             if len(total_text) > self._min_section_size:
+                print(f"Book: {book.title}; Section {section_num}. Title: {title}. Length: {len(total_text)}")
                 docs.extend(temp_docs)
                 meta.extend(temp_meta)
                 section_num += 1
+            else:
+                print(f"Book: {book.title}; Title: {title}. Length: {len(total_text)}. Skipped.")
+
         return docs, meta
 
     def _doc_converter_pipeline(self) -> None:
