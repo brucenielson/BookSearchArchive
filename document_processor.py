@@ -316,7 +316,7 @@ def main() -> None:
     processor: DocumentProcessor = DocumentProcessor(
         table_name="popperarchive",
         recreate_table=True,
-        embedder_model_name="BAAI/llm-embedder",  # "Alibaba-NLP/gte-large-en-v1.5",
+        embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=epub_file_path,
         postgres_user_name='postgres',
         postgres_password=postgres_password,
