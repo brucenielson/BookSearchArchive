@@ -1,4 +1,6 @@
 # Hugging Face and Pytorch imports
+import csv
+
 import torch
 from sentence_transformers import SentenceTransformer
 # EPUB imports
@@ -18,6 +20,9 @@ from haystack.utils.auth import Secret
 # Other imports
 from typing import List, Optional, Dict, Any, Tuple
 from pathlib import Path
+
+from typing_extensions import Set
+
 from generator_model import get_secret
 
 
@@ -170,10 +175,43 @@ class DocumentProcessor:
         self._postgres_connection_str: str = (f"postgresql://{postgres_user_name}:{postgres_password}@"
                                               f"{postgres_host}:{postgres_port}/{postgres_db_name}")
 
+        # Sections to skip
+        self._sections_to_skip: Dict[str, Set[str]] = self._load_sections_to_skip()
+        for book_title, sections in self._sections_to_skip.items():
+            print(f"Skipping sections for book '{book_title}': {sections}")
+
         print("Initializing document store")
         self._document_store: Optional[PgvectorDocumentStore] = None
         self._doc_convert_pipeline: Optional[Pipeline] = None
         self._initialize_document_store()
+
+    def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
+        sections_to_skip: Dict[str, Set[str]] = {}
+        if self._is_directory:
+            csv_path = Path(self._file_or_folder_path) / "sections_to_skip.csv"
+        else:
+            # Get the directory of the file and then look for the csv file in that directory
+            csv_path = Path(self._file_or_folder_path).parent / "sections_to_skip.csv"
+
+        if csv_path.exists():
+            with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
+                reader: csv.DictReader[str] = csv.DictReader(csvfile)
+                row: dict[str, str]
+                for row in reader:
+                    book_title: str = row['Book Title'].strip()
+                    section_title: str = row['Section Title'].strip()
+                    if book_title and section_title:
+                        if book_title not in sections_to_skip:
+                            sections_to_skip[book_title] = set()
+                        sections_to_skip[book_title].add(section_title)
+
+            # Count total sections to skip across all books
+            skip_count: int = sum(len(sections) for _, sections in sections_to_skip.items())
+            print(f"Loaded {skip_count} sections to skip.")
+        else:
+            print("No sections_to_skip.csv file found. Processing all sections.")
+
+        return sections_to_skip
 
     @property
     def context_length(self) -> Optional[int]:
@@ -222,39 +260,70 @@ class DocumentProcessor:
         if self._doc_convert_pipeline is not None:
             self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
 
-    def _load_epub(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
+    def _load_files(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
+        all_docs: List[ByteStream] = []
+        all_meta: List[Dict[str, str]] = []
+
+        if self._is_directory:
+            for file_path in Path(self._file_or_folder_path).glob('*.epub'):
+                docs, meta = self._load_epub(str(file_path))
+                all_docs.extend(docs)
+                all_meta.extend(meta)
+        else:
+            all_docs, all_meta = self._load_epub(self._file_or_folder_path)
+
+        return all_docs, all_meta
+
+    def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         docs: List[ByteStream] = []
         meta: List[Dict[str, str]] = []
-        book: epub.EpubBook = epub.read_epub(self._file_or_folder_path)
+        included_sections: List[str] = []
+        book: epub.EpubBook = epub.read_epub(file_path)
+        print()
+        print(f"Book Title: {book.title}")
         section_num: int = 1
         for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
             section_html: str = section.get_body_content().decode('utf-8')
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
-            headings = [heading.get_text().strip() for heading in section_soup.find_all('h1')]
-            title = section.id + ' '.join(headings)
+            headings: List[str] = [heading.get_text().strip() for heading in section_soup.find_all('h1')]
+            section_name: str = section.id
+            title: str = ' '.join(headings)
+            if title == "":
+                title = section_name
+            else:
+                title = title + " - " + section_name
             paragraphs: List[Any] = section_soup.find_all('p')
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             for p in paragraphs:
                 p_str: str = str(p)
-                # Concatenate paragraphs to form a single document string
                 total_text += p_str
                 p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
                 byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
-                meta_node: Dict[str, str] = {"section_num": section_num, "title": title}
+                meta_node: Dict[str, str] = {
+                    "section_num": str(section_num),
+                    "title": title,
+                    "book_title": book.title,
+                    "file_path": file_path
+                }
                 temp_docs.append(byte_stream)
                 temp_meta.append(meta_node)
 
-            # If the total text length is greater than the minimum section size, add the section to the list
-            if len(total_text) > self._min_section_size:
-                print(f"Book: {book.title}; Section {section_num}. Title: {title}. Length: {len(total_text)}")
+            if (len(total_text) > self._min_section_size
+                    and section_name not in self._sections_to_skip.get(book.title, set())):
+                print(f"Book: {book.title}; Section {section_num}. Section Title: {title}. Length: {len(total_text)}")
                 docs.extend(temp_docs)
                 meta.extend(temp_meta)
+                included_sections.append(book.title + ", " + title)
                 section_num += 1
             else:
                 print(f"Book: {book.title}; Title: {title}. Length: {len(total_text)}. Skipped.")
 
+        print(f"Sections included:")
+        for section in included_sections:
+            print(section)
+        print()
         return docs, meta
 
     def _doc_converter_pipeline(self) -> None:
@@ -281,7 +350,7 @@ class DocumentProcessor:
         self._doc_convert_pipeline = doc_convert_pipe
 
     def _initialize_document_store(self) -> None:
-        def create_doc_store(force_recreate:bool=False) -> PgvectorDocumentStore:
+        def create_doc_store(force_recreate: bool = False) -> PgvectorDocumentStore:
             connection_token: Secret = Secret.from_token(self._postgres_connection_str)
             doc_store: PgvectorDocumentStore = PgvectorDocumentStore(
                 connection_string=connection_token,
@@ -306,7 +375,7 @@ class DocumentProcessor:
             sources: List[ByteStream]
             meta: List[Dict[str, str]]
             print("Loading document file")
-            sources, meta = self._load_epub()
+            sources, meta = self._load_files()
             print("Writing documents to document store")
             self._doc_converter_pipeline()
             results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": sources, "meta": meta}})
