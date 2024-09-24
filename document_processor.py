@@ -315,7 +315,7 @@ class DocumentProcessor:
                 print(f"Book: {book.title}; Section {section_num}. Section Title: {title}. Length: {len(total_text)}")
                 docs.extend(temp_docs)
                 meta.extend(temp_meta)
-                included_sections.append(book.title + ", " + title)
+                included_sections.append(book.title + ", " + section_name)
                 section_num += 1
             else:
                 print(f"Book: {book.title}; Title: {title}. Length: {len(total_text)}. Skipped.")
@@ -383,7 +383,7 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(

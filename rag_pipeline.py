@@ -49,10 +49,12 @@ def print_documents(documents: List[Document]) -> None:
         print(f"Document {i}:")
         print(f"Score: {doc.score}")
         if hasattr(doc, 'meta') and doc.meta:
+            if 'book_title' in doc.meta:
+                print(f"Book Title: {doc.meta['book_title']}")
             if 'title' in doc.meta:
-                print(f"Title: {doc.meta['title']}")
+                print(f"Section Title: {doc.meta['title']}")
             if 'section_num' in doc.meta:
-                print(f"Section: {doc.meta['section_num']}")
+                print(f"Section #: {doc.meta['section_num']}")
         print(f"Content: {doc.content}")
         print("-" * 50)
 
@@ -322,7 +324,7 @@ def main() -> None:
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
     # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
     model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
-    rag_processor: RagPipeline = RagPipeline(table_name="federalist_papers",
+    rag_processor: RagPipeline = RagPipeline(table_name="popperarchive",
                                              generator_model=model,
                                              postgres_user_name='postgres',
                                              postgres_password=postgres_password,
@@ -330,7 +332,7 @@ def main() -> None:
                                              postgres_port=5432,
                                              postgres_db_name='postgres',
                                              use_streaming=True,
-                                             embedder_model_name="Alibaba-NLP/gte-large-en-v1.5")
+                                             embedder_model_name="BAAI/llm-embedder")
 
     # Draw images of the pipelines
     rag_processor.draw_pipeline()
@@ -339,7 +341,7 @@ def main() -> None:
     print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
     print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "What is the difference between a republic and a democracy?"
+    query: str = "What is induction? Does it exist? Has it been refuted"
     rag_processor.generate_response(query)
 
 
