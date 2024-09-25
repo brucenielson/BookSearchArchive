@@ -449,3 +449,4 @@ if __name__ == "__main__":
 # TODO: Rewrite this to load one document into the store at a time so I don't hold everything in memory.
 # TODO: Get rid of sections with a name like "INDEX" or "CONTENT"
 # TODO: There should be a 'true' section number based on finding a number then a return line character in paragraph 1
+# TODO: Add hybrid search
