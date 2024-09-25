@@ -126,6 +126,7 @@ class DocumentProcessor:
                  postgres_port: int = 5432,
                  postgres_db_name: str = 'postgres',
                  min_section_size: int = 1000,
+                 min_paragraph_size: int = 1000,
                  embedder_model_name: Optional[str] = None,
                  ) -> None:
         """
@@ -150,6 +151,7 @@ class DocumentProcessor:
         self._min_section_size = min_section_size
         self._embedder_model_name: Optional[str] = embedder_model_name
         self._sentence_embedder: Optional[SentenceTransformersDocumentEmbedder] = None
+        self._min_paragraph_size: int = min_paragraph_size
 
         # File paths
         self._file_or_folder_path: Optional[str] = file_or_folder_path  # New instance variable
@@ -282,6 +284,7 @@ class DocumentProcessor:
         print()
         print(f"Book Title: {book.title}")
         section_num: int = 1
+        i: int
         for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
             section_html: str = section.get_body_content().decode('utf-8')
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
@@ -296,13 +299,28 @@ class DocumentProcessor:
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
-            for p in paragraphs:
+            combined_paragraph: str = ""
+            para_num: int = 0
+            j: int
+            for j, p in enumerate(paragraphs):
                 p_str: str = str(p)
+                if len(combined_paragraph) + len(p_str) < self._min_paragraph_size:
+                    combined_paragraph += "\n" + p_str
+                    # If it's the last paragraph, process it
+                    if j == len(paragraphs) - 1:
+                        p_str = combined_paragraph
+                    else:
+                        continue
+                else:
+                    p_str = combined_paragraph + "\n" + p_str
+                    combined_paragraph = ""
+                para_num += 1
                 total_text += p_str
                 p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
                 byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
                 meta_node: Dict[str, str] = {
                     "section_num": str(section_num),
+                    "paragraph_num": str(para_num),
                     "title": title,
                     "book_title": book.title,
                     "file_path": file_path
@@ -397,6 +415,7 @@ def main() -> None:
         postgres_port=5432,
         postgres_db_name='postgres',
         min_section_size=3000,
+        min_paragraph_size=1000
     )
 
     # Draw images of the pipelines
