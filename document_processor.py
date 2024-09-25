@@ -44,9 +44,26 @@ class CustomDocumentSplitter:
         self.max_seq_length = self.model.get_max_seq_length()
 
     @component.output_types(documents=List[Document])
-    def run(self, documents: List[Document]) -> dict:
+    def run(self, documents: List[Document], verbose: bool = False) -> dict:
         processed_docs = []
+        last_section_num = None  # Track the last section number
+
         for doc in documents:
+            # Extract section_num and paragraph_num from the metadata
+            section_num = int(doc.meta.get("section_num"))
+            paragraph_num = int(doc.meta.get("paragraph_num"))
+
+            # If verbose is True, print the content when section_num changes and paragraph_num == 1
+            if verbose and section_num != last_section_num and paragraph_num == 1:
+                print(f"New section: {section_num}")
+                print(f"Book Title: {doc.meta.get('book_title')}")
+                print(f"Section Title: {doc.meta.get('title')}")
+                print(f"Content: {doc.content}\n")
+
+            # Update the last_section_num
+            last_section_num = section_num
+
+            # Process and extend documents
             processed_docs.extend(self.process_document(doc))
 
         print(f"Processed {len(documents)} documents into {len(processed_docs)} documents")
@@ -400,7 +417,7 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents\Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
@@ -425,7 +442,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-# TODO Error: Writing documents to document store
-# Token indices sequence length is longer than the specified maximum sequence length for this model (560 > 512). Running this sequence through the model will result in indexing errors
-# What is causing that error since I check for the length of the tokens before splitting the document?
