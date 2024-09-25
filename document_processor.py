@@ -54,7 +54,6 @@ class CustomDocumentSplitter:
 
     def process_document(self, document: Document) -> List[Document]:
         token_count = self.count_tokens(document.content)
-
         if token_count <= self.max_seq_length:
             # Document fits within max sequence length, no need to split
             return [document]
@@ -90,7 +89,7 @@ class CustomDocumentSplitter:
         return [document]
 
     def count_tokens(self, text: str) -> int:
-        return len(self.tokenizer.encode(text))
+        return len(self.tokenizer.encode(text, verbose=False))
 
 
 class DocumentProcessor:
@@ -401,7 +400,7 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents"
+    epub_file_path: str = "documents\Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
