@@ -407,3 +407,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+# TODO Error: Writing documents to document store
+# Token indices sequence length is longer than the specified maximum sequence length for this model (560 > 512). Running this sequence through the model will result in indexing errors
+# What is causing that error since I check for the length of the tokens before splitting the document?
