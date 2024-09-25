@@ -442,3 +442,10 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+# TODO: It's confusing that I use 'title' and 'book_title' in the metadata. I should standardize on one or the other.
+# especially since 'title' is really the section title.
+# TODO: Create a verbose mode for the overall class and get rid of any verbose parameters in the methods.
+# TODO: Rewrite this to load one document into the store at a time so I don't hold everything in memory.
+# TODO: Get rid of sections with a name like "INDEX" or "CONTENT"
+# TODO: There should be a 'true' section number based on finding a number then a return line character in paragraph 1
