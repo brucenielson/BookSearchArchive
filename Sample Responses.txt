@@ -1,0 +1,8 @@
+What is induction? Does it exist? Has it been refuted?
+
+        According to the given context, the author refutes the existence of induction. They argue that repetitive induction is out and cannot establish anything. Eliminative induction, which involves eliminating or refuting false theories, is also different from the method of critical discussion. The author suggests that theories are never empirically verifiable, and that falsifiability is a better criterion for demarcation than verifiability. The author argues that induction is a myth and that there is no such thing as inductive logic. They also refute the idea that a series of positive cases with an absence of negative cases suffice to establish a law-like regularity. Overall, the author seems to reject the traditional concept of induction as a valid method for establishing scientific theories.
+
+
+What does induction get correct?
+
+        The passage argues that induction, as a method of logical inference, is a myth and does not exist. It suggests that instead of relying on induction, scientists rely on critical discussion and testing theories through repeated observations and experiments. The passage highlights that the success of science is not based on rules of induction, but rather on luck, ingenuity, and the purely deductive rules of critical argument. Therefore, induction does not get anything correct, as the passage argues that it is not a psychological fact, a fact of ordinary life, or one of scientific procedure.
