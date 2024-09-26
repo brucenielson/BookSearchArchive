@@ -102,7 +102,8 @@ class RagPipeline:
                  postgres_db_name: str = 'postgres',
                  generator_model: Union[gen.GeneratorModel, HuggingFaceLocalGenerator, GoogleAIGeminiGenerator] = None,
                  embedder_model_name: Optional[str] = None,
-                 use_streaming: bool = False
+                 use_streaming: bool = False,
+                 verbose: bool = False,
                  ) -> None:
         """
         Initialize the HaystackPgvector instance.
@@ -127,6 +128,7 @@ class RagPipeline:
         self._sentence_embedder: Optional[SentenceTransformersDocumentEmbedder] = None
         self._embedder_model_name: Optional[str] = embedder_model_name
         self._use_streaming: bool = use_streaming
+        self._verbose: bool = verbose
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -140,7 +142,7 @@ class RagPipeline:
         self._postgres_connection_str: str = (f"postgresql://{postgres_user_name}:{postgres_password}@"
                                               f"{postgres_host}:{postgres_port}/{postgres_db_name}")
 
-        print("Initializing document store")
+        self._print_verbose("Initializing document store")
         self._document_store: Optional[PgvectorDocumentStore] = None
         self._initialize_document_store()
 
@@ -148,6 +150,7 @@ class RagPipeline:
             raise ValueError("Generator model must be provided")
         self._generator_model: Optional[Union[gen.GeneratorModel, HuggingFaceLocalGenerator, GoogleAIGeminiGenerator]]
         self._generator_model = generator_model
+        self._generator_model.verbose = self._verbose
         # Handle callbacks for streaming if applicable
         if self._can_stream() and self._generator_model.streaming_callback is None:
             self._generator_model.streaming_callback = streaming_callback
@@ -201,6 +204,20 @@ class RagPipeline:
         else:
             return None
 
+    @property
+    def verbose(self) -> bool:
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, value: bool) -> None:
+        self._verbose = value
+        if self._generator_model is not None:
+            self._generator_model.verbose = value
+
+    def _print_verbose(self, *args, **kwargs) -> None:
+        if self._verbose:
+            print(*args, **kwargs)
+
     def _setup_embedder(self) -> None:
         if self._sentence_embedder is None:
             if self._embedder_model_name is not None:
@@ -251,7 +268,7 @@ class RagPipeline:
             merged_results = results["merger"]["merged_results"]
 
             # Print retrieved documents
-            print("Retrieved Documents:")
+            self._print_verbose("Retrieved Documents:")
             print_documents(merged_results["documents"])
 
             # Print generated response
@@ -278,7 +295,7 @@ class RagPipeline:
         )
 
         self._document_store = document_store
-        print("Document Count: " + str(document_store.count_documents()))
+        self._print_verbose("Document Count: " + str(document_store.count_documents()))
 
     def _can_stream(self) -> bool:
         return (self._use_streaming
@@ -343,14 +360,16 @@ def main() -> None:
                                              postgres_port=5432,
                                              postgres_db_name='postgres',
                                              use_streaming=True,
+                                             verbose=True,
                                              embedder_model_name="BAAI/llm-embedder")
 
-    # Draw images of the pipelines
-    rag_processor.draw_pipeline()
-    print("Generator Embedder Dims: " + str(model.embedding_dimensions))
-    print("Generator Context Length: " + str(model.context_length))
-    print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
-    print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
+    if rag_processor.verbose:
+        # Draw images of the pipelines
+        rag_processor.draw_pipeline()
+        print("Generator Embedder Dims: " + str(model.embedding_dimensions))
+        print("Generator Context Length: " + str(model.context_length))
+        print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
+        print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
     query: str = "What is induction? Does it exist? Has it been refuted?"
     rag_processor.generate_response(query)

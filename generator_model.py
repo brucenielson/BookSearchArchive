@@ -74,6 +74,14 @@ class GeneratorModel(ABC):
         self._verbose: bool = verbose
 
     @property
+    def verbose(self) -> bool:
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, value: bool) -> None:
+        self._verbose = value
+
+    @property
     def generator_component(self) -> Union[HuggingFaceLocalGenerator, HuggingFaceAPIGenerator, GoogleAIGeminiGenerator]:
         """
         Get the generator component of the language model.
@@ -133,14 +141,6 @@ class GeneratorModel(ABC):
     @property
     def model_name(self) -> Optional[str]:
         return self._model_name
-
-    @property
-    def verbose(self) -> bool:
-        return self._verbose
-
-    @verbose.setter
-    def verbose(self, value: bool) -> None:
-        self._verbose = value
 
 
 class HuggingFaceModel(GeneratorModel, ABC):
@@ -290,7 +290,7 @@ class HuggingFaceAPIModel(HuggingFaceModel):
                  password: Optional[str] = None,
                  temperature: float = 0.6,
                  streaming_callback: Optional[Callable[[StreamingChunk], None]] = None,
-                 verbose: bool = True) -> None:
+                 verbose: bool = False) -> None:
         """
         Initialize the GeneratorModel instance.
 
