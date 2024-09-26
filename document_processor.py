@@ -56,12 +56,16 @@ class CustomDocumentSplitter:
         self._max_seq_length = self._model.get_max_seq_length()
 
     @component.output_types(documents=List[Document])
-    def run(self, documents: List[Document],
-            verbose: bool = False,
-            skip_content_func: Optional[callable] = None) -> dict:
+    def run(self, documents: List[Document]) -> dict:
         processed_docs = []
         last_section_num = None  # Track the last section number
         sections_to_skip = set()  # Sections to skip
+
+        # Delete "first_paragraph_section.txt"
+        file_name: str = "first_paragraph_per_section.txt"
+        if self._verbose:
+            with open(file_name, "w", encoding="utf-8") as file:
+                file.write("")
 
         for doc in documents:
             # Extract section_num and paragraph_num from the metadata
@@ -75,10 +79,11 @@ class CustomDocumentSplitter:
             # If verbose is True, print the content when section_num changes and paragraph_num == 1
             if section_num != last_section_num and paragraph_num == 1:
                 if self._verbose:
-                    print(f"New section: {section_num}")
-                    print(f"Book Title: {doc.meta.get('book_title')}")
-                    print(f"Section Title: {doc.meta.get('section_title')}")
-                    print(f"Content: {doc.content}\n")
+                    with open(file_name, "a", encoding="utf-8") as file:
+                        file.write(f"Section: {section_num}\n")
+                        file.write(f"Book Title: {doc.meta.get('book_title')}\n")
+                        file.write(f"Section Title: {doc.meta.get('section_title')}\n")
+                        file.write(f"Content:\n{doc.content}\n\n")
                 # For the first paragraph, check for possible section skipping
                 if self._skip_content_func is not None and self._skip_content_func(doc.content):
                     if self._verbose:
@@ -230,44 +235,20 @@ class DocumentProcessor:
         # Sections to skip
         self._sections_to_skip: Dict[str, Set[str]] = self._load_sections_to_skip()
         for book_title, sections in self._sections_to_skip.items():
-            self.print_verbose(f"Skipping sections for book '{book_title}': {sections}")
-        self.print_verbose("Initializing document store")
+            self._print_verbose(f"Skipping sections for book '{book_title}': {sections}")
+        self._print_verbose("Initializing document store")
 
         self._document_store: Optional[PgvectorDocumentStore] = None
         self._doc_convert_pipeline: Optional[Pipeline] = None
         self._initialize_document_store()
 
-    def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
-        sections_to_skip: Dict[str, Set[str]] = {}
-        if self._is_directory:
-            csv_path = Path(self._file_or_folder_path) / "sections_to_skip.csv"
-        else:
-            # Get the directory of the file and then look for the csv file in that directory
-            csv_path = Path(self._file_or_folder_path).parent / "sections_to_skip.csv"
+    @property
+    def verbose(self) -> bool:
+        return self._verbose
 
-        if csv_path.exists():
-            with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
-                reader: csv.DictReader[str] = csv.DictReader(csvfile)
-                row: dict[str, str]
-                for row in reader:
-                    book_title: str = row['Book Title'].strip()
-                    section_title: str = row['Section Title'].strip()
-                    if book_title and section_title:
-                        if book_title not in sections_to_skip:
-                            sections_to_skip[book_title] = set()
-                        sections_to_skip[book_title].add(section_title)
-
-            # Count total sections to skip across all books
-            skip_count: int = sum(len(sections) for _, sections in sections_to_skip.items())
-            self.print_verbose(f"Loaded {skip_count} sections to skip.")
-        else:
-            self.print_verbose("No sections_to_skip.csv file found. Processing all sections.")
-
-        return sections_to_skip
-
-    def print_verbose(self, *args, **kwargs) -> None:
-        if self._verbose:
-            print(*args, **kwargs)
+    @verbose.setter
+    def verbose(self, value: bool) -> None:
+        self._verbose = value
 
     @property
     def context_length(self) -> Optional[int]:
@@ -296,6 +277,38 @@ class DocumentProcessor:
             return self._sentence_embedder.embedding_backend.model.get_sentence_embedding_dimension()
         else:
             return None
+
+    def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
+        sections_to_skip: Dict[str, Set[str]] = {}
+        if self._is_directory:
+            csv_path = Path(self._file_or_folder_path) / "sections_to_skip.csv"
+        else:
+            # Get the directory of the file and then look for the csv file in that directory
+            csv_path = Path(self._file_or_folder_path).parent / "sections_to_skip.csv"
+
+        if csv_path.exists():
+            with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
+                reader: csv.DictReader[str] = csv.DictReader(csvfile)
+                row: dict[str, str]
+                for row in reader:
+                    book_title: str = row['Book Title'].strip()
+                    section_title: str = row['Section Title'].strip()
+                    if book_title and section_title:
+                        if book_title not in sections_to_skip:
+                            sections_to_skip[book_title] = set()
+                        sections_to_skip[book_title].add(section_title)
+
+            # Count total sections to skip across all books
+            skip_count: int = sum(len(sections) for _, sections in sections_to_skip.items())
+            self._print_verbose(f"Loaded {skip_count} sections to skip.")
+        else:
+            self._print_verbose("No sections_to_skip.csv file found. Processing all sections.")
+
+        return sections_to_skip
+
+    def _print_verbose(self, *args, **kwargs) -> None:
+        if self._verbose:
+            print(*args, **kwargs)
 
     def _setup_embedder(self) -> None:
         if self._sentence_embedder is None:
@@ -335,8 +348,8 @@ class DocumentProcessor:
         meta: List[Dict[str, str]] = []
         included_sections: List[str] = []
         book: epub.EpubBook = epub.read_epub(file_path)
-        self.print_verbose()
-        self.print_verbose(f"Book Title: {book.title}")
+        self._print_verbose()
+        self._print_verbose(f"Book Title: {book.title}")
         section_num: int = 1
         i: int
         for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
@@ -385,19 +398,19 @@ class DocumentProcessor:
 
             if (len(total_text) > self._min_section_size
                     and section_id not in self._sections_to_skip.get(book.title, set())):
-                self.print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {section_title}. "
-                      f"Length: {len(total_text)}")
+                self._print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {section_title}. "
+                                    f"Length: {len(total_text)}")
                 docs.extend(temp_docs)
                 meta.extend(temp_meta)
                 included_sections.append(book.title + ", " + section_id)
                 section_num += 1
             else:
-                self.print_verbose(f"Book: {book.title}; Title: {section_title}. Length: {len(total_text)}. Skipped.")
+                self._print_verbose(f"Book: {book.title}; Title: {section_title}. Length: {len(total_text)}. Skipped.")
 
-        self.print_verbose(f"Sections included:")
+        self._print_verbose(f"Sections included:")
         for section in included_sections:
-            self.print_verbose(section)
-        self.print_verbose()
+            self._print_verbose(section)
+        self._print_verbose()
         return docs, meta
 
     def _doc_converter_pipeline(self) -> None:
@@ -445,17 +458,17 @@ class DocumentProcessor:
         document_store = create_doc_store()
         self._document_store = document_store
 
-        self.print_verbose("Document Count: " + str(document_store.count_documents()))
+        self._print_verbose("Document Count: " + str(document_store.count_documents()))
 
         if document_store.count_documents() == 0 and self._file_or_folder_path is not None:
             sources: List[ByteStream]
             meta: List[Dict[str, str]]
-            self.print_verbose("Loading document file")
+            self._print_verbose("Loading document file")
             sources, meta = self._load_files()
-            self.print_verbose("Writing documents to document store")
+            self._print_verbose("Writing documents to document store")
             self._doc_converter_pipeline()
             results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": sources, "meta": meta}})
-            self.print_verbose(f"\n\nNumber of documents: {results['writer']['documents_written']}")
+            self._print_verbose(f"\n\nNumber of documents: {results['writer']['documents_written']}")
 
 
 def main() -> None:
@@ -478,15 +491,15 @@ def main() -> None:
     )
 
     # Draw images of the pipelines
-    processor.draw_pipeline()
-    print("Sentence Embedder Dims: " + str(processor.embed_dims))
-    print("Sentence Embedder Context Length: " + str(processor.context_length))
+    if processor.verbose:
+        processor.draw_pipeline()
+        print("Sentence Embedder Dims: " + str(processor.embed_dims))
+        print("Sentence Embedder Context Length: " + str(processor.context_length))
 
 
 if __name__ == "__main__":
     main()
 
-# TODO: Create a verbose mode for the overall class and get rid of any verbose parameters in the methods.
 # TODO: Rewrite this to load one document into the store at a time so I don't hold everything in memory.
 # TODO: There should be a 'true' section number based on finding a number then a return line character in paragraph 1
 # TODO: Add hybrid search
