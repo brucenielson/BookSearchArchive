@@ -74,16 +74,17 @@ class CustomDocumentSplitter:
 
             # If verbose is True, print the content when section_num changes and paragraph_num == 1
             if section_num != last_section_num and paragraph_num == 1:
-                if verbose:
+                if self._verbose:
                     print(f"New section: {section_num}")
                     print(f"Book Title: {doc.meta.get('book_title')}")
                     print(f"Section Title: {doc.meta.get('section_title')}")
                     print(f"Content: {doc.content}\n")
                 # For the first paragraph, check for possible section skipping
                 if self._skip_content_func is not None and self._skip_content_func(doc.content):
-                    # Skip this section
-                    print(f"Skipping section {doc.meta.get('book_title')} / {doc.meta.get('section_title')} "
-                          f"due to content check")
+                    if self._verbose:
+                        # Skip this section
+                        print(f"Skipping section {doc.meta.get('book_title')} / {doc.meta.get('section_title')} "
+                              f"due to content check")
                     sections_to_skip.add((doc.meta.get("book_title"), section_num))
                     continue
 
@@ -93,7 +94,8 @@ class CustomDocumentSplitter:
             # Process and extend documents
             processed_docs.extend(self.process_document(doc))
 
-        print(f"Processed {len(documents)} documents into {len(processed_docs)} documents")
+        if self._verbose:
+            print(f"Processed {len(documents)} documents into {len(processed_docs)} documents")
         return {"documents": processed_docs}
 
     def process_document(self, document: Document) -> List[Document]:
@@ -127,9 +129,10 @@ class CustomDocumentSplitter:
         # If we get here, even single sentences exceed max_seq_length
         # So just let the splitter truncate the document
         # But give warning that document was truncated
-        print(f"Document was truncated to fit within max sequence length of {self._max_seq_length}: "
-              f"Actual length: {self.count_tokens(document.content)}")
-        print(f"Problem Document: {document.content}")
+        if self._verbose:
+            print(f"Document was truncated to fit within max sequence length of {self._max_seq_length}: "
+                  f"Actual length: {self.count_tokens(document.content)}")
+            print(f"Problem Document: {document.content}")
         return [document]
 
     def count_tokens(self, text: str) -> int:
@@ -172,6 +175,7 @@ class DocumentProcessor:
                  min_section_size: int = 1000,
                  min_paragraph_size: int = 1000,
                  embedder_model_name: Optional[str] = None,
+                 verbose: bool = False
                  ) -> None:
         """
         Initialize the HaystackPgvector instance.
@@ -197,6 +201,7 @@ class DocumentProcessor:
         self._sentence_embedder: Optional[SentenceTransformersDocumentEmbedder] = None
         self._min_paragraph_size: int = min_paragraph_size
         self._skip_content: Optional[callable] = skip_content_func
+        self._verbose: bool = verbose
 
         # File paths
         self._file_or_folder_path: Optional[str] = file_or_folder_path  # New instance variable
@@ -225,9 +230,9 @@ class DocumentProcessor:
         # Sections to skip
         self._sections_to_skip: Dict[str, Set[str]] = self._load_sections_to_skip()
         for book_title, sections in self._sections_to_skip.items():
-            print(f"Skipping sections for book '{book_title}': {sections}")
+            self.print_verbose(f"Skipping sections for book '{book_title}': {sections}")
+        self.print_verbose("Initializing document store")
 
-        print("Initializing document store")
         self._document_store: Optional[PgvectorDocumentStore] = None
         self._doc_convert_pipeline: Optional[Pipeline] = None
         self._initialize_document_store()
@@ -254,11 +259,15 @@ class DocumentProcessor:
 
             # Count total sections to skip across all books
             skip_count: int = sum(len(sections) for _, sections in sections_to_skip.items())
-            print(f"Loaded {skip_count} sections to skip.")
+            self.print_verbose(f"Loaded {skip_count} sections to skip.")
         else:
-            print("No sections_to_skip.csv file found. Processing all sections.")
+            self.print_verbose("No sections_to_skip.csv file found. Processing all sections.")
 
         return sections_to_skip
+
+    def print_verbose(self, *args, **kwargs) -> None:
+        if self._verbose:
+            print(*args, **kwargs)
 
     @property
     def context_length(self) -> Optional[int]:
@@ -326,8 +335,8 @@ class DocumentProcessor:
         meta: List[Dict[str, str]] = []
         included_sections: List[str] = []
         book: epub.EpubBook = epub.read_epub(file_path)
-        print()
-        print(f"Book Title: {book.title}")
+        self.print_verbose()
+        self.print_verbose(f"Book Title: {book.title}")
         section_num: int = 1
         i: int
         for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
@@ -376,26 +385,26 @@ class DocumentProcessor:
 
             if (len(total_text) > self._min_section_size
                     and section_id not in self._sections_to_skip.get(book.title, set())):
-                print(f"Book: {book.title}; Section {section_num}. Section Title: {section_title}. "
+                self.print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {section_title}. "
                       f"Length: {len(total_text)}")
                 docs.extend(temp_docs)
                 meta.extend(temp_meta)
                 included_sections.append(book.title + ", " + section_id)
                 section_num += 1
             else:
-                print(f"Book: {book.title}; Title: {section_title}. Length: {len(total_text)}. Skipped.")
+                self.print_verbose(f"Book: {book.title}; Title: {section_title}. Length: {len(total_text)}. Skipped.")
 
-        print(f"Sections included:")
+        self.print_verbose(f"Sections included:")
         for section in included_sections:
-            print(section)
-        print()
+            self.print_verbose(section)
+        self.print_verbose()
         return docs, meta
 
     def _doc_converter_pipeline(self) -> None:
         self._setup_embedder()
         # Create the custom splitter
         custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder,
-                                                                         verbose=True,
+                                                                         verbose=self._verbose,
                                                                          skip_content_func=self._skip_content)
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
@@ -436,17 +445,17 @@ class DocumentProcessor:
         document_store = create_doc_store()
         self._document_store = document_store
 
-        print("Document Count: " + str(document_store.count_documents()))
+        self.print_verbose("Document Count: " + str(document_store.count_documents()))
 
         if document_store.count_documents() == 0 and self._file_or_folder_path is not None:
             sources: List[ByteStream]
             meta: List[Dict[str, str]]
-            print("Loading document file")
+            self.print_verbose("Loading document file")
             sources, meta = self._load_files()
-            print("Writing documents to document store")
+            self.print_verbose("Writing documents to document store")
             self._doc_converter_pipeline()
             results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": sources, "meta": meta}})
-            print(f"\n\nNumber of documents: {results['writer']['documents_written']}")
+            self.print_verbose(f"\n\nNumber of documents: {results['writer']['documents_written']}")
 
 
 def main() -> None:
@@ -464,7 +473,8 @@ def main() -> None:
         postgres_db_name='postgres',
         skip_content_func=skip_content,
         min_section_size=3000,
-        min_paragraph_size=1000
+        min_paragraph_size=1000,
+        verbose=True
     )
 
     # Draw images of the pipelines
