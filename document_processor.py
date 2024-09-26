@@ -7,23 +7,31 @@ from sentence_transformers import SentenceTransformer
 from bs4 import BeautifulSoup
 from ebooklib import epub, ITEM_DOCUMENT
 # Haystack imports
+# noinspection PyPackageRequirements
 from haystack import Pipeline, Document, component
+# noinspection PyPackageRequirements
 from haystack.dataclasses import ByteStream
+# noinspection PyPackageRequirements
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
+# noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
+# noinspection PyPackageRequirements
 from haystack.components.converters import HTMLToDocument
+# noinspection PyPackageRequirements
 from haystack.components.writers import DocumentWriter
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
+# noinspection PyPackageRequirements
 from haystack.utils import ComponentDevice, Device
+# noinspection PyPackageRequirements
 from haystack.document_stores.types import DuplicatePolicy
+# noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
 # Other imports
 from typing import List, Optional, Dict, Any, Tuple
 from pathlib import Path
-
 from typing_extensions import Set
-
 from generator_model import get_secret
+from doc_content_checker import skip_content
 
 
 @component
@@ -54,11 +62,15 @@ class CustomDocumentSplitter:
             paragraph_num = int(doc.meta.get("paragraph_num"))
 
             # If verbose is True, print the content when section_num changes and paragraph_num == 1
-            if verbose and section_num != last_section_num and paragraph_num == 1:
-                print(f"New section: {section_num}")
-                print(f"Book Title: {doc.meta.get('book_title')}")
-                print(f"Section Title: {doc.meta.get('title')}")
-                print(f"Content: {doc.content}\n")
+            if section_num != last_section_num and paragraph_num == 1:
+                if verbose:
+                    print(f"New section: {section_num}")
+                    print(f"Book Title: {doc.meta.get('book_title')}")
+                    print(f"Section Title: {doc.meta.get('section_title')}")
+                    print(f"Content: {doc.content}\n")
+                # For the first paragraph, check for possible section skipping
+                # if self._skip_content is not None and self._skip_content(doc.content):
+
 
             # Update the last_section_num
             last_section_num = section_num
@@ -141,6 +153,7 @@ class DocumentProcessor:
                  postgres_host: str = 'localhost',
                  postgres_port: int = 5432,
                  postgres_db_name: str = 'postgres',
+                 skip_content_func: Optional[callable] = None,
                  min_section_size: int = 1000,
                  min_paragraph_size: int = 1000,
                  embedder_model_name: Optional[str] = None,
@@ -168,6 +181,7 @@ class DocumentProcessor:
         self._embedder_model_name: Optional[str] = embedder_model_name
         self._sentence_embedder: Optional[SentenceTransformersDocumentEmbedder] = None
         self._min_paragraph_size: int = min_paragraph_size
+        self._skip_content: Optional[callable] = skip_content_func
 
         # File paths
         self._file_or_folder_path: Optional[str] = file_or_folder_path  # New instance variable
@@ -305,12 +319,12 @@ class DocumentProcessor:
             section_html: str = section.get_body_content().decode('utf-8')
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
             headings: List[str] = [heading.get_text().strip() for heading in section_soup.find_all('h1')]
-            section_name: str = section.id
-            title: str = ' '.join(headings)
-            if title == "":
-                title = section_name
+            section_id: str = section.id
+            section_title: str = ' '.join(headings)
+            if section_title == "":
+                section_title = section_id
             else:
-                title = title + " - " + section_name
+                section_title = section_title + " - " + section_id
             paragraphs: List[Any] = section_soup.find_all('p')
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
@@ -337,22 +351,24 @@ class DocumentProcessor:
                 meta_node: Dict[str, str] = {
                     "section_num": str(section_num),
                     "paragraph_num": str(para_num),
-                    "title": title,
                     "book_title": book.title,
+                    "section_id": section_id,
+                    "section_title": section_title,
                     "file_path": file_path
                 }
                 temp_docs.append(byte_stream)
                 temp_meta.append(meta_node)
 
             if (len(total_text) > self._min_section_size
-                    and section_name not in self._sections_to_skip.get(book.title, set())):
-                print(f"Book: {book.title}; Section {section_num}. Section Title: {title}. Length: {len(total_text)}")
+                    and section_id not in self._sections_to_skip.get(book.title, set())):
+                print(f"Book: {book.title}; Section {section_num}. Section Title: {section_title}. "
+                      f"Length: {len(total_text)}")
                 docs.extend(temp_docs)
                 meta.extend(temp_meta)
-                included_sections.append(book.title + ", " + section_name)
+                included_sections.append(book.title + ", " + section_id)
                 section_num += 1
             else:
-                print(f"Book: {book.title}; Title: {title}. Length: {len(total_text)}. Skipped.")
+                print(f"Book: {book.title}; Title: {section_title}. Length: {len(total_text)}. Skipped.")
 
         print(f"Sections included:")
         for section in included_sections:
@@ -417,11 +433,10 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents"
+    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
-    # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
-        table_name="popperarchive",
+        table_name="popper_archive",
         recreate_table=True,
         embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=epub_file_path,
@@ -430,6 +445,7 @@ def main() -> None:
         postgres_host='localhost',
         postgres_port=5432,
         postgres_db_name='postgres',
+        skip_content_func=skip_content,
         min_section_size=3000,
         min_paragraph_size=1000
     )

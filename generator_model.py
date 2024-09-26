@@ -1,13 +1,18 @@
 # Hugging Face and Pytorch imports
 import torch
 import huggingface_hub as hf_hub
+# noinspection PyPackageRequirements
 from haystack.dataclasses import StreamingChunk
 from transformers import AutoConfig
 # Haystack imports
+# noinspection PyPackageRequirements
 from haystack.components.generators import HuggingFaceLocalGenerator
 from haystack_integrations.components.generators.google_ai import GoogleAIGeminiGenerator
+# noinspection PyPackageRequirements
 from haystack.components.generators import HuggingFaceAPIGenerator
+# noinspection PyPackageRequirements
 from haystack.utils import ComponentDevice, Device
+# noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
 # Other imports
 from typing import Optional, Union, Callable
