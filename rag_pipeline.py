@@ -1,15 +1,22 @@
 # Hugging Face and Pytorch imports
 import torch
 # Haystack imports
+# noinspection PyPackageRequirements
 from haystack import Pipeline, Document, component
+# noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder, SentenceTransformersTextEmbedder
+# noinspection PyPackageRequirements
 from haystack.components.builders import PromptBuilder
+# noinspection PyPackageRequirements
 from haystack.components.generators import HuggingFaceLocalGenerator
+# noinspection PyPackageRequirements
 from haystack.dataclasses import StreamingChunk
 from haystack_integrations.components.generators.google_ai import GoogleAIGeminiGenerator
 from haystack_integrations.components.retrievers.pgvector import PgvectorEmbeddingRetriever
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
+# noinspection PyPackageRequirements
 from haystack.utils import ComponentDevice, Device
+# noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
 # Other imports
 from typing import List, Optional, Dict, Any, Union
@@ -51,8 +58,10 @@ def print_documents(documents: List[Document]) -> None:
         if hasattr(doc, 'meta') and doc.meta:
             if 'book_title' in doc.meta:
                 print(f"Book Title: {doc.meta['book_title']}")
-            if 'title' in doc.meta:
-                print(f"Section Title: {doc.meta['title']}")
+            if 'section_title' in doc.meta:
+                print(f"Section Title: {doc.meta['section_title']}")
+            if 'section_id' in doc.meta:
+                print(f"Section ID: {doc.meta['section_id']}")
             if 'section_num' in doc.meta:
                 print(f"Section #: {doc.meta['section_num']}")
             if 'paragraph_num' in doc.meta:
@@ -326,7 +335,7 @@ def main() -> None:
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
     # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
     model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
-    rag_processor: RagPipeline = RagPipeline(table_name="popperarchive",
+    rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
                                              generator_model=model,
                                              postgres_user_name='postgres',
                                              postgres_password=postgres_password,
