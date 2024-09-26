@@ -7,7 +7,11 @@
 def skip_content(first_paragraph) -> bool:
     # If the first paragraph of a section starts with the word "index" (once taken lower case) followed by newline
     # or "contents" (once taken lower case) followed by newline, then skip this section.
-    if first_paragraph.lower().startswith("index\n") or first_paragraph.lower().startswith("contents\n"):
-        return False
-    else:
+    paragraph: str = first_paragraph.lower()
+    if (paragraph.startswith("index\n")
+            or paragraph.startswith("name index\n")
+            or paragraph.startswith("subject index\n")
+            or paragraph.startswith("contents\n")):
         return True
+    else:
+        return False

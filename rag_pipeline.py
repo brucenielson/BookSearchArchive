@@ -159,7 +159,7 @@ class RagPipeline:
         Quoting the information contained in the context where possible, give a comprehensive answer to the question.
 
         Context:
-          {% for doc in documents %}
+          {% for doc in documents|reverse %}
           {{ doc.content }}
           {% endfor %};
 

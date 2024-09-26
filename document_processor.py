@@ -45,21 +45,32 @@ class RemoveIllegalDocs:
 
 @component
 class CustomDocumentSplitter:
-    def __init__(self, embedder: SentenceTransformersDocumentEmbedder):
-        self.embedder: SentenceTransformersDocumentEmbedder = embedder
-        self.model: SentenceTransformer = embedder.embedding_backend.model
-        self.tokenizer = self.model.tokenizer
-        self.max_seq_length = self.model.get_max_seq_length()
+    def __init__(self, embedder: SentenceTransformersDocumentEmbedder,
+                 verbose=True,
+                 skip_content_func: Optional[callable] = None):
+        self._embedder: SentenceTransformersDocumentEmbedder = embedder
+        self._verbose: bool = verbose
+        self._skip_content_func: Optional[callable] = skip_content_func
+        self._model: SentenceTransformer = embedder.embedding_backend.model
+        self._tokenizer = self._model.tokenizer
+        self._max_seq_length = self._model.get_max_seq_length()
 
     @component.output_types(documents=List[Document])
-    def run(self, documents: List[Document], verbose: bool = False) -> dict:
+    def run(self, documents: List[Document],
+            verbose: bool = False,
+            skip_content_func: Optional[callable] = None) -> dict:
         processed_docs = []
         last_section_num = None  # Track the last section number
+        sections_to_skip = set()  # Sections to skip
 
         for doc in documents:
             # Extract section_num and paragraph_num from the metadata
             section_num = int(doc.meta.get("section_num"))
             paragraph_num = int(doc.meta.get("paragraph_num"))
+
+            # If this is a section to skip, go to the next document
+            if (doc.meta.get("book_title"), section_num) in sections_to_skip:
+                continue
 
             # If verbose is True, print the content when section_num changes and paragraph_num == 1
             if section_num != last_section_num and paragraph_num == 1:
@@ -69,8 +80,12 @@ class CustomDocumentSplitter:
                     print(f"Section Title: {doc.meta.get('section_title')}")
                     print(f"Content: {doc.content}\n")
                 # For the first paragraph, check for possible section skipping
-                # if self._skip_content is not None and self._skip_content(doc.content):
-
+                if self._skip_content_func is not None and self._skip_content_func(doc.content):
+                    # Skip this section
+                    print(f"Skipping section {doc.meta.get('book_title')} / {doc.meta.get('section_title')} "
+                          f"due to content check")
+                    sections_to_skip.add((doc.meta.get("book_title"), section_num))
+                    continue
 
             # Update the last_section_num
             last_section_num = section_num
@@ -83,7 +98,7 @@ class CustomDocumentSplitter:
 
     def process_document(self, document: Document) -> List[Document]:
         token_count = self.count_tokens(document.content)
-        if token_count <= self.max_seq_length:
+        if token_count <= self._max_seq_length:
             # Document fits within max sequence length, no need to split
             return [document]
 
@@ -103,7 +118,7 @@ class CustomDocumentSplitter:
             split_docs = splitter.run(documents=[document])["documents"]
 
             # Check if all split documents fit within max_seq_length
-            if all(self.count_tokens(doc.content) <= self.max_seq_length for doc in split_docs):
+            if all(self.count_tokens(doc.content) <= self._max_seq_length for doc in split_docs):
                 return split_docs
 
             # If not, reduce split_length and try again
@@ -112,13 +127,13 @@ class CustomDocumentSplitter:
         # If we get here, even single sentences exceed max_seq_length
         # So just let the splitter truncate the document
         # But give warning that document was truncated
-        print(f"Document was truncated to fit within max sequence length of {self.max_seq_length}: "
+        print(f"Document was truncated to fit within max sequence length of {self._max_seq_length}: "
               f"Actual length: {self.count_tokens(document.content)}")
         print(f"Problem Document: {document.content}")
         return [document]
 
     def count_tokens(self, text: str) -> int:
-        return len(self.tokenizer.encode(text, verbose=False))
+        return len(self._tokenizer.encode(text, verbose=False))
 
 
 class DocumentProcessor:
@@ -127,7 +142,7 @@ class DocumentProcessor:
 
     This class provides functionality to set up and use a RAG system for question answering
     tasks on a given corpus of text, currently from an EPUB file. It handles document
-    indexing, embedding, retrieval, and generation of responses using a language model.
+    indexing, embedding, retrieval, and generation of responses using a language _model.
 
     The system uses a Postgres database with the Pgvector extension for efficient
     similarity search of embedded documents.
@@ -170,7 +185,7 @@ class DocumentProcessor:
             postgres_host (str): Host address for Postgres database.
             postgres_port (int): Port number for Postgres database.
             postgres_db_name (str): Name of the Postgres database.
-            embedder_model_name (Optional[str]): Name of the embedding model to use.
+            embedder_model_name (Optional[str]): Name of the embedding _model to use.
             min_section_size (int): Minimum size of a section to be considered for indexing.
         """
 
@@ -379,7 +394,9 @@ class DocumentProcessor:
     def _doc_converter_pipeline(self) -> None:
         self._setup_embedder()
         # Create the custom splitter
-        custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder)
+        custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder,
+                                                                         verbose=True,
+                                                                         skip_content_func=self._skip_content)
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("converter", HTMLToDocument())
