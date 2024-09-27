@@ -70,8 +70,9 @@ def print_documents(documents: List[Document]) -> None:
         print("-" * 50)
 
 
-def print_debug_results(results: Dict[str, Any], verbose: bool = True, level: int = 1) -> None:
-    if verbose and 'llm' in results:
+def print_debug_results(results: Dict[str, Any], verbose: bool = True) -> None:
+    level: int = 1
+    if verbose:
         # Remove 'llm' from results
         results_filtered = {k: v for k, v in results.items() if k != 'llm'}
         if results_filtered:
@@ -84,6 +85,8 @@ def print_debug_results(results: Dict[str, Any], verbose: bool = True, level: in
 def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
     for key, value in data.items():
         # Print the key with the corresponding level
+        if level == 1:
+            print()
         print(f"Level {level}: {key}")
         # If the value is a dictionary, call the function recursively
         if isinstance(value, dict):
@@ -129,6 +132,7 @@ class RagPipeline:
                  verbose: bool = False,
                  top_k: int = 5,
                  display_top_k_docs: int = None,
+                 include_outputs_from: Optional[set[str]] = None
                  ) -> None:
         """
         Initialize the HaystackPgvector instance.
@@ -156,6 +160,7 @@ class RagPipeline:
         self._verbose: bool = verbose
         self._top_k: int = top_k
         self._display_top_k: int = display_top_k_docs
+        self._include_outputs_from: Optional[dict[str, str]] = include_outputs_from
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -292,12 +297,11 @@ class RagPipeline:
         # Run the pipeline
         if self._can_stream():
             # Document streaming and LLM streaming will be handled inside the components
-            results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from={"prompt_builder"})
+            results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from=self._include_outputs_from)
             print()
             print_debug_results(results, self._verbose)
-
         else:
-            results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from={"prompt_builder"})
+            results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from=self._include_outputs_from)
             print()
             print_debug_results(results, self._verbose)
 
@@ -389,6 +393,7 @@ def main() -> None:
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
     # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
     model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
+    include_outputs_from: set[str] = {"prompt_builder", "retriever"}
     rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
                                              generator_model=model,
                                              postgres_user_name='postgres',
@@ -400,6 +405,7 @@ def main() -> None:
                                              verbose=True,
                                              top_k=5,
                                              display_top_k_docs=None,
+                                             include_outputs_from=include_outputs_from,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
