@@ -70,6 +70,16 @@ def print_documents(documents: List[Document]) -> None:
         print("-" * 50)
 
 
+def print_debug_results(results: Dict[str, Any], verbose: bool = True) -> None:
+    if verbose and 'llm' in results:
+        # Remove 'llm' from results
+        results_filtered = {k: v for k, v in results.items() if k != 'llm'}
+        if results_filtered:
+            print()
+            print("Debug Results:")
+            print(results_filtered)
+
+
 class RagPipeline:
     """
     A class that implements a Retrieval-Augmented Generation (RAG) system using Haystack and Pgvector.
@@ -105,6 +115,7 @@ class RagPipeline:
                  use_streaming: bool = False,
                  verbose: bool = False,
                  top_k: int = 5,
+                 display_top_k_docs: int = None,
                  ) -> None:
         """
         Initialize the HaystackPgvector instance.
@@ -131,6 +142,7 @@ class RagPipeline:
         self._use_streaming: bool = use_streaming
         self._verbose: bool = verbose
         self._top_k: int = top_k
+        self._display_top_k: int = display_top_k_docs
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -164,14 +176,36 @@ class RagPipeline:
         Quoting the information contained in the context where possible, give a comprehensive answer to the question.
 
         Context:
-          {% for doc in documents|reverse %}
-          {{ doc.content }}
+          {% for i in range(3) %}
+            {% if documents[i] is defined %}
+              {{ documents[i].content }}
+            {% endif %}
           {% endfor %};
 
         Question: {{query}}<end_of_turn>
 
         <start_of_turn>model
         """
+        self._print_verbose("Prompt Template:")
+        self._print_verbose(self._prompt_template)
+        range_value: int = 3
+        stuff = f"""
+        <start_of_turn>user
+        Quoting the information contained in the context where possible, give a comprehensive answer to the question.
+        
+        Context:
+          {{% for i in range({range_value}) %}}
+            {{% if documents[i] is defined %}}
+              {{{{ documents[i].content }}}}
+            {{% endif %}}
+          {{% endfor %}};
+        
+        Question: {{{{query}}}}<end_of_turn>
+        
+        <start_of_turn>model
+        """
+        self._print_verbose("Prompt Template:")
+        self._print_verbose(self._prompt_template)
 
         # Declare rag pipeline
         self._rag_pipeline: Optional[Pipeline] = None
@@ -262,10 +296,13 @@ class RagPipeline:
 
         # Run the pipeline
         if self._can_stream():
-            self._rag_pipeline.run(inputs)
             # Document streaming and LLM streaming will be handled inside the components
+            results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from={"prompt_builder"})
+            print_debug_results(results, self._verbose)
+
         else:
-            results: Dict[str, Any] = self._rag_pipeline.run(inputs)
+            results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from={"prompt_builder"})
+            print_debug_results(results, self._verbose)
 
             merged_results = results["merger"]["merged_results"]
 
@@ -365,6 +402,7 @@ def main() -> None:
                                              use_streaming=True,
                                              verbose=True,
                                              top_k=5,
+                                             display_top_k_docs=None,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
