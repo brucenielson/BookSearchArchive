@@ -70,14 +70,27 @@ def print_documents(documents: List[Document]) -> None:
         print("-" * 50)
 
 
-def print_debug_results(results: Dict[str, Any], verbose: bool = True) -> None:
+def print_debug_results(results: Dict[str, Any], verbose: bool = True, level: int = 1) -> None:
     if verbose and 'llm' in results:
         # Remove 'llm' from results
         results_filtered = {k: v for k, v in results.items() if k != 'llm'}
         if results_filtered:
             print()
             print("Debug Results:")
-            print(results_filtered)
+            # Call the recursive function to print the results hierarchically
+            _print_hierarchy(results_filtered, level)
+
+
+def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
+    for key, value in data.items():
+        # Print the key with the corresponding level
+        print(f"Level {level}: {key}")
+        # If the value is a dictionary, call the function recursively
+        if isinstance(value, dict):
+            _print_hierarchy(value, level + 1)
+        else:
+            # If the value is not a dictionary, print it
+            print(value)  # Indicate it's a value at the next level
 
 
 class RagPipeline:
@@ -171,39 +184,21 @@ class RagPipeline:
 
         # Default prompt template
         # noinspection SpellCheckingInspection
-        self._prompt_template: str = """
-        <start_of_turn>user
-        Quoting the information contained in the context where possible, give a comprehensive answer to the question.
-
-        Context:
-          {% for i in range(3) %}
-            {% if documents[i] is defined %}
-              {{ documents[i].content }}
-            {% endif %}
-          {% endfor %};
-
-        Question: {{query}}<end_of_turn>
-
-        <start_of_turn>model
-        """
-        self._print_verbose("Prompt Template:")
-        self._print_verbose(self._prompt_template)
-        range_value: int = 3
-        stuff = f"""
-        <start_of_turn>user
-        Quoting the information contained in the context where possible, give a comprehensive answer to the question.
-        
-        Context:
-          {{% for i in range({range_value}) %}}
-            {{% if documents[i] is defined %}}
-              {{{{ documents[i].content }}}}
-            {{% endif %}}
-          {{% endfor %}};
-        
-        Question: {{{{query}}}}<end_of_turn>
-        
-        <start_of_turn>model
-        """
+        self._prompt_template: str = (  # noqa: E101
+            "<start_of_turn>user\n"
+            "Quoting the information contained in the context where possible, "
+            "give a comprehensive answer to the question. Pay more attention to the higher scoring "
+            "documents.\n\n"
+            "Context:\n"
+            "{% for i in range(top_k) %}"
+                "Rank {{ i + 1 }},  Score: {{ '%.2f' | format(documents[i].score) }}\n"
+                    "{% if documents[i] is defined %}"
+                        "{{ documents[i].content }}\n"
+                    "{% endif %}\n"
+                "{% endfor %};\n\n"
+            "Question: {{query}}<end_of_turn>\n\n"
+            "<start_of_turn>model\n"
+        )
         self._print_verbose("Prompt Template:")
         self._print_verbose(self._prompt_template)
 
@@ -291,17 +286,19 @@ class RagPipeline:
         # Prepare inputs for the pipeline
         inputs: Dict[str, Any] = {
             "query_embedder": {"text": query},
-            "prompt_builder": {"query": query}
+            "prompt_builder": {"query": query, "top_k": self._top_k}
         }
 
         # Run the pipeline
         if self._can_stream():
             # Document streaming and LLM streaming will be handled inside the components
             results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from={"prompt_builder"})
+            print()
             print_debug_results(results, self._verbose)
 
         else:
             results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from={"prompt_builder"})
+            print()
             print_debug_results(results, self._verbose)
 
             merged_results = results["merger"]["merged_results"]
