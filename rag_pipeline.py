@@ -139,8 +139,8 @@ class RagPipeline:
                  embedder_model_name: Optional[str] = None,
                  use_streaming: bool = False,
                  verbose: bool = False,
-                 top_k: int = 5,
-                 display_top_k_docs: int = None,
+                 llm_top_k: int = 5,
+                 retriever_top_k_docs: int = None,
                  include_outputs_from: Optional[set[str]] = None
                  ) -> None:
         """
@@ -167,8 +167,8 @@ class RagPipeline:
         self._embedder_model_name: Optional[str] = embedder_model_name
         self._use_streaming: bool = use_streaming
         self._verbose: bool = verbose
-        self._top_k: int = top_k
-        self._display_top_k: int = display_top_k_docs or top_k
+        self._llm_top_k: int = llm_top_k
+        self._retriever_top_k: int = max(retriever_top_k_docs, llm_top_k)
         self._include_outputs_from: Optional[dict[str, str]] = include_outputs_from
 
         # GPU or CPU
@@ -204,7 +204,7 @@ class RagPipeline:
             "give a comprehensive answer to the question. Pay more attention to the higher scoring "
             "documents.\n\n"
             "Context:\n"
-            "{% for i in range(top_k) %}"
+            "{% for i in range(llm_top_k) %}"
                 "Rank {{ i + 1 }},  Score: {{ '%.2f' | format(documents[i].score) }}\n"
                     "{% if documents[i] is defined %}"
                         "{{ documents[i].content }}\n"
@@ -219,6 +219,25 @@ class RagPipeline:
         # Declare rag pipeline
         self._rag_pipeline: Optional[Pipeline] = None
         # Create the RAG pipeline
+        self._create_rag_pipeline()
+
+    @property
+    def llm_top_k(self) -> int:
+        return self._llm_top_k
+
+    @llm_top_k.setter
+    def llm_top_k(self, value: int) -> None:
+        self._llm_top_k = value
+        self._retriever_top_k = max(self._retriever_top_k, self._llm_top_k)
+        self._create_rag_pipeline()
+
+    @property
+    def retriever_top_k(self) -> int:
+        return self._retriever_top_k
+
+    @retriever_top_k.setter
+    def retriever_top_k(self, value: int) -> None:
+        self._retriever_top_k = max(self._llm_top_k, value)
         self._create_rag_pipeline()
 
     @property
@@ -300,7 +319,7 @@ class RagPipeline:
         # Prepare inputs for the pipeline
         inputs: Dict[str, Any] = {
             "query_embedder": {"text": query},
-            "prompt_builder": {"query": query, "top_k": self._top_k}
+            "prompt_builder": {"query": query, "llm_top_k": self._llm_top_k}
         }
 
         # Run the pipeline
@@ -366,13 +385,13 @@ class RagPipeline:
         # If streaming is enabled, use the StreamingRetriever
         if self._can_stream():
             streaming_retriever: StreamingRetriever = StreamingRetriever(
-                retriever=PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._display_top_k))
+                retriever=PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
             rag_pipeline.add_component("retriever", streaming_retriever)
         else:
             # Use the standard retriever if not streaming
             rag_pipeline.add_component("retriever",
                                        PgvectorEmbeddingRetriever(document_store=self._document_store,
-                                                                  top_k=self._display_top_k))
+                                                                  top_k=self._retriever_top_k))
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
@@ -412,8 +431,8 @@ def main() -> None:
                                              postgres_db_name='postgres',
                                              use_streaming=True,
                                              verbose=True,
-                                             top_k=5,
-                                             display_top_k_docs=None,
+                                             llm_top_k=5,
+                                             retriever_top_k_docs=10,
                                              include_outputs_from=include_outputs_from,
                                              embedder_model_name="BAAI/llm-embedder")
 
