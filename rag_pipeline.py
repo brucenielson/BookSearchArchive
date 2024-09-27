@@ -104,6 +104,7 @@ class RagPipeline:
                  embedder_model_name: Optional[str] = None,
                  use_streaming: bool = False,
                  verbose: bool = False,
+                 top_k: int = 5,
                  ) -> None:
         """
         Initialize the HaystackPgvector instance.
@@ -129,6 +130,7 @@ class RagPipeline:
         self._embedder_model_name: Optional[str] = embedder_model_name
         self._use_streaming: bool = use_streaming
         self._verbose: bool = verbose
+        self._top_k: int = top_k
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -317,12 +319,13 @@ class RagPipeline:
         # If streaming is enabled, use the StreamingRetriever
         if self._can_stream():
             streaming_retriever: StreamingRetriever = StreamingRetriever(
-                retriever=PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=5))
+                retriever=PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._top_k))
             rag_pipeline.add_component("retriever", streaming_retriever)
         else:
             # Use the standard retriever if not streaming
             rag_pipeline.add_component("retriever",
-                                       PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=5))
+                                       PgvectorEmbeddingRetriever(document_store=self._document_store,
+                                                                  top_k=self._top_k))
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
@@ -361,6 +364,7 @@ def main() -> None:
                                              postgres_db_name='postgres',
                                              use_streaming=True,
                                              verbose=True,
+                                             top_k=5,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
