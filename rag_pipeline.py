@@ -88,12 +88,21 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
         if level == 1:
             print()
         print(f"Level {level}: {key}")
-        # If the value is a dictionary, call the function recursively
+
+        # Check if the value is a dictionary
         if isinstance(value, dict):
             _print_hierarchy(value, level + 1)
+        # Check if the value is a list
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                print(f"Level {level + 1}: Item {index + 1}")  # Indicating it's an item in a list
+                if isinstance(item, dict):
+                    _print_hierarchy(item, level + 2)
+                else:
+                    print(item)  # Print the item directly
         else:
-            # If the value is not a dictionary, print it
-            print(value)  # Indicate it's a value at the next level
+            # If the value is neither a dict nor a list, print it directly
+            print(value)
 
 
 class RagPipeline:
@@ -159,7 +168,7 @@ class RagPipeline:
         self._use_streaming: bool = use_streaming
         self._verbose: bool = verbose
         self._top_k: int = top_k
-        self._display_top_k: int = display_top_k_docs
+        self._display_top_k: int = display_top_k_docs or top_k
         self._include_outputs_from: Optional[dict[str, str]] = include_outputs_from
 
         # GPU or CPU
@@ -357,13 +366,13 @@ class RagPipeline:
         # If streaming is enabled, use the StreamingRetriever
         if self._can_stream():
             streaming_retriever: StreamingRetriever = StreamingRetriever(
-                retriever=PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._top_k))
+                retriever=PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._display_top_k))
             rag_pipeline.add_component("retriever", streaming_retriever)
         else:
             # Use the standard retriever if not streaming
             rag_pipeline.add_component("retriever",
                                        PgvectorEmbeddingRetriever(document_store=self._document_store,
-                                                                  top_k=self._top_k))
+                                                                  top_k=self._display_top_k))
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
