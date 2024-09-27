@@ -472,10 +472,10 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     processor: DocumentProcessor = DocumentProcessor(
-        table_name="popper_archive",
+        table_name="book_archive",
         recreate_table=True,
         embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=epub_file_path,
