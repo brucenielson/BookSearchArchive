@@ -34,6 +34,16 @@ class SearchMode(Enum):
 
 
 @component
+class QueryComponent:
+    """
+    A simple component that takes a query and returns it in a dictionary so that we can connect it to other components.
+    """
+    @component.output_types(query=str, llm_top_k=int)
+    def run(self, query: str, llm_top_k: int) -> Dict[str, Any]:
+        return {"query": query, "llm_top_k": llm_top_k}
+
+
+@component
 class MergeResults:
     @component.output_types(merged_results=Dict[str, Any])
     def run(self, documents: List[Document],
@@ -87,11 +97,13 @@ def print_documents(documents: List[Document]) -> None:
         print("-" * 50)
 
 
-def print_debug_results(results: Dict[str, Any], verbose: bool = True) -> None:
+def print_debug_results(results: Dict[str, Any],
+                        include_outputs_from: Optional[set[str]] = None,
+                        verbose: bool = True) -> None:
     level: int = 1
-    if verbose:
-        # Remove 'llm' from results
-        results_filtered = {k: v for k, v in results.items() if k != 'llm'}
+    if verbose and include_outputs_from is not None:
+        # Exclude excess outputs
+        results_filtered = {k: v for k, v in results.items() if k in include_outputs_from}
         if results_filtered:
             print()
             print("Debug Results:")
@@ -187,7 +199,7 @@ class RagPipeline:
         self._verbose: bool = verbose
         self._llm_top_k: int = llm_top_k
         self._retriever_top_k: int = max(retriever_top_k_docs or float('-inf'), llm_top_k)
-        self._include_outputs_from: Optional[dict[str, str]] = include_outputs_from
+        self._include_outputs_from: Optional[set[str]] = include_outputs_from
         self._search_mode: SearchMode = search_mode
 
         # GPU or CPU
@@ -360,9 +372,7 @@ class RagPipeline:
 
         # Prepare inputs for the pipeline
         inputs: Dict[str, Any] = {
-            "query_embedder": {"text": query},
-            "prompt_builder": {"query": query, "llm_top_k": self._llm_top_k},
-            # "lex_retriever": {"query": query},
+            "query_input": {"query": query, "llm_top_k": self._llm_top_k},
         }
 
         # Run the pipeline
@@ -370,11 +380,11 @@ class RagPipeline:
             # Document streaming and LLM streaming will be handled inside the components
             results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from=self._include_outputs_from)
             print()
-            print_debug_results(results, self._verbose)
+            print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
         else:
             results: Dict[str, Any] = self._rag_pipeline.run(inputs, include_outputs_from=self._include_outputs_from)
             print()
-            print_debug_results(results, self._verbose)
+            print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
             merged_results = results["merger"]["merged_results"]
 
@@ -395,11 +405,19 @@ class RagPipeline:
         rag_pipeline: Pipeline = Pipeline()
         self._setup_embedder()
         self._setup_generator()
-        prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
 
-        # Add the query embedder and the prompt builder
-        rag_pipeline.add_component("query_embedder", self._sentence_embedder)
+        # Pass query to the query input component
+        rag_pipeline.add_component("query_input", QueryComponent())
+        # Connect the query input to the query component if this is a semantic or hybrid search
+        if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
+            rag_pipeline.add_component("query_embedder", self._sentence_embedder)
+            rag_pipeline.connect("query_input.query", "query_embedder.text")
+        # Add the prompt builder component
+        prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
         rag_pipeline.add_component("prompt_builder", prompt_builder)
+        # Connect the query input to the prompt builder
+        rag_pipeline.connect("query_input.query", "prompt_builder.query")
+        rag_pipeline.connect("query_input.llm_top_k", "prompt_builder.llm_top_k")
 
         # Add the retriever component(s) depending on search mode
         lex_retriever: Optional[RetrieverWrapper] = None
@@ -409,10 +427,19 @@ class RagPipeline:
             lex_retriever = RetrieverWrapper(
                 PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
                 do_stream=self._can_stream())
+            rag_pipeline.add_component("lex_retriever", lex_retriever)
+            # rag_pipeline.connect("lex_retriever", "joiner")
+            rag_pipeline.connect("query_input.query", "lex_retriever")
+            rag_pipeline.connect("lex_retriever.documents", "prompt_builder.documents")
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
             semantic_retriever = RetrieverWrapper(
                 PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
                 do_stream=self._can_stream())
+            rag_pipeline.add_component("semantic_retriever", semantic_retriever)
+            rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
+            # rag_pipeline.connect("semantic_retriever", "joiner")
+            rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
+
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
             rag_pipeline.add_component("llm", self._generator_model.generator_component)
@@ -424,19 +451,13 @@ class RagPipeline:
         joiner: DocumentJoiner = DocumentJoiner(join_mode="merge", top_k=self._retriever_top_k)
         # rag_pipeline.add_component("joiner", joiner)
 
-        if lex_retriever is not None:
-            rag_pipeline.add_component("lex_retriever", lex_retriever)
-            rag_pipeline.connect("lex_retriever", "joiner")
-        if semantic_retriever is not None:
-            rag_pipeline.add_component("semantic_retriever", semantic_retriever)
-            rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
-            # rag_pipeline.connect("semantic_retriever", "joiner")
-            rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
-
         if not self._can_stream():
             # Add the final merger of documents and llm response only when streaming is disabled
             rag_pipeline.add_component("merger", MergeResults())
-            rag_pipeline.connect("semantic_retriever.documents", "merger.documents")
+            if lex_retriever is not None:
+                rag_pipeline.connect("lex_retriever.documents", "merger.documents")
+            if semantic_retriever is not None:
+                rag_pipeline.connect("semantic_retriever.documents", "merger.documents")
             rag_pipeline.connect("llm.replies", "merger.replies")
 
         # Connect the components for both streaming and non-streaming scenarios
@@ -463,7 +484,7 @@ def main() -> None:
                                              postgres_port=5432,
                                              postgres_db_name='postgres',
                                              use_streaming=True,
-                                             verbose=False,
+                                             verbose=True,
                                              llm_top_k=5,
                                              retriever_top_k_docs=None,
                                              include_outputs_from=include_outputs_from,
