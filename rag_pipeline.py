@@ -237,13 +237,15 @@ class RagPipeline:
         self._prompt_template: str = (  # noqa: E101
             "<start_of_turn>user\n"
             "Quoting the information contained in the context where possible, "
-            "give a comprehensive answer to the question. Pay more attention to the higher scoring "
+            "give a comprehensive answer to the question. Pay more attention to the higher ranked "
             "documents.\n\n"
             "Context:\n"
             "{% for i in range([documents|count, llm_top_k] | min) %}"
-                "Rank {{ i + 1 }},  Score: {{ '%.2f' | format(documents[i].score) }}\n"
-                "{{ documents[i].content }}\n\n"
-            "{% endfor %}\n\n"
+                "Rank {{ i + 1 }}\n"
+                    "{% if documents[i] is defined %}"
+                        "{{ documents[i].content }}\n"
+                    "{% endif %}\n"
+            "{% endfor %}End of Context\n\n"
             "Question: {{query}}<end_of_turn>\n\n"
             "<start_of_turn>model\n"
         )
@@ -427,9 +429,9 @@ class RagPipeline:
 
         # Add the joiner component
         # Create a joiner to merge the results from both retrievers
-        joiner: DocumentJoiner = DocumentJoiner(join_mode="distribution_based_rank_fusion",
-                                                top_k=self._retriever_top_k*2)
-        rag_pipeline.add_component("joiner", joiner)
+        # joiner: DocumentJoiner = DocumentJoiner(join_mode="distribution_based_rank_fusion",
+        #                                         top_k=self._retriever_top_k*2)
+        # rag_pipeline.add_component("joiner", joiner)
 
         # Add the retriever component(s) depending on search mode
         lex_retriever: Optional[RetrieverWrapper] = None
@@ -440,9 +442,9 @@ class RagPipeline:
                 PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
                 do_stream=self._can_stream())
             rag_pipeline.add_component("lex_retriever", lex_retriever)
-            rag_pipeline.connect("lex_retriever", "joiner")
+            # rag_pipeline.connect("lex_retriever", "joiner")
             rag_pipeline.connect("query_input.query", "lex_retriever")
-            rag_pipeline.connect("lex_retriever.documents", "joiner.documents")
+            # rag_pipeline.connect("lex_retriever.documents", "joiner.documents")
 
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
             semantic_retriever = RetrieverWrapper(
@@ -450,10 +452,13 @@ class RagPipeline:
                 do_stream=self._can_stream())
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
-            rag_pipeline.connect("semantic_retriever.documents", "joiner.documents")
+            # rag_pipeline.connect("semantic_retriever.documents", "joiner.documents")
 
         # Always connect the joiner to the prompt builder
-        rag_pipeline.connect("joiner.documents", "prompt_builder.documents")
+        if lex_retriever is not None:
+            rag_pipeline.connect("lex_retriever.documents", "prompt_builder.documents")
+        elif semantic_retriever is not None:
+            rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
