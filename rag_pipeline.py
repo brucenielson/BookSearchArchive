@@ -73,6 +73,11 @@ class RetrieverWrapper:
         elif isinstance(query, str):
             documents = self._retriever.run(query=query)['documents']
         if self._do_stream:
+            print()
+            if isinstance(self._retriever, PgvectorEmbeddingRetriever):
+                print("Semantic Retriever Results:")
+            elif isinstance(self._retriever, PgvectorKeywordRetriever):
+                print("Lexical Retriever Results:")
             print_documents(documents)
         # Return a dictionary with documents
         return {"documents": documents}
@@ -232,18 +237,19 @@ class RagPipeline:
         self._prompt_template: str = (  # noqa: E101
             "<start_of_turn>user\n"
             "Quoting the information contained in the context where possible, "
-            "give a comprehensive answer to the question. Pay more attention to the higher scoring "
+            "give a comprehensive answer to the question. Pay more attention to the higher ranked "
             "documents.\n\n"
             "Context:\n"
-            "{% for i in range(llm_top_k) %}"
-                "Rank {{ i + 1 }},  Score: {{ '%.2f' | format(documents[i].score) }}\n"
+            "{% for i in range([documents|count, llm_top_k] | min) %}"
+                "Rank {{ i + 1 }}\n"
                     "{% if documents[i] is defined %}"
                         "{{ documents[i].content }}\n"
                     "{% endif %}\n"
-                "{% endfor %};\n\n"
+            "{% endfor %}End of Context\n\n"
             "Question: {{query}}<end_of_turn>\n\n"
             "<start_of_turn>model\n"
         )
+
         self._print_verbose("Prompt Template:")
         self._print_verbose(self._prompt_template)
 
@@ -393,14 +399,14 @@ class RagPipeline:
             self._print_verbose("Retrieved Documents:")
             print_documents(merged_results["documents"])
 
-            # Print generated response
-            # noinspection SpellCheckingInspection
-            print("\nLLM's Response:")
-            if merged_results["replies"]:
-                answer: str = merged_results["replies"][0]
-                print(answer)
-            else:
-                print("No response was generated.")
+            # # Print generated response
+            # # noinspection SpellCheckingInspection
+            # print("\nLLM's Response:")
+            # if merged_results["replies"]:
+            #     answer: str = merged_results["replies"][0]
+            #     print(answer)
+            # else:
+            #     print("No response was generated.")
 
     def _create_rag_pipeline(self) -> None:
         rag_pipeline: Pipeline = Pipeline()
@@ -413,12 +419,19 @@ class RagPipeline:
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
             rag_pipeline.add_component("query_embedder", self._sentence_embedder)
             rag_pipeline.connect("query_input.query", "query_embedder.text")
-        # Add the prompt builder component
+
+        # # Add the prompt builder component
         prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
         rag_pipeline.add_component("prompt_builder", prompt_builder)
-        # Connect the query input to the prompt builder
+        # # Connect the query input to the prompt builder
         rag_pipeline.connect("query_input.query", "prompt_builder.query")
         rag_pipeline.connect("query_input.llm_top_k", "prompt_builder.llm_top_k")
+
+        # Add the joiner component
+        # Create a joiner to merge the results from both retrievers
+        # joiner: DocumentJoiner = DocumentJoiner(join_mode="distribution_based_rank_fusion",
+        #                                         top_k=self._retriever_top_k*2)
+        # rag_pipeline.add_component("joiner", joiner)
 
         # Add the retriever component(s) depending on search mode
         lex_retriever: Optional[RetrieverWrapper] = None
@@ -431,7 +444,7 @@ class RagPipeline:
             rag_pipeline.add_component("lex_retriever", lex_retriever)
             # rag_pipeline.connect("lex_retriever", "joiner")
             rag_pipeline.connect("query_input.query", "lex_retriever")
-            rag_pipeline.connect("lex_retriever.documents", "prompt_builder.documents")
+            # rag_pipeline.connect("lex_retriever.documents", "joiner.documents")
 
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
             semantic_retriever = RetrieverWrapper(
@@ -439,22 +452,19 @@ class RagPipeline:
                 do_stream=self._can_stream())
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
-            # rag_pipeline.connect("semantic_retriever", "joiner")
-            rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
+            # rag_pipeline.connect("semantic_retriever.documents", "joiner.documents")
 
-        if self._search_mode == SearchMode.HYBRID:
-            pass
+        # Always connect the joiner to the prompt builder
+        if lex_retriever is not None:
+            rag_pipeline.connect("lex_retriever.documents", "prompt_builder.documents")
+        elif semantic_retriever is not None:
+            rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
             rag_pipeline.add_component("llm", self._generator_model.generator_component)
         else:
             rag_pipeline.add_component("llm", self._generator_model)
-
-        # Add the joiner component
-        # Create a joiner to merge the results from both retrievers
-        joiner: DocumentJoiner = DocumentJoiner(join_mode="merge", top_k=self._retriever_top_k)
-        # rag_pipeline.add_component("joiner", joiner)
 
         if not self._can_stream():
             # Add the final merger of documents and llm response only when streaming is disabled
@@ -465,8 +475,7 @@ class RagPipeline:
                 rag_pipeline.connect("semantic_retriever.documents", "merger.documents")
             rag_pipeline.connect("llm.replies", "merger.replies")
 
-        # Connect the components for both streaming and non-streaming scenarios
-        # rag_pipeline.connect("joiner.documents", "prompt_builder.documents")
+        # Connect prompt builder to the llm
         rag_pipeline.connect("prompt_builder", "llm")
 
         # Set the pipeline instance
@@ -504,7 +513,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "What is induction?"
+    query: str = "What is induction? Does it exist? Has it been refuted?"
     rag_processor.generate_response(query)
 
 
