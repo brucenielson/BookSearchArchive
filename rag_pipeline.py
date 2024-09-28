@@ -47,9 +47,12 @@ class MergeResults:
 
 
 @component
-class StreamingRetriever:
-    def __init__(self, retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever]) -> None:
+class RetrieverWrapper:
+    def __init__(self, retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever],
+                 do_stream: bool = False) -> None:
         self._retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever] = retriever
+        self._do_stream: bool = do_stream
+        # Alternatively, you can set the input types:
         # component.set_input_types(self, query_embedding=List[float], query=Optional[str])
 
     @component.output_types(documents=List[Document])
@@ -59,7 +62,8 @@ class StreamingRetriever:
             documents = self._retriever.run(query_embedding=query)['documents']
         elif isinstance(query, str):
             documents = self._retriever.run(query=query)['documents']
-        print_documents(documents)
+        if self._do_stream:
+            print_documents(documents)
         # Return a dictionary with documents
         return {"documents": documents}
 
@@ -398,23 +402,17 @@ class RagPipeline:
         rag_pipeline.add_component("prompt_builder", prompt_builder)
 
         # Add the retriever component(s) depending on search mode
-        lex_retriever: Optional[Union[PgvectorKeywordRetriever, StreamingRetriever]] = None
-        semantic_retriever: Optional[Union[PgvectorEmbeddingRetriever, StreamingRetriever]] = None
+        lex_retriever: Optional[RetrieverWrapper] = None
+        semantic_retriever: Optional[RetrieverWrapper] = None
 
         if self._search_mode == SearchMode.LEXICAL or self._search_mode == SearchMode.HYBRID:
-            lex_retriever = PgvectorKeywordRetriever(document_store=self._document_store,
-                                                     top_k=self._retriever_top_k)
+            lex_retriever = RetrieverWrapper(
+                PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
+                do_stream=self._can_stream())
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
-            semantic_retriever = PgvectorEmbeddingRetriever(document_store=self._document_store,
-                                                            top_k=self._retriever_top_k)
-
-        # If we're streaming, wrap one or both retrievers in a StreamingRetriever
-        if self._can_stream():
-            if lex_retriever is not None:
-                lex_retriever = StreamingRetriever(lex_retriever)
-            if semantic_retriever is not None:
-                semantic_retriever = StreamingRetriever(semantic_retriever)
-
+            semantic_retriever = RetrieverWrapper(
+                PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
+                do_stream=self._can_stream())
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
             rag_pipeline.add_component("llm", self._generator_model.generator_component)
@@ -431,10 +429,7 @@ class RagPipeline:
             rag_pipeline.connect("lex_retriever", "joiner")
         if semantic_retriever is not None:
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
-            if self._can_stream():
-                rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
-            else:
-                rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query_embedding")
+            rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
             # rag_pipeline.connect("semantic_retriever", "joiner")
             rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
 
@@ -468,7 +463,7 @@ def main() -> None:
                                              postgres_port=5432,
                                              postgres_db_name='postgres',
                                              use_streaming=True,
-                                             verbose=True,
+                                             verbose=False,
                                              llm_top_k=5,
                                              retriever_top_k_docs=None,
                                              include_outputs_from=include_outputs_from,
