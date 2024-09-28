@@ -368,6 +368,7 @@ class RagPipeline:
         Args:
             query (str): The input query to process.
         """
+        print()
         print("Generating Response...")
 
         # Prepare inputs for the pipeline
@@ -499,7 +500,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "What is induction? Does it exist? Has it been refuted?"
+    query: str = "What is induction?"
     rag_processor.generate_response(query)
 
 
