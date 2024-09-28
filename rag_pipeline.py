@@ -432,6 +432,7 @@ class RagPipeline:
             # rag_pipeline.connect("lex_retriever", "joiner")
             rag_pipeline.connect("query_input.query", "lex_retriever")
             rag_pipeline.connect("lex_retriever.documents", "prompt_builder.documents")
+
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
             semantic_retriever = RetrieverWrapper(
                 PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
@@ -440,6 +441,9 @@ class RagPipeline:
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
             # rag_pipeline.connect("semantic_retriever", "joiner")
             rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
+
+        if self._search_mode == SearchMode.HYBRID:
+            pass
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
