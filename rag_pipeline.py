@@ -250,8 +250,8 @@ class RagPipeline:
             "<start_of_turn>model\n"
         )
 
-        self._print_verbose("Prompt Template:")
-        self._print_verbose(self._prompt_template)
+        # self._print_verbose("Prompt Template:")
+        # self._print_verbose(self._prompt_template)
 
         # Declare rag pipeline
         self._rag_pipeline: Optional[Pipeline] = None
@@ -399,14 +399,14 @@ class RagPipeline:
             self._print_verbose("Retrieved Documents:")
             print_documents(merged_results["documents"])
 
-            # # Print generated response
-            # # noinspection SpellCheckingInspection
-            # print("\nLLM's Response:")
-            # if merged_results["replies"]:
-            #     answer: str = merged_results["replies"][0]
-            #     print(answer)
-            # else:
-            #     print("No response was generated.")
+            # Print generated response
+            # noinspection SpellCheckingInspection
+            print("\nLLM's Response:")
+            if merged_results["replies"]:
+                answer: str = merged_results["replies"][0]
+                print(answer)
+            else:
+                print("No response was generated.")
 
     def _create_rag_pipeline(self) -> None:
         rag_pipeline: Pipeline = Pipeline()
@@ -429,9 +429,9 @@ class RagPipeline:
 
         # Add the joiner component
         # Create a joiner to merge the results from both retrievers
-        # joiner: DocumentJoiner = DocumentJoiner(join_mode="distribution_based_rank_fusion",
-        #                                         top_k=self._retriever_top_k*2)
-        # rag_pipeline.add_component("joiner", joiner)
+        joiner: DocumentJoiner = DocumentJoiner(join_mode="concatenate",
+                                                top_k=self._retriever_top_k*2)
+        rag_pipeline.add_component("joiner", joiner)
 
         # Add the retriever component(s) depending on search mode
         lex_retriever: Optional[RetrieverWrapper] = None
@@ -442,9 +442,8 @@ class RagPipeline:
                 PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
                 do_stream=self._can_stream())
             rag_pipeline.add_component("lex_retriever", lex_retriever)
-            # rag_pipeline.connect("lex_retriever", "joiner")
             rag_pipeline.connect("query_input.query", "lex_retriever")
-            # rag_pipeline.connect("lex_retriever.documents", "joiner.documents")
+            rag_pipeline.connect("lex_retriever.documents", "joiner.documents")
 
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
             semantic_retriever = RetrieverWrapper(
@@ -452,13 +451,14 @@ class RagPipeline:
                 do_stream=self._can_stream())
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
-            # rag_pipeline.connect("semantic_retriever.documents", "joiner.documents")
+            rag_pipeline.connect("semantic_retriever.documents", "joiner.documents")
 
         # Always connect the joiner to the prompt builder
-        if lex_retriever is not None:
-            rag_pipeline.connect("lex_retriever.documents", "prompt_builder.documents")
-        elif semantic_retriever is not None:
-            rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
+        # if lex_retriever is not None:
+        #     rag_pipeline.connect("lex_retriever.documents", "prompt_builder.documents")
+        # elif semantic_retriever is not None:
+        #     rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
+        rag_pipeline.connect("joiner.documents", "prompt_builder.documents")
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
@@ -469,14 +469,11 @@ class RagPipeline:
         if not self._can_stream():
             # Add the final merger of documents and llm response only when streaming is disabled
             rag_pipeline.add_component("merger", MergeResults())
-            if lex_retriever is not None:
-                rag_pipeline.connect("lex_retriever.documents", "merger.documents")
-            if semantic_retriever is not None:
-                rag_pipeline.connect("semantic_retriever.documents", "merger.documents")
+            rag_pipeline.connect("joiner.documents", "merger.documents")
             rag_pipeline.connect("llm.replies", "merger.replies")
 
         # Connect prompt builder to the llm
-        rag_pipeline.connect("prompt_builder", "llm")
+        rag_pipeline.connect("prompt_builder.prompt", "llm.prompt")
 
         # Set the pipeline instance
         self._rag_pipeline = rag_pipeline
@@ -489,7 +486,8 @@ def main() -> None:
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
     # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
     model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
-    include_outputs_from: set[str] = {"prompt_builder", "lex_retriever", "semantic_retriever", "joiner"}
+    # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder"
+    include_outputs_from: set[str] = {"joiner", "llm"}
     rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
                                              generator_model=model,
                                              postgres_user_name='postgres',
