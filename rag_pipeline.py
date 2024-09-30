@@ -37,6 +37,8 @@ class SearchMode(Enum):
 
 @component
 class DocumentQueryCollector:
+    def __init__(self, do_stream: bool = False) -> None:
+        self._do_stream: bool = do_stream
     """
     A simple component that takes a List of Documents from the DocumentJoiner
     as well as the query and llm_top_k from the QueryComponent and returns them in a dictionary
@@ -78,6 +80,10 @@ class DocumentQueryCollector:
             documents = semantic_documents
         elif lexical_documents is not None:
             documents = lexical_documents
+        if self._do_stream:
+            print()
+            print("Retrieved Documents:")
+            print_documents(documents)
         return {"documents": documents, "query": query, "llm_top_k": llm_top_k}
 
 
@@ -452,7 +458,7 @@ class RagPipeline:
         prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
         rag_pipeline.add_component("prompt_builder", prompt_builder)
 
-        doc_checker: DocumentQueryCollector = DocumentQueryCollector()
+        doc_checker: DocumentQueryCollector = DocumentQueryCollector(do_stream=self._can_stream())
         rag_pipeline.add_component("doc_query_collector", doc_checker)
         rag_pipeline.connect("query_input.query", "doc_query_collector.query")
         rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
@@ -460,16 +466,14 @@ class RagPipeline:
         # Add the retriever component(s) depending on search mode
         if self._search_mode == SearchMode.LEXICAL or self._search_mode == SearchMode.HYBRID:
             lex_retriever: RetrieverWrapper = RetrieverWrapper(
-                PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
-                do_stream=self._can_stream())
+                PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
             rag_pipeline.add_component("lex_retriever", lex_retriever)
             rag_pipeline.connect("query_input.query", "lex_retriever.query")
             rag_pipeline.connect("lex_retriever.documents", "doc_query_collector.lexical_documents")
 
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
             semantic_retriever: RetrieverWrapper = RetrieverWrapper(
-                PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
-                do_stream=self._can_stream())
+                PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
             rag_pipeline.connect("semantic_retriever.documents", "doc_query_collector.semantic_documents")
@@ -505,8 +509,9 @@ def main() -> None:
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
     # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
     model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
-    # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder"
-    include_outputs_from: set[str] = {"joiner", "llm", "prompt_builder", "doc_query_collector"}
+    # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder",
+    # "joiner", "llm", "prompt_builder", "doc_query_collector"
+    include_outputs_from: Optional[set[str]] = None
     rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
                                              generator_model=model,
                                              postgres_user_name='postgres',
@@ -515,7 +520,7 @@ def main() -> None:
                                              postgres_port=5432,
                                              postgres_db_name='postgres',
                                              use_streaming=True,
-                                             verbose=True,
+                                             verbose=False,
                                              llm_top_k=5,
                                              retriever_top_k_docs=None,
                                              include_outputs_from=include_outputs_from,
