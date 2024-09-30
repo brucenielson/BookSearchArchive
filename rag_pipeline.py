@@ -62,10 +62,17 @@ class DocumentQueryCollector:
                 docs_per_id[doc.id].append(doc)
             docs: list
             for docs in docs_per_id.values():
+                # Take the document with the best score
                 doc_with_best_score = max(docs, key=lambda a_doc: a_doc.score if a_doc.score else -inf)
+                # Give a slight boost to the score for each duplicate - Add .1 to the score for each duplicate
+                # but adjust the 0.1 boost by score of the duplicate
+                if len(docs) > 1:
+                    for doc in docs:
+                        if doc != doc_with_best_score:
+                            doc_with_best_score.score += 0.1 * max(doc.score, 0.0)
                 output.append(doc_with_best_score)
+            output.sort(key=lambda a_doc: a_doc.score if a_doc.score else -inf, reverse=True)
             documents = output
-
         elif semantic_documents is not None:
             documents = semantic_documents
         elif lexical_documents is not None:
