@@ -26,6 +26,7 @@ from enum import Enum
 from collections import defaultdict
 import itertools
 from math import inf
+import textwrap
 
 
 class SearchMode(Enum):
@@ -132,20 +133,22 @@ class RetrieverWrapper:
 
 def print_documents(documents: List[Document]) -> None:
     for i, doc in enumerate(documents, 1):
+        print()
         print(f"Document {i}:")
         print(f"Score: {doc.score}")
         if hasattr(doc, 'meta') and doc.meta:
             if 'book_title' in doc.meta:
-                print(f"Book Title: {doc.meta['book_title']}")
+                print(textwrap.fill(f"Book Title: {doc.meta['book_title']}", width=80))
             if 'section_title' in doc.meta:
-                print(f"Section Title: {doc.meta['section_title']}")
+                print(textwrap.fill(f"Section Title: {doc.meta['section_title']}", width=80))
             if 'section_id' in doc.meta:
-                print(f"Section ID: {doc.meta['section_id']}")
+                print(textwrap.fill(f"Section ID: {doc.meta['section_id']}", width=80))
             if 'section_num' in doc.meta:
-                print(f"Section #: {doc.meta['section_num']}")
+                print(textwrap.fill(f"Section #: {doc.meta['section_num']}", width=80))
             if 'paragraph_num' in doc.meta:
-                print(f"Paragraph #: {doc.meta['paragraph_num']}")
-        print(f"Content: {doc.content}")
+                print(textwrap.fill(f"Paragraph #: {doc.meta['paragraph_num']}", width=80))
+        # Use text wrap to wrap the content at 80 characters
+        print(textwrap.fill(f"Content: {doc.content}", width=80))
         print("-" * 50)
 
 
@@ -187,6 +190,9 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 
 
 class RagPipeline:
+    # The amount of text streamed since last newline.
+    _streamed_text_length: int = 0
+
     def __init__(self,
                  table_name: str = 'haystack_pgvector_docs',
                  postgres_user_name: str = 'postgres',
@@ -203,9 +209,19 @@ class RagPipeline:
                  search_mode: SearchMode = SearchMode.HYBRID,
                  include_outputs_from: Optional[set[str]] = None
                  ) -> None:
+
         # streaming_callback function to print to screen
         def streaming_callback(chunk: StreamingChunk) -> None:
-            print(chunk.content, end='')
+            # Print the content of the chunks but wrap the text after 80 characters
+            RagPipeline._streamed_text_length += len(chunk.content)
+            if RagPipeline._streamed_text_length < 80 or chunk.content in ['.', ',', ';', ':', '!', '?', ' ', '\n']:
+                print(chunk.content, end='')
+                if chunk.content == '\n':
+                    RagPipeline._streamed_text_length = 0
+            else:
+                print()
+                print(chunk.content.strip(), end='')
+                RagPipeline._streamed_text_length = len(chunk.content)
 
         # Instance variables
         self._table_name: str = table_name
@@ -407,6 +423,7 @@ class RagPipeline:
             merged_results = results["merger"]["merged_results"]
 
             # Print retrieved documents
+            print()
             self._print_verbose("Retrieved Documents:")
             print_documents(merged_results["documents"])
 
@@ -415,7 +432,7 @@ class RagPipeline:
             print("\nLLM's Response:")
             if merged_results["replies"]:
                 answer: str = merged_results["replies"][0]
-                print(answer)
+                print(textwrap.fill(answer, width=80))
             else:
                 print("No response was generated.")
 
