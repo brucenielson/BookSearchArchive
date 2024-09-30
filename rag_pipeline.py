@@ -34,6 +34,33 @@ class SearchMode(Enum):
 
 
 @component
+class DocumentQueryCollector:
+    """
+    A simple component that takes a List of Documents from the DocumentJoiner
+    as well as the query and llm_top_k from the QueryComponent and returns them in a dictionary
+    so that we can connect it to other components.
+
+    This component should be unnecessary, but a bug in DocumentJoiner requires it to avoid
+    strange results on streaming happening from the LLM component prior to receiving the documents.
+    """
+    @component.output_types(documents=List[Document], query=str, llm_top_k=int)
+    def run(self, query: str,
+            llm_top_k: int = 5,
+            semantic_documents: Optional[List[Document]] = None,
+            lexical_documents: Optional[List[Document]] = None
+            ) -> Dict[str, Any]:
+        documents: List[Document] = []
+        # Check for semantic documents vs lexical documents and, if both exist, merge them
+        if semantic_documents is not None and lexical_documents is not None:
+            documents = semantic_documents + lexical_documents
+        elif semantic_documents is not None:
+            documents = semantic_documents
+        elif lexical_documents is not None:
+            documents = lexical_documents
+        return {"documents": documents, "query": query, "llm_top_k": llm_top_k}
+
+
+@component
 class QueryComponent:
     """
     A simple component that takes a query and returns it in a dictionary so that we can connect it to other components.
@@ -140,28 +167,6 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 
 
 class RagPipeline:
-    """
-    A class that implements a Retrieval-Augmented Generation (RAG) system using Haystack and Pgvector.
-
-    This class provides functionality to set up and use a RAG system for question answering
-    tasks on a given corpus of text, currently from an EPUB file. It handles document
-    indexing, embedding, retrieval, and generation of responses using a language model.
-
-    The system uses a Postgres database with the Pgvector extension for efficient
-    similarity search of embedded documents.
-
-    Public Methods:
-        draw_pipelines(): Visualize the RAG and document conversion pipelines.
-        generate_response(query: str): Generate a response to a given query.
-
-    Properties:
-        sentence_context_length: Get the context length of the sentence embedder.
-        sentence_embed_dims: Get the embedding dimensions of the sentence embedder.
-
-    The class handles initialization of the document store, embedding models,
-    and language models internally. It also manages the creation and execution
-    of the document processing and RAG pipelines.
-    """
     def __init__(self,
                  table_name: str = 'haystack_pgvector_docs',
                  postgres_user_name: str = 'postgres',
@@ -178,20 +183,6 @@ class RagPipeline:
                  search_mode: SearchMode = SearchMode.HYBRID,
                  include_outputs_from: Optional[set[str]] = None
                  ) -> None:
-        """
-        Initialize the HaystackPgvector instance.
-
-        Args:
-            table_name (str): Name of the table in the Pgvector database.
-            postgres_user_name (str): Username for Postgres database.
-            postgres_password (str): Password for Postgres database.
-            postgres_host (str): Host address for Postgres database.
-            postgres_port (int): Port number for Postgres database.
-            postgres_db_name (str): Name of the Postgres database.
-            generator_model (Union[GeneratorModel, HuggingFaceLocalGenerator, GoogleAIGeminiGenerator]):
-                Language model to use for text generation.
-            embedder_model_name (Optional[str]): Name of the embedding model to use.
-        """
         # streaming_callback function to print to screen
         def streaming_callback(chunk: StreamingChunk) -> None:
             print(chunk.content, end='')
@@ -240,7 +231,7 @@ class RagPipeline:
             "give a comprehensive answer to the question. Pay more attention to the higher ranked "
             "documents.\n\n"
             "Context:\n"
-            "{% for i in range([documents|count, llm_top_k] | min) %}"
+            "{% for i in range([documents|count, llm_top_k|int] | min) %}"
                 "Rank {{ i + 1 }}\n"
                     "{% if documents[i] is defined %}"
                         "{{ documents[i].content }}\n"
@@ -423,42 +414,33 @@ class RagPipeline:
         # # Add the prompt builder component
         prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
         rag_pipeline.add_component("prompt_builder", prompt_builder)
-        # # Connect the query input to the prompt builder
-        rag_pipeline.connect("query_input.query", "prompt_builder.query")
-        rag_pipeline.connect("query_input.llm_top_k", "prompt_builder.llm_top_k")
 
-        # Add the joiner component
-        # Create a joiner to merge the results from both retrievers
-        joiner: DocumentJoiner = DocumentJoiner(join_mode="concatenate",
-                                                top_k=self._retriever_top_k*2)
-        rag_pipeline.add_component("joiner", joiner)
+        doc_checker: DocumentQueryCollector = DocumentQueryCollector()
+        rag_pipeline.add_component("doc_query_collector", doc_checker)
+        rag_pipeline.connect("query_input.query", "doc_query_collector.query")
+        rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
 
         # Add the retriever component(s) depending on search mode
-        lex_retriever: Optional[RetrieverWrapper] = None
-        semantic_retriever: Optional[RetrieverWrapper] = None
-
         if self._search_mode == SearchMode.LEXICAL or self._search_mode == SearchMode.HYBRID:
-            lex_retriever = RetrieverWrapper(
+            lex_retriever: RetrieverWrapper = RetrieverWrapper(
                 PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
                 do_stream=self._can_stream())
             rag_pipeline.add_component("lex_retriever", lex_retriever)
-            rag_pipeline.connect("query_input.query", "lex_retriever")
-            rag_pipeline.connect("lex_retriever.documents", "joiner.documents")
+            rag_pipeline.connect("query_input.query", "lex_retriever.query")
+            rag_pipeline.connect("lex_retriever.documents", "doc_query_collector.lexical_documents")
 
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
-            semantic_retriever = RetrieverWrapper(
+            semantic_retriever: RetrieverWrapper = RetrieverWrapper(
                 PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
                 do_stream=self._can_stream())
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
-            rag_pipeline.connect("semantic_retriever.documents", "joiner.documents")
+            rag_pipeline.connect("semantic_retriever.documents", "doc_query_collector.semantic_documents")
 
-        # Always connect the joiner to the prompt builder
-        # if lex_retriever is not None:
-        #     rag_pipeline.connect("lex_retriever.documents", "prompt_builder.documents")
-        # elif semantic_retriever is not None:
-        #     rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
-        rag_pipeline.connect("joiner.documents", "prompt_builder.documents")
+        # Connect the query input to the prompt builder
+        rag_pipeline.connect("doc_query_collector.query", "prompt_builder.query")
+        rag_pipeline.connect("doc_query_collector.llm_top_k", "prompt_builder.llm_top_k")
+        rag_pipeline.connect("doc_query_collector.documents", "prompt_builder.documents")
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
@@ -469,7 +451,7 @@ class RagPipeline:
         if not self._can_stream():
             # Add the final merger of documents and llm response only when streaming is disabled
             rag_pipeline.add_component("merger", MergeResults())
-            rag_pipeline.connect("joiner.documents", "merger.documents")
+            rag_pipeline.connect("doc_query_collector.documents", "merger.documents")
             rag_pipeline.connect("llm.replies", "merger.replies")
 
         # Connect prompt builder to the llm
@@ -487,7 +469,7 @@ def main() -> None:
     # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
     model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
     # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder"
-    include_outputs_from: set[str] = {"joiner", "llm"}
+    include_outputs_from: set[str] = {"joiner", "llm", "prompt_builder", "doc_query_collector"}
     rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
                                              generator_model=model,
                                              postgres_user_name='postgres',
@@ -500,7 +482,7 @@ def main() -> None:
                                              llm_top_k=5,
                                              retriever_top_k_docs=None,
                                              include_outputs_from=include_outputs_from,
-                                             search_mode=SearchMode.SEMANTIC,
+                                             search_mode=SearchMode.HYBRID,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
