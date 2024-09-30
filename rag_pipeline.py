@@ -69,7 +69,7 @@ class DocumentQueryCollector:
                 if len(docs) > 1:
                     for doc in docs:
                         if doc != doc_with_best_score:
-                            doc_with_best_score.score += 0.1 * max(doc.score, 0.0)
+                            doc_with_best_score.score += min(max(doc.score, 0.0), 0.1)
                 output.append(doc_with_best_score)
             output.sort(key=lambda a_doc: a_doc.score if a_doc.score else -inf, reverse=True)
             documents = output
@@ -247,12 +247,12 @@ class RagPipeline:
         # noinspection SpellCheckingInspection
         self._prompt_template: str = (  # noqa: E101
             "<start_of_turn>user\n"
-            "Quoting the information contained in the context where possible, "
-            "give a comprehensive answer to the question. Pay more attention to the higher ranked "
-            "documents.\n\n"
+            "Using the information contained in the context where possible, "
+            "give a comprehensive answer to the question. Pay more attention to passages with "
+            "higher relevance scores.\n\n"
             "Context:\n"
-            "{% for i in range([documents|count, llm_top_k|int] | min) %}"
-                "Rank {{ i + 1 }}\n"
+            "{% for i in range([documents|count, llm_top_k|int] | min) | reverse %}"
+                "Relevance Score {{ '%.2f' | format(documents[i].score) }}\n"
                     "{% if documents[i] is defined %}"
                         "{{ documents[i].content }}\n"
                     "{% endif %}\n"
