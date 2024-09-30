@@ -23,6 +23,9 @@ from typing import List, Optional, Dict, Any, Union
 from pathlib import Path
 import generator_model as gen
 from enum import Enum
+from collections import defaultdict
+import itertools
+from math import inf
 
 
 class SearchMode(Enum):
@@ -50,7 +53,19 @@ class DocumentQueryCollector:
         documents: List[Document] = []
         # Check for semantic documents vs lexical documents and, if both exist, merge them
         if semantic_documents is not None and lexical_documents is not None:
-            documents = semantic_documents + lexical_documents
+            # Combine semantic and lexical documents. But only include each document once and take highest scores first.
+            output: List[Document] = []
+            document_lists: List[list] = [semantic_documents, lexical_documents]
+            docs_per_id: defaultdict = defaultdict(list)
+            doc: Document
+            for doc in itertools.chain.from_iterable(document_lists):
+                docs_per_id[doc.id].append(doc)
+            docs: list
+            for docs in docs_per_id.values():
+                doc_with_best_score = max(docs, key=lambda a_doc: a_doc.score if a_doc.score else -inf)
+                output.append(doc_with_best_score)
+            documents = output
+
         elif semantic_documents is not None:
             documents = semantic_documents
         elif lexical_documents is not None:
