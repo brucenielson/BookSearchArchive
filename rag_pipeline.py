@@ -19,7 +19,7 @@ from haystack.utils import ComponentDevice, Device
 # noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
 # Other imports
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any, Union, Callable
 from pathlib import Path
 import generator_model as gen
 from enum import Enum
@@ -37,8 +37,9 @@ class SearchMode(Enum):
 
 @component
 class DocumentQueryCollector:
-    def __init__(self, do_stream: bool = False) -> None:
+    def __init__(self, do_stream: bool = False, callback_func: Callable = None) -> None:
         self._do_stream: bool = do_stream
+        self._callback_func: Callable = callback_func
     """
     A simple component that takes a List of Documents from the DocumentJoiner
     as well as the query and llm_top_k from the QueryComponent and returns them in a dictionary
@@ -84,6 +85,8 @@ class DocumentQueryCollector:
             print()
             print("Retrieved Documents:")
             print_documents(documents)
+        if self._callback_func is not None:
+            self._callback_func()
         return {"documents": documents, "query": query, "llm_top_k": llm_top_k}
 
 
@@ -220,15 +223,16 @@ class RagPipeline:
         # streaming_callback function to print to screen
         def streaming_callback(chunk: StreamingChunk) -> None:
             # Print the content of the chunks but wrap the text after 80 characters
-            RagPipeline._streamed_text_length += len(chunk.content)
-            if RagPipeline._streamed_text_length < 80 or chunk.content in ['.', ',', ';', ':', '!', '?', ' ', '\n']:
-                print(chunk.content, end='')
-                if chunk.content == '\n':
-                    RagPipeline._streamed_text_length = 0
-            else:
-                print()
-                print(chunk.content.strip(), end='')
-                RagPipeline._streamed_text_length = len(chunk.content)
+            if self._allow_streaming_callback:
+                RagPipeline._streamed_text_length += len(chunk.content)
+                if RagPipeline._streamed_text_length < 80 or chunk.content in ['.', ',', ';', ':', '!', '?', ' ', '\n']:
+                    print(chunk.content, end='')
+                    if chunk.content == '\n':
+                        RagPipeline._streamed_text_length = 0
+                else:
+                    print()
+                    print(chunk.content.strip(), end='')
+                    RagPipeline._streamed_text_length = len(chunk.content)
 
         # Instance variables
         self._table_name: str = table_name
@@ -240,6 +244,7 @@ class RagPipeline:
         self._retriever_top_k: int = max(retriever_top_k_docs or float('-inf'), llm_top_k)
         self._include_outputs_from: Optional[set[str]] = include_outputs_from
         self._search_mode: SearchMode = search_mode
+        self._allow_streaming_callback: bool = False
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -444,6 +449,9 @@ class RagPipeline:
                 print("No response was generated.")
 
     def _create_rag_pipeline(self) -> None:
+        def doc_collector_completed() -> None:
+            self._allow_streaming_callback = True
+
         rag_pipeline: Pipeline = Pipeline()
         self._setup_embedder()
         self._setup_generator()
@@ -459,7 +467,10 @@ class RagPipeline:
         prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
         rag_pipeline.add_component("prompt_builder", prompt_builder)
 
-        doc_checker: DocumentQueryCollector = DocumentQueryCollector(do_stream=self._can_stream())
+        # Add the document query collector component with an inline callback function to specify when completed
+        # This is an extra way to be sure the LLM doesn't prematurely start calling the streaming callback
+        doc_checker: DocumentQueryCollector = DocumentQueryCollector(do_stream=self._can_stream(),
+                                                                     callback_func=lambda: doc_collector_completed())
         rag_pipeline.add_component("doc_query_collector", doc_checker)
         rag_pipeline.connect("query_input.query", "doc_query_collector.query")
         rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
