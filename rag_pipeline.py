@@ -90,7 +90,8 @@ class DocumentQueryCollector:
 @component
 class QueryComponent:
     """
-    A simple component that takes a query and returns it in a dictionary so that we can connect it to other components.
+    A simple component that takes a query and llm_top_k and returns it in a dictionary so that we can connect it to
+    other components.
     """
     @component.output_types(query=str, llm_top_k=int)
     def run(self, query: str, llm_top_k: int) -> Dict[str, Any]:
