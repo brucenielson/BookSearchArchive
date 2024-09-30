@@ -13,8 +13,6 @@ from haystack.components.generators import HuggingFaceLocalGenerator
 from haystack.dataclasses import StreamingChunk
 from haystack_integrations.components.generators.google_ai import GoogleAIGeminiGenerator
 from haystack_integrations.components.retrievers.pgvector import PgvectorEmbeddingRetriever, PgvectorKeywordRetriever
-# noinspection PyPackageRequirements
-from haystack.components.joiners import DocumentJoiner
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 # noinspection PyPackageRequirements
 from haystack.utils import ComponentDevice, Device
