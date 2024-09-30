@@ -13,8 +13,6 @@ from haystack.components.generators import HuggingFaceLocalGenerator
 from haystack.dataclasses import StreamingChunk
 from haystack_integrations.components.generators.google_ai import GoogleAIGeminiGenerator
 from haystack_integrations.components.retrievers.pgvector import PgvectorEmbeddingRetriever, PgvectorKeywordRetriever
-# noinspection PyPackageRequirements
-from haystack.components.joiners import DocumentJoiner
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 # noinspection PyPackageRequirements
 from haystack.utils import ComponentDevice, Device
@@ -25,12 +23,68 @@ from typing import List, Optional, Dict, Any, Union
 from pathlib import Path
 import generator_model as gen
 from enum import Enum
+from collections import defaultdict
+import itertools
+from math import inf
+import textwrap
 
 
 class SearchMode(Enum):
     LEXICAL = 1
     SEMANTIC = 2
     HYBRID = 3
+
+
+@component
+class DocumentQueryCollector:
+    def __init__(self, do_stream: bool = False) -> None:
+        self._do_stream: bool = do_stream
+    """
+    A simple component that takes a List of Documents from the DocumentJoiner
+    as well as the query and llm_top_k from the QueryComponent and returns them in a dictionary
+    so that we can connect it to other components.
+
+    This component should be unnecessary, but a bug in DocumentJoiner requires it to avoid
+    strange results on streaming happening from the LLM component prior to receiving the documents.
+    """
+    @component.output_types(documents=List[Document], query=str, llm_top_k=int)
+    def run(self, query: str,
+            llm_top_k: int = 5,
+            semantic_documents: Optional[List[Document]] = None,
+            lexical_documents: Optional[List[Document]] = None
+            ) -> Dict[str, Any]:
+        documents: List[Document] = []
+        # Check for semantic documents vs lexical documents and, if both exist, merge them
+        if semantic_documents is not None and lexical_documents is not None:
+            # Combine semantic and lexical documents. But only include each document once and take highest scores first.
+            output: List[Document] = []
+            document_lists: List[list] = [semantic_documents, lexical_documents]
+            docs_per_id: defaultdict = defaultdict(list)
+            doc: Document
+            for doc in itertools.chain.from_iterable(document_lists):
+                docs_per_id[doc.id].append(doc)
+            docs: list
+            for docs in docs_per_id.values():
+                # Take the document with the best score
+                doc_with_best_score = max(docs, key=lambda a_doc: a_doc.score if a_doc.score else -inf)
+                # Give a slight boost to the score for each duplicate - Add .1 to the score for each duplicate
+                # but adjust the 0.1 boost by score of the duplicate
+                if len(docs) > 1:
+                    for doc in docs:
+                        if doc != doc_with_best_score:
+                            doc_with_best_score.score += min(max(doc.score, 0.0), 0.1)
+                output.append(doc_with_best_score)
+            output.sort(key=lambda a_doc: a_doc.score if a_doc.score else -inf, reverse=True)
+            documents = output
+        elif semantic_documents is not None:
+            documents = semantic_documents
+        elif lexical_documents is not None:
+            documents = lexical_documents
+        if self._do_stream:
+            print()
+            print("Retrieved Documents:")
+            print_documents(documents)
+        return {"documents": documents, "query": query, "llm_top_k": llm_top_k}
 
 
 @component
@@ -85,20 +139,22 @@ class RetrieverWrapper:
 
 def print_documents(documents: List[Document]) -> None:
     for i, doc in enumerate(documents, 1):
+        print()
         print(f"Document {i}:")
         print(f"Score: {doc.score}")
         if hasattr(doc, 'meta') and doc.meta:
             if 'book_title' in doc.meta:
-                print(f"Book Title: {doc.meta['book_title']}")
+                print(textwrap.fill(f"Book Title: {doc.meta['book_title']}", width=80))
             if 'section_title' in doc.meta:
-                print(f"Section Title: {doc.meta['section_title']}")
+                print(textwrap.fill(f"Section Title: {doc.meta['section_title']}", width=80))
             if 'section_id' in doc.meta:
-                print(f"Section ID: {doc.meta['section_id']}")
+                print(textwrap.fill(f"Section ID: {doc.meta['section_id']}", width=80))
             if 'section_num' in doc.meta:
-                print(f"Section #: {doc.meta['section_num']}")
+                print(textwrap.fill(f"Section #: {doc.meta['section_num']}", width=80))
             if 'paragraph_num' in doc.meta:
-                print(f"Paragraph #: {doc.meta['paragraph_num']}")
-        print(f"Content: {doc.content}")
+                print(textwrap.fill(f"Paragraph #: {doc.meta['paragraph_num']}", width=80))
+        # Use text wrap to wrap the content at 80 characters
+        print(textwrap.fill(f"Content: {doc.content}", width=80))
         print("-" * 50)
 
 
@@ -140,28 +196,9 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 
 
 class RagPipeline:
-    """
-    A class that implements a Retrieval-Augmented Generation (RAG) system using Haystack and Pgvector.
+    # The amount of text streamed since last newline.
+    _streamed_text_length: int = 0
 
-    This class provides functionality to set up and use a RAG system for question answering
-    tasks on a given corpus of text, currently from an EPUB file. It handles document
-    indexing, embedding, retrieval, and generation of responses using a language model.
-
-    The system uses a Postgres database with the Pgvector extension for efficient
-    similarity search of embedded documents.
-
-    Public Methods:
-        draw_pipelines(): Visualize the RAG and document conversion pipelines.
-        generate_response(query: str): Generate a response to a given query.
-
-    Properties:
-        sentence_context_length: Get the context length of the sentence embedder.
-        sentence_embed_dims: Get the embedding dimensions of the sentence embedder.
-
-    The class handles initialization of the document store, embedding models,
-    and language models internally. It also manages the creation and execution
-    of the document processing and RAG pipelines.
-    """
     def __init__(self,
                  table_name: str = 'haystack_pgvector_docs',
                  postgres_user_name: str = 'postgres',
@@ -178,23 +215,19 @@ class RagPipeline:
                  search_mode: SearchMode = SearchMode.HYBRID,
                  include_outputs_from: Optional[set[str]] = None
                  ) -> None:
-        """
-        Initialize the HaystackPgvector instance.
 
-        Args:
-            table_name (str): Name of the table in the Pgvector database.
-            postgres_user_name (str): Username for Postgres database.
-            postgres_password (str): Password for Postgres database.
-            postgres_host (str): Host address for Postgres database.
-            postgres_port (int): Port number for Postgres database.
-            postgres_db_name (str): Name of the Postgres database.
-            generator_model (Union[GeneratorModel, HuggingFaceLocalGenerator, GoogleAIGeminiGenerator]):
-                Language model to use for text generation.
-            embedder_model_name (Optional[str]): Name of the embedding model to use.
-        """
         # streaming_callback function to print to screen
         def streaming_callback(chunk: StreamingChunk) -> None:
-            print(chunk.content, end='')
+            # Print the content of the chunks but wrap the text after 80 characters
+            RagPipeline._streamed_text_length += len(chunk.content)
+            if RagPipeline._streamed_text_length < 80 or chunk.content in ['.', ',', ';', ':', '!', '?', ' ', '\n']:
+                print(chunk.content, end='')
+                if chunk.content == '\n':
+                    RagPipeline._streamed_text_length = 0
+            else:
+                print()
+                print(chunk.content.strip(), end='')
+                RagPipeline._streamed_text_length = len(chunk.content)
 
         # Instance variables
         self._table_name: str = table_name
@@ -236,12 +269,12 @@ class RagPipeline:
         # noinspection SpellCheckingInspection
         self._prompt_template: str = (  # noqa: E101
             "<start_of_turn>user\n"
-            "Quoting the information contained in the context where possible, "
-            "give a comprehensive answer to the question. Pay more attention to the higher ranked "
-            "documents.\n\n"
+            "Using the information contained in the context where possible, "
+            "give a comprehensive answer to the question. Pay more attention to passages with "
+            "higher relevance scores.\n\n"
             "Context:\n"
-            "{% for i in range([documents|count, llm_top_k] | min) %}"
-                "Rank {{ i + 1 }}\n"
+            "{% for i in range([documents|count, llm_top_k|int] | min) | reverse %}"
+                "Relevance Score {{ '%.2f' | format(documents[i].score) }}\n"
                     "{% if documents[i] is defined %}"
                         "{{ documents[i].content }}\n"
                     "{% endif %}\n"
@@ -250,8 +283,8 @@ class RagPipeline:
             "<start_of_turn>model\n"
         )
 
-        self._print_verbose("Prompt Template:")
-        self._print_verbose(self._prompt_template)
+        # self._print_verbose("Prompt Template:")
+        # self._print_verbose(self._prompt_template)
 
         # Declare rag pipeline
         self._rag_pipeline: Optional[Pipeline] = None
@@ -396,17 +429,18 @@ class RagPipeline:
             merged_results = results["merger"]["merged_results"]
 
             # Print retrieved documents
+            print()
             self._print_verbose("Retrieved Documents:")
             print_documents(merged_results["documents"])
 
-            # # Print generated response
-            # # noinspection SpellCheckingInspection
-            # print("\nLLM's Response:")
-            # if merged_results["replies"]:
-            #     answer: str = merged_results["replies"][0]
-            #     print(answer)
-            # else:
-            #     print("No response was generated.")
+            # Print generated response
+            # noinspection SpellCheckingInspection
+            print("\nLLM's Response:")
+            if merged_results["replies"]:
+                answer: str = merged_results["replies"][0]
+                print(textwrap.fill(answer, width=80))
+            else:
+                print("No response was generated.")
 
     def _create_rag_pipeline(self) -> None:
         rag_pipeline: Pipeline = Pipeline()
@@ -423,42 +457,31 @@ class RagPipeline:
         # # Add the prompt builder component
         prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
         rag_pipeline.add_component("prompt_builder", prompt_builder)
-        # # Connect the query input to the prompt builder
-        rag_pipeline.connect("query_input.query", "prompt_builder.query")
-        rag_pipeline.connect("query_input.llm_top_k", "prompt_builder.llm_top_k")
 
-        # Add the joiner component
-        # Create a joiner to merge the results from both retrievers
-        # joiner: DocumentJoiner = DocumentJoiner(join_mode="distribution_based_rank_fusion",
-        #                                         top_k=self._retriever_top_k*2)
-        # rag_pipeline.add_component("joiner", joiner)
+        doc_checker: DocumentQueryCollector = DocumentQueryCollector(do_stream=self._can_stream())
+        rag_pipeline.add_component("doc_query_collector", doc_checker)
+        rag_pipeline.connect("query_input.query", "doc_query_collector.query")
+        rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
 
         # Add the retriever component(s) depending on search mode
-        lex_retriever: Optional[RetrieverWrapper] = None
-        semantic_retriever: Optional[RetrieverWrapper] = None
-
         if self._search_mode == SearchMode.LEXICAL or self._search_mode == SearchMode.HYBRID:
-            lex_retriever = RetrieverWrapper(
-                PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
-                do_stream=self._can_stream())
+            lex_retriever: RetrieverWrapper = RetrieverWrapper(
+                PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
             rag_pipeline.add_component("lex_retriever", lex_retriever)
-            # rag_pipeline.connect("lex_retriever", "joiner")
-            rag_pipeline.connect("query_input.query", "lex_retriever")
-            # rag_pipeline.connect("lex_retriever.documents", "joiner.documents")
+            rag_pipeline.connect("query_input.query", "lex_retriever.query")
+            rag_pipeline.connect("lex_retriever.documents", "doc_query_collector.lexical_documents")
 
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
-            semantic_retriever = RetrieverWrapper(
-                PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k),
-                do_stream=self._can_stream())
+            semantic_retriever: RetrieverWrapper = RetrieverWrapper(
+                PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
-            # rag_pipeline.connect("semantic_retriever.documents", "joiner.documents")
+            rag_pipeline.connect("semantic_retriever.documents", "doc_query_collector.semantic_documents")
 
-        # Always connect the joiner to the prompt builder
-        if lex_retriever is not None:
-            rag_pipeline.connect("lex_retriever.documents", "prompt_builder.documents")
-        elif semantic_retriever is not None:
-            rag_pipeline.connect("semantic_retriever.documents", "prompt_builder.documents")
+        # Connect the query input to the prompt builder
+        rag_pipeline.connect("doc_query_collector.query", "prompt_builder.query")
+        rag_pipeline.connect("doc_query_collector.llm_top_k", "prompt_builder.llm_top_k")
+        rag_pipeline.connect("doc_query_collector.documents", "prompt_builder.documents")
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
@@ -469,14 +492,11 @@ class RagPipeline:
         if not self._can_stream():
             # Add the final merger of documents and llm response only when streaming is disabled
             rag_pipeline.add_component("merger", MergeResults())
-            if lex_retriever is not None:
-                rag_pipeline.connect("lex_retriever.documents", "merger.documents")
-            if semantic_retriever is not None:
-                rag_pipeline.connect("semantic_retriever.documents", "merger.documents")
+            rag_pipeline.connect("doc_query_collector.documents", "merger.documents")
             rag_pipeline.connect("llm.replies", "merger.replies")
 
         # Connect prompt builder to the llm
-        rag_pipeline.connect("prompt_builder", "llm")
+        rag_pipeline.connect("prompt_builder.prompt", "llm.prompt")
 
         # Set the pipeline instance
         self._rag_pipeline = rag_pipeline
@@ -489,7 +509,9 @@ def main() -> None:
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
     # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
     model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
-    include_outputs_from: set[str] = {"prompt_builder", "lex_retriever", "semantic_retriever", "joiner"}
+    # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder",
+    # "joiner", "llm", "prompt_builder", "doc_query_collector"
+    include_outputs_from: Optional[set[str]] = None
     rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
                                              generator_model=model,
                                              postgres_user_name='postgres',
@@ -498,11 +520,11 @@ def main() -> None:
                                              postgres_port=5432,
                                              postgres_db_name='postgres',
                                              use_streaming=True,
-                                             verbose=True,
+                                             verbose=False,
                                              llm_top_k=5,
                                              retriever_top_k_docs=None,
                                              include_outputs_from=include_outputs_from,
-                                             search_mode=SearchMode.SEMANTIC,
+                                             search_mode=SearchMode.HYBRID,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
