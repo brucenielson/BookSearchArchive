@@ -446,13 +446,15 @@ class DocumentProcessor:
                 hnsw_index_name=self._table_name + "_hnsw_index",
                 keyword_index_name=self._table_name + "_keyword_index",
             )
+
             return doc_store
 
         document_store: PgvectorDocumentStore
         document_store = init_doc_store()
         self._document_store = document_store
 
-        self._print_verbose("Document Count: " + str(document_store.count_documents()))
+        doc_count: int = document_store.count_documents()
+        self._print_verbose("Document Count: " + str(doc_count))
         self._print_verbose("Loading document file")
 
         # Iterate over the document and metadata pairs as they are loaded
@@ -472,11 +474,11 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents"
+    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     processor: DocumentProcessor = DocumentProcessor(
         table_name="book_archive",
-        recreate_table=True,
+        recreate_table=False,
         embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=epub_file_path,
         postgres_user_name='postgres',

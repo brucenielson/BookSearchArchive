@@ -393,8 +393,8 @@ class RagPipeline:
             recreate_table=False,
             search_strategy="hnsw",
             hnsw_recreate_index_if_exists=True,
-            hnsw_index_name=self._table_name + "_haystack_hnsw_index",
-            keyword_index_name=self._table_name + "_haystack_keyword_index",
+            hnsw_index_name=self._table_name + "_hnsw_index",
+            keyword_index_name=self._table_name + "_keyword_index",
         )
 
         self._document_store = document_store
