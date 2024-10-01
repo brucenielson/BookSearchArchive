@@ -10,6 +10,8 @@ from ebooklib import epub, ITEM_DOCUMENT
 # noinspection PyPackageRequirements
 from haystack import Pipeline, Document, component
 # noinspection PyPackageRequirements
+from haystack.components.routers import ConditionalRouter
+# noinspection PyPackageRequirements
 from haystack.dataclasses import ByteStream
 # noinspection PyPackageRequirements
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
@@ -433,6 +435,23 @@ class DocumentProcessor:
         custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder,
                                                                          verbose=self._verbose,
                                                                          skip_content_func=self._skip_content)
+
+        routes = [
+            {
+                "condition": "{{documents|length > 0}}",
+                "output": "{{documents}}",
+                "output_name": "has_documents",
+                "output_type": List[Document],
+            },
+            {
+                "condition": "{{documents|length <= 10}}",
+                "output": "No unique documents to write.",
+                "output_name": "no_documents",
+                "output_type": str,
+            },
+        ]
+        router = ConditionalRouter(routes=routes)
+
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("converter", HTMLToDocument())
@@ -441,6 +460,7 @@ class DocumentProcessor:
         doc_convert_pipe.add_component("splitter", custom_splitter)
         doc_convert_pipe.add_component("embedder", self._sentence_embedder)
         doc_convert_pipe.add_component("duplicate_checker", DuplicateChecker(document_store=self._document_store))
+        doc_convert_pipe.add_component("router", router)
         doc_convert_pipe.add_component("writer",
                                        DocumentWriter(document_store=self._document_store,
                                                       policy=DuplicatePolicy.OVERWRITE))
@@ -450,7 +470,8 @@ class DocumentProcessor:
         doc_convert_pipe.connect("cleaner", "splitter")
         doc_convert_pipe.connect("splitter", "embedder")
         doc_convert_pipe.connect("embedder", "duplicate_checker")
-        doc_convert_pipe.connect("duplicate_checker", "writer")
+        doc_convert_pipe.connect("duplicate_checker", "router")
+        doc_convert_pipe.connect("router.has_documents", "writer")
 
         self._doc_convert_pipeline = doc_convert_pipe
 
@@ -491,15 +512,19 @@ class DocumentProcessor:
             # If needed, you can batch process here instead of processing one by one
             # Pass the source and meta to the document conversion pipeline
             results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": source, "meta": meta}})
-            written = results["writer"]["documents_written"]
-            total_written += written
-            self._print_verbose(f"Wrote {written} documents.")
+            # Check if results has a "writer" key
+            if "writer" in results:
+                written = results["writer"]["documents_written"]
+                total_written += written
+                self._print_verbose(f"Wrote {written} documents.")
+            else:
+                self._print_verbose("No documents written.")
 
         self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
 
 
 def main() -> None:
-    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    epub_file_path: str = "documents"  # /Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     processor: DocumentProcessor = DocumentProcessor(
         table_name="book_archive",
