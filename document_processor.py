@@ -44,6 +44,26 @@ class RemoveIllegalDocs:
 
 
 @component
+class DuplicateChecker:
+    def __init__(self, document_store: PgvectorDocumentStore):
+        self.document_store = document_store
+
+    @component.output_types(documents=List[Document])
+    def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
+        unique_documents = []
+        for doc in documents:
+            if not self._is_duplicate(doc):
+                unique_documents.append(doc)
+        return {"documents": unique_documents}
+
+    def _is_duplicate(self, document: Document) -> bool:
+        # Use a simpler filter that checks for exact content match
+        filters = {"content": document.content}
+        results = self.document_store.filter_documents(filters=filters)
+        return len(results) > 0
+
+
+@component
 class CustomDocumentSplitter:
     def __init__(self, embedder: SentenceTransformersDocumentEmbedder,
                  verbose=True,
@@ -420,6 +440,7 @@ class DocumentProcessor:
         doc_convert_pipe.add_component("cleaner", DocumentCleaner())
         doc_convert_pipe.add_component("splitter", custom_splitter)
         doc_convert_pipe.add_component("embedder", self._sentence_embedder)
+        doc_convert_pipe.add_component("duplicate_checker", DuplicateChecker(document_store=self._document_store))
         doc_convert_pipe.add_component("writer",
                                        DocumentWriter(document_store=self._document_store,
                                                       policy=DuplicatePolicy.OVERWRITE))
@@ -428,7 +449,8 @@ class DocumentProcessor:
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
         doc_convert_pipe.connect("splitter", "embedder")
-        doc_convert_pipe.connect("embedder", "writer")
+        doc_convert_pipe.connect("embedder", "duplicate_checker")
+        doc_convert_pipe.connect("duplicate_checker", "writer")
 
         self._doc_convert_pipeline = doc_convert_pipe
 
