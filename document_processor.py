@@ -27,7 +27,7 @@ from haystack.document_stores.types import DuplicatePolicy
 # noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
 # Other imports
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional, Dict, Any, Tuple, Iterator
 from pathlib import Path
 from typing_extensions import Set
 from generator_model import get_secret
@@ -168,9 +168,9 @@ class DocumentProcessor:
     of the document processing and RAG pipelines.
     """
     def __init__(self,
+                 file_or_folder_path: str,
                  table_name: str = 'haystack_pgvector_docs',
                  recreate_table: bool = False,
-                 file_or_folder_path: Optional[str] = None,
                  postgres_user_name: str = 'postgres',
                  postgres_password: str = None,
                  postgres_host: str = 'localhost',
@@ -209,16 +209,15 @@ class DocumentProcessor:
         self._verbose: bool = verbose
 
         # File paths
-        self._file_or_folder_path: Optional[str] = file_or_folder_path  # New instance variable
+        self._file_or_folder_path: str = file_or_folder_path  # New instance variable
 
         # Determine if the path is a file or directory
-        if self._file_or_folder_path is not None:
-            if Path(self._file_or_folder_path).is_file():
-                self._is_directory = False
-            elif Path(self._file_or_folder_path).is_dir():
-                self._is_directory = True
-            else:
-                raise ValueError("The provided path must be a valid file or directory.")
+        if Path(self._file_or_folder_path).is_file():
+            self._is_directory = False
+        elif Path(self._file_or_folder_path).is_dir():
+            self._is_directory = True
+        else:
+            raise ValueError("The provided path must be a valid file or directory.")
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -329,19 +328,14 @@ class DocumentProcessor:
         if self._doc_convert_pipeline is not None:
             self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
 
-    def _load_files(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        all_docs: List[ByteStream] = []
-        all_meta: List[Dict[str, str]] = []
-
+    def _load_files(self) -> Iterator[Tuple[ByteStream, Dict[str, str]]]:
         if self._is_directory:
             for file_path in Path(self._file_or_folder_path).glob('*.epub'):
                 docs, meta = self._load_epub(str(file_path))
-                all_docs.extend(docs)
-                all_meta.extend(meta)
+                yield docs, meta
         else:
-            all_docs, all_meta = self._load_epub(self._file_or_folder_path)
-
-        return all_docs, all_meta
+            docs, meta = self._load_epub(self._file_or_folder_path)
+            yield docs, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         docs: List[ByteStream] = []
@@ -439,7 +433,7 @@ class DocumentProcessor:
         self._doc_convert_pipeline = doc_convert_pipe
 
     def _initialize_document_store(self) -> None:
-        def create_doc_store(force_recreate: bool = False) -> PgvectorDocumentStore:
+        def init_doc_store(force_recreate: bool = False) -> PgvectorDocumentStore:
             connection_token: Secret = Secret.from_token(self._postgres_connection_str)
             doc_store: PgvectorDocumentStore = PgvectorDocumentStore(
                 connection_string=connection_token,
@@ -455,20 +449,25 @@ class DocumentProcessor:
             return doc_store
 
         document_store: PgvectorDocumentStore
-        document_store = create_doc_store()
+        document_store = init_doc_store()
         self._document_store = document_store
 
         self._print_verbose("Document Count: " + str(document_store.count_documents()))
+        self._print_verbose("Loading document file")
 
-        if document_store.count_documents() == 0 and self._file_or_folder_path is not None:
-            sources: List[ByteStream]
-            meta: List[Dict[str, str]]
-            self._print_verbose("Loading document file")
-            sources, meta = self._load_files()
-            self._print_verbose("Writing documents to document store")
-            self._doc_converter_pipeline()
-            results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": sources, "meta": meta}})
-            self._print_verbose(f"\n\nNumber of documents: {results['writer']['documents_written']}")
+        # Iterate over the document and metadata pairs as they are loaded
+        total_written: int = 0
+        self._doc_converter_pipeline()
+        for source, meta in self._load_files():
+            self._print_verbose("Processing document: " + meta[0]["book_title"])
+
+            # If needed, you can batch process here instead of processing one by one
+            # Pass the source and meta to the document conversion pipeline
+            results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": source, "meta": meta}})
+            total_written += results["writer"]["documents_written"]
+            self._print_verbose(f"Wrote {results["writer"]["documents_written"]} documents.")
+
+        self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
 
 
 def main() -> None:
