@@ -460,6 +460,9 @@ class DocumentProcessor:
         # Iterate over the document and metadata pairs as they are loaded
         total_written: int = 0
         self._doc_converter_pipeline()
+
+        source: List[ByteStream]
+        meta: List[Dict[str, str]]
         for source, meta in self._load_files():
             self._print_verbose("Processing document: " + meta[0]["book_title"])
 
@@ -504,3 +507,4 @@ if __name__ == "__main__":
 
 # TODO: Rewrite this to load one document into the store at a time so I don't hold everything in memory.
 # TODO: There should be a 'true' section number based on finding a number then a return line character in paragraph 1
+# TODO: Don't load duplicates?
