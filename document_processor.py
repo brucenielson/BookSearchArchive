@@ -464,8 +464,9 @@ class DocumentProcessor:
             # If needed, you can batch process here instead of processing one by one
             # Pass the source and meta to the document conversion pipeline
             results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": source, "meta": meta}})
-            total_written += results["writer"]["documents_written"]
-            self._print_verbose(f"Wrote {results["writer"]["documents_written"]} documents.")
+            written = results["writer"]["documents_written"]
+            total_written += written
+            self._print_verbose(f"Wrote {written} documents.")
 
         self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
 
