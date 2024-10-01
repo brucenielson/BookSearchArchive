@@ -555,3 +555,5 @@ if __name__ == "__main__":
 # TODO: Rewrite this to load one document into the store at a time so I don't hold everything in memory.
 # TODO: There should be a 'true' section number based on finding a number then a return line character in paragraph 1
 # TODO: Don't load duplicates?
+# TODO: Change pipeline so that it passes empty List of documents to a final repo so that I don't have to check
+#  for 'writer'

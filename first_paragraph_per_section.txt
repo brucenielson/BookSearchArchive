@@ -1,274 +1,174 @@
 Section: 1
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Preface to the First German Edition, 1978 - preface
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id32
 Content:
-The present book, Die beiden Grundprobleme der Erkenntnistheorie, can be seen as a collection of drafts and preliminary work from the years 1930 to 1933 for my first published book, Logik der Forschung, the first edition of which appeared in the autumn of 1934. The title is an allusion to Schopenhauer’s Die beiden Grundprobleme der Ethik 1 (The Two Fundamental Problems of Ethics). Earlier preliminary work, as well as some of the work from the years 1930 to 1933, has been lost.
-1 Arthur Schopenhauer, Die beiden Grundprobleme der Ethik, behandelt in zwei akademischen Preisschriften: I. Über die Freiheit des menschlichen Willens …, II. Über das Fundament der Moral … (1841; 2nd ed, 1860).
-I had not planned on publishing this earlier work. As I have recounted in Section 16 of my autobiography,2 it was Herbert Feigl who in 1929 or 1930 encouraged me to write a book for publication, and who later arranged for me to meet Rudolf Carnap. Carnap read the manuscript of Die beiden Grundprobleme in the summer of 1932, and subsequently several members of the Vienna Circle read it as well. Carnap reported on the manuscript in the journal Erkenntnis,3 and Heinrich Gomperz wrote two detailed letters on it, one to me and one to Oskar Siebeck of the publishing house J.C.B. Mohr, which now, forty-six years later, is publishing the book.
+A Summary by Way of a Preface
+All things living are in search of a better world.
+Men, animals, plants, even unicellular organisms are constantly active. They are trying to improve their situation, or at least to avoid its deterioration. Even when asleep, the organism is actively maintaining the state of sleep: the depth (or else the shallowness) of sleep is a condition actively created by the organism, which sustains sleep (or else keeps the organism on the alert). Every organism is constantly preoccupied with the task of solving problems. These problems arise from its own assessments of its condition and of its environment; conditions which the organism seeks to improve.
+An attempted solution often proves to be misguided, in that it makes things worse. Then follow further attempts at solutions – further trial and error movements.
+We can see that life – even at the level of the unicellular organism – brings something completely new into the world, something that did not previously exist: problems and active attempts to solve them; assessments, values; trial and error.
 
 Section: 2
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Introduction, 1978 - fm-chapter9
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id26
 Content:
-1 In Plato’s Apology of Socrates – perhaps the most beautiful philosophical work I know – Socrates reports how surprised he was that the Delphic Oracle answered “No” to the question of whether anyone was wiser than Socrates. What does the god mean? Socrates asked himself, knowing full well that he was not wise. And he arrived at the following conclusion: “I am indeed a little wiser than the others because I know that I do not know. But the others do not even know that much; for they believe that they know something.”
-Socrates’ insight into our ignorance, “I know that I know (almost) nothing”, is of the greatest significance. Often this insight has not been taken very seriously; it has even been held to be paradoxical; and certainly, in the Apology the formulation is intended to sound rather surprising and paradoxical.1
-1 “I know that I know nothing” might be considered as a variant of the paradox of the liar (“What I say now is false”). Inserting the word “almost” formally avoids the appearance of the paradox. Therefore “scepticism” (at least in this sense) is certainly not “obviously nonsensical”, as Wittgenstein says (Tractatus Logico-Philosophicus, 1918/1922, Proposition 6.51). Also the classic formulation of scepticism, “There is no universal criterion of truth”, is far from being nonsensical: indeed, scepticism in this sense is a true theory. However, one certainly ought not to infer from this that there can be no progress in the sciences.
+1
+Knowledge and the Shaping of Reality
+The Search for a Better World
+The first half of the title of my lecture was not chosen by me, but by the organizers of the Alpbach Forum. Their title was: ‘Knowledge and the Shaping of Reality’.
+My lecture consists of three parts: knowledge; reality; and the shaping of reality through knowledge. The second part, which deals with reality, is by far the longest, since it contains a great deal by way of preparation for the third part.
+1. Knowledge
+I shall start with knowledge. We live in a time in which irrational-ism has once more become fashionable. Consequently, I want to begin by declaring that I regard scientific knowledge as the best and most important kind of knowledge we have – though I am far from regarding it as the only one. The central features of scientific knowledge are as follows:
 
 Section: 3
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter I FORMULATION OF THE PROBLEM - ch1
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id29
 Content:
-DOI: 10.4324/9780203371107-2
-1. The problem of induction and the problem of demarcation
-This analysis focuses on two questions: the problem of induction and the problem of demarcation.
-The problem of induction:
-We are only able to observe particular events, and always only a limited number of them. Nonetheless, the empirical sciences advance universal propositions, such as the natural laws; that is, propositions which should hold true for an unlimited number of events. What is the justification for advancing such propositions? What is actually meant by these propositions? These questions indicate in outline the problem of induction. The “problem of induction” will denote the question concerning the validity or justification of universal propositions of the empirical sciences. Or, put another way, can empirical propositions that are based on experience be universally valid? (Or more simply, can we know more than we know?)
+2
+On Knowledge and Ignorance
+Mr President, Mr Dean, ladies and gentlemen, let me first thank the Faculty of Economic Sciences of the Johann Wolfgang Goethe University for the great honour they have bestowed on me in making me a doctor rerum politicarum honoris causa. With Johann Wolfgang Goethe’s great first monologue of Doctor Faust, I can now say:
+They call me a master, and a doctor to boot …
+But in teaching my students I can do no good.
+But I really must ask you for your permission to recite a dozen lines or so from the beginning of the monologue in full; you will find that they are highly relevant.1
+I have studied philosophy
+Many a night,
 
 Section: 4
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter II DEDUCTIVISM AND INDUCTIVISM - ch2
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id21
 Content:
-DOI: 10.4324/9780203371107-3
-2. Comments on how the solutions are reached and preliminary presentation of the solutions
-Are we justified in calling the problem of induction, but even more so the problem of demarcation, the fundamental problems of the theory of knowledge?
-Are we justified in regarding the theory of knowledge as the methodology of the empirical sciences?
-Evidently, these questions can only be answered through an analysis that takes into account the historical circumstances. However, such analysis need not, as a consequence, have a historical interest. It will only have to show that the typical problems that have, time and again, been dealt with by the theory of knowledge, are reducible to the problem of induction and then to the problem of demarcation; and it will also have to show that these problems may be viewed as methodological problems, and that such a view is a productive one.
+3
+On the So-Called Sources of Knowledge
+Thank you for the great honour that you have bestowed on me by making me a Doctor of Philosophy in the Faculty of Arts of your University. I am deeply grateful for this honour and I accept it with real pleasure.
+I have also taken on a difficult task, at very short notice, namely the task of giving a short lecture. Before I begin this lecture, however, I should like to tell you a true story from my days in New Zealand.
+In Christchurch, New Zealand, I was friendly with the physicist Professor Coleridge Farr, who was roughly the same age when I arrived there as I am now. He was a very witty and amusing man and a Fellow of the Royal Society of London. Professor Farr was a public-spirited man, and used to give lectures on popular science in the most varied circles, including, among others, prisons. Once he began his lecture in a prison with the words: ‘Today I am giving exactly the same lecture as I gave here six years ago. So if anyone has already heard it, then it jolly well serves him right!’ Scarcely had he uttered these rather provocative words, when the light in the lecture hall went out. He said afterwards that he had felt rather ill at ease until the light came back on.
 
 Section: 5
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter III THE PROBLEM OF INDUCTION - ch3
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id27
 Content:
-DOI: 10.4324/9780203371107-4
-5. The infinite regression (Hume's argument)
-Hume1 was the first who presented, with exemplary clarity, the difficulties surrounding the problem of universal empirical statements, or the problem of induction (“Can we know more than we know?”). He demonstrated that every attempt at inductive generalisation will be defeated by a circular inference.
-1 [David Hume, A Treatise on Human Nature (1739/1740), Book I, Part III, Section VI. Ed.]
-This argument will be presented here in detail: it is the crucial idea of the whole problem area. The presentation will deviate from Hume on some points of only minor relevance to the subject. (In particular, Hume’s circular inference will be replaced by a so-called regressus in infinitum.*1) This does not, however, alter Hume’s fundamental idea that in analysing any inductive generalisation, one will necessarily encounter impermissible logical operations.
+4
+Science and Criticism
+As an old member of the Alpbach Forum I was very pleased to be invited to its thirtieth birthday celebrations; but I only accepted this invitation after some hesitation. I thought it scarcely possible to say something sensible and comprehensible on our extremely wide-ranging basic theme of ‘Intellectual and scientific development over the past thirty years’ in just thirty minutes. In fact, if my mathematics are correct, this leaves me with exactly one minute for each year of intellectual and scientific development! And so I must not fritter away the time available to me with apologies, but must begin without further ado.
+I
+As you can see from die title I have chosen, ‘Science and Criticism’, I intend to let the question of intellectual development go more or less by the board and to deal mainly with the development of science. The reason for this is, quite simply, that I do not think much of the intellectual or cultural development of die past thirty years.
 
 Section: 6
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter IV THE NORMAL-STATEMENT POSITIONS - ch4
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id23
 Content:
-DOI: 10.4324/9780203371107-5
-7. The normal-statement positions: naive inductivism, strict positivism and apriorism
-The normal-statement positions on inductivism assume that all empirical statements are “normal” statements, that is, that they are decidably true or false.*1 It “is essential for a genuine statement”, says Schlick,1 “that it be in principle finally verifiable or falsifiable”. If “strict universal empirical statements” exist at all, then the same will also apply to them.
-*1 What is meant is: “normal” statements have a logical form such that, if they are true, their truth is decidable, and if they are false, their falsity is decidable; that is, decidable by experience.
+5
+The Logic of the Social Sciences
+I propose to begin my paper on the logic of the social sciences with two theses which express the contrast between our knowledge and our ignorance.
+First thesis: We have a fair amount of knowledge. Moreover, we know not only details of doubtful intellectual interest, but also, and more especially, things that are not only of considerable practical importance, but may, in addition, provide us with deep theoretical insight, and with a surprising understanding of the world.
+Second thesis: Our ignorance is boundless and sobering. Indeed, it is precisely this overwhelming progress of the natural sciences (to which my first thesis alludes) that continually reminds us of our ignorance, even in the field of the natural sciences themselves.
+This gives a new twist to the Socratic idea of ignorance. With each step forward, with every problem we solve, we not only discover new and unsolved problems, but we also discover that just when we believed that we were standing on firm and safe ground, all things are, in reality, insecure and unstable.
 
 Section: 7
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter V KANT AND FRIES - ch5
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id15
 Content:
-DOI: 10.4324/9780203371107-6
-11. Supplement to the critique of apriorism
-(Psychologism and transcendentalism in Kant and Fries. – On the question of the empirical basis.) The present rather lengthy section ought, strictly speaking, to be characterised as a digression. While in this part of the book there is otherwise no digression from the analysis of the problem of induction, this section will present a number of related problems in some detail. It will not, however, change the position we have already reached in discussing the problem of induction. The next section will therefore resume the argument from the end of the preceding section.
-Thus, the analysis in this section is intended not to move the discussion forward but rather to deepen it, particularly with respect to the question of the epistemological method. Although, in a certain sense, this section represents merely a collection of critical reflections, nevertheless it serves the important purpose of showing that a systematic comparison of the transcendental and the psychological methods is an illuminating and promising way of getting closer to the solution of epistemological problems.
+6
+Against Big Words
+(A Letter not Originally Intended for Publication)
+Preface. About fourteen years ago I received a letter from a Herr Klaus Grossner, whom I had never previously heard of. He mentioned my friend Hans Albert and asked me for a written interview about the state of (German) philosophy. I agreed with a great deal of his letter, and although I disagreed with some of it, I nevertheless thought it worthy of discussion; and so I answered his questions in spite of some reservations. In a subsequent letter, Herr Grossner asked me for permission to publish the parts of the letter printed here below in a book he was planning. Despite further misgivings I gave him my permission, but only for his book: I retained all my author’s rights, and stressed that my contribution to his book must not be reprinted without my express permission. Yet shortly afterwards an excerpt appeared (under the excellent title ‘Against Big Words’ [’Wider die groβen Worte’]) in the weekly newspaper Die Zeit, without my permission and with no mention of my rights. (In Germany and Austria copyright is often considerably abused.) Since my letter has already been printed twice in excerpts and has been misquoted on many occasions, I have decided to reprint the previously published section here without any amendments, in spite of its aggressiveness. I wrote:
 
 Section: 8
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter VI THE PROBABILITY POSITIONS - ch6
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id6
 Content:
-DOI: 10.4324/9780203371107-7
-12. The probability positions – subjective belief in probability
-The normal-statement positions cannot be satisfactory:
-Naive inductivism is logically untenable; it is directly refuted by Hume’s argument.
-Strict positivism is logically consistent, but epistemologically (transcendentally) unsatisfactory. It does not provide an explanation for the existence of natural laws, and cannot give an adequate interpretation of theoretical natural science. It offers too little.
-Apriorism, on the other hand, offers too much. It “proves” the absolute a priori validity of certain empirical statements; but empirical science will find it hard to accept the view that there are empirical statements that are necessarily valid and in principle irrefutable by experience.
-This is where the probability positions enter, which seem to overcome all of these difficulties. They agree with positivism (and empirical science) that universal empirical statements can never be ultimately verified; like apriorism (and again like empirical science) they acknowledge that natural laws are strictly universal empirical statements.
+7
+Books and Thoughts
+Europe’s First Publication
+I am grateful for the invitation to give a lecture about books. This is not only because I think that books, and therefore libraries, are the most characteristic and the most important physical things in our European civilization, and perhaps in human civilization as a whole, but also because of the dominating role books have played – and still play – in my own life. When I was five years old, the first volume of Selma Lagerlöf’s book The Wonderful Adventures of Nils (Wunderbare Reise des kleinen Nils Holgersson mit den Wildgdnsen) was read to me. The work had just been published in three green volumes. No other book had such a decisive influence not only on my own character, but also on that of my childhood friend Konrad Lorenz. Konrad fell in love with the wild geese, whilst I fell in love with Selma Lagerlof and her books. Like her I became a school teacher. Both Konrad and I remained true to our loves.
 
 Section: 9
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter VII THE PSEUDO-STATEMENT POSITIONS - ch7
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id19
 Content:
-DOI: 10.4324/9780203371107-8
-18. The pseudo-statement positions: new formulation of the problem
-The preceding considerations allow us to make a generalisation that is decisive for the problem situation.
-If a statement is not to be regarded as valid, then this must be expressed by a statement about that statement; regardless of whether that statement is to be called “false” or perhaps “probable”, or whether we wish to assign to it any other truth value whatsoever (except for the value “true”).
-Only if this second statement, or some other higher-order statement, can be unconditionally true will the regression stop. However, should none of these statements be considered unconditionally true, then the infinite regression will be inevitable. Putting all these statements together, we have in effect said nothing.
-As a result, we no longer have any reason to add another truth value to “two-valued logic”. (In principle, singular empirical statements must always be definitively verifiable or falsifiable; and such a step can be of no benefit to universal empirical statements.)
+8
+On Culture Clash
+I was very pleased to be invited to Vienna to see old friends again and to make new friends; and I felt it as a great honour to be invited here today by the Chairman of the Society of Expatriate Austrians to give a short lecture. His invitation stressed that the subject of my lecture was left to me. So he left to me, very kindly, all the agonies of having to make a choice.
+The difficulties in making a decision were considerable. Obviously, I wished to choose a subject that interests me. On the other hand it should also have some relevance to the present occasion – to the meeting of expatriate Austrians in Vienna on the occasion of the Silver Jubilee of the Austrian State Treaty – the unique event that terminated the occupation of Austria after the Second World War.
+I doubt if the subject I have chosen fulfils these expectations. Remembering the Austrian State Treaty and the Russian occupation of Austria that followed the Second World War, my talk is dedicated to the problem of culture clash – a thing that all expatriates must experience.
 
 Section: 10
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter VIII CONVENTIONALISM - ch8
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id13
 Content:
-DOI: 10.4324/9780203371107-9
-24. The pseudo-statement positions will temporarily be put away: conventionalism
-Conventionalism regards natural laws as genuine statements. Therefore, it is not a pseudo-statement position.
-In contrast to all previously discussed views, conventionalism is deductivist: this is one reason why it is of interest. Discussing it does not, however, properly belong to a critical analysis of the inductivist positions.
-Conventionalism is distinguished from the deductivist and empiricist theory of knowledge (which I advocate) above all by the fact that it must be characterised as non-empiricist. According to the conventionalist view, experience cannot decide the truth or falsity of natural laws. According to conventionalism, natural laws are analytic judgements because they are (hidden) definitions, arbitrary stipulations, “conventions”.
+9
+Immanuel Kant: The Philosopher of the Enlightenment
+A Lecture to Commemorate the 150th Anniversary of Kant’s Death
+One hundred and fifty years ago Immanuel Kant died, having spent the eighty years of his life in the Prussian provincial town of Konigsberg. For years his retirement had been complete,1 and his friends intended a quiet burial. But this son of an artisan was buried like a king. When the rumour of his death spread through the town the people flocked to his house demanding to see him. On the day of the funeral the life of the town was at a standstill. The coffin was followed by thousands, while the bells of all the churches were tolling. Nothing like this had ever before happened in Königsberg, say the chroniclers.2
 
 Section: 11
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter IX STRICTLY UNIVERSAL STATEMENTS AND SINGULAR STATEMENTS - ch9
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id30
 Content:
-DOI: 10.4324/9780203371107-10
-31. Implication and general implication
-Our critical discussion of the pseudo-statement positions was interrupted in order to enable us to analyse (in sections 24–30) the set of problems posed by conventionalism, above all in order to allow a closer characterisation of the first pseudo-statement position.
-On that occasion, logical (logistical) questions were discussed in perhaps greater detail than was absolutely necessary. This was done in part because a polemical treatment was desirable, but also because the terminological machinery acquired in that process will be needed in a further discussion, which is also polemical. Only after concluding this discussion can we return to the critique of the pseudo-statement positions.
-This second polemic concerns the relationship between general implications on the one hand and universal and singular statements on the other.
+10
+Emancipation through Knowledge
+The philosophy of Immanuel Kant, and with it his philosophy of history, is often looked upon in Germany as antiquated, and as superseded by Hegel and his followers. This may well be due to the surpassing intellectual and moral stature of Kant, Germany’s greatest philosopher; for the very greatness of his achievement was a thorn in the flesh of his lesser successors, so that Fichte, and later Hegel, tried to solve this irritating problem by persuading the world that Kant had been merely one of their forerunners. But Kant was nothing of the sort. On the contrary he was a determined opponent of the whole Romantic Movement and especially of Fichte: Kant was in fact the last great exponent of that much reviled movement, the Enlightenment. In an important essay entitled ‘What is Enlightenment?’ (1785) Kant wrote:
+Enlightenment is the emancipation of man from a state of self-imposed tutelage. This state is due to his incapacity to use his own intelligence without external guidance. Such a state of tutelage I call ‘self-imposed’ [or ‘culpable’] if it is due not to lack of intelligence but to lack of courage or determination to use one’s own intelligence without the help of a leader. Sapere aude! Dare to use your own intelligence! This is the battle-cry of the Enlightenment.
 
 Section: 12
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter X BACK TO THE PSEUDO-STATEMENT POSITIONS - ch10
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id5
 Content:
-DOI: 10.4324/9780203371107-11
-36. Return to the discussion of the pseudo-statement positions
-A brief recapitulation, from the start of our discussion of the pseudo-statement positions, should serve to recall the course of our analysis so far.
-The pseudo-statement positions deny natural laws the character of genuine propositions to which truth values can be assigned. If this position were accepted, the problem of induction, or the question of the validity of natural laws, would disappear. It would be not a genuine problem, but only a pseudo-problem caused by the misunderstanding by which natural laws are regarded as genuine statements.
-This idea – which we owe to Wittgenstein and Schlick – leads to the question being posed in a new form: What are natural laws if they are not genuine propositions?
-The answer1 that natural laws are “rules for the transformation of statements” was accepted here tentatively, but it was not considered satisfactory. For such rules might also be genuine propositions. To the new formulation of the question had to be added the demand that natural laws be so defined that their character as pseudo-statements is put beyond doubt.
+11
+Public Opinion and Liberal Principles
+The following remarks were designed to provide material for debate at an international conference of liberals (in the English sense of the term1). My purpose was simply to lay the foundations for a good general discussion. Because I could assume liberal views in my audience I was largely concerned to challenge, rather than to endorse, popular assumptions favourable to these views.
+I. The Myth of Public Opinion
+We should beware of a number of myths concerning ‘public opinion’ which are often accepted uncritically.
+There is, first, the classical myth, vox populi vox dei, which attributes to the voice of the people a kind of final authority and unlimited wisdom. Its modern equivalent is faith in the ultimate commonsense rightness of that mythical figure, ‘the man in the street’, his vote, and his voice. The avoidance of the plural in both cases is characteristic. Yet people are, thank God, seldom univocal; and the various men in the various streets are as different as any collection of VIPs in a conference-room. And if, on occasion, they do speak more or less in unison, what they say is not necessarily wise. They may be right, or they may be wrong. ‘The voice’ may be very firm on very doubtful issues. (Example: the nearly unanimous and unquestioning acceptance of the demand for ‘unconditional surrender’.) And it may waver on issues over which there is hardly room for doubt. (Example: the question whether to condone political blackmail, and mass-murder.) It may be well-intentioned but imprudent. (Example: the public reaction which destroyed the Hoare–Laval plan.) Or it may be neither well-intentioned nor very prudent. (Example: the approval of the Runciman mission; the approval of the Munich agreement of 1938.)
 
 Section: 13
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter XI PSEUDO-STATEMENT POSITIONS AND THE CONCEPT OF MEANING - ch11
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id10
 Content:
-DOI: 10.4324/9780203371107-12
-43. The concept of meaning in logical positivism
-In the writings of logical positivists, the concept of meaning is of paramount significance. There can be no doubt that Wittgenstein’s and Schlick’s pseudo-statement positions can be understood only in connection with the concept of meaning, which is why this concept will be presented here in detail. (To the extent that the structure of my presentation permits it, I shall use quotations.)
-Before one can even ask about a proposition being true or false, one must know whether it has a meaning or whether it is nonsensical. The (putative) proposition “Socrates is identical” is nonsensical; and it would also be nonsensical to ask whether it is true or false.
-It is one of Wittgenstein’s fundamental ideas that the grammatically correct form of a proposition offers no guarantee that it is meaningful.
+12
+An Objective Theory of Historical Understanding
+The different western philosophies are very largely variations on the theme of body–mind dualism. The main departures from this dualistic theme were attempts to replace it by some kind of monism. It seems to me that these attempts were unsuccessful. We find time and again that behind the veil of monistic protestations there still lurks the dualism of body and mind.
+Pluralism and World 3
+There were, however, not only monistic deviations, but also some pluralistic ones. This is obvious in polytheism, and even in its monotheistic and atheistic variants. Yet it may seem doubtful whether the various religious interpretations of the world offer an alternative to the dualism of body and mind, for the gods, whether many or few, are either minds endowed with immortal bodies, or else pure minds, in contrast to ourselves.
 
 Section: 14
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Chapter XII CONCLUSION - ch12
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id16
 Content:
-DOI: 10.4324/9780203371107-13
-47. The dialectical and the transcendental corroboration of the solution
-The critique of inductivist attempts to solve the problem of induction has been concluded. What has it achieved?
-Even the sharpest polemic in this investigation was designed, first and foremost, to serve a positive purpose. But what is this purpose, and how should it be assessed?
-I see the primary value of the critical-polemical form in being an acid test of the positive solution. We should not, of course, overrate this form of testing. Its sole value consists, essentially, in making the proposed solution fit for discussion.
-One might also call this critical-polemical test a dialectical corroboration of the solution, because (to characterise this method in the words of H. Gomperz 1) it “lets every attempted solution … emerge from the contradictions that another attempt has encountered, either with its own assumptions or with concepts of the individual sciences or of scientific practice”, and because it seeks to show that the proposed solution “contains within itself, in ‘preserved’ form, the justified elements of earlier attempted resolutions”.
+13
+How I See Philosophy
+(Stolen from Fritz Waismann and from One of the First Men to Land on the Moon)
+I
+A famous and spirited paper by my late friend Friedrich Waismann bears the title ‘How I See Philosophy’.1 There is much in this paper that I admire; and there are a number of points in it with which I can agree, even though my approach is totally different from his.
+Fritz Waismann and many of his colleagues take it for granted that philosophers are a special kind of people and that philosophy can be looked upon as their peculiar activity. And what he tries to do in his paper is to show, with the help of examples, what constitutes the distinctive character of a philosopher, and the distinctive character of philosophy, if compared with other academic subjects such as mathematics or physics. Thus he tries, especially, to give a description of the interests and activities of contemporary academic philosophers, and of the sense in which they can be said to carry on what philosophers did in the past.
 
 Section: 15
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: PART ONE FRAGMENTS 1932 - pt3
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id14
 Content:
-Is there a philosophical science? (Introductory considerations on the problem of demarcation.)
-An investigation in an individual science, say in physics, can begin straight away with the formulation of the problem. It is possible “to enter the house through open doors”, as it were; for a “house” exists: a structure of scientific theory, a generally recognised problem situation. The researcher can count on the reader (who can be expected to be familiar with the discipline’s prerequisites) to fit the new work into the overall context of scientific knowledge.
-A philosopher finds himself in an entirely different situation. He faces not a theoretical edifice but a heap of ruins. He cannot take as his starting point a generally recognised problem situation; for the only thing that is generally recognised is, most often, that there is none. Indeed, it is even fashionable in philosophical circles to assert that nothing like a genuine philosophical problem can exist at all.
+14
+Toleration and Intellectual Responsibility
+(Stolen from Xenophanes and Voltaire)
+I have been asked here today to repeat a lecture which I gave in Tubingen, on the theme ‘Toleration and Intellectual Responsibility’. The lecture is dedicated to the memory of Leopold Lucas, a scholar, a historian, a man of toleration and humanity who became a victim of intolerance and inhumanity.
+At the age of seventy, in December 1942, Dr Leopold Lucas and his wife were imprisoned in the Theresienstadt concentration camp, where he worked as a rabbi: an immensely difficult task. He died there ten months later. Dora Lucas, his wife, was kept in Theresienstadt for another thirteen months, but she was able to work as a nurse. In October 1944 she was deported to Poland, together with 18,000 other prisoners. There she was put to death.
+It was a terrible fate. It was the fate of countless human beings; people who loved other people, who tried to help other people; who were loved by other people and whom other people tried to help. They belonged to families which were torn apart, destroyed, exterminated.
 
 Section: 16
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: I. FORMULATION OF THE PROBLEM - ch13
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id7
 Content:
-DOI: 10.4324/9780203371107-16
-1. The problem of demarcation
-What distinguishes the empirical sciences from the non-empirical sciences and from extra-scientific domains?
-Is there a criterion that demarcates the empirical sciences from non-empirical domains? A criterion that marks out some statements or systems of statements as empirical, and others as non-empirical?
-I call the question about such a demarcation criterion the “demarcation problem”.
-The demarcation problem is the fundamental problem of the theory of knowledge: all epistemological questions can be reduced to it.
-2. Scope of the problem of demarcation
-Instead of the question:
-What is knowledge?
-(which, in this form, can surely lead to little but a fruitless quarrel about nominal definitions, for definitions are always arbitrary), we could start by asking the narrower question:
+15
+What Does the West Believe in?
+(Stolen from the Author of The Open Society)
+I am sorry to say that I must begin with an apology: an apology for the title of my lecture. This title reads: ‘What Does the West Believe In?’ When I think of the history of the expression ‘the West’, I wonder whether I should not have avoided it. This expression has gained currency in England primarily through the translation of Spengler’s Untergang des Abendlandes, for the English title of this book is The Decline of the West. Yet I do not, of course, want to associate myself with Spengler, whom I regard not only as a false prophet of an alleged decline, but also as a symptom of a real decline, even though this is not a decline of the West: what his prophecies actually illustrate is the decline of the intellectual conscience of many western thinkers. They illustrate the victory of intellectual immodesty, of the attempt to beguile a public that is thirsty for knowledge by using bombastic words, in short, the victory of Hegelianism and of that Hegelian historicism which Schopenhauer exposed as the intellectual plague of Germany more than a century ago and against which he fought.
 
 Section: 17
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: II. ON THE QUESTION OF ELIMINATING SUBJECTIVIST PSYCHOLOGISM - ch14
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Title: id24
 Content:
-DOI: 10.4324/9780203371107-17
-The deductivist, transcendentalist and objectivist view of science advocated here, differs in a truly fundamental way from any inductivist, psychologistic and subjectivist view of science such as the one advocated by (for example) modern positivism. Inductivism (positivism) regards our perceptions (and perhaps other experiences also) as the foundation of all knowledge, of all science. This basic theme is common to all positivist approaches, although they interpret it in a variety of different ways. Some go so far as to regard scientific statements as being “only” logical constructions of experiences; others regard the concepts of empirical science as “only” logical constructions (classes of classes, classes of relations) of elementary experiences. The transcendental untenability of this view, and the logical difficulty of treating irrational elements (which is what our experiences are) logically and rationally, lead positivism ultimately (while not abandoning its basic position) to replace irrational experiences with rational constructs, namely with perceptual statements (“protocol sentences”). The foundations of science are to be constituted no longer by our irrational perceptions, but by the rationalised linguistic expression of these perceptions.
-
-Section: 18
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: III. TRANSITION TO THE THEORY OF METHOD1 - ch15
-Content:
-DOI: 10.4324/9780203371107-18
-1. An objection to the criterion of falsifiability
-The following objection can be raised, and quite rightly so, to the proposed solutions to the demarcation problem2 and to the problem of induction:
-2 [See Editor’s Postscript. Ed.]
-Admittedly, so this objection may be formulated, scientific theories represent non-verifiable systems; they are not, however, unverifiable only, but unfalsifiable also. Every theoretical system can be protected against empirical falsification, and in a variety of ways. One can introduce auxiliary hypotheses to “explain” the observations that threaten the theoretical system, that is, to bring them into agreement with the system; or one can amend the “coordinative definitions” (or whatever takes their place if not working with “coordinative definitions”, as in the view advocated here). In other words, one can alter the empirical meaning assigned to the concepts ([or] the terms) that occur in the theory. Finally, one can simply exclude the unfavourable observations by declaring them to be “fabricated”, “unscientific”, “non-objective” or something of this sort. Any one of these procedures, and even more so in combination, makes it possible to protect a theory against falsification. The reference to the one-sided falsifiability of theories, therefore, is not a sound argument and is incapable of paving the way for a solution of the epistemological problems. There is, moreover, no asymmetry between positive and negative truth values, between verification and falsification. The proposed solution to the problem of induction should be rejected, because natural laws are not “partially decidable” but not decidable at all. The proposed solution to the demarcation problem should be rejected because scientific theories are not falsifiable, which entails that falsifiability as the criterion of demarcation would exclude them from science (as a result of which, the arguments raised against Wittgenstein’s criterion of meaning3 would now be turned against the position advocated here).
-
-Section: 19
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: IV. THE METHOD OF EXHAUSTION. – “STATE OF AFFAIRS” AND “FACT”. – UNIVERSAL DIVERSITY - ch16
-Content:
-DOI: 10.4324/9780203371107-19
-Eddington1 says, the mind exhausts;
-1 [Cf. Arthur Stanley Eddington, Das Weltbild der Physik und ein Versuch seiner philosophischen Deutung (German translation by M. Fr. Rausch v. Traubenberg und H. Diesselhorst, 1931), pp. 237 ff. Ed. [The Nature of the Physical World (1928), pp. 239 ff. Tr.]]
-we can say, theories exhaust.
-The term “method of exhaustion” was coined by Dingler.2 He is probably unique among modern methodologists in forcefully emphasising that we address reality with our theoretical questions, and “exhaust” it with the help of our theories. We capture only those things that find space in our receptacle (the theory).
-
-Section: 20
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: V. OUTLINE OF A THEORY OF EMPIRICAL-SCIENTIFIC METHODS (THEORY OF EXPERIENCE)1 - ch17
-Content:
-DOI: 10.4324/9780203371107-20
-Principle of falsifiability
-Empirical scientific statements or systems of statements are distinguished by being empirically falsifiable.
-Singular empirical statements can be empirically verifiable also; theoretical systems, natural laws and universal empirical statements are, in principle, one-sidedly falsifiable only.
-The theory of method explains in further detail what is to be understood by “empirical falsification” and “empirical verification”. It explains also the conditions (the “methodological decisions”) designed to ensure the empirical falsifiability of empirical statements and systems of statements.
-1. Principle of continuity
-So long as any system of hypotheses is to be regarded as not falsified, the application of the following rules notwithstanding, it is regarded as corroborated. The rule is: all admissible means of escaping falsification should be used.
-
-Section: 21
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: PART TWOFRAGMENTS 1933 - pt4
-Content:
-The situation in contemporary philosophy is characterised by the opposition between the proponents of “metaphysics” and those of “anti-metaphysics”.
-The question at the centre of this controversy is the one about the relationship between philosophy and the empirical sciences.
-The metaphysician is quite wary of empirical science. Recent upheavals in the natural sciences in particular, having rocked the very foundations of their systems, strike him as an alarming symptom of an internal crisis, as a consequence of the alienation of empirical research from its philosophical basis; for only philosophy can provide the ultimate justification of empirical science.
-The anti-metaphysician admires the rapid developments in modern natural science. It appears to him that the more profoundly these developments rock its foundations, the more powerful its empirical, non-philosophical character will become. Empirical science seems to be freeing itself from the inhibiting prejudices of its metaphysical past. In the attitude of metaphysics towards modern natural science, the anti-metaphysician can see only uncomprehending presumptuousness. Empirical science is autonomous. It needs no philosophy to provide it with any “foundations”. There is no longer any need for a philosophical science superordinate to the individual sciences. The supposed problems of philosophy prove to be meaningless or even nonsensical pseudo-problems. Much like Kant1 (“philosophy can never be learned … we can at most learn to philosophise”), although more radically, the anti-metaphysician declares that philosophy is not a body of doctrine but an activity.2
-
-Section: 22
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: VI. PHILOSOPHY - ch18
-Content:
-DOI: 10.4324/9780203371107-22
-[Introduction.]
-Is there a philosophical science? Are there, beside the empirical sciences, beside logic and mathematics, other sciences that have a specific, a “philosophical” character?
-I believe that to pose the question is to answer it. By speaking about empirical science, about logic and mathematics, about the relationships between these sciences, by asking whether there is a “science”, we have already constituted a system of concepts that belong to a domain we should probably have to identify as “philosophy”. The concept “empirical science” is not a concept of empirical science. The concept “logic” is not a concept of logic. The concept “mathematics” is not a concept of mathematics. All these concepts belong to a theory of science.
-It would seem obvious, furthermore, that the concept of a “theory of science” cannot be a concept of the theory of science. And this is quite true. We arrive at a kind of hierarchy of analytical types, each one investigating the nature of the type subordinate to it.*1 But this does not create a problem: we are not facing an infinite regression, for the truth of the statements that belong to the subordinate science is not deduced from that of the superordinate one. Each of these sciences has to fend for itself. (Compare Nelson’s critique.1>)
-
-Section: 23
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: VII. THE PROBLEM OF METHODOLOGY - ch19
-Content:
-DOI: 10.4324/9780203371107-23
-1. Methodology and the possibility of falsification
-We began by examining theoretical statements, in order to see whether by virtue of their logical form they permit strict verification through singular statements. This has proved not to be the case. Instead of trying, as it were, to circumvent this negative result and replace a strict form of verification with a more relaxed form, which would have entangled us in the difficulties of the problem of induction, we abandoned the idea of verification in any form and turned to falsification. It seems to us that falsification attempts offer the only possibility of testing a theory empirically.
-We had to turn to a logical investigation of the falsifiability of a theory. We were able to develop falsifiability as a relationship between a theory and its possible empirical basic statements. This shifted the question logically to the problem of basic statements.
-
-Section: 24
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: VIII. COMMENTS ON THE SO-CALLED PROBLEM OF FREE WILL - ch20
-Content:
-DOI: 10.4324/9780203371107-24
-[1. Introduction.]
-The supposed problem of free will emerges with full force within a “deterministic” world view only, that is, where physics (to put it a little simplistically) draws a picture of the world that resembles the movement of a clock. Modern quantum physics, with its “non-deterministic” probability statements, seems more likely to blur the problem of free will than to solve it. More precisely, this blurring of the problem is caused not by physics itself, of course, but by impermissible interpretations.
-I believe that we shall gain a much clearer understanding of the question of free will, if we stand back completely from contemporary physics and ask ourselves how the problem would appear if we imagined a completely deterministic physics.
-Let us pose the problem as specifically as possible, if only in an “ad hominem” fashion. If, as a consequence of a deterministic world view, we regarded the creations of Bach or of Michelangelo, for example, as nothing but the outcomes of necessary physical processes, the products of an automatic physical apparatus, something in us would rebel against accepting such a consequence. If we imagined all the physical processes in the world as determined by the constellation of initial conditions and natural laws, then whether we liked it or not we would have to assume that the works of Bach and of Michelangelo were contained in them already in nuce, that is, we would find ourselves almost irretrievably within a metaphysics of pre-established harmony.
-
-Section: 25
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: IX THE PROBLEM OF FREE WILL1 - ch21
-Content:
-DOI: 10.4324/9780203371107-25
-5. Individuals and universals
-Even though we can never provide anything approaching a complete description of a “slice of reality”, we can always give it a name; we can characterise it in individual terms. Here, once again, we encounter the problem of universals. We have established already2 that it is impossible to replace an individual concept, or to identify an individual unambiguously, by any number of universals. We encounter the same opposition in the relationship between “event” and “slice of reality”; for if we could describe a “slice of reality” unambiguously, we could replace its name by a description.
-2 [See Volume I: Section 33; Volume II (Fragments): [III.] Transition to the Theory of Method, Section 7. Ed.]
-
-Section: 26
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: X. THE PROBLEM OF THE RANDOMNESS OF PROBABILITY STATEMENTS - ch22
-Content:
-DOI: 10.4324/9780203371107-26
-[Introduction.]
-Only from the vantage point of the frequency interpretation1 of probability statements is it possible to formulate precisely the distinctive paradox inherent in all probability arguments, a paradox that constitutes the one aspect of probability that is most in need of an epistemological clarification.
-1 [See Karl Popper, Logik der Forschung (1934), Chapter VI (2nd ed., 1966, Chapter VIII) [The Logic of Scientific Discover (1959; 2nd ed., 1968), Chapter VIII. Tr.]. Ed.]
-This paradox consists in the following: there are particular classes of events to which we tend to apply a very characteristic and perplexing form of expression. When it becomes apparent, for particular series of events*1 that belong to such a class, that we are unable to come up with predictions for the individual events in these series, from this impossibility of predicting an individual event we infer the possibility of making a prediction for the whole series; that is, a frequency prediction.
-
-Section: 27
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: APPENDIX SUMMARY EXCERPT (1932) from - appendix
-Content:
-The Two Fundamental Problems of the Theory of Knowledge
-The following brief item is a summarising excerpt from the manuscript of my book (planned to consist of two volumes) The Two Fundamental Problems of the Theory of Knowledge, Volume I: The Problem of Induction (Experience and Hypothesis), Volume II: The Problem of Demarcation (Experience and Metaphysics).
-In this note, Sections I to V, VII, IX and X are taken from Volume I, which is in publishable form. Some of these are verbatim excerpts (for example, Section I), sometimes with additions. Section V will appear under the title “A Criterion for the Empirical Character of Theoretical Systems” as a “Preliminary Communication” in the next issue of Erkenntnis.1 It can be regarded as the shortest summary of the basic ideas.
-
-Section: 28
-Book Title: The Two Fundamental Problems of the Theory of Knowledge
-Section Title: Editor's Postscript1 - epilogue
-Content:
-1 In the notes to The Two Fundamental Problems, many references appear to the Editor’s Postscript. Volume II (Fragments): [III.] Transition to the Theory of Method, Section 8, note 1 (p. 409) refers to the Postscript, Section 2, note 1 (p. 490); [IX. The Problem of Free Will], Section 5, note 1 (p. 443) refers to the Postscript, Section 5 and Section 6, note 30 (p. 496) and to the text of this note. All other references to the Editor’s Postscript refer to Section 6 of this Postscript.
-1. Introduction
-This edition of The Two Fundamental Problems of the Theory of Knowledge contains everything that could be found2 of the original copies of the manuscript. Despite tireless efforts3 to track down the missing parts, it has proved impossible to publish a complete edition of this two-volume work, written in the years 1930–1933. Volume I: The Problem of Induction appears to have been preserved in its entirety,4 whereas almost the whole manuscript of Volume II: The Problem of Demarcation must be presumed lost. Of this volume, there exist a few fragments only and the drastically abridged version published in 1934 under the title Logik der Forschung.5 This book and two short papers (1933–1935) on induction and demarcation in the journal Erkenntnis 6 are all that has been published to date (January 1979) of The Two Fundamental Problems of the Theory of Knowledge.7
+16
+Creative Self-Criticism in Science and in Art
+(Stolen from Beethoven’s Sketch Books)
+I should like first of all to express my thanks for the kind invitation to give the opening address at the Salzburg Festival. This is a great honour. The invitation came as a complete surprise, and it was even somewhat disturbing. Ever since 1950 my wife and I have led a secluded life in our house in the Chiltern Hills. We have no television and no newspaper, and we are completely absorbed by our work. My work is concerned mainly with an abstract subject: the problem of human knowledge and, in particular, of scientific knowledge. That hardly qualifies me to give an opening address at the Salzburg Festival.
+So I wondered why I had been invited. First I thought that I had been confused with somebody else. Or was it perhaps because of my love for this city, which sprang from a childhood love, when I was about 5 or 6 years old, well over 70 years ago? Yet no one knew of this. And nobody knew about an adventure I had here on an icy cold night, more than half a century ago. It was midnight, and I was on my way home from skiing, when, in the beautiful light of a full moon, I happened to slip into one of Salzburg’s two famous horseponds … Indeed there must have been other reasons for choosing me as your guest speaker. Then something occurred to me. In one respect I am really quite unique: you see, I am an optimist. I am an optimist in a world where among the intelligentsia it has become a strict rule that one must be a pessimist if one wants to be ‘in’. But I do believe that our age is not so bad as is generally maintained. I do believe that it is better and more beautiful than its reputation. A quarter of a century ago, I gave a lecture, the title of which sounds today even more provocative than it did then: ‘The History of our Time: An Optimist’s View’.1 So if there is anything that qualifies me to give this address, then it is perhaps the reputation of being an incorrigible optimist.
 
