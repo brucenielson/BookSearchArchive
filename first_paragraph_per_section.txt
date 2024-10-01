@@ -1,174 +1,117 @@
 Section: 1
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id32
+Book Title: The Myth of the Framework
+Section Title: Author
 Content:
-A Summary by Way of a Preface
-All things living are in search of a better world.
-Men, animals, plants, even unicellular organisms are constantly active. They are trying to improve their situation, or at least to avoid its deterioration. Even when asleep, the organism is actively maintaining the state of sleep: the depth (or else the shallowness) of sleep is a condition actively created by the organism, which sustains sleep (or else keeps the organism on the alert). Every organism is constantly preoccupied with the task of solving problems. These problems arise from its own assessments of its condition and of its environment; conditions which the organism seeks to improve.
-An attempted solution often proves to be misguided, in that it makes things worse. Then follow further attempts at solutions – further trial and error movements.
-We can see that life – even at the level of the unicellular organism – brings something completely new into the world, something that did not previously exist: problems and active attempts to solve them; assessments, values; trial and error.
+AUTHOR’S NOTE, 1993
+I do not regard myself as an expert in either science or philosophy. I have, however, tried hard all my life to understand something of the world we live in. Scientific knowledge, and the human rationality that produces it, are, I believe, always fallible, or subject to error. But they are, I believe, also the pride of mankind. For man is, so far as I know, the only thing in the universe that tries to understand what it is all about. May we continue to do so, and may we also be aware of the severe limitations of all our contributions.
+For many years I have argued against intellectual fashions in the sciences, and even more against intellectual fashions in philosophy. The fashionable thinker is, in the main, a prisoner of his fashion, and I regard freedom, political freedom as well as a free and open mind, as one of the greatest, if not the greatest, value that our life can offer us.
 
 Section: 2
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id26
+Book Title: The Myth of the Framework
+Section Title: Introduction
 Content:
-1
-Knowledge and the Shaping of Reality
-The Search for a Better World
-The first half of the title of my lecture was not chosen by me, but by the organizers of the Alpbach Forum. Their title was: ‘Knowledge and the Shaping of Reality’.
-My lecture consists of three parts: knowledge; reality; and the shaping of reality through knowledge. The second part, which deals with reality, is by far the longest, since it contains a great deal by way of preparation for the third part.
-1. Knowledge
-I shall start with knowledge. We live in a time in which irrational-ism has once more become fashionable. Consequently, I want to begin by declaring that I regard scientific knowledge as the best and most important kind of knowledge we have – though I am far from regarding it as the only one. The central features of scientific knowledge are as follows:
+INTRODUCTION
+All, or almost all, the papers collected in this volume are written to defend rationality and rational criticism. It is a way of thinking, and even a way of living: a readiness to listen to critical arguments, to search for one’s own mistakes, and to learn from them. It is, fundamentally, an attitude that I have tried to formulate (perhaps first in 1932) in the following two lines:
+‘I may be wrong and you may be right,
+and by an effort, we may get nearer to the truth.’
+These two lines in italics here quoted were first printed in 1945 in my Open Society (volume II, the second page of chapter 24, ‘The Revolt Against Reason’); and I italicized the lines in order to indicate that I regarded them as important. For these two lines were an attempt to summarize a very central part of my moral articles of faith. The view that they summed up I called ‘critical rationalism’.
 
 Section: 3
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id29
+Book Title: The Myth of the Framework
+Section Title: Chapter01
 Content:
-2
-On Knowledge and Ignorance
-Mr President, Mr Dean, ladies and gentlemen, let me first thank the Faculty of Economic Sciences of the Johann Wolfgang Goethe University for the great honour they have bestowed on me in making me a doctor rerum politicarum honoris causa. With Johann Wolfgang Goethe’s great first monologue of Doctor Faust, I can now say:
-They call me a master, and a doctor to boot …
-But in teaching my students I can do no good.
-But I really must ask you for your permission to recite a dozen lines or so from the beginning of the monologue in full; you will find that they are highly relevant.1
-I have studied philosophy
-Many a night,
+1
+THE RATIONALITY OF SCIENTIFIC REVOLUTIONS
+Selection versus instruction
+The title of this series of Spencer lectures, ‘Progress and Obstacles to Progress in the Sciences’, was chosen by the organizers of the series. The title seems to imply that progress in science is a good thing, and that an obstacle to progress is a bad thing – a position held by almost everybody until quite recently. Perhaps I should make it clear at once that I accept this position, although with some slight and faintly obvious reservations to which I shall briefly allude later. Of course, obstacles which are due to the inherent difficulty of the problems tackled are welcome challenges. (Indeed, many scientists were greatly disappointed when it turned out that the problem of tapping nuclear energy was comparatively trivial, involving no new revolutionary change of theory.) But stagnation in science would be a curse. Still, I agree with Professor Bodmer’s suggestion that scientific advance is only a mixed blessing1. Let’s face it: blessings are mixed, though there may be some exceedingly rare exceptions.
 
 Section: 4
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id21
+Book Title: The Myth of the Framework
+Section Title: Chapter02
 Content:
-3
-On the So-Called Sources of Knowledge
-Thank you for the great honour that you have bestowed on me by making me a Doctor of Philosophy in the Faculty of Arts of your University. I am deeply grateful for this honour and I accept it with real pleasure.
-I have also taken on a difficult task, at very short notice, namely the task of giving a short lecture. Before I begin this lecture, however, I should like to tell you a true story from my days in New Zealand.
-In Christchurch, New Zealand, I was friendly with the physicist Professor Coleridge Farr, who was roughly the same age when I arrived there as I am now. He was a very witty and amusing man and a Fellow of the Royal Society of London. Professor Farr was a public-spirited man, and used to give lectures on popular science in the most varied circles, including, among others, prisons. Once he began his lecture in a prison with the words: ‘Today I am giving exactly the same lecture as I gave here six years ago. So if anyone has already heard it, then it jolly well serves him right!’ Scarcely had he uttered these rather provocative words, when the light in the lecture hall went out. He said afterwards that he had felt rather ill at ease until the light came back on.
+2
+THE MYTH OF THE FRAMEWORK
+Those who believe this, and those who do not, have no common ground of discussion, but in view of their opinions they must of necessity scorn each other.
+Plato
+I
+One of the more disturbing aspects of the intellectual life of our time is the way in which irrationalism is so widely advocated, and the way in which irrationalist doctrines are taken for granted. One of the components of modern irrationalism is relativism (the doctrine that truth is relative to our intellectual background, which is supposed to determine somehow the framework within which we are able to think: that truth may change from one framework to another), and, in particular, the doctrine of the impossibility of mutual understanding between different cultures, generations, or historical periods – even within science, even within physics. In this paper I discuss the problem of relativism. It is my claim that behind it lies what I call ‘The Myth of the Framework’. I explain and criticize this myth, and comment also on arguments that have been used in its defence.
 
 Section: 5
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id27
+Book Title: The Myth of the Framework
+Section Title: Chapter03
 Content:
-4
-Science and Criticism
-As an old member of the Alpbach Forum I was very pleased to be invited to its thirtieth birthday celebrations; but I only accepted this invitation after some hesitation. I thought it scarcely possible to say something sensible and comprehensible on our extremely wide-ranging basic theme of ‘Intellectual and scientific development over the past thirty years’ in just thirty minutes. In fact, if my mathematics are correct, this leaves me with exactly one minute for each year of intellectual and scientific development! And so I must not fritter away the time available to me with apologies, but must begin without further ado.
+3
+REASON OR REVOLUTION?
+The trouble with a total revolution …
+Is that it brings the same class up on top.
+Executives of skilful execution
+Will therefore plan to go halfway and stop.
+Robert Frost
+The following critical considerations are reactions to the book, Der Positivismusstreit in der deutschen Soziologie,1 which was published in 1969, and for which I unwittingly provided the original incentive.
 I
-As you can see from die title I have chosen, ‘Science and Criticism’, I intend to let the question of intellectual development go more or less by the board and to deal mainly with the development of science. The reason for this is, quite simply, that I do not think much of the intellectual or cultural development of die past thirty years.
+I will begin by telling some of the history of the book and of its misleading title. In 1960 I was invited to open a discussion on ‘The Logic of the Social Sciences’ at a congress of German sociologists in Tübingen. I accepted – and I was told that my opening address would be followed by a reply from Professor Theodor W. Adorno of Frankfurt. It was suggested to me by the organizers that, in order to make a fruitful discussion possible, I should formulate my views in a number of definite theses. This I did: my opening address to that discussion, delivered in 1961, consisted of twenty-seven sharply formulated theses, plus a programmatic formulation of the task of the theoretical social sciences. Of course, I formulated these theses so as to make it difficult for any Hegelian or Marxist (such as Adorno) to accept them. And I supported them as well as I could by arguments. Owing to the limited time available, I confined myself to fundamentals, and I tried to avoid repeating what I had said elsewhere.
 
 Section: 6
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id23
+Book Title: The Myth of the Framework
+Section Title: Chapter04
 Content:
-5
-The Logic of the Social Sciences
-I propose to begin my paper on the logic of the social sciences with two theses which express the contrast between our knowledge and our ignorance.
-First thesis: We have a fair amount of knowledge. Moreover, we know not only details of doubtful intellectual interest, but also, and more especially, things that are not only of considerable practical importance, but may, in addition, provide us with deep theoretical insight, and with a surprising understanding of the world.
-Second thesis: Our ignorance is boundless and sobering. Indeed, it is precisely this overwhelming progress of the natural sciences (to which my first thesis alludes) that continually reminds us of our ignorance, even in the field of the natural sciences themselves.
-This gives a new twist to the Socratic idea of ignorance. With each step forward, with every problem we solve, we not only discover new and unsolved problems, but we also discover that just when we believed that we were standing on firm and safe ground, all things are, in reality, insecure and unstable.
+4
+SCIENCE: PROBLEMS, AIMS, RESPONSIBILITIES
+I
+The intellectual history of man has its depressing as well as its exhilarating aspects. For one may well look upon it as a history of prejudice and dogma, tenaciously held, and often combined with intolerance and fanaticism. One may even describe it as a history of spells of religious or quasi-religious frenzy. It should be remembered, in this context, that most of our great destructive wars have been religious or ideological wars – with the notable exception, perhaps, of the wars of Genghis Khan, who seems to have been a model of religious toleration.
+Yet even the sad and depressing picture of religious wars has its brighter side. It is an encouraging fact that countless men, from ancient to modern times, have been ready to live and to die for their convictions, for ideas – ideas which they believed to be true.
 
 Section: 7
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id15
+Book Title: The Myth of the Framework
+Section Title: Chapter05
 Content:
-6
-Against Big Words
-(A Letter not Originally Intended for Publication)
-Preface. About fourteen years ago I received a letter from a Herr Klaus Grossner, whom I had never previously heard of. He mentioned my friend Hans Albert and asked me for a written interview about the state of (German) philosophy. I agreed with a great deal of his letter, and although I disagreed with some of it, I nevertheless thought it worthy of discussion; and so I answered his questions in spite of some reservations. In a subsequent letter, Herr Grossner asked me for permission to publish the parts of the letter printed here below in a book he was planning. Despite further misgivings I gave him my permission, but only for his book: I retained all my author’s rights, and stressed that my contribution to his book must not be reprinted without my express permission. Yet shortly afterwards an excerpt appeared (under the excellent title ‘Against Big Words’ [’Wider die groβen Worte’]) in the weekly newspaper Die Zeit, without my permission and with no mention of my rights. (In Germany and Austria copyright is often considerably abused.) Since my letter has already been printed twice in excerpts and has been misquoted on many occasions, I have decided to reprint the previously published section here without any amendments, in spite of its aggressiveness. I wrote:
+5
+PHILOSOPHY AND PHYSICS
+The influence on theoretical and experimental physics of some metaphysical speculations on the structure of matter
+The following remarks are intended as an illustration of the important thesis that science is capable of solving philosophical problems and that modern science, at any rate, has something important to say to the philosopher about some of the classical problems of philosophy – especially about the old problem of matter. I intend to discuss certain aspects of the problem of matter since Descartes. And I intend to point out the interesting fact that some of these problems were solved, in collaboration, by speculative philosophers, such as Descartes, Leibniz, and Kant, who all helped by proposing important though tentative solutions and thus prepared the way for the work of experimental scientists and theorists of physics such as Faraday, Maxwell, Einstein, de Broglie, and Schrödinger.
 
 Section: 8
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id6
+Book Title: The Myth of the Framework
+Section Title: Chapter06
 Content:
-7
-Books and Thoughts
-Europe’s First Publication
-I am grateful for the invitation to give a lecture about books. This is not only because I think that books, and therefore libraries, are the most characteristic and the most important physical things in our European civilization, and perhaps in human civilization as a whole, but also because of the dominating role books have played – and still play – in my own life. When I was five years old, the first volume of Selma Lagerlöf’s book The Wonderful Adventures of Nils (Wunderbare Reise des kleinen Nils Holgersson mit den Wildgdnsen) was read to me. The work had just been published in three green volumes. No other book had such a decisive influence not only on my own character, but also on that of my childhood friend Konrad Lorenz. Konrad fell in love with the wild geese, whilst I fell in love with Selma Lagerlof and her books. Like her I became a school teacher. Both Konrad and I remained true to our loves.
+6
+THE MORAL RESPONSIBILITY OF THE SCIENTIST
+The topic I am going to discuss was not of my choosing, but was suggested by the organizers of this conference. I say this because I do not think that I can make any significant contribution to the solution of the grave problems involved. I nevertheless accepted the invitation to speak about it because I believe that in this respect we are all more or less in the same boat. I take it that our topic, ‘the moral responsibility of the scientist’, is a kind of euphemism for the issue of nuclear and biological warfare. But I shall try to approach our topic with some wider issues in mind.
+One may say that the problem has lately become more general, due to the fact that lately all science, and indeed all learning, has tended to become potentially applicable. Formerly, the pure scientist or the pure scholar had only one responsibility beyond those which everyone else has – that is, to search for truth. He had to further the growth of his subject as well as he could. For all I know, Maxwell had little reason to worry about the possible applications of his equations. And perhaps even Hertz did not worry about Hertzian waves. This happy situation belongs to the past. Today not only all pure science may become applied science, but even all pure scholarship.
 
 Section: 9
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id19
+Book Title: The Myth of the Framework
+Section Title: Chapter07
 Content:
-8
-On Culture Clash
-I was very pleased to be invited to Vienna to see old friends again and to make new friends; and I felt it as a great honour to be invited here today by the Chairman of the Society of Expatriate Austrians to give a short lecture. His invitation stressed that the subject of my lecture was left to me. So he left to me, very kindly, all the agonies of having to make a choice.
-The difficulties in making a decision were considerable. Obviously, I wished to choose a subject that interests me. On the other hand it should also have some relevance to the present occasion – to the meeting of expatriate Austrians in Vienna on the occasion of the Silver Jubilee of the Austrian State Treaty – the unique event that terminated the occupation of Austria after the Second World War.
-I doubt if the subject I have chosen fulfils these expectations. Remembering the Austrian State Treaty and the Russian occupation of Austria that followed the Second World War, my talk is dedicated to the problem of culture clash – a thing that all expatriates must experience.
+7
+A PLURALIST APPROACH TO THE PHILOSOPHY OF HISTORY
+I
+What may be called the philosophy of history persistently turns round three big questions.
+1 Is there a plot to history, and if so, what is it?
+2 What is the use of history?
+3 How are we to write history, or what is the method of history?
+(This also includes the ‘problem of historical knowledge’.)
+Answers to these three questions have been given, implicitly and explicitly, from the Bible and Homer down to our own day. And the answers have changed astonishingly little.
+The oldest answer to our first question, given in the Bible and in Homer, is theistic. There is a plot to history. But it is only dimly discernible, because it results from the will of God, or of the gods. And though it is perhaps not completely unfathomable, it is not easy to fathom. At any rate, there is something secret hidden behind the surface of events. It has to do with reward and punishment, with a kind of divine balance of justice – though only by the most discerning can justice be seen to be done.
 
 Section: 10
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id13
+Book Title: The Myth of the Framework
+Section Title: Chapter08
 Content:
-9
-Immanuel Kant: The Philosopher of the Enlightenment
-A Lecture to Commemorate the 150th Anniversary of Kant’s Death
-One hundred and fifty years ago Immanuel Kant died, having spent the eighty years of his life in the Prussian provincial town of Konigsberg. For years his retirement had been complete,1 and his friends intended a quiet burial. But this son of an artisan was buried like a king. When the rumour of his death spread through the town the people flocked to his house demanding to see him. On the day of the funeral the life of the town was at a standstill. The coffin was followed by thousands, while the bells of all the churches were tolling. Nothing like this had ever before happened in Königsberg, say the chroniclers.2
+8
+MODELS, INSTRUMENTS, AND TRUTH
+The status of the rationality principle in the social sciences
+When I received the invitation to present to you my views on the methodology of the social sciences, I felt very honoured indeed. But I also felt a little uneasy, for the following reasons. My views on the methodology of the social sciences are the result of my admiration for economic theory: I began to develop them, some twenty-five years ago, by trying to generalize the method of theoretical economics.1 You will understand my fear that you may, as economists, find my views trivial – if not altogether out of date.
+It was this fear that made me decide to devote about one-third of this lecture to my views on the methodology of science in general, one third (sections 2 to 7) to problems peculiar to the methods of social science, and the remainder (sections 8 to 11) to an attack upon the instrumentalist philosophy of science – that still fashionable philosophical theory of pragmatism which tells us that our theories are nothing but instruments. To this I shall oppose my own view according to which theories are steps in our search for truth – or to be both more explicit and more modest, in our search for better and better solutions of deeper and deeper problems (where ‘better and better’ means, as we shall see, ‘nearer and nearer to the truth’).2
 
 Section: 11
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id30
+Book Title: The Myth of the Framework
+Section Title: Chapter09
 Content:
-10
-Emancipation through Knowledge
-The philosophy of Immanuel Kant, and with it his philosophy of history, is often looked upon in Germany as antiquated, and as superseded by Hegel and his followers. This may well be due to the surpassing intellectual and moral stature of Kant, Germany’s greatest philosopher; for the very greatness of his achievement was a thorn in the flesh of his lesser successors, so that Fichte, and later Hegel, tried to solve this irritating problem by persuading the world that Kant had been merely one of their forerunners. But Kant was nothing of the sort. On the contrary he was a determined opponent of the whole Romantic Movement and especially of Fichte: Kant was in fact the last great exponent of that much reviled movement, the Enlightenment. In an important essay entitled ‘What is Enlightenment?’ (1785) Kant wrote:
-Enlightenment is the emancipation of man from a state of self-imposed tutelage. This state is due to his incapacity to use his own intelligence without external guidance. Such a state of tutelage I call ‘self-imposed’ [or ‘culpable’] if it is due not to lack of intelligence but to lack of courage or determination to use one’s own intelligence without the help of a leader. Sapere aude! Dare to use your own intelligence! This is the battle-cry of the Enlightenment.
-
-Section: 12
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id5
-Content:
-11
-Public Opinion and Liberal Principles
-The following remarks were designed to provide material for debate at an international conference of liberals (in the English sense of the term1). My purpose was simply to lay the foundations for a good general discussion. Because I could assume liberal views in my audience I was largely concerned to challenge, rather than to endorse, popular assumptions favourable to these views.
-I. The Myth of Public Opinion
-We should beware of a number of myths concerning ‘public opinion’ which are often accepted uncritically.
-There is, first, the classical myth, vox populi vox dei, which attributes to the voice of the people a kind of final authority and unlimited wisdom. Its modern equivalent is faith in the ultimate commonsense rightness of that mythical figure, ‘the man in the street’, his vote, and his voice. The avoidance of the plural in both cases is characteristic. Yet people are, thank God, seldom univocal; and the various men in the various streets are as different as any collection of VIPs in a conference-room. And if, on occasion, they do speak more or less in unison, what they say is not necessarily wise. They may be right, or they may be wrong. ‘The voice’ may be very firm on very doubtful issues. (Example: the nearly unanimous and unquestioning acceptance of the demand for ‘unconditional surrender’.) And it may waver on issues over which there is hardly room for doubt. (Example: the question whether to condone political blackmail, and mass-murder.) It may be well-intentioned but imprudent. (Example: the public reaction which destroyed the Hoare–Laval plan.) Or it may be neither well-intentioned nor very prudent. (Example: the approval of the Runciman mission; the approval of the Munich agreement of 1938.)
-
-Section: 13
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id10
-Content:
-12
-An Objective Theory of Historical Understanding
-The different western philosophies are very largely variations on the theme of body–mind dualism. The main departures from this dualistic theme were attempts to replace it by some kind of monism. It seems to me that these attempts were unsuccessful. We find time and again that behind the veil of monistic protestations there still lurks the dualism of body and mind.
-Pluralism and World 3
-There were, however, not only monistic deviations, but also some pluralistic ones. This is obvious in polytheism, and even in its monotheistic and atheistic variants. Yet it may seem doubtful whether the various religious interpretations of the world offer an alternative to the dualism of body and mind, for the gods, whether many or few, are either minds endowed with immortal bodies, or else pure minds, in contrast to ourselves.
-
-Section: 14
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id16
-Content:
-13
-How I See Philosophy
-(Stolen from Fritz Waismann and from One of the First Men to Land on the Moon)
+9
+EPISTEMOLOGY AND INDUSTRIALIZATION
+Francis Bacon looked forward to an alteration in the form of production and to the effective control of nature by man, as a result of a change in the ways of thinking.
+Karl Marx
 I
-A famous and spirited paper by my late friend Friedrich Waismann bears the title ‘How I See Philosophy’.1 There is much in this paper that I admire; and there are a number of points in it with which I can agree, even though my approach is totally different from his.
-Fritz Waismann and many of his colleagues take it for granted that philosophers are a special kind of people and that philosophy can be looked upon as their peculiar activity. And what he tries to do in his paper is to show, with the help of examples, what constitutes the distinctive character of a philosopher, and the distinctive character of philosophy, if compared with other academic subjects such as mathematics or physics. Thus he tries, especially, to give a description of the interests and activities of contemporary academic philosophers, and of the sense in which they can be said to carry on what philosophers did in the past.
-
-Section: 15
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id14
-Content:
-14
-Toleration and Intellectual Responsibility
-(Stolen from Xenophanes and Voltaire)
-I have been asked here today to repeat a lecture which I gave in Tubingen, on the theme ‘Toleration and Intellectual Responsibility’. The lecture is dedicated to the memory of Leopold Lucas, a scholar, a historian, a man of toleration and humanity who became a victim of intolerance and inhumanity.
-At the age of seventy, in December 1942, Dr Leopold Lucas and his wife were imprisoned in the Theresienstadt concentration camp, where he worked as a rabbi: an immensely difficult task. He died there ten months later. Dora Lucas, his wife, was kept in Theresienstadt for another thirteen months, but she was able to work as a nurse. In October 1944 she was deported to Poland, together with 18,000 other prisoners. There she was put to death.
-It was a terrible fate. It was the fate of countless human beings; people who loved other people, who tried to help other people; who were loved by other people and whom other people tried to help. They belonged to families which were torn apart, destroyed, exterminated.
-
-Section: 16
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id7
-Content:
-15
-What Does the West Believe in?
-(Stolen from the Author of The Open Society)
-I am sorry to say that I must begin with an apology: an apology for the title of my lecture. This title reads: ‘What Does the West Believe In?’ When I think of the history of the expression ‘the West’, I wonder whether I should not have avoided it. This expression has gained currency in England primarily through the translation of Spengler’s Untergang des Abendlandes, for the English title of this book is The Decline of the West. Yet I do not, of course, want to associate myself with Spengler, whom I regard not only as a false prophet of an alleged decline, but also as a symptom of a real decline, even though this is not a decline of the West: what his prophecies actually illustrate is the decline of the intellectual conscience of many western thinkers. They illustrate the victory of intellectual immodesty, of the attempt to beguile a public that is thirsty for knowledge by using bombastic words, in short, the victory of Hegelianism and of that Hegelian historicism which Schopenhauer exposed as the intellectual plague of Germany more than a century ago and against which he fought.
-
-Section: 17
-Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
-Section Title: id24
-Content:
-16
-Creative Self-Criticism in Science and in Art
-(Stolen from Beethoven’s Sketch Books)
-I should like first of all to express my thanks for the kind invitation to give the opening address at the Salzburg Festival. This is a great honour. The invitation came as a complete surprise, and it was even somewhat disturbing. Ever since 1950 my wife and I have led a secluded life in our house in the Chiltern Hills. We have no television and no newspaper, and we are completely absorbed by our work. My work is concerned mainly with an abstract subject: the problem of human knowledge and, in particular, of scientific knowledge. That hardly qualifies me to give an opening address at the Salzburg Festival.
-So I wondered why I had been invited. First I thought that I had been confused with somebody else. Or was it perhaps because of my love for this city, which sprang from a childhood love, when I was about 5 or 6 years old, well over 70 years ago? Yet no one knew of this. And nobody knew about an adventure I had here on an icy cold night, more than half a century ago. It was midnight, and I was on my way home from skiing, when, in the beautiful light of a full moon, I happened to slip into one of Salzburg’s two famous horseponds … Indeed there must have been other reasons for choosing me as your guest speaker. Then something occurred to me. In one respect I am really quite unique: you see, I am an optimist. I am an optimist in a world where among the intelligentsia it has become a strict rule that one must be a pessimist if one wants to be ‘in’. But I do believe that our age is not so bad as is generally maintained. I do believe that it is better and more beautiful than its reputation. A quarter of a century ago, I gave a lecture, the title of which sounds today even more provocative than it did then: ‘The History of our Time: An Optimist’s View’.1 So if there is anything that qualifies me to give this address, then it is perhaps the reputation of being an incorrigible optimist.
+In a famous and highly dramatic passage of his chief work, Plato demands that philosophers should be kings and, vice versa, that kings – or autocratic rulers – should be fully trained philosophers.1 Plato’s proposal that philosophers should be kings has pleased many philosophers, and some of them have taken it quite seriously. Personally I do not find it an attractive proposal. Quite apart from the fact that I am against any form of autocracy or dictatorship, including the dictatorship of the wisest and best, philosophers do not seem to me particularly well suited for the job. Take for example the case of Thomas Masaryk, the creator, first president and, one might say, the philosopher-king of the Czechoslovak Republic. Masaryk was not only a fully trained philosopher, but also a born statesman and a great and admirable man. And his creation, the Czechoslovak Republic, was an unparalleled political achievement. Yet the dissolution of the Old Austrian Empire was also partly Masaryk’s work. And this proved a disaster for Europe and the world. For the instability that followed this dissolution was largely responsible for the rise of Nazism and finally even for the downfall of Masaryk’s own Czechoslovak Republic. And it is significant that Masaryk’s doctrine that ‘Austria-Hungary, this antinational … state, must be dismembered’2 (to use his own words) was derived from a mistaken philosophical doctrine: from the philosophical principle of the National State.3 But this principle, the principle of political nationalism, is not only an unfortunate and even a mischievous conception, it is also one that is actually impossible to realize. This is because Nations – in the sense of those who advocate this principle – do not exist: they are theoretical constructs, and the theories in which they are constructed are wholly inadequate, and completely inapplicable to Europe. For the political theory of nationalism rests on the assumption that there are ethnic groups which at the same time are also linguistic groups, and which happen also to inhabit geographically unified and coherent regions with natural boundaries that are defensible from a military point of view – groups which are united by a common language, a common territory, a common history, a common culture, and a common fate. The boundaries of the regions inhabited by these groups should, according to the theory of the Nation State, form boundaries of the new national states.
 
