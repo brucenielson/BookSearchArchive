@@ -37,6 +37,16 @@ from doc_content_checker import skip_content
 
 
 @component
+class FinalDocCounter:
+    # A component that connects to both 'router' and 'writer' components and determines
+    # how many, if any, documents were written to the document store. This avoids having to check if 'writer' exists
+    # at the last node of the pipeline. I can always just be assured this component will exist.
+    @component.output_types(documents_written=int)
+    def run(self, documents_written: int = 0, no_documents: int = 0) -> Dict[str, int]:
+        return {"documents_written": documents_written + no_documents}
+
+
+@component
 class RemoveIllegalDocs:
     @component.output_types(documents=List[Document])
     def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
@@ -60,7 +70,11 @@ class DuplicateChecker:
 
     def _is_duplicate(self, document: Document) -> bool:
         # Use a simpler filter that checks for exact content match
-        filters = {"content": document.content}
+        filters = {
+            "field": "content",
+            "operator": "==",
+            "value": document.content
+        }
         results = self.document_store.filter_documents(filters=filters)
         return len(results) > 0
 
@@ -122,7 +136,7 @@ class CustomDocumentSplitter:
             processed_docs.extend(self.process_document(doc))
 
         if self._verbose:
-            print(f"Processed {len(documents)} documents into {len(processed_docs)} documents")
+            print(f"Split {len(documents)} documents into {len(processed_docs)} documents")
         return {"documents": processed_docs}
 
     def process_document(self, document: Document) -> List[Document]:
@@ -444,10 +458,10 @@ class DocumentProcessor:
                 "output_type": List[Document],
             },
             {
-                "condition": "{{documents|length <= 10}}",
-                "output": "No unique documents to write.",
+                "condition": "{{documents|length <= 0}}",
+                "output": "{{0}}",
                 "output_name": "no_documents",
-                "output_type": str,
+                "output_type": int,
             },
         ]
         router = ConditionalRouter(routes=routes)
@@ -464,6 +478,7 @@ class DocumentProcessor:
         doc_convert_pipe.add_component("writer",
                                        DocumentWriter(document_store=self._document_store,
                                                       policy=DuplicatePolicy.OVERWRITE))
+        doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
         doc_convert_pipe.connect("converter", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
@@ -472,6 +487,8 @@ class DocumentProcessor:
         doc_convert_pipe.connect("embedder", "duplicate_checker")
         doc_convert_pipe.connect("duplicate_checker", "router")
         doc_convert_pipe.connect("router.has_documents", "writer")
+        doc_convert_pipe.connect("writer.documents_written", "final_counter.documents_written")
+        doc_convert_pipe.connect("router.no_documents", "final_counter.no_documents")
 
         self._doc_convert_pipeline = doc_convert_pipe
 
@@ -507,24 +524,20 @@ class DocumentProcessor:
         source: List[ByteStream]
         meta: List[Dict[str, str]]
         for source, meta in self._load_files():
-            self._print_verbose("Processing document: " + meta[0]["book_title"])
+            self._print_verbose(f"Processing document: {meta[0]['book_title']}")
 
             # If needed, you can batch process here instead of processing one by one
             # Pass the source and meta to the document conversion pipeline
             results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": source, "meta": meta}})
-            # Check if results has a "writer" key
-            if "writer" in results:
-                written = results["writer"]["documents_written"]
-                total_written += written
-                self._print_verbose(f"Wrote {written} documents.")
-            else:
-                self._print_verbose("No documents written.")
+            written = results["final_counter"]["documents_written"]
+            total_written += written
+            self._print_verbose(f"Wrote {written} documents for {meta[0]['book_title']}.")
 
         self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
 
 
 def main() -> None:
-    epub_file_path: str = "documents"  # /Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     processor: DocumentProcessor = DocumentProcessor(
         table_name="book_archive",
@@ -552,8 +565,6 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# TODO: Rewrite this to load one document into the store at a time so I don't hold everything in memory.
 # TODO: There should be a 'true' section number based on finding a number then a return line character in paragraph 1
-# TODO: Don't load duplicates?
 # TODO: Change pipeline so that it passes empty List of documents to a final repo so that I don't have to check
 #  for 'writer'
