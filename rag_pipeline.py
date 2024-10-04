@@ -393,8 +393,8 @@ class RagPipeline:
             recreate_table=False,
             search_strategy="hnsw",
             hnsw_recreate_index_if_exists=True,
-            hnsw_index_name=self._table_name + "_haystack_hnsw_index",
-            keyword_index_name=self._table_name + "_haystack_keyword_index",
+            hnsw_index_name=self._table_name + "_hnsw_index",
+            keyword_index_name=self._table_name + "_keyword_index",
         )
 
         self._document_store = document_store
@@ -547,7 +547,11 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "What is induction? Does it exist? Has it been refuted?"
+    query: str = "How are refutation, falsification, and testability related?"
+    # "What is the relationship between ad hocness and independent testability?"
+    # "Should we strive to make our theories as severely testable as possible?"
+    # "Should you ad hoc save your theory?"
+    # "How are refutation, falsification, and testability related?"
     rag_processor.generate_response(query)
 
 

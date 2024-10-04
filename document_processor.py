@@ -10,6 +10,8 @@ from ebooklib import epub, ITEM_DOCUMENT
 # noinspection PyPackageRequirements
 from haystack import Pipeline, Document, component
 # noinspection PyPackageRequirements
+from haystack.components.routers import ConditionalRouter
+# noinspection PyPackageRequirements
 from haystack.dataclasses import ByteStream
 # noinspection PyPackageRequirements
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
@@ -27,11 +29,21 @@ from haystack.document_stores.types import DuplicatePolicy
 # noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
 # Other imports
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional, Dict, Any, Tuple, Iterator
 from pathlib import Path
 from typing_extensions import Set
 from generator_model import get_secret
 from doc_content_checker import skip_content
+
+
+@component
+class FinalDocCounter:
+    # A component that connects to both 'router' and 'writer' components and determines
+    # how many, if any, documents were written to the document store. This avoids having to check if 'writer' exists
+    # at the last node of the pipeline. I can always just be assured this component will exist.
+    @component.output_types(documents_written=int)
+    def run(self, documents_written: int = 0, no_documents: int = 0) -> Dict[str, int]:
+        return {"documents_written": documents_written + no_documents}
 
 
 @component
@@ -41,6 +53,30 @@ class RemoveIllegalDocs:
         documents = [Document(content=doc.content, meta=doc.meta) for doc in documents if doc.content is not None]
         documents = list({doc.id: doc for doc in documents}.values())
         return {"documents": documents}
+
+
+@component
+class DuplicateChecker:
+    def __init__(self, document_store: PgvectorDocumentStore):
+        self.document_store = document_store
+
+    @component.output_types(documents=List[Document])
+    def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
+        unique_documents = []
+        for doc in documents:
+            if not self._is_duplicate(doc):
+                unique_documents.append(doc)
+        return {"documents": unique_documents}
+
+    def _is_duplicate(self, document: Document) -> bool:
+        # Use a simpler filter that checks for exact content match
+        filters = {
+            "field": "content",
+            "operator": "==",
+            "value": document.content
+        }
+        results = self.document_store.filter_documents(filters=filters)
+        return len(results) > 0
 
 
 @component
@@ -100,7 +136,7 @@ class CustomDocumentSplitter:
             processed_docs.extend(self.process_document(doc))
 
         if self._verbose:
-            print(f"Processed {len(documents)} documents into {len(processed_docs)} documents")
+            print(f"Split {len(documents)} documents into {len(processed_docs)} documents")
         return {"documents": processed_docs}
 
     def process_document(self, document: Document) -> List[Document]:
@@ -168,9 +204,9 @@ class DocumentProcessor:
     of the document processing and RAG pipelines.
     """
     def __init__(self,
+                 file_or_folder_path: str,
                  table_name: str = 'haystack_pgvector_docs',
                  recreate_table: bool = False,
-                 file_or_folder_path: Optional[str] = None,
                  postgres_user_name: str = 'postgres',
                  postgres_password: str = None,
                  postgres_host: str = 'localhost',
@@ -209,16 +245,15 @@ class DocumentProcessor:
         self._verbose: bool = verbose
 
         # File paths
-        self._file_or_folder_path: Optional[str] = file_or_folder_path  # New instance variable
+        self._file_or_folder_path: str = file_or_folder_path  # New instance variable
 
         # Determine if the path is a file or directory
-        if self._file_or_folder_path is not None:
-            if Path(self._file_or_folder_path).is_file():
-                self._is_directory = False
-            elif Path(self._file_or_folder_path).is_dir():
-                self._is_directory = True
-            else:
-                raise ValueError("The provided path must be a valid file or directory.")
+        if Path(self._file_or_folder_path).is_file():
+            self._is_directory = False
+        elif Path(self._file_or_folder_path).is_dir():
+            self._is_directory = True
+        else:
+            raise ValueError("The provided path must be a valid file or directory.")
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -329,19 +364,14 @@ class DocumentProcessor:
         if self._doc_convert_pipeline is not None:
             self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
 
-    def _load_files(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        all_docs: List[ByteStream] = []
-        all_meta: List[Dict[str, str]] = []
-
+    def _load_files(self) -> Iterator[Tuple[ByteStream, Dict[str, str]]]:
         if self._is_directory:
             for file_path in Path(self._file_or_folder_path).glob('*.epub'):
                 docs, meta = self._load_epub(str(file_path))
-                all_docs.extend(docs)
-                all_meta.extend(meta)
+                yield docs, meta
         else:
-            all_docs, all_meta = self._load_epub(self._file_or_folder_path)
-
-        return all_docs, all_meta
+            docs, meta = self._load_epub(self._file_or_folder_path)
+            yield docs, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         docs: List[ByteStream] = []
@@ -419,6 +449,23 @@ class DocumentProcessor:
         custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder,
                                                                          verbose=self._verbose,
                                                                          skip_content_func=self._skip_content)
+
+        routes = [
+            {
+                "condition": "{{documents|length > 0}}",
+                "output": "{{documents}}",
+                "output_name": "has_documents",
+                "output_type": List[Document],
+            },
+            {
+                "condition": "{{documents|length <= 0}}",
+                "output": "{{0}}",
+                "output_name": "no_documents",
+                "output_type": int,
+            },
+        ]
+        router = ConditionalRouter(routes=routes)
+
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("converter", HTMLToDocument())
@@ -426,20 +473,27 @@ class DocumentProcessor:
         doc_convert_pipe.add_component("cleaner", DocumentCleaner())
         doc_convert_pipe.add_component("splitter", custom_splitter)
         doc_convert_pipe.add_component("embedder", self._sentence_embedder)
+        doc_convert_pipe.add_component("duplicate_checker", DuplicateChecker(document_store=self._document_store))
+        doc_convert_pipe.add_component("router", router)
         doc_convert_pipe.add_component("writer",
                                        DocumentWriter(document_store=self._document_store,
                                                       policy=DuplicatePolicy.OVERWRITE))
+        doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
         doc_convert_pipe.connect("converter", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
         doc_convert_pipe.connect("splitter", "embedder")
-        doc_convert_pipe.connect("embedder", "writer")
+        doc_convert_pipe.connect("embedder", "duplicate_checker")
+        doc_convert_pipe.connect("duplicate_checker", "router")
+        doc_convert_pipe.connect("router.has_documents", "writer")
+        doc_convert_pipe.connect("writer.documents_written", "final_counter.documents_written")
+        doc_convert_pipe.connect("router.no_documents", "final_counter.no_documents")
 
         self._doc_convert_pipeline = doc_convert_pipe
 
     def _initialize_document_store(self) -> None:
-        def create_doc_store(force_recreate: bool = False) -> PgvectorDocumentStore:
+        def init_doc_store(force_recreate: bool = False) -> PgvectorDocumentStore:
             connection_token: Secret = Secret.from_token(self._postgres_connection_str)
             doc_store: PgvectorDocumentStore = PgvectorDocumentStore(
                 connection_string=connection_token,
@@ -452,31 +506,42 @@ class DocumentProcessor:
                 hnsw_index_name=self._table_name + "_hnsw_index",
                 keyword_index_name=self._table_name + "_keyword_index",
             )
+
             return doc_store
 
         document_store: PgvectorDocumentStore
-        document_store = create_doc_store()
+        document_store = init_doc_store()
         self._document_store = document_store
 
-        self._print_verbose("Document Count: " + str(document_store.count_documents()))
+        doc_count: int = document_store.count_documents()
+        self._print_verbose("Document Count: " + str(doc_count))
+        self._print_verbose("Loading document file")
 
-        if document_store.count_documents() == 0 and self._file_or_folder_path is not None:
-            sources: List[ByteStream]
-            meta: List[Dict[str, str]]
-            self._print_verbose("Loading document file")
-            sources, meta = self._load_files()
-            self._print_verbose("Writing documents to document store")
-            self._doc_converter_pipeline()
-            results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": sources, "meta": meta}})
-            self._print_verbose(f"\n\nNumber of documents: {results['writer']['documents_written']}")
+        # Iterate over the document and metadata pairs as they are loaded
+        total_written: int = 0
+        self._doc_converter_pipeline()
+
+        source: List[ByteStream]
+        meta: List[Dict[str, str]]
+        for source, meta in self._load_files():
+            self._print_verbose(f"Processing document: {meta[0]['book_title']}")
+
+            # If needed, you can batch process here instead of processing one by one
+            # Pass the source and meta to the document conversion pipeline
+            results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": source, "meta": meta}})
+            written = results["final_counter"]["documents_written"]
+            total_written += written
+            self._print_verbose(f"Wrote {written} documents for {meta[0]['book_title']}.")
+
+        self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
 
 
 def main() -> None:
-    epub_file_path: str = "documents"
+    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     processor: DocumentProcessor = DocumentProcessor(
         table_name="book_archive",
-        recreate_table=True,
+        recreate_table=False,
         embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=epub_file_path,
         postgres_user_name='postgres',
@@ -500,5 +565,6 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# TODO: Rewrite this to load one document into the store at a time so I don't hold everything in memory.
 # TODO: There should be a 'true' section number based on finding a number then a return line character in paragraph 1
+# TODO: Change pipeline so that it passes empty List of documents to a final repo so that I don't have to check
+#  for 'writer'
