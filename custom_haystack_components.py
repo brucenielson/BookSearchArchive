@@ -184,6 +184,46 @@ class DuplicateChecker:
         return len(results) > 0
 
 
+def analyze_first_two_lines(content: str) -> dict:
+    """
+    Analyzes the first two lines of the given content and extracts chapter number, chapter title,
+    and identifies lines that start with 'DOI:'.
+
+    :param content: The document content to analyze.
+    :return: A dictionary with metadata (chapter_number, chapter_title) and the cleaned content.
+    """
+    result = {"chapter_number": None, "chapter_title": None, "cleaned_content": content}
+
+    # Split the content into lines
+    lines = content.split("\n", 2)  # Only split into first two lines
+    first_line = lines[0].strip() if len(lines) > 0 else ""
+    second_line = lines[1].strip() if len(lines) > 1 else ""
+
+    # Only analyze if the first line is under 100 characters
+    if len(first_line) < 100:
+        # Check if the first line is a chapter number (an integer)
+        if first_line.isdigit():
+            result["chapter_number"] = int(first_line)
+
+        # Check if the first line is a chapter title (all caps, < 100 chars)
+        if first_line.isupper():
+            result["chapter_title"] = first_line
+
+        # If the second line is also under 100 characters, analyze it
+        if len(second_line) < 100:
+            if second_line.isupper():
+                result["chapter_title"] = second_line
+
+        # Remove lines that start with "DOI:"
+        if first_line.startswith("DOI:"):
+            content = content.replace(first_line, "", 1)
+            result["cleaned_content"] = content.strip()  # Update cleaned content
+        else:
+            result["cleaned_content"] = None
+
+    return result
+
+
 @component
 class CustomDocumentSplitter:
     def __init__(self, embedder: SentenceTransformersDocumentEmbedder,
@@ -208,6 +248,9 @@ class CustomDocumentSplitter:
             with open(file_name, "w", encoding="utf-8") as file:
                 file.write("")
 
+        current_chapter_number = None  # Store chapter number for the section
+        current_chapter_title = None   # Store chapter title for the section
+
         for doc in documents:
             # Extract section_num and paragraph_num from the metadata
             section_num = int(doc.meta.get("section_num"))
@@ -220,6 +263,23 @@ class CustomDocumentSplitter:
             # If verbose is True, print the content when section_num changes and paragraph_num == 1
             if section_num != last_section_num and paragraph_num == 1:
                 if self._verbose:
+                    # Analyze the first two lines using the helper function
+                    analysis_results = analyze_first_two_lines(doc.content)
+
+                    # Update metadata with chapter number and chapter title if available
+                    current_chapter_number = analysis_results["chapter_number"]
+                    current_chapter_title = analysis_results["chapter_title"]
+
+                    if current_chapter_number is not None:
+                        doc.meta["chapter_number"] = current_chapter_number
+
+                    if current_chapter_title is not None:
+                        doc.meta["chapter_title"] = current_chapter_title
+
+                    # Update document content with cleaned content
+                    if analysis_results["cleaned_content"] is not None:
+                        doc.content = analysis_results["cleaned_content"]
+
                     with open(file_name, "a", encoding="utf-8") as file:
                         file.write(f"Section: {section_num}\n")
                         file.write(f"Book Title: {doc.meta.get('book_title')}\n")
@@ -233,6 +293,13 @@ class CustomDocumentSplitter:
                               f"due to content check")
                     sections_to_skip.add((doc.meta.get("book_title"), section_num))
                     continue
+            elif section_num == last_section_num:
+                # Apply stored chapter number and chapter title to all paragraphs in the same section
+                if current_chapter_number is not None:
+                    doc.meta["chapter_number"] = current_chapter_number
+
+                if current_chapter_title is not None:
+                    doc.meta["chapter_title"] = current_chapter_title
 
             # Update the last_section_num
             last_section_num = section_num
