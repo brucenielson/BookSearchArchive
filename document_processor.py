@@ -539,6 +539,7 @@ class DocumentProcessor:
 def main() -> None:
     epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
+    # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
         table_name="book_archive",
         recreate_table=False,
