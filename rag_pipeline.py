@@ -1,8 +1,8 @@
-# Hugging Face and Pytorch imports
+# Pytorch imports
 import torch
 # Haystack imports
 # noinspection PyPackageRequirements
-from haystack import Pipeline, Document, component
+from haystack import Pipeline
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder, SentenceTransformersTextEmbedder
 # noinspection PyPackageRequirements
@@ -19,147 +19,19 @@ from haystack.utils import ComponentDevice, Device
 # noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
 # Other imports
-from typing import List, Optional, Dict, Any, Union, Callable
+from typing import Optional, Dict, Any, Union
 from pathlib import Path
 import generator_model as gen
 from enum import Enum
-from collections import defaultdict
-import itertools
-from math import inf
 import textwrap
+from custom_haystack_components import (MergeResults, DocumentQueryCollector, RetrieverWrapper, print_documents,
+                                        QueryComponent)
 
 
 class SearchMode(Enum):
     LEXICAL = 1
     SEMANTIC = 2
     HYBRID = 3
-
-
-@component
-class DocumentQueryCollector:
-    def __init__(self, do_stream: bool = False, callback_func: Callable = None) -> None:
-        self._do_stream: bool = do_stream
-        self._callback_func: Callable = callback_func
-    """
-    A simple component that takes a List of Documents from the DocumentJoiner
-    as well as the query and llm_top_k from the QueryComponent and returns them in a dictionary
-    so that we can connect it to other components.
-
-    This component should be unnecessary, but a bug in DocumentJoiner requires it to avoid
-    strange results on streaming happening from the LLM component prior to receiving the documents.
-    """
-    @component.output_types(documents=List[Document], query=str, llm_top_k=int)
-    def run(self, query: str,
-            llm_top_k: int = 5,
-            semantic_documents: Optional[List[Document]] = None,
-            lexical_documents: Optional[List[Document]] = None
-            ) -> Dict[str, Any]:
-        documents: List[Document] = []
-        # Check for semantic documents vs lexical documents and, if both exist, merge them
-        if semantic_documents is not None and lexical_documents is not None:
-            # Combine semantic and lexical documents. But only include each document once and take highest scores first.
-            output: List[Document] = []
-            document_lists: List[list] = [semantic_documents, lexical_documents]
-            docs_per_id: defaultdict = defaultdict(list)
-            doc: Document
-            for doc in itertools.chain.from_iterable(document_lists):
-                docs_per_id[doc.id].append(doc)
-            docs: list
-            for docs in docs_per_id.values():
-                # Take the document with the best score
-                doc_with_best_score = max(docs, key=lambda a_doc: a_doc.score if a_doc.score else -inf)
-                # Give a slight boost to the score for each duplicate - Add .1 to the score for each duplicate
-                # but adjust the 0.1 boost by score of the duplicate
-                if len(docs) > 1:
-                    for doc in docs:
-                        if doc != doc_with_best_score:
-                            doc_with_best_score.score += min(max(doc.score, 0.0), 0.1)
-                output.append(doc_with_best_score)
-            output.sort(key=lambda a_doc: a_doc.score if a_doc.score else -inf, reverse=True)
-            documents = output
-        elif semantic_documents is not None:
-            documents = semantic_documents
-        elif lexical_documents is not None:
-            documents = lexical_documents
-        if self._do_stream:
-            print()
-            print("Retrieved Documents:")
-            print_documents(documents)
-        if self._callback_func is not None:
-            self._callback_func()
-        return {"documents": documents, "query": query, "llm_top_k": llm_top_k}
-
-
-@component
-class QueryComponent:
-    """
-    A simple component that takes a query and llm_top_k and returns it in a dictionary so that we can connect it to
-    other components.
-    """
-    @component.output_types(query=str, llm_top_k=int)
-    def run(self, query: str, llm_top_k: int) -> Dict[str, Any]:
-        return {"query": query, "llm_top_k": llm_top_k}
-
-
-@component
-class MergeResults:
-    @component.output_types(merged_results=Dict[str, Any])
-    def run(self, documents: List[Document],
-            replies: List[Union[str, Dict[str, str]]]) -> Dict[str, Dict[str, Any]]:
-        return {
-            "merged_results": {
-                "documents": documents,
-                "replies": replies
-            }
-        }
-
-
-@component
-class RetrieverWrapper:
-    def __init__(self, retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever],
-                 do_stream: bool = False) -> None:
-        self._retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever] = retriever
-        self._do_stream: bool = do_stream
-        # Alternatively, you can set the input types:
-        # component.set_input_types(self, query_embedding=List[float], query=Optional[str])
-
-    @component.output_types(documents=List[Document])
-    def run(self, query: Union[List[float], str]) -> Dict[str, Any]:
-        documents: List[Document] = []
-        if isinstance(query, list):
-            documents = self._retriever.run(query_embedding=query)['documents']
-        elif isinstance(query, str):
-            documents = self._retriever.run(query=query)['documents']
-        if self._do_stream:
-            print()
-            if isinstance(self._retriever, PgvectorEmbeddingRetriever):
-                print("Semantic Retriever Results:")
-            elif isinstance(self._retriever, PgvectorKeywordRetriever):
-                print("Lexical Retriever Results:")
-            print_documents(documents)
-        # Return a dictionary with documents
-        return {"documents": documents}
-
-
-def print_documents(documents: List[Document]) -> None:
-    for i, doc in enumerate(documents, 1):
-        print()
-        print(f"Document {i}:")
-        print(f"Score: {doc.score}")
-        if hasattr(doc, 'meta') and doc.meta:
-            if 'book_title' in doc.meta:
-                print(textwrap.fill(f"Book Title: {doc.meta['book_title']}", width=80))
-            if 'section_title' in doc.meta:
-                print(textwrap.fill(f"Section Title: {doc.meta['section_title']}", width=80))
-            if 'section_id' in doc.meta:
-                print(textwrap.fill(f"Section ID: {doc.meta['section_id']}", width=80))
-            if 'section_num' in doc.meta:
-                print(textwrap.fill(f"Section #: {doc.meta['section_num']}", width=80))
-            if 'paragraph_num' in doc.meta:
-                print(textwrap.fill(f"Paragraph #: {doc.meta['paragraph_num']}", width=80))
-        # Use text wrap to wrap the content at 80 characters
-        print(textwrap.fill(f"Content: {doc.content}", width=80))
-        print("-" * 50)
 
 
 def print_debug_results(results: Dict[str, Any],
@@ -561,4 +433,5 @@ if __name__ == "__main__":
 # TODO: Add a reranker component to rerank the documents before passing them to the LLM
 # TODO: Add a way to chat with the model
 # TODO: Add graph rag pipeline
-# TODO: Fix Google Gemini. Why did it break?
+# TODO: Fix Google Gemini. Why did it break? Upgrade it.
+# TODO: Break out components into another file.
