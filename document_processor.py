@@ -1,20 +1,17 @@
-# Hugging Face and Pytorch imports
-import csv
-
+# Pytorch imports
 import torch
-from sentence_transformers import SentenceTransformer
 # EPUB imports
 from bs4 import BeautifulSoup
 from ebooklib import epub, ITEM_DOCUMENT
 # Haystack imports
 # noinspection PyPackageRequirements
-from haystack import Pipeline, Document, component
+from haystack import Pipeline, Document
 # noinspection PyPackageRequirements
 from haystack.components.routers import ConditionalRouter
 # noinspection PyPackageRequirements
 from haystack.dataclasses import ByteStream
 # noinspection PyPackageRequirements
-from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
+from haystack.components.preprocessors import DocumentCleaner
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 # noinspection PyPackageRequirements
@@ -34,150 +31,8 @@ from pathlib import Path
 from typing_extensions import Set
 from generator_model import get_secret
 from doc_content_checker import skip_content
-
-
-@component
-class FinalDocCounter:
-    # A component that connects to both 'router' and 'writer' components and determines
-    # how many, if any, documents were written to the document store. This avoids having to check if 'writer' exists
-    # at the last node of the pipeline. I can always just be assured this component will exist.
-    @component.output_types(documents_written=int)
-    def run(self, documents_written: int = 0, no_documents: int = 0) -> Dict[str, int]:
-        return {"documents_written": documents_written + no_documents}
-
-
-@component
-class RemoveIllegalDocs:
-    @component.output_types(documents=List[Document])
-    def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
-        documents = [Document(content=doc.content, meta=doc.meta) for doc in documents if doc.content is not None]
-        documents = list({doc.id: doc for doc in documents}.values())
-        return {"documents": documents}
-
-
-@component
-class DuplicateChecker:
-    def __init__(self, document_store: PgvectorDocumentStore):
-        self.document_store = document_store
-
-    @component.output_types(documents=List[Document])
-    def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
-        unique_documents = []
-        for doc in documents:
-            if not self._is_duplicate(doc):
-                unique_documents.append(doc)
-        return {"documents": unique_documents}
-
-    def _is_duplicate(self, document: Document) -> bool:
-        # Use a simpler filter that checks for exact content match
-        filters = {
-            "field": "content",
-            "operator": "==",
-            "value": document.content
-        }
-        results = self.document_store.filter_documents(filters=filters)
-        return len(results) > 0
-
-
-@component
-class CustomDocumentSplitter:
-    def __init__(self, embedder: SentenceTransformersDocumentEmbedder,
-                 verbose=True,
-                 skip_content_func: Optional[callable] = None):
-        self._embedder: SentenceTransformersDocumentEmbedder = embedder
-        self._verbose: bool = verbose
-        self._skip_content_func: Optional[callable] = skip_content_func
-        self._model: SentenceTransformer = embedder.embedding_backend.model
-        self._tokenizer = self._model.tokenizer
-        self._max_seq_length = self._model.get_max_seq_length()
-
-    @component.output_types(documents=List[Document])
-    def run(self, documents: List[Document]) -> dict:
-        processed_docs = []
-        last_section_num = None  # Track the last section number
-        sections_to_skip = set()  # Sections to skip
-
-        # Delete "first_paragraph_section.txt"
-        file_name: str = "first_paragraph_per_section.txt"
-        if self._verbose:
-            with open(file_name, "w", encoding="utf-8") as file:
-                file.write("")
-
-        for doc in documents:
-            # Extract section_num and paragraph_num from the metadata
-            section_num = int(doc.meta.get("section_num"))
-            paragraph_num = int(doc.meta.get("paragraph_num"))
-
-            # If this is a section to skip, go to the next document
-            if (doc.meta.get("book_title"), section_num) in sections_to_skip:
-                continue
-
-            # If verbose is True, print the content when section_num changes and paragraph_num == 1
-            if section_num != last_section_num and paragraph_num == 1:
-                if self._verbose:
-                    with open(file_name, "a", encoding="utf-8") as file:
-                        file.write(f"Section: {section_num}\n")
-                        file.write(f"Book Title: {doc.meta.get('book_title')}\n")
-                        file.write(f"Section Title: {doc.meta.get('section_title')}\n")
-                        file.write(f"Content:\n{doc.content}\n\n")
-                # For the first paragraph, check for possible section skipping
-                if self._skip_content_func is not None and self._skip_content_func(doc.content):
-                    if self._verbose:
-                        # Skip this section
-                        print(f"Skipping section {doc.meta.get('book_title')} / {doc.meta.get('section_title')} "
-                              f"due to content check")
-                    sections_to_skip.add((doc.meta.get("book_title"), section_num))
-                    continue
-
-            # Update the last_section_num
-            last_section_num = section_num
-
-            # Process and extend documents
-            processed_docs.extend(self.process_document(doc))
-
-        if self._verbose:
-            print(f"Split {len(documents)} documents into {len(processed_docs)} documents")
-        return {"documents": processed_docs}
-
-    def process_document(self, document: Document) -> List[Document]:
-        token_count = self.count_tokens(document.content)
-        if token_count <= self._max_seq_length:
-            # Document fits within max sequence length, no need to split
-            return [document]
-
-        # Document exceeds max sequence length, find optimal split_length
-        split_docs = self.find_optimal_split(document)
-        return split_docs
-
-    def find_optimal_split(self, document: Document) -> List[Document]:
-        split_length = 10  # Start with 10 sentences
-        while split_length > 0:
-            splitter = DocumentSplitter(
-                split_by="sentence",
-                split_length=split_length,
-                split_overlap=min(1, split_length - 1),
-                split_threshold=min(3, split_length)
-            )
-            split_docs = splitter.run(documents=[document])["documents"]
-
-            # Check if all split documents fit within max_seq_length
-            if all(self.count_tokens(doc.content) <= self._max_seq_length for doc in split_docs):
-                return split_docs
-
-            # If not, reduce split_length and try again
-            split_length -= 1
-
-        # If we get here, even single sentences exceed max_seq_length
-        # So just let the splitter truncate the document
-        # But give warning that document was truncated
-        if self._verbose:
-            print(f"Document was truncated to fit within max sequence length of {self._max_seq_length}: "
-                  f"Actual length: {self.count_tokens(document.content)}")
-            print(f"Problem Document: {document.content}")
-        return [document]
-
-    def count_tokens(self, text: str) -> int:
-        return len(self._tokenizer.encode(text, verbose=False))
+from custom_haystack_components import CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker
+import csv
 
 
 class DocumentProcessor:
