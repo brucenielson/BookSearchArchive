@@ -567,5 +567,3 @@ if __name__ == "__main__":
     main()
 
 # TODO: There should be a 'true' section number based on finding a number then a return line character in paragraph 1
-# TODO: Change pipeline so that it passes empty List of documents to a final repo so that I don't have to check
-#  for 'writer'
