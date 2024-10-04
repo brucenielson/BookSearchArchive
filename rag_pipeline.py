@@ -380,7 +380,7 @@ class RagPipeline:
             rag_pipeline.connect("llm.replies", "merger.replies")
 
         # Connect prompt builder to the llm
-        rag_pipeline.connect("prompt_builder.prompt", "llm.prompt")
+        rag_pipeline.connect("prompt_builder", "llm")
 
         # Set the pipeline instance
         self._rag_pipeline = rag_pipeline
@@ -420,7 +420,6 @@ def main() -> None:
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
     query: str = "How are refutation, falsification, and testability related?"
-    # "What is the relationship between ad hocness and independent testability?"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"
@@ -433,4 +432,4 @@ if __name__ == "__main__":
 # TODO: Add a reranker component to rerank the documents before passing them to the LLM
 # TODO: Add a way to chat with the model
 # TODO: Add graph rag pipeline
-# TODO: Fix Google Gemini. Why did it break? Upgrade it.
+# TODO: Upgrade Google Gemini
