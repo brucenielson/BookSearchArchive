@@ -434,4 +434,3 @@ if __name__ == "__main__":
 # TODO: Add a way to chat with the model
 # TODO: Add graph rag pipeline
 # TODO: Fix Google Gemini. Why did it break? Upgrade it.
-# TODO: Break out components into another file.
