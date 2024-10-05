@@ -208,7 +208,7 @@ def analyze_first_two_lines(doc: Document, line_max: int = 100) -> Dict[str, Opt
         result["cleaned_content"] = None
 
     # Check section title for the chapter number pattern if not already found
-    match = re.search(r'(?:chapter|ch)\D*(\d+)', section_id.lower())
+    match = re.search(r'(?<!-)(?:chapter|ch)\D*(\d+)', section_id.lower())
     if match and result["chapter_number"] is None:
         result["chapter_number"] = int(match.group(1))  # Capture the chapter number
 
