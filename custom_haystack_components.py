@@ -184,7 +184,7 @@ class DuplicateChecker:
         return len(results) > 0
 
 
-def analyze_content(doc: Document, line_max: int = 100) -> Dict[str, Optional[str]]:
+def analyze_content(doc: Document, paragraph_num: int, title_line_max: int = 100) -> Dict[str, Optional[str]]:
     result: Dict[str, Optional[Union[str, int]]] = {"chapter_number": None, "chapter_title": None,
                                                     "cleaned_content": None}
 
@@ -196,37 +196,41 @@ def analyze_content(doc: Document, line_max: int = 100) -> Dict[str, Optional[st
     first_line: str = lines[0].strip() if len(lines) > 0 else ""
     second_line: str = lines[1].strip() if len(lines) > 1 else ""
 
-    # Remove lines that start with "DOI:"
-    if first_line.lower().startswith("doi:"):
-        content = content.replace(first_line, "", 1).strip()
-        result["cleaned_content"] = content
-        lines = content.split("\n", 3)  # Only split into first two lines
-        first_line = lines[0].strip() if len(lines) > 0 else ""
-        second_line = lines[1].strip() if len(lines) > 1 else ""
-    else:
-        result["cleaned_content"] = None
-
     # Check section title for the chapter number pattern if not already found
     match = re.search(r'(?<!-)(?:chapter|ch)\D*(\d+)', section_id.lower())
-    # match = re.search(r'(?<!\w-)(?:chapter|ch)\D*(\d+)', section_id.lower())
-
     if match and result["chapter_number"] is None:
         result["chapter_number"] = int(match.group(1))  # Capture the chapter number
 
-    # Only analyze if the first line is under 100 characters
-    if len(first_line) < line_max:
-        # Check if the first line is a chapter number (an integer) - we prefer this over the section_id
-        if first_line.isdigit():
-            result["chapter_number"] = int(first_line)
-            # If first line is a lone chapter number, the second line is likely the chapter title
-            if len(second_line) < line_max and result["chapter_title"] is None:
-                result["chapter_title"] = second_line.title()
-        # Check if the first line is short enough to be a title
-        elif len(first_line) < line_max and first_line.isupper():
-            result["chapter_title"] = first_line.title()
-        # An all uppercase second line is likely the name of someone for a quote, so this isn't a chapter title
-        # elif len(first_line) < line_max and not second_line.isupper():
-        #     result["chapter_title"] = first_line.title()
+    # Paragraph 1 is special - it may contain chapter number and title or DOI lines to remove
+    if paragraph_num == 1:
+        # Remove lines that start with "DOI:" on paragraph 1 - this is an unneeded line
+        if first_line.lower().startswith("doi:"):
+            content = content.replace(first_line, "", 1).strip()
+            result["cleaned_content"] = content
+            lines = content.split("\n", 3)  # Only split into first two lines
+            first_line = lines[0].strip() if len(lines) > 0 else ""
+            second_line = lines[1].strip() if len(lines) > 1 else ""
+
+        # Only analyze if the first line is under title_line_max characters
+        if len(first_line) < title_line_max:
+            # Check if the first line is a chapter number (an integer) - we prefer this over the section_id
+            if first_line.isdigit():
+                result["chapter_number"] = int(first_line)
+                # If first line is a lone chapter number, the second line is likely the chapter title
+                if len(second_line) < title_line_max and result["chapter_title"] is None:
+                    result["chapter_title"] = second_line.title()
+            # Check if the first line is short enough to be a title
+            elif len(first_line) < title_line_max and first_line.isupper():
+                result["chapter_title"] = first_line.title()
+
+    else:  # This is any other paragraph other than the first
+        # Check if the first line is a subsection title
+        # Patter is an integer followed by a period and then a title
+        if len(first_line) < title_line_max:
+            match = re.match(r'(\d+)\.\s*(.*)', first_line)
+            if match:
+                result["subsection_num"] = int(match.group(1))
+                result["subsection_title"] = match.group(2).title()
 
     return result
 
@@ -273,7 +277,7 @@ class CustomDocumentSplitter:
             # Otherwise, just save chapter info off
             if section_num != last_section_num and paragraph_num == 1:
                 # Analyze the first two lines using the helper function
-                analysis_results: Dict[str, Optional[str]] = analyze_content(doc)
+                analysis_results: Dict[str, Optional[str]] = analyze_content(doc, paragraph_num)
 
                 # Update metadata with chapter number and chapter title if available
                 current_chapter_number = analysis_results["chapter_number"]
@@ -315,6 +319,13 @@ class CustomDocumentSplitter:
 
                 if current_chapter_title is not None:
                     doc.meta["chapter_title"] = current_chapter_title
+
+                if paragraph_num > 1:
+                    analysis_results: Dict[str, Optional[str]] = analyze_content(doc, paragraph_num)
+                    if analysis_results.get("subsection_num") is not None:
+                        doc.meta["subsection_num"] = analysis_results["subsection_num"]
+                    if analysis_results.get("subsection_title") is not None:
+                        doc.meta["subsection_title"] = analysis_results["subsection_title"]
 
             # Update the last_section_num
             last_section_num = section_num
