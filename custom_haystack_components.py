@@ -25,6 +25,8 @@ def print_documents(documents: List[Document]) -> None:
             for key, value in doc.meta.items():
                 if key == 'file_path':  # Skip 'file_path'
                     continue
+                if key == 'section_headings':
+                    pass
                 # Print the key-value pair, wrapped at 80 characters
                 print(textwrap.fill(f"{key.replace('_', ' ').title()}: {value}", width=80))
 
@@ -216,13 +218,15 @@ def analyze_content(doc: Document, line_max: int = 100) -> Dict[str, Optional[st
         # Check if the first line is a chapter number (an integer) - we prefer this over the section_id
         if first_line.isdigit():
             result["chapter_number"] = int(first_line)
+            # If first line is a lone chapter number, the second line is likely the chapter title
+            if len(second_line) < line_max and result["chapter_title"] is None:
+                result["chapter_title"] = second_line.title()
         # Check if the first line is short enough to be a title
         elif len(first_line) < line_max and first_line.isupper():
             result["chapter_title"] = first_line.title()
-
-        # If first line isn't a title, is the second line a title?
-        if len(second_line) < line_max and second_line.isupper() and result["chapter_title"] is None:
-            result["chapter_title"] = second_line.title()
+        # An all uppercase second line is likely the name of someone for a quote, so this isn't a chapter title
+        # elif len(first_line) < line_max and not second_line.isupper():
+        #     result["chapter_title"] = first_line.title()
 
     return result
 
@@ -287,14 +291,12 @@ class CustomDocumentSplitter:
 
                 if self._verbose:
                     with open(self._file_name, "a", encoding="utf-8") as file:
-                        file.write(f"Section: {section_num}\n")
-                        file.write(f"Book Title: {book_title}\n")
-                        file.write(f"Section ID: {doc.meta.get('section_id')}\n")
-                        file.write(f"Section Title: {doc.meta.get('section_title')}\n")
-                        if current_chapter_number is not None:
-                            file.write(f"Chapter Number: {current_chapter_number}\n")
-                        if current_chapter_title is not None:
-                            file.write(f"Chapter Title: {current_chapter_title}\n")
+                        # Loop through all metadata attributes
+                        for key, value in doc.meta.items():
+                            if key != 'file_path':  # Skip the 'file_path' attribute
+                                file.write(f"{key.replace('_', ' ').title()}: {value}\n")
+
+                        # Write content at the end
                         file.write(f"Content:\n{doc.content}\n\n")
 
                 # For the first paragraph, check for possible section skipping
