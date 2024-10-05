@@ -266,25 +266,26 @@ class CustomDocumentSplitter:
                 continue
 
             # If verbose is True, print the content when section_num changes and paragraph_num == 1
+            # Otherwise, just save chapter info off
             if section_num != last_section_num and paragraph_num == 1:
+                # Analyze the first two lines using the helper function
+                analysis_results: Dict[str, Optional[str]] = analyze_first_two_lines(doc)
+
+                # Update metadata with chapter number and chapter title if available
+                current_chapter_number = analysis_results["chapter_number"]
+                current_chapter_title = analysis_results["chapter_title"]
+
+                if current_chapter_number is not None:
+                    doc.meta["chapter_number"] = current_chapter_number
+
+                if current_chapter_title is not None:
+                    doc.meta["chapter_title"] = current_chapter_title
+
+                # Update document content with cleaned content
+                if analysis_results["cleaned_content"] is not None:
+                    doc.content = analysis_results["cleaned_content"]
+
                 if self._verbose:
-                    # Analyze the first two lines using the helper function
-                    analysis_results: Dict[str, Optional[str]] = analyze_first_two_lines(doc)
-
-                    # Update metadata with chapter number and chapter title if available
-                    current_chapter_number = analysis_results["chapter_number"]
-                    current_chapter_title = analysis_results["chapter_title"]
-
-                    if current_chapter_number is not None:
-                        doc.meta["chapter_number"] = current_chapter_number
-
-                    if current_chapter_title is not None:
-                        doc.meta["chapter_title"] = current_chapter_title
-
-                    # Update document content with cleaned content
-                    if analysis_results["cleaned_content"] is not None:
-                        doc.content = analysis_results["cleaned_content"]
-
                     with open(file_name, "a", encoding="utf-8") as file:
                         file.write(f"Section: {section_num}\n")
                         file.write(f"Book Title: {book_title}\n")
