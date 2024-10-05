@@ -347,10 +347,10 @@ class DocumentProcessor:
         doc_convert_pipe.connect("converter", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
-        doc_convert_pipe.connect("splitter", "embedder")
-        doc_convert_pipe.connect("embedder", "duplicate_checker")
+        doc_convert_pipe.connect("splitter", "duplicate_checker")
         doc_convert_pipe.connect("duplicate_checker", "router")
-        doc_convert_pipe.connect("router.has_documents", "writer")
+        doc_convert_pipe.connect("router.has_documents", "embedder")
+        doc_convert_pipe.connect("embedder", "writer")
         doc_convert_pipe.connect("writer.documents_written", "final_counter.documents_written")
         doc_convert_pipe.connect("router.no_documents", "final_counter.no_documents")
 
