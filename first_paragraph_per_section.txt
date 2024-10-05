@@ -1,6 +1,7 @@
 Section: 1
 Book Title: The Myth of the Framework
 Section Title: Author
+Chapter Title: Author’S Note, 1993
 Content:
 AUTHOR’S NOTE, 1993
 I do not regard myself as an expert in either science or philosophy. I have, however, tried hard all my life to understand something of the world we live in. Scientific knowledge, and the human rationality that produces it, are, I believe, always fallible, or subject to error. But they are, I believe, also the pride of mankind. For man is, so far as I know, the only thing in the universe that tries to understand what it is all about. May we continue to do so, and may we also be aware of the severe limitations of all our contributions.
@@ -9,6 +10,7 @@ For many years I have argued against intellectual fashions in the sciences, and 
 Section: 2
 Book Title: The Myth of the Framework
 Section Title: Introduction
+Chapter Title: Introduction
 Content:
 INTRODUCTION
 All, or almost all, the papers collected in this volume are written to defend rationality and rational criticism. It is a way of thinking, and even a way of living: a readiness to listen to critical arguments, to search for one’s own mistakes, and to learn from them. It is, fundamentally, an attitude that I have tried to formulate (perhaps first in 1932) in the following two lines:
@@ -19,6 +21,8 @@ These two lines in italics here quoted were first printed in 1945 in my Open Soc
 Section: 3
 Book Title: The Myth of the Framework
 Section Title: Chapter01
+Chapter Number: 1
+Chapter Title: The Rationality Of Scientific Revolutions
 Content:
 1
 THE RATIONALITY OF SCIENTIFIC REVOLUTIONS
@@ -28,6 +32,8 @@ The title of this series of Spencer lectures, ‘Progress and Obstacles to Progr
 Section: 4
 Book Title: The Myth of the Framework
 Section Title: Chapter02
+Chapter Number: 2
+Chapter Title: The Myth Of The Framework
 Content:
 2
 THE MYTH OF THE FRAMEWORK
@@ -39,6 +45,8 @@ One of the more disturbing aspects of the intellectual life of our time is the w
 Section: 5
 Book Title: The Myth of the Framework
 Section Title: Chapter03
+Chapter Number: 3
+Chapter Title: Reason Or Revolution?
 Content:
 3
 REASON OR REVOLUTION?
@@ -54,6 +62,8 @@ I will begin by telling some of the history of the book and of its misleading ti
 Section: 6
 Book Title: The Myth of the Framework
 Section Title: Chapter04
+Chapter Number: 4
+Chapter Title: Science: Problems, Aims, Responsibilities
 Content:
 4
 SCIENCE: PROBLEMS, AIMS, RESPONSIBILITIES
@@ -64,6 +74,8 @@ Yet even the sad and depressing picture of religious wars has its brighter side.
 Section: 7
 Book Title: The Myth of the Framework
 Section Title: Chapter05
+Chapter Number: 5
+Chapter Title: Philosophy And Physics
 Content:
 5
 PHILOSOPHY AND PHYSICS
@@ -73,6 +85,8 @@ The following remarks are intended as an illustration of the important thesis th
 Section: 8
 Book Title: The Myth of the Framework
 Section Title: Chapter06
+Chapter Number: 6
+Chapter Title: The Moral Responsibility Of The Scientist
 Content:
 6
 THE MORAL RESPONSIBILITY OF THE SCIENTIST
@@ -82,6 +96,8 @@ One may say that the problem has lately become more general, due to the fact tha
 Section: 9
 Book Title: The Myth of the Framework
 Section Title: Chapter07
+Chapter Number: 7
+Chapter Title: A Pluralist Approach To The Philosophy Of History
 Content:
 7
 A PLURALIST APPROACH TO THE PHILOSOPHY OF HISTORY
@@ -97,6 +113,8 @@ The oldest answer to our first question, given in the Bible and in Homer, is the
 Section: 10
 Book Title: The Myth of the Framework
 Section Title: Chapter08
+Chapter Number: 8
+Chapter Title: Models, Instruments, And Truth
 Content:
 8
 MODELS, INSTRUMENTS, AND TRUTH
@@ -107,6 +125,8 @@ It was this fear that made me decide to devote about one-third of this lecture t
 Section: 11
 Book Title: The Myth of the Framework
 Section Title: Chapter09
+Chapter Number: 9
+Chapter Title: Epistemology And Industrialization
 Content:
 9
 EPISTEMOLOGY AND INDUSTRIALIZATION

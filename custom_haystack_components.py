@@ -12,6 +12,7 @@ from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 from sentence_transformers import SentenceTransformer
+import re
 
 
 def print_documents(documents: List[Document]) -> None:
@@ -184,35 +185,37 @@ class DuplicateChecker:
         return len(results) > 0
 
 
-def analyze_first_two_lines(content: str) -> dict:
-    """
-    Analyzes the first two lines of the given content and extracts chapter number, chapter title,
-    and identifies lines that start with 'DOI:'.
-
-    :param content: The document content to analyze.
-    :return: A dictionary with metadata (chapter_number, chapter_title) and the cleaned content.
-    """
-    result = {"chapter_number": None, "chapter_title": None, "cleaned_content": content}
+def analyze_first_two_lines(doc: Document, line_max: int=100) -> Dict[str, Optional[str]]:
+    result: Dict[str, Optional[Union[str, int]]] = {"chapter_number": None, "chapter_title": None,
+                                                    "cleaned_content": None}
 
     # Split the content into lines
-    lines = content.split("\n", 2)  # Only split into first two lines
-    first_line = lines[0].strip() if len(lines) > 0 else ""
-    second_line = lines[1].strip() if len(lines) > 1 else ""
+    meta: Dict[str, str] = doc.meta
+    content: str = doc.content
+    section_title: str = meta.get("section_title", "").lower()
+    lines: List[str] = content.split("\n", 3)  # Only split into first two lines
+    first_line: str = lines[0].strip() if len(lines) > 0 else ""
+    second_line: str = lines[1].strip() if len(lines) > 1 else ""
 
     # Only analyze if the first line is under 100 characters
-    if len(first_line) < 100:
+    if len(first_line) < line_max:
         # Check if the first line is a chapter number (an integer)
         if first_line.isdigit():
             result["chapter_number"] = int(first_line)
+        else:
+            # Check section title for the chapter number pattern if not already found
+            match = re.search(r'chapter(\d{1,2})', section_title)
+            if match and result["chapter_number"] is None:
+                result["chapter_number"] = int(match.group(1))  # Capture the chapter number
 
         # Check if the first line is a chapter title (all caps, < 100 chars)
         if first_line.isupper():
-            result["chapter_title"] = first_line
+            result["chapter_title"] = first_line.title()
 
         # If the second line is also under 100 characters, analyze it
-        if len(second_line) < 100:
+        if len(second_line) < line_max:
             if second_line.isupper():
-                result["chapter_title"] = second_line
+                result["chapter_title"] = second_line.title()
 
         # Remove lines that start with "DOI:"
         if first_line.startswith("DOI:"):
@@ -226,21 +229,22 @@ def analyze_first_two_lines(content: str) -> dict:
 
 @component
 class CustomDocumentSplitter:
-    def __init__(self, embedder: SentenceTransformersDocumentEmbedder,
-                 verbose=True,
+    def __init__(self,
+                 embedder: SentenceTransformersDocumentEmbedder,
+                 verbose: bool = True,
                  skip_content_func: Optional[callable] = None):
         self._embedder: SentenceTransformersDocumentEmbedder = embedder
         self._verbose: bool = verbose
         self._skip_content_func: Optional[callable] = skip_content_func
         self._model: SentenceTransformer = embedder.embedding_backend.model
         self._tokenizer = self._model.tokenizer
-        self._max_seq_length = self._model.get_max_seq_length()
+        self._max_seq_length: int = self._model.get_max_seq_length()
 
     @component.output_types(documents=List[Document])
-    def run(self, documents: List[Document]) -> dict:
-        processed_docs = []
-        last_section_num = None  # Track the last section number
-        sections_to_skip = set()  # Sections to skip
+    def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
+        processed_docs: List[Document] = []
+        last_section_num: Optional[int] = None  # Track the last section number
+        sections_to_skip: set = set()  # Sections to skip
 
         # Delete "first_paragraph_section.txt"
         file_name: str = "first_paragraph_per_section.txt"
@@ -248,23 +252,24 @@ class CustomDocumentSplitter:
             with open(file_name, "w", encoding="utf-8") as file:
                 file.write("")
 
-        current_chapter_number = None  # Store chapter number for the section
-        current_chapter_title = None   # Store chapter title for the section
+        current_chapter_number: Optional[int] = None  # Store chapter number for the section
+        current_chapter_title: Optional[str] = None  # Store chapter title for the section
 
         for doc in documents:
             # Extract section_num and paragraph_num from the metadata
-            section_num = int(doc.meta.get("section_num"))
-            paragraph_num = int(doc.meta.get("paragraph_num"))
+            section_num: int = int(doc.meta.get("section_num"))
+            paragraph_num: int = int(doc.meta.get("paragraph_num"))
+            book_title: str = doc.meta.get("book_title")
 
             # If this is a section to skip, go to the next document
-            if (doc.meta.get("book_title"), section_num) in sections_to_skip:
+            if (book_title, section_num) in sections_to_skip:
                 continue
 
             # If verbose is True, print the content when section_num changes and paragraph_num == 1
             if section_num != last_section_num and paragraph_num == 1:
                 if self._verbose:
                     # Analyze the first two lines using the helper function
-                    analysis_results = analyze_first_two_lines(doc.content)
+                    analysis_results: Dict[str, Optional[str]] = analyze_first_two_lines(doc)
 
                     # Update metadata with chapter number and chapter title if available
                     current_chapter_number = analysis_results["chapter_number"]
@@ -282,9 +287,14 @@ class CustomDocumentSplitter:
 
                     with open(file_name, "a", encoding="utf-8") as file:
                         file.write(f"Section: {section_num}\n")
-                        file.write(f"Book Title: {doc.meta.get('book_title')}\n")
+                        file.write(f"Book Title: {book_title}\n")
                         file.write(f"Section Title: {doc.meta.get('section_title')}\n")
+                        if current_chapter_number is not None:
+                            file.write(f"Chapter Number: {current_chapter_number}\n")
+                        if current_chapter_title is not None:
+                            file.write(f"Chapter Title: {current_chapter_title}\n")
                         file.write(f"Content:\n{doc.content}\n\n")
+
                 # For the first paragraph, check for possible section skipping
                 if self._skip_content_func is not None and self._skip_content_func(doc.content):
                     if self._verbose:
@@ -293,6 +303,7 @@ class CustomDocumentSplitter:
                               f"due to content check")
                     sections_to_skip.add((doc.meta.get("book_title"), section_num))
                     continue
+
             elif section_num == last_section_num:
                 # Apply stored chapter number and chapter title to all paragraphs in the same section
                 if current_chapter_number is not None:
