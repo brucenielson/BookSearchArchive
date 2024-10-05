@@ -378,6 +378,7 @@ class DocumentProcessor:
 
         source: List[ByteStream]
         meta: List[Dict[str, str]]
+
         for source, meta in self._load_files():
             self._print_verbose(f"Processing document: {meta[0]['book_title']}")
 
