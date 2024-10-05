@@ -239,14 +239,18 @@ class DocumentProcessor:
         i: int
         for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
             section_html: str = section.get_body_content().decode('utf-8')
+            # print(section_html)
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
             headings: List[str] = [heading.get_text().strip() for heading in section_soup.find_all('h1')]
+            section_headings: str = ' '.join(headings)
+            sub_headings: List[str] = [heading.get_text().strip() for heading in section_soup.find_all('h2')]
+            section_subheadings: str = ' '.join(sub_headings)
             section_id: str = section.id
-            section_title: str = ' '.join(headings)
-            if section_title == "":
-                section_title = section_id
+            section_title: str = section.title
+            if section_title == "" and section_headings != "":
+                section_title = section_headings
             else:
-                section_title = section_title + " - " + section_id
+                section_title = section_id
             paragraphs: List[Any] = section_soup.find_all('p')
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
@@ -278,6 +282,11 @@ class DocumentProcessor:
                     "section_title": section_title,
                     "file_path": file_path
                 }
+                if section_headings != "" and section_headings is not None:
+                    meta_node["section_headings"] = section_headings
+                if section_subheadings != "" and section_subheadings is not None:
+                    meta_node["section_subheadings"] = section_subheadings
+                # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
                 temp_meta.append(meta_node)
 
@@ -327,8 +336,8 @@ class DocumentProcessor:
         doc_convert_pipe.add_component("remove_illegal_docs", instance=RemoveIllegalDocs())
         doc_convert_pipe.add_component("cleaner", DocumentCleaner())
         doc_convert_pipe.add_component("splitter", custom_splitter)
-        doc_convert_pipe.add_component("embedder", self._sentence_embedder)
         doc_convert_pipe.add_component("duplicate_checker", DuplicateChecker(document_store=self._document_store))
+        doc_convert_pipe.add_component("embedder", self._sentence_embedder)
         doc_convert_pipe.add_component("router", router)
         doc_convert_pipe.add_component("writer",
                                        DocumentWriter(document_store=self._document_store,
@@ -393,7 +402,7 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents"  # /Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(

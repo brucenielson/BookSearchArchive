@@ -17,20 +17,17 @@ import re
 
 def print_documents(documents: List[Document]) -> None:
     for i, doc in enumerate(documents, 1):
-        print()
-        print(f"Document {i}:")
+        print(f"\nDocument {i}:")
         print(f"Score: {doc.score}")
+
+        # Dynamically iterate over all keys in doc.meta, excluding 'file_path'
         if hasattr(doc, 'meta') and doc.meta:
-            if 'book_title' in doc.meta:
-                print(textwrap.fill(f"Book Title: {doc.meta['book_title']}", width=80))
-            if 'section_title' in doc.meta:
-                print(textwrap.fill(f"Section Title: {doc.meta['section_title']}", width=80))
-            if 'section_id' in doc.meta:
-                print(textwrap.fill(f"Section ID: {doc.meta['section_id']}", width=80))
-            if 'section_num' in doc.meta:
-                print(textwrap.fill(f"Section #: {doc.meta['section_num']}", width=80))
-            if 'paragraph_num' in doc.meta:
-                print(textwrap.fill(f"Paragraph #: {doc.meta['paragraph_num']}", width=80))
+            for key, value in doc.meta.items():
+                if key == 'file_path':  # Skip 'file_path'
+                    continue
+                # Print the key-value pair, wrapped at 80 characters
+                print(textwrap.fill(f"{key.replace('_', ' ').title()}: {value}", width=80))
+
         # Use text wrap to wrap the content at 80 characters
         print(textwrap.fill(f"Content: {doc.content}", width=80))
         print("-" * 50)
@@ -185,7 +182,7 @@ class DuplicateChecker:
         return len(results) > 0
 
 
-def analyze_first_two_lines(doc: Document, line_max: int = 100) -> Dict[str, Optional[str]]:
+def analyze_content(doc: Document, line_max: int = 100) -> Dict[str, Optional[str]]:
     result: Dict[str, Optional[Union[str, int]]] = {"chapter_number": None, "chapter_title": None,
                                                     "cleaned_content": None}
 
@@ -209,6 +206,8 @@ def analyze_first_two_lines(doc: Document, line_max: int = 100) -> Dict[str, Opt
 
     # Check section title for the chapter number pattern if not already found
     match = re.search(r'(?<!-)(?:chapter|ch)\D*(\d+)', section_id.lower())
+    # match = re.search(r'(?<!\w-)(?:chapter|ch)\D*(\d+)', section_id.lower())
+
     if match and result["chapter_number"] is None:
         result["chapter_number"] = int(match.group(1))  # Capture the chapter number
 
@@ -218,11 +217,11 @@ def analyze_first_two_lines(doc: Document, line_max: int = 100) -> Dict[str, Opt
         if first_line.isdigit():
             result["chapter_number"] = int(first_line)
         # Check if the first line is short enough to be a title
-        elif len(first_line) < line_max:
+        elif len(first_line) < line_max and first_line.isupper():
             result["chapter_title"] = first_line.title()
 
         # If first line isn't a title, is the second line a title?
-        if len(second_line) < line_max and result["chapter_title"] is None:
+        if len(second_line) < line_max and second_line.isupper() and result["chapter_title"] is None:
             result["chapter_title"] = second_line.title()
 
     return result
@@ -270,7 +269,7 @@ class CustomDocumentSplitter:
             # Otherwise, just save chapter info off
             if section_num != last_section_num and paragraph_num == 1:
                 # Analyze the first two lines using the helper function
-                analysis_results: Dict[str, Optional[str]] = analyze_first_two_lines(doc)
+                analysis_results: Dict[str, Optional[str]] = analyze_content(doc)
 
                 # Update metadata with chapter number and chapter title if available
                 current_chapter_number = analysis_results["chapter_number"]
