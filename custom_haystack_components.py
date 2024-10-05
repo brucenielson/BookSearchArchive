@@ -185,7 +185,7 @@ class DuplicateChecker:
         return len(results) > 0
 
 
-def analyze_first_two_lines(doc: Document, line_max: int=100) -> Dict[str, Optional[str]]:
+def analyze_first_two_lines(doc: Document, line_max: int = 100) -> Dict[str, Optional[str]]:
     result: Dict[str, Optional[Union[str, int]]] = {"chapter_number": None, "chapter_title": None,
                                                     "cleaned_content": None}
 
@@ -207,25 +207,23 @@ def analyze_first_two_lines(doc: Document, line_max: int=100) -> Dict[str, Optio
     else:
         result["cleaned_content"] = None
 
+    # Check section title for the chapter number pattern if not already found
+    match = re.search(r'(?:chapter|ch)\D*(\d+)', section_id.lower())
+    if match and result["chapter_number"] is None:
+        result["chapter_number"] = int(match.group(1))  # Capture the chapter number
+
     # Only analyze if the first line is under 100 characters
     if len(first_line) < line_max:
-        # Check if the first line is a chapter number (an integer)
+        # Check if the first line is a chapter number (an integer) - we prefer this over the section_id
         if first_line.isdigit():
             result["chapter_number"] = int(first_line)
-        else:
-            # Check section title for the chapter number pattern if not already found
-            match = re.search(r'(?:chapter|ch)(\d{1,2})', section_id)
-            if match and result["chapter_number"] is None:
-                result["chapter_number"] = int(match.group(1))  # Capture the chapter number
-
-        # Check if the first line is a chapter title (all caps, < 100 chars)
-        if first_line.isupper():
+        # Check if the first line is short enough to be a title
+        elif len(first_line) < line_max:
             result["chapter_title"] = first_line.title()
 
-        # If the second line is also under 100 characters, analyze it
-        if len(second_line) < line_max:
-            if second_line.isupper():
-                result["chapter_title"] = second_line.title()
+        # If first line isn't a title, is the second line a title?
+        if len(second_line) < line_max and result["chapter_title"] is None:
+            result["chapter_title"] = second_line.title()
 
     return result
 
@@ -235,25 +233,25 @@ class CustomDocumentSplitter:
     def __init__(self,
                  embedder: SentenceTransformersDocumentEmbedder,
                  verbose: bool = True,
-                 skip_content_func: Optional[callable] = None):
+                 skip_content_func: Optional[callable] = None,
+                 verbose_file_name: str = "first_paragraph_per_section.txt") -> None:
         self._embedder: SentenceTransformersDocumentEmbedder = embedder
         self._verbose: bool = verbose
         self._skip_content_func: Optional[callable] = skip_content_func
         self._model: SentenceTransformer = embedder.embedding_backend.model
         self._tokenizer = self._model.tokenizer
         self._max_seq_length: int = self._model.get_max_seq_length()
+        # Delete "first_paragraph_section.txt"
+        self._file_name: str = verbose_file_name
+        if self._verbose:
+            with open(self._file_name, "w", encoding="utf-8") as file:
+                file.write("")
 
     @component.output_types(documents=List[Document])
     def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
         processed_docs: List[Document] = []
         last_section_num: Optional[int] = None  # Track the last section number
         sections_to_skip: set = set()  # Sections to skip
-
-        # Delete "first_paragraph_section.txt"
-        file_name: str = "first_paragraph_per_section.txt"
-        if self._verbose:
-            with open(file_name, "w", encoding="utf-8") as file:
-                file.write("")
 
         current_chapter_number: Optional[int] = None  # Store chapter number for the section
         current_chapter_title: Optional[str] = None  # Store chapter title for the section
@@ -288,9 +286,8 @@ class CustomDocumentSplitter:
                 if analysis_results["cleaned_content"] is not None:
                     doc.content = analysis_results["cleaned_content"]
 
-
                 if self._verbose:
-                    with open(file_name, "a", encoding="utf-8") as file:
+                    with open(self._file_name, "a", encoding="utf-8") as file:
                         file.write(f"Section: {section_num}\n")
                         file.write(f"Book Title: {book_title}\n")
                         file.write(f"Section ID: {doc.meta.get('section_id')}\n")
