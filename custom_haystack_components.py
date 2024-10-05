@@ -192,10 +192,20 @@ def analyze_first_two_lines(doc: Document, line_max: int=100) -> Dict[str, Optio
     # Split the content into lines
     meta: Dict[str, str] = doc.meta
     content: str = doc.content
-    section_title: str = meta.get("section_title", "").lower()
+    section_id: str = meta.get("section_id", "").lower()
     lines: List[str] = content.split("\n", 3)  # Only split into first two lines
     first_line: str = lines[0].strip() if len(lines) > 0 else ""
     second_line: str = lines[1].strip() if len(lines) > 1 else ""
+
+    # Remove lines that start with "DOI:"
+    if first_line.lower().startswith("doi:"):
+        content = content.replace(first_line, "", 1).strip()
+        result["cleaned_content"] = content
+        lines = content.split("\n", 3)  # Only split into first two lines
+        first_line = lines[0].strip() if len(lines) > 0 else ""
+        second_line = lines[1].strip() if len(lines) > 1 else ""
+    else:
+        result["cleaned_content"] = None
 
     # Only analyze if the first line is under 100 characters
     if len(first_line) < line_max:
@@ -204,7 +214,7 @@ def analyze_first_two_lines(doc: Document, line_max: int=100) -> Dict[str, Optio
             result["chapter_number"] = int(first_line)
         else:
             # Check section title for the chapter number pattern if not already found
-            match = re.search(r'chapter(\d{1,2})', section_title)
+            match = re.search(r'(?:chapter|ch)(\d{1,2})', section_id)
             if match and result["chapter_number"] is None:
                 result["chapter_number"] = int(match.group(1))  # Capture the chapter number
 
@@ -216,13 +226,6 @@ def analyze_first_two_lines(doc: Document, line_max: int=100) -> Dict[str, Optio
         if len(second_line) < line_max:
             if second_line.isupper():
                 result["chapter_title"] = second_line.title()
-
-        # Remove lines that start with "DOI:"
-        if first_line.startswith("DOI:"):
-            content = content.replace(first_line, "", 1)
-            result["cleaned_content"] = content.strip()  # Update cleaned content
-        else:
-            result["cleaned_content"] = None
 
     return result
 
@@ -285,10 +288,12 @@ class CustomDocumentSplitter:
                 if analysis_results["cleaned_content"] is not None:
                     doc.content = analysis_results["cleaned_content"]
 
+
                 if self._verbose:
                     with open(file_name, "a", encoding="utf-8") as file:
                         file.write(f"Section: {section_num}\n")
                         file.write(f"Book Title: {book_title}\n")
+                        file.write(f"Section ID: {doc.meta.get('section_id')}\n")
                         file.write(f"Section Title: {doc.meta.get('section_title')}\n")
                         if current_chapter_number is not None:
                             file.write(f"Chapter Number: {current_chapter_number}\n")

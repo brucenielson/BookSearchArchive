@@ -392,7 +392,7 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    epub_file_path: str = "documents"  # /Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
@@ -421,7 +421,6 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# TODO: There should be a 'true' section number based on finding a number then a return line character in paragraph 1
 # TODO: Get code to work with upgraded Haystack version
 # TODO: There has got to be a way to get actual page numbers from an EPUB file
 # TODO: Add PDF support (and maybe other document types)
