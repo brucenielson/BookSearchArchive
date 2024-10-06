@@ -377,9 +377,9 @@ class DocumentProcessor:
                 if chapter_number:
                     meta_node["chapter_number"] = str(chapter_number)
                 if header1:
-                    meta_node["header1"] = header1
+                    meta_node["header_1"] = header1
                 if header2:
-                    meta_node["header2"] = header2
+                    meta_node["header_2"] = header2
                 if section.title:
                     meta_node["section_title"] = section.title
 
