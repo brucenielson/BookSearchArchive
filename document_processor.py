@@ -1,7 +1,7 @@
 # Pytorch imports
 import torch
 # EPUB imports
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from ebooklib import epub, ITEM_DOCUMENT
 # Haystack imports
 # noinspection PyPackageRequirements
@@ -229,8 +229,38 @@ class DocumentProcessor:
             yield docs, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        docs: List[ByteStream] = []
-        meta: List[Dict[str, str]] = []
+        def is_section_header(paragraph: Tag) -> bool:
+            if paragraph is None:
+                return False
+            elif hasattr(paragraph, 'name') and (paragraph.name == 'h1' or paragraph.name == 'h2'):
+                # This is an actual header
+                return True
+            elif (hasattr(paragraph, 'name') and paragraph.name == 'p' and
+                  hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
+                  ('h1' in paragraph.attrs['class'] or 'h2' in paragraph.attrs['class'])):
+                # This is a paragraph that is styled like a header
+                return True
+            else:
+                return False
+
+        def create_paragraph(p_text, book_info, section_info, sec_num, p_num, h1, h2) -> Tuple[ByteStream, Dict[str, str]]:
+            p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_text}</body></html>"
+            b_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
+            m_node: Dict[str, str] = {
+                "section_num": str(sec_num),
+                "paragraph_num": str(p_num),
+                "book_title": book_info.title,
+                "section_id": section_info.id,
+                "section_title": section_info.title,
+                "header1": h1,
+                "header2": h2,
+                "file_path": file_path
+            }
+            # self._print_verbose(meta_node)
+            return b_stream, m_node
+
+        docs_list: List[ByteStream] = []
+        meta_list: List[Dict[str, str]] = []
         included_sections: List[str] = []
         book: epub.EpubBook = epub.read_epub(file_path)
         self._print_verbose()
@@ -241,26 +271,40 @@ class DocumentProcessor:
             section_html: str = section.get_body_content().decode('utf-8')
             # print(section_html)
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
-            headings: List[str] = [heading.get_text().strip() for heading in section_soup.find_all('h1')]
-            section_headings: str = ' '.join(headings)
-            sub_headings: List[str] = [heading.get_text().strip() for heading in section_soup.find_all('h2')]
-            section_subheadings: str = ' '.join(sub_headings)
-            section_id: str = section.id
-            section_title: str = section.title
-            if section_title == "" and section_headings != "":
-                section_title = section_headings
-            else:
-                section_title = section_id
-            paragraphs: List[Any] = section_soup.find_all('p')
+            print()
+            print("HTML:")
+            print(section_soup)
+            print()
+            paragraphs: List[Any] = section_soup.find_all(['p', 'h1', 'h2'])
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             combined_paragraph: str = ""
+            meta: Dict[str, str] = {}
+            header1: str = ""
+            header2: str = ""
+            title: str = ""
+            chapter_number: int = 0
             para_num: int = 0
             j: int
             for j, p in enumerate(paragraphs):
+                next_p: Optional[Tag] = None
+                if j < len(paragraphs) - 1:
+                    next_p = paragraphs[j + 1]
+
+                if p.name == 'h1' or (hasattr(p, 'attrs') and 'class' in p.attrs and 'h1' in p.attrs['class']):
+                    header1 = p.text.title()
+                elif p.name == 'h2' or (hasattr(p, 'attrs') and 'class' in p.attrs and 'h2' in p.attrs['class']):
+                    header2 = p.text.title()
+                elif hasattr(p, 'attrs') and 'class' in p.attrs and any(cls.endswith('title') for cls in p.attrs['class']):
+                    title += p.text.title() + " "
+                elif hasattr(p, 'attrs') and 'class' in p.attrs and 'chno' in p.attrs['class'] and p.text.isdigit():
+                    chapter_number = int(p.text)
+                elif hasattr(p, 'attrs') and 'class' in p.attrs and 'section' in p.attrs['class']:
+                    section_name = p.text
+
                 p_str: str = str(p)
-                if len(combined_paragraph) + len(p_str) < self._min_paragraph_size:
+                if len(combined_paragraph) + len(p_str) < self._min_paragraph_size and not is_section_header(next_p):
                     combined_paragraph += "\n" + p_str
                     # If it's the last paragraph, process it
                     if j == len(paragraphs) - 1:
@@ -278,34 +322,32 @@ class DocumentProcessor:
                     "section_num": str(section_num),
                     "paragraph_num": str(para_num),
                     "book_title": book.title,
-                    "section_id": section_id,
-                    "section_title": section_title,
+                    "section_id": section.id,
+                    "section_title": section.title,
+                    "header1": header1,
+                    "header2": header2,
                     "file_path": file_path
                 }
-                if section_headings != "" and section_headings is not None:
-                    meta_node["section_headings"] = section_headings
-                if section_subheadings != "" and section_subheadings is not None:
-                    meta_node["section_subheadings"] = section_subheadings
                 # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
                 temp_meta.append(meta_node)
 
             if (len(total_text) > self._min_section_size
-                    and section_id not in self._sections_to_skip.get(book.title, set())):
-                self._print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {section_title}. "
+                    and section.id not in self._sections_to_skip.get(book.title, set())):
+                self._print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {section.title}. "
                                     f"Length: {len(total_text)}")
-                docs.extend(temp_docs)
-                meta.extend(temp_meta)
-                included_sections.append(book.title + ", " + section_id)
+                docs_list.extend(temp_docs)
+                meta_list.extend(temp_meta)
+                included_sections.append(book.title + ", " + section.id)
                 section_num += 1
             else:
-                self._print_verbose(f"Book: {book.title}; Title: {section_title}. Length: {len(total_text)}. Skipped.")
+                self._print_verbose(f"Book: {book.title}; Title: {section.title}. Length: {len(total_text)}. Skipped.")
 
         self._print_verbose(f"Sections included:")
         for section in included_sections:
             self._print_verbose(section)
         self._print_verbose()
-        return docs, meta
+        return docs_list, meta_list
 
     def _doc_converter_pipeline(self) -> None:
         self._setup_embedder()
@@ -402,7 +444,7 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents"
+    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
