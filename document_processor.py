@@ -323,6 +323,10 @@ class DocumentProcessor:
                 if section.id == 'Chapter02':
                     pass
 
+                # If we used the paragraph to fill in metadata, we don't want to include it in the text
+                if updated:
+                    continue
+
                 p_str: str = str(p)  # p.text.strip()
                 p_str_chars: int = len(p.text)
                 min_paragraph_size: int = self._min_paragraph_size
@@ -495,8 +499,8 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    # epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
-    epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
+    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(

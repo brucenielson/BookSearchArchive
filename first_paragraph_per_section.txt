@@ -4,7 +4,6 @@ Book Title: The Myth of the Framework
 Section Id: Author
 Title: Author’S Note, 1993
 Content:
-AUTHOR’S NOTE, 1993
 I do not regard myself as an expert in either science or philosophy. I have, however, tried hard all my life to understand something of the world we live in. Scientific knowledge, and the human rationality that produces it, are, I believe, always fallible, or subject to error. But they are, I believe, also the pride of mankind. For man is, so far as I know, the only thing in the universe that tries to understand what it is all about. May we continue to do so, and may we also be aware of the severe limitations of all our contributions.
 
 Section Num: 1
@@ -64,7 +63,6 @@ Book Title: The Myth of the Framework
 Section Id: Introduction
 Title: Introduction
 Content:
-INTRODUCTION
 All, or almost all, the papers collected in this volume are written to defend rationality and rational criticism. It is a way of thinking, and even a way of living: a readiness to listen to critical arguments, to search for one’s own mistakes, and to learn from them. It is, fundamentally, an attitude that I have tried to formulate (perhaps first in 1932) in the following two lines:
 
 Section Num: 2
@@ -134,9 +132,6 @@ Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Content:
-1
-THE RATIONALITY OF SCIENTIFIC REVOLUTIONS
-Selection versus instruction
 The title of this series of Spencer lectures, ‘Progress and Obstacles to Progress in the Sciences’, was chosen by the organizers of the series. The title seems to imply that progress in science is a good thing, and that an obstacle to progress is a bad thing – a position held by almost everybody until quite recently. Perhaps I should make it clear at once that I accept this position, although with some slight and faintly obvious reservations to which I shall briefly allude later. Of course, obstacles which are due to the inherent difficulty of the problems tackled are welcome challenges. (Indeed, many scientists were greatly disappointed when it turned out that the problem of tapping nuclear energy was comparatively trivial, involving no new revolutionary change of theory.) But stagnation in science would be a curse. Still, I agree with Professor Bodmer’s suggestion that scientific advance is only a mixed blessing1. Let’s face it: blessings are mixed, though there may be some exceedingly rare exceptions.
 
 Section Num: 3
@@ -166,7 +161,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: I
 Content:
-I
 I now turn to progress in science. I will be looking at progress in science from a biological or evolutionary point of view. I am far from suggesting that this is the most important point of view for examining progress in science. But the biological approach offers a convenient way of introducing the two leading ideas of the first half of my talk. They are the ideas of instruction and selection.
 
 Section Num: 3
@@ -188,7 +182,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: II
 Content:
-II
 In order not to lead you blindfolded to the result of this comparison I will annnounce at once my main thesis. It is a thesis asserting the fundamental similarity of the three levels, as follows.
 On all three levels – genetic adaptation, adaptive behaviour, and scientific discovery – the mechanism of adaptation is fundamentally the same.
 
@@ -293,7 +286,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: III
 Content:
-III
 So far I have stressed the similarities in the working of the adaptive mechanism on the three levels. This raises an obvious problem: what about the differences?
 The main difference between the genetic and the behavioural level is this. Mutations on the genetic level are not only random but completely ‘blind’ in two senses.6 First, they are in no way goal directed. Secondly, the survival of a mutation cannot influence the further mutations, not even the frequencies or probabilities of their occurrence (though admittedly, the survival of a mutation may sometimes determine what kind of mutations may possibly survive in future cases). On the behavioural level, trials are also more or less random. But they are no longer completely ‘blind’ in either of the two senses mentioned. First, they are goal directed. And secondly, animals may learn from the outcome of a trial: they may learn to avoid the type of trial behaviour that has led to a failure. (They may even avoid it in cases in which it could have succeeded.) Similarly, they may also learn from success. And successful behaviour may be repeated, even in cases in which it is not adequate. However, a certain degree of ‘blindness’ is inherent in all trials.7
 
@@ -376,7 +368,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: IV
 Content:
-IV
 I have suggested that progress in science, or scientific discovery, depends on instruction and selection: on a conservative or traditional or historical element, and on a revolutionary use of trial and the elimination of error by criticism, which includes severe empirical examinations or tests – that is, attempts to probe into the possible weaknesses of theories, attempts to refute them.
 
 Section Num: 3
@@ -427,7 +418,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: V
 Content:
-V
 However, not even Darwin or Wallace, not to mention Spencer, saw that there is no instruction from without. They did not operate with purely selectionist arguments. In fact, they frequently argued on Lamarckian lines.16 In this they seem to have been mistaken. Yet it may be worth while to speculate about possible limits to Darwinism. For we should always be on the lookout for possible alternatives to any dominant theory.
 
 Section Num: 3
@@ -468,7 +458,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: VI
 Content:
-VI
 I suggest therefore that we conceive the way science progresses somewhat on the lines of Niels Jerne’s and Sir Macfarlane Burnet’s theories of antibody formation.19 Earlier theories of antibody formation assumed that the antigen works as a negative template for the formation of the antibody. This would mean that there is instruction from without, from the invading antibody. The fundamental idea of Jerne was that the instruction or information which enables the antibody to recognize the antigen is, literally, inborn: that it is part of the gene structure, though possibly subject to a repertoire of mutational variations. It is conveyed by the genetic code, by the chromosomes of the specialized cells that produce the antibodies. And the immune reaction is a result of growth-stimulation given to these cells by the antibody-antigen complex. Thus these cells are selected with the help of the invading environment (that is, with the help of the antigen), rather than instructed. (The analogy with the selection – and the modification – of scientific theories is clearly seen by Jerne, who in this connection refers to Kierkegaard, and to Socrates in the Meno.)
 
 Section Num: 3
@@ -489,7 +478,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: VII
 Content:
-VII
 Undismayed by Herbert Spencer’s cosmological theories of evolution, I will now try to outline the cosmological significance of the contrast between instruction from within the structure, and selection from without by the elimination of trials.
 To this end we may note first the presence, in the cell, of the gene structure, the coded instruction, and of various chemical substructures,20 the latter in random Brownian motion. The process of instruction by which the gene replicates proceeds as follows. The various substructures are carried in random fashion (by Brownian motion) to the gene. Those which do not fit fail to attach themselves to the DNA structure. Those which fit do attach themselves (with the help of enzymes). By this process of trial and selection,21 a kind of photographic negative or complement of the genetic instruction is formed. Later, this complement separates from the original instruction and, by an analogous process, forms again its negative. This negative of the negative becomes an identical copy of the original positive instruction.22
 
@@ -531,7 +519,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: VIII
 Content:
-VIII
 So far I have considered progress in science mainly from a biological point of view. However, it seems to me that the following two logical points are crucial.
 First, in order that a new theory should constitute a discovery or a step forward it should conflict with its predecessor – that is to say, it should lead to at least some conflicting results. But this means, from a logical point of view, that it should contradict25 its predecessor: it should overthrow it.
 
@@ -604,7 +591,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: IX
 Content:
-IX
 I think that the main obstacles to progress in science are of a social nature, and that they may be divided into two groups: economic obstacles and ideological obstacles.
 On the economic side poverty may, trivially, be an obstacle (although great theoretical and experimental discoveries have been made in spite of poverty). In recent years, however, it has become fairly clear that affluence may also be an obstacle. Too many dollars may chase too few ideas. Admittedly, even under such adverse circumstances progress can be achieved. But the spirit of science is in danger. Big Science may destroy great science, and the publication explosion may kill ideas. Ideas, which are only too rare, may become submerged in the flood. The danger is very real, and it is hardly necessary to enlarge upon it, but I may perhaps quote Eugene Wigner, one of the early heroes of quantum mechanics, who sadly remarks:32 ‘The spirit of science has changed.’
 
@@ -626,7 +612,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: X
 Content:
-X
 The most widely recognized of the ideological obstacles is ideological or religious intolerance, usually combined with dogmatism and lack of imagination. Historical examples are so well known that I need not dwell upon them. Yet it should be noted that even suppression may lead to progress. The martyrdom of Giordano Bruno and the trial of Galileo may have done more in the end for the progress of science than the Inquisition could do against it.
 
 Section Num: 3
@@ -688,7 +673,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: XI
 Content:
-XI
 But there is an even greater danger: a theory, even a scientific theory, may become an intellectual fashion, a substitute for religion, an entrenched ideology. And with this I come to the main point of this second part of my lecture, the part that deals with obstacles to progress in science – to the distinction between scientific revolutions and ideological revolutions.
 
 Section Num: 3
@@ -739,7 +723,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: XII
 Content:
-XII
 As my first example I choose the Copernican and Darwinian revolutions, because in these two cases a scientific revolution gave rise to an ideological revolution. Even if we neglect here the ideology of ‘Social Darwinism’,42 we can distinguish a scientific and an ideological component in both these revolutions.
 
 Section Num: 3
@@ -823,7 +806,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: XIII
 Content:
-XIII
 Of great interest is the case of the so-called Einsteinian revolution – I mean Einstein’s scientific revolution, which among intellectuals had an ideological influence comparable to that of the Copernican or Darwinian revolutions.
 Of Einstein’s many revolutionary discoveries in physics, there are two which are relevant here.
 
@@ -917,7 +899,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: XIV
 Content:
-XIV
 I hope that I have made clear the distinction between a scientific revolution and the ideological revolution which may sometimes be linked with it. The ideological revolution may serve rationality or it may undermine it. But it is often nothing but an intellectual fashion. Even if it is linked to a scientific revolution it may be of a highly irrational character, and it may consciously break with tradition.
 
 Section Num: 3
@@ -938,7 +919,6 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: NOTES
 Content:
-NOTES
 1 Professor W.F. Bodmer concluded his Herbert Spencer Lecture, entitled ‘Bio-medical Advances: A Mixed Blessing?’, with the remark:
 Thus I believe that even if biomedical advances (and of course other scientific advances) are a mixed blessing – they are a blessing we cannot avoid and it is our job to see to it that the mixture comes out for the best. (See Problems of Scientific Revolution. Scientific Progress and Obstacles to Progress in the Sciences, The Herbert Spencer Lectures 1973, p. 41.)
 My own misgivings concerning scientific advance and stagnation arise mainly from the changed spirit of science, and from the unchecked growth of Big Science, which endangers great science. (See section IX of this lecture.) Biology seems to have escaped this danger so far, but not, of course, the closely related dangers of large-scale application.
@@ -1278,8 +1258,6 @@ Section Id: Chapter02
 Title: The Myth Of The Framework
 Chapter Number: 2
 Content:
-2
-THE MYTH OF THE FRAMEWORK
 Those who believe this, and those who do not, have no common ground of discussion, but in view of their opinions they must of necessity scorn each other.
 Plato
 
@@ -1291,7 +1269,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: I
 Content:
-I
 One of the more disturbing aspects of the intellectual life of our time is the way in which irrationalism is so widely advocated, and the way in which irrationalist doctrines are taken for granted. One of the components of modern irrationalism is relativism (the doctrine that truth is relative to our intellectual background, which is supposed to determine somehow the framework within which we are able to think: that truth may change from one framework to another), and, in particular, the doctrine of the impossibility of mutual understanding between different cultures, generations, or historical periods – even within science, even within physics. In this paper I discuss the problem of relativism. It is my claim that behind it lies what I call ‘The Myth of the Framework’. I explain and criticize this myth, and comment also on arguments that have been used in its defence.
 
 Section Num: 4
@@ -1322,7 +1299,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: II
 Content:
-II
 Although I am an admirer of tradition, and conscious of its importance, I am, at the same time, an almost orthodox adherent of unorthodoxy: I hold that orthodoxy is the death of knowledge, since the growth of knowledge depends entirely on the existence of disagreement. Admittedly, disagreement may lead to strife, and even to violence. And this, I think, is very bad indeed, for I abhor violence. Yet disagreement may also lead to discussion, to argument, and to mutual criticism. And these, I think, are of paramount importance. I suggest that the greatest step towards a better and more peaceful world was taken when the war of swords was first supported, and later sometimes even replaced, by a war of words. This is why my topic is of some practical significance.
 
 Section Num: 4
@@ -1333,7 +1309,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: III
 Content:
-III
 But let me first explain what my topic is, and what I mean by my title, ‘The Myth of the Framework’. I will discuss, and argue against, a myth: a false story that is widely accepted, especially in Germany. From there it invaded America, where it became almost all-pervasive among intellectuals, and where it forms the background of some of the most flourishing schools of philosophy. So I fear that the majority of my present readers may also believe in the myth, either consciously or unconsciously.
 
 Section Num: 4
@@ -1416,7 +1391,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: IV
 Content:
-IV
 But is a fruitful discussion between different frameworks really possible? Let us take an extreme case. Herodotus, the father of historiography, tells an interesting though somewhat gruesome story of the Persian King, Darius the First, who wanted to teach a lesson to the Greeks living in his empire. It was the custom of the Greeks to burn their dead. Darius ‘summoned’, we read in Herodotus, ‘the Greeks living in his land, and asked them for what payment they would consent to eat up their fathers when they died. They answered that nothing on earth would induce them to do so. Then Darius summoned the … Callatians, who do eat their fathers, and he asked them in the presence of the Greeks, who had the help of an interpreter, for what payment they would consent to burn the bodies of their fathers when they died. And they cried out aloud and implored him not to mention such an abomination.’1
 
 Section Num: 4
@@ -1487,7 +1461,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: V
 Content:
-V
 I wish to suggest here that, in a way, we ourselves and our own attitudes are in part the results of confrontations and of inconclusive discussions of the kind described by Herodotus.
 What I mean can be summed up by the thesis that our Western civilization is the result of the clash, or confrontation, of different cultures, and therefore of the clash, or confrontation, of different frameworks.
 
@@ -1603,7 +1576,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: VI
 Content:
-VI
 One of the main tasks for human reason is to make the universe we live in understandable to ourselves. This is the task of science. There are two different components of about equal importance in this enterprise.
 The first is poetic inventiveness, that is, story-telling or myth-making: the invention of stories that explain the world. These are, to begin with, often or perhaps always polytheistic. Men feel that they are in the hands of unknown powers, and they try to understand and to explain the world, and human life and death, by inventing stories or myths about these powers.
 
@@ -1776,7 +1748,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: VII
 Content:
-VII
 If we look back on this development, then we can understand better why we must not expect any critical discussion of a serious issue, any ‘confrontation’, to yield quick and final results. Truth is hard to come by. It needs both ingenuity in criticizing old theories, and ingenuity in the imaginative invention of new theories. This is so not only in the sciences, but in all fields.
 
 Section Num: 4
@@ -1807,7 +1778,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: VIII
 Content:
-VIII
 But let me now return to the myth of the framework. There are many tendencies which may contribute to the fact that this myth is often taken for an almost self-evident truth.
 One of these tendencies I have already mentioned. It results from a disappointed over-optimism concerning the powers of reason – that is, from an over-optimistic expectation concerning the outcome of a discussion. I mean the expectation that discussion should lead to a decisive and deserved intellectual victory of the truth, represented by one party, over falsity, represented by the other. When it is found that this is not what a discussion usually achieves, disappointment turns an over-optimistic expectation into a general pessimism concerning the fruitfulness of discussions.
 
@@ -1891,7 +1861,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: IX
 Content:
-IX
 There are some people who uphold the myth that frameworks of laws and customs cannot be rationally discussed. They assert that morality is identical with legality or custom or usage, and that it is therefore impossible to judge, or even to discuss, whether one system of customs is morally better than another, since the various existing systems of laws and customs are the only possible standards of morality.
 
 Section Num: 4
@@ -1974,7 +1943,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: X
 Content:
-X
 An awareness of the difficulties of translation between different languages has also contributed to the myth. It may happen that a statement in one language is untranslatable into another, or in other words that a fact or a state of affairs which can be described in one language cannot be described in another.
 
 Section Num: 4
@@ -2036,7 +2004,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: XI
 Content:
-XI
 It is obvious that this situation must make rational discussion very difficult if the participants are brought up in different parts of the world and speak different languages. But I have found that these difficulties can often be surmounted. I have had students in the London School of Economics not only from Europe and America but also from various parts of Africa, the Middle East, India, South-East Asia, China, and Japan. And I have found that the difficulties could usually be conquered with a little patience on both sides. Whenever there was a major obstacle to overcome, it was, as a rule, the result of indoctrination with Western ideas. Dogmatic, uncritical teaching in bad Westernized schools and universities, and especially training in Western verbosity and in some Western ideology were, in my experience, much graver obstacles to rational discussion than any cultural or linguistic gap.
 
 Section Num: 4
@@ -2098,7 +2065,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: XII
 Content:
-XII
 In the remainder of this paper I will try to apply this brief analysis to some problems that have arisen in a field in which I am greatly interested – the philosophy of science.
 It is now fifty years since I arrived at a view very similar to the myth of the framework – and I not only arrived at it but at once went beyond it. It was during the great and heated discussions after the First World War that I found out how difficult it was to get anywhere with people living in a closed framework – I mean people like the Marxists, the Freudians, and the Adlerians. None of them could ever be shaken in his adopted view of the world. Every argument against their framework was interpreted by them so as to fit into it. And if this turned out to be difficult, then it was always possible to psychoanalyse or socioanalyse the arguer: criticism of Marxian ideas was due to class prejudice, criticism of Freudian ideas was due to repression, and criticism of Adlerian ideas was due to the urge to prove your superiority, an urge which was due to an attempt to compensate for a feeling of inferiority.
 
@@ -2181,7 +2147,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: XIII
 Content:
-XIII
 Some people do not think that these assertions are correct, and this results in a view of science and its history very different from mine. Let me briefly outline such a view of science.
 The proponents19 of such a view observe that scientists are normally engaged in close cooperation and discussion. And the proponents argue that this situation is made possible by the fact that scientists normally operate within a common framework to which they have committed themselves. (Frameworks of this kind seem to me to be closely related to what Karl Mannheim used to call ‘Total Ideologies’.20) The periods during which scientists remain committed to a framework are regarded as typical. They are periods of ‘normal science’, and scientists who work in this way are regarded as ‘normal scientists’.
 
@@ -2274,7 +2239,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: XIV
 Content:
-XIV
 Almost forty years ago I stressed that even observations, and reports of observations, are under the sway of theories or, if you like, under the sway of a framework. Indeed, there is no such thing as an uninterpreted observation, an observation which is not theory-impregnated. In fact, our very eyes and ears are the result of evolutionary adaptations – that is, of the method of trial and error corresponding to the method of conjectures and refutations. Both methods are adjustments to environmental regularities. A simple example will show that ordinary visual experiences have a pre-Parmenidian absolute sense of up and down built into them – a sense which is no doubt genetically based. The example is this. A square standing on one of its sides looks to all of us a different figure from a square standing on one of its corners. There is a real Gestalt shift in moving from one figure to the other.
 
 Section Num: 4
@@ -2315,7 +2279,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: XV
 Content:
-XV
 I may perhaps also mention that there is a very special form of the myth of the framework that is particularly widespread. It is the view that, before discussion, we should agree on our vocabulary – perhaps by ‘defining our terms’.
 I have criticized this view on various occasions and I do not have space to do so again.25 I only wish to make clear that there are the strongest possible reasons against this view. All definitions, so-called ‘operational definitions’ included, can only shift the problem of the meaning of the term in question to the defining terms. Thus the demand for definitions leads to an infinite regress unless we admit so-called ‘primitive’ terms, that is, undefined terms. But these are as a rule no less problematic than most of the defined terms.
 
@@ -2327,7 +2290,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: XVI
 Content:
-XVI
 In the last section of this paper, I will briefly discuss the myth of the framework from a logical point of view: I will attempt something like a logical diagnosis of the malaise.
 The myth of the framework is clearly the same as the doctrine that one cannot rationally discuss anything that is fundamental, or that a rational discussion of principles is impossible.
 
@@ -2410,7 +2372,6 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: NOTES
 Content:
-NOTES
 1 Herodotus, III, 38.
 2 I discuss the distinction between nature and convention in my Open Society, chapter 5, where I refer to Pindar, Herodotus, Protagoras, Antiphon, Archelaus, and especially to Plato’s Laws (cp. notes 3, 7, 10, 11, and 28 to chapter 5 and text). Although I mention (p. 60) the significance of ‘the realization that taboos are different in various tribes’, and although I (just) mention Xenophanes (note 7) and his profession as a ‘wandering bard’ (note 9 to chapter 10), I did not then fully realize the part played by culture clash in the evolution of critical thought, as witnessed by the contribution made by Xenophanes, Heraclitus, and Parmenides (see especially note 11 to the Open Society, chapter 5) to the problem of nature or reality or truth versus convention or opinion. See also my Conjectures and Refutations, passim.
 
@@ -2519,8 +2480,6 @@ Section Id: Chapter03
 Title: Reason Or Revolution?
 Chapter Number: 3
 Content:
-3
-REASON OR REVOLUTION?
 The trouble with a total revolution …
 Is that it brings the same class up on top.
 Executives of skilful execution
@@ -2536,7 +2495,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: I
 Content:
-I
 I will begin by telling some of the history of the book and of its misleading title. In 1960 I was invited to open a discussion on ‘The Logic of the Social Sciences’ at a congress of German sociologists in Tübingen. I accepted – and I was told that my opening address would be followed by a reply from Professor Theodor W. Adorno of Frankfurt. It was suggested to me by the organizers that, in order to make a fruitful discussion possible, I should formulate my views in a number of definite theses. This I did: my opening address to that discussion, delivered in 1961, consisted of twenty-seven sharply formulated theses, plus a programmatic formulation of the task of the theoretical social sciences. Of course, I formulated these theses so as to make it difficult for any Hegelian or Marxist (such as Adorno) to accept them. And I supported them as well as I could by arguments. Owing to the limited time available, I confined myself to fundamentals, and I tried to avoid repeating what I had said elsewhere.
 
 Section Num: 5
@@ -2608,7 +2566,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: II
 Content:
-II
 This fact and my attitude towards revolution can be easily explained. We may start from Darwinian evolution. Organisms evolve by trial and error, and their erroneous trials – their erroneous mutations – are eliminated, as a rule, by the elimination of the organism that is the ‘carrier’ of the error. It is part of my epistemology that, in man, through the evolution of a descriptive and argumentative language, all this has changed radically. Man has achieved the possibility of being critical of his own tentative trials, of his own theories. These theories are no longer incorporated in his organism or in his genetic system. They may be formulated in books or in journals. And they can be critically discussed, and shown to be erroneous, without killing any authors or burning books – without destroying the ‘carriers’.
 
 Section Num: 5
@@ -2641,7 +2598,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: III
 Content:
-III
 I have been for many years a critic of the so-called ‘sociology of knowledge’. Not that I thought that everything that Mannheim (and Scheler) said was mistaken. On the contrary, much of it was only too trivially true. What I combated was Mannheim’s belief that there was an essential difference with respect to objectivity between the social scientist and the natural scientist, or between the study of society and the study of nature. The thesis I combated was that it was easy to be objective in the natural sciences, while objectivity in the social sciences could be achieved, if at all, only by very select intellects: by the ‘freely poised intelligence’ which is only ‘loosely anchored in social traditions’.4
 
 Section Num: 5
@@ -2673,7 +2629,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: IV
 Content:
-IV
 The sociological explanation of this fact is simple. We all get our values, or most of them, from our social environment: often merely by imitation (simply by taking them over from others), sometimes by a revolutionary reaction to accepted values, and at other times – though this may be rare – by a critical examination of these values and of possible alternatives. However this may be, the social and intellectual climate, the tradition in which one is brought up, is often decisive for the moral and other standards and values one adopts. All this is rather obvious. A very special case, but all-important for our purpose, is that of intellectual values.
 
 Section Num: 5
@@ -2714,7 +2669,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: V
 Content:
-V
 There is here, at first sight, a difference between the social sciences and the natural sciences: in the so-called social sciences and in philosophy, the degeneration into impressive but more or less empty verbalism has gone further than in the natural sciences. Yet the danger is getting acute everywhere. Even among mathematicians a tendency to impress people may sometimes be discerned, although the incitement to do so is least here. For it is partly the wish to ape the mathematicians and the mathematical physicists in technicality and in difficulty that inspires the use of verbiage in other sciences.
 
 Section Num: 5
@@ -2756,7 +2710,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: VI
 Content:
-VI
 I now come to my main point. It is this. Some of the famous leaders of German sociology who do their intellectual best, and do it with the best conscience in the world, are nevertheless, I believe, simply talking trivialities in high-sounding language, as they were taught. They teach this to their students, who are dissatisfied, yet do the same. The genuine and general feeling of dissatisfaction, manifest in their hostility to the society in which they live, is a reflection of their unconscious dissatisfaction with the sterility of their own activities.
 
 Section Num: 5
@@ -2838,7 +2791,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: VII
 Content:
-VII
 It is for reasons such as these that I find it so difficult to discuss any serious problem with Professor Habermas. I am sure he is perfectly sincere. But I think that he does not know how to put things simply, clearly, and modestly, rather than impressively. Most of what he says seems to me trivial. The rest seems mistaken.
 
 Section Num: 5
@@ -2879,7 +2831,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: VIII
 Content:
-VIII
 A last word about the term ‘positivism’. Words do not matter, and I do not really mind if even a thoroughly misleading and mistaken label is applied to me. But the fact is that throughout my life I have combated positivist epistemology, under the name ‘positivism’. I do not deny, of course, the possibility of stretching the term ‘positivist’ until it covers anybody who takes any interest in natural science, so that it can be applied even to opponents of positivism, such as myself. I only contend that such a procedure is neither honest nor apt to clarify matters.
 
 Section Num: 5
@@ -2932,7 +2883,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: NOTES
 Content:
-NOTES
 1 H. Maus and F. Fürstenberg, eds, Der Positivismusstreit in der deutschen Soziologie, Luchterhand, Berlin, 1969.
 2 ‘What is Dialectic?’, Mind, XLIX, 1940, pp. 403ff. Reprinted in Conjectures and Refutations.
 3 The Vienna Circle consisted of men of originality and of the highest intellectual and moral standards. Not all of them were positivists, even if we mean by this term no more than a condemnation of speculative thought, although most of them were. I have always been in favour of criticizable speculative thought and, of course, of its criticism.
@@ -2973,7 +2923,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: ADDENDUM 1974: THE FRANKFURT SCHOOL
 Content:
-ADDENDUM 1974: THE FRANKFURT SCHOOL
 I first heard of the Frankfurt School in the 1930s but decided then, on the basis of some experimental reading, against conscientiously reading its output.
 In 1960, as recounted in my ‘Reason or Revolution?’, I was asked to open a discussion at a conference in Tübingen, and was told that Adorno would reply to my paper. This led me to another attempt at reading the publications of the Frankfurt School and especially Adorno’s books.
 
@@ -3107,7 +3056,6 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: NOTES
 Content:
-NOTES
 1 Max Horkheimer and Theodor W. Adorno, Dialectic of Enlightenment, Herder & Herder, New York, 1972.
 2 Karl Marx, Capital, volume II, 1872, ‘Nachwort’.
 3 Max Horkheimer, Kritische Theorie, edited by A. Schmidt, S. Fisher, Frankfurt, 1968, volume II, pp. 340f.
@@ -3123,9 +3071,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: I
 Content:
-4
-SCIENCE: PROBLEMS, AIMS, RESPONSIBILITIES
-I
 The intellectual history of man has its depressing as well as its exhilarating aspects. For one may well look upon it as a history of prejudice and dogma, tenaciously held, and often combined with intolerance and fanaticism. One may even describe it as a history of spells of religious or quasi-religious frenzy. It should be remembered, in this context, that most of our great destructive wars have been religious or ideological wars – with the notable exception, perhaps, of the wars of Genghis Khan, who seems to have been a model of religious toleration.
 
 Section Num: 6
@@ -3285,7 +3230,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: II
 Content:
-II
 I shall now very briefly criticize Bacon’s anti-theoretical dogma and his view of science, and then turn to my own view of science – and in particular of experimental science – which I propose to put in its place.
 1 The idea that we can purge our minds of prejudices at will and so get rid of all preconceived ideas or theories, prior to, and preparatory to, scientific discovery, is naïve and mistaken. It is mainly through scientific discovery that we learn that certain of our ideas – such as those of the flat earth or the moving sun – are prejudices. We discover the fact that one of the beliefs we held was a prejudice only after the advance of science has led us to discard it. For there is no criterion by which we could recognize prejudices in anticipation of this advance.
 
@@ -3380,7 +3324,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: III
 Content:
-III
 With this, I will now leave Bacon’s views in order to give you my own view of the matter. I will first propose a simple solution of Bacon’s problem.
 My solution consists of two steps.
 First, every scientist who claims that his theory is supported by experiment or observation should be prepared to ask himself the following question: Can I describe any possible results of observation or experiment which, if actually reached, would refute my theory?
@@ -3468,7 +3411,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: IV
 Content:
-IV
 Let us look at a few examples. Psychoanalysis would become refutable only if it denied that certain possible or conceivable forms of human behaviour do, in fact, occur.
 Newton’s theory of gravity is highly testable, for example, because its theory of perturbations predicts certain deviations from Kepler’s planetary orbits, and this prediction may be refuted. Einstein’s theory of gravity is highly testable because it predicts certain deviations from Newton’s planetary orbits, and this prediction may be refuted. It also predicts the curvature of light rays and the retardation of atomic clocks in strong gravitational fields, and again these predictions may be refuted.
 
@@ -3520,7 +3462,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: V
 Content:
-V
 The modern view of science – the view that scientific theories are essentially hypothetical or conjectural, and that we can never be sure that even the best established theory may not be overthrown and replaced by a better approximation – is, I believe, the result of the Einsteinian revolution.
 For there never was a more successful theory, or a better tested theory, than Newton’s theory of gravity. It succeeded in explaining both terrestrial and celestial mechanics. It was most severely tested in both fields for centuries. The great physicist and mathematician Henri Poincaré believed not only that it was true – this of course was everybody’s belief – but that it was true by definition, and that it would therefore remain the invariable basis of physics to the end of man’s search for truth. And Poincaré believed this in spite of the fact that he actually anticipated – or that he came very close to anticipating – Einstein’s special theory of relativity. I mention this in order to illustrate the tremendous authority of Newton’s theory down to the very last.
 
@@ -3582,7 +3523,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: VI
 Content:
-VI
 I have mentioned these historical facts merely because I wish to stress that the change from the authoritarian theory of scientific knowledge to an anti-authoritarian and critical theory is quite recent. This also explains why the view that the method of science is essentially the method of critical discussion, and of a critical examination of competing conjectures or hypotheses, is still felt by many to be inappropriate to the experimental sciences – why so many people still feel that what is based upon careful laboratory work has more than merely hypothetical status.
 
 Section Num: 6
@@ -3614,7 +3554,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: VII
 Content:
-VII
 I may now perhaps sum up the first part of my talk by restating all the controversial things I have been saying in a number of theses, which I shall try to put in as challenging a form as I can.
 1 All scientific knowledge is hypothetical or conjectural.
 2 The growth of knowledge, and especially of scientific knowledge, consists in learning from our mistakes.
@@ -3723,7 +3662,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: VIII
 Content:
-VIII
 I now turn to the second part of this talk, devoted to problems and their role in science.
 Science begins with observation, says Bacon, and this saying is an integral part of the Baconian religion. It is still widely accepted, and still repeated ad nauseam in the introductions to even some of the best textbooks in the field of the physical and biological sciences.
 
@@ -3859,7 +3797,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: IX
 Content:
-IX
 Now let us look a little more closely at the way in which we get acquainted with a problem.
 We start, I say, with a problem – a difficulty. It is perhaps a practical problem, or a theoretical problem. Whatever it may be, when we first encounter the problem we cannot, obviously, know much about it. At best, we have only a vague idea what our problem really consists of. How, then, can we produce an adequate solution? Obviously, we cannot. We must first get better acquainted with the problem. But how?
 
@@ -3964,7 +3901,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: X
 Content:
-X
 My view of the significance of problems for the methodology or theory of scientific knowledge may perhaps be summed up by the following considerations.
 The theory of knowledge – and especially the theory of scientific knowledge – is constantly faced with a near paradox which may be brought home to us by the clash of the following two theses.
 
@@ -4034,7 +3970,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: XI
 Content:
-XI
 Having discussed problems and their growth at some length, I now turn to theories. I shall discuss the question: What is meant by saying that we ‘understand’ a scientific theory?
 This question has been much discussed, and it has been suggested that we should not speak at all about ‘understanding’ theories – that the idea that we can understand a theory is out of date. It has also been suggested that those who, like myself, speak about ‘understanding’ mean either the understanding of a crude mechanism, like a clock, or else ‘understanding’ in the sense of being able to draw a picture, or make a model, of the process in question. And it is then pointed out, and quite correctly, that modern physical theory no longer confines itself to clockwork mechanisms, or to picturable processes. From this it is concluded – wrongly, I believe – that the whole idea of ‘understanding’ a theory is out of date. And this conclusion is widely accepted, not only by physicists but also by some biologists.
 
@@ -4088,7 +4023,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: XII
 Content:
-XII
 It may be appropriate at this stage to say something about the acceptance of theories – much discussed by philosophers of science as the question of ‘verification’.
 To begin with, I wish to make it quite clear that I regard the question of the acceptance of a theory or conjecture as one whose importance is much over-rated (quite apart from the fact that I don’t believe in the verification or verifiability of theories, but this I shall not discuss here).
 
@@ -4140,7 +4074,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: XIII
 Content:
-XIII
 I have not said anything about induction so far, and I should not have said anything were I not afraid to disappoint some of those who came to hear a philosopher on scientific method – and thus on induction.
 So I must say now that I do not believe there is such a thing as an inductive method or an inductive procedure – unless indeed you decide to use the name ‘induction’ for that method of critical discussion and of attempted refutations which I have described here.
 
@@ -4204,7 +4137,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: XIV
 Content:
-XIV
 Let me conclude this part of my talk with a practical proposal.
 There is a tradition still alive in the writing of scientific papers which I have dubbed ‘the inductive style’. I am sure you all know it, and some of you may still practise it. A very well-known form of it is to write a paper by first describing the experimental arrangements, then the observations, possibly a curve which may link them up, and perhaps concluding (in small print) with a hypothesis. This inductive or Baconian style has a long and glorious history: great and world-shaking papers have been written in this style – for example, Sir Alexander Fleming’s paper reporting his first observations of penicillin.
 
@@ -4277,7 +4209,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: XV
 Content:
-XV
 I now come to the brief concluding part of my talk, entitled ‘Responsibilities’.
 Anybody who says anything today about the human or social responsibilities of scientists is expected, I am afraid, to say something about the bomb. So let me get the bomb out of the way first, for what I really wish to discuss has nothing to do with it.
 
@@ -4406,7 +4337,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: NOTES
 Content:
-NOTES
 1 The quotation is taken from ‘The Third Day’. The translation is my own. Cp. Stillman Drake’s translation, Dialogue Concerning the Two Chief World Systems, University of California Press, Berkeley and Los Angeles, 1953, pp. 327f.
 2 See, for example, J.C. Eccles, The Physiology of Nerve Cells, Johns Hopkins University Press, Baltimore and Oxford, 1957, pp. 182–4.
 3 When writing this I ought to have remembered the strange period from about 1929 or 1930 to 1932 or 1933, now easily forgotten, when the same feeling as described by Planck emerged again, though only for a short time, among some leading physicists. It is described by C.P. Snow in The Search where a Cambridge physicist whom he describes as ‘one of the greatest mathematical physicists’ and as ‘Newton’s successor’ is made to say: ‘In a sense, physics and chemistry are finished sciences.’ (Penguin edition, London, 1965, p. 162. See also p. 88 for suggestions about the identity of the physicist.) A somewhat similar attitude may be discerned in R.A. Millikan’s Time, Matter and Values, University of North Carolina Press, Chapel Hill, 1932, p. 46. The ‘finished science’ of those days was the electrical theory of matter, that is, the theory of protons and electrons: the structure of matter was to be explained by electrical forces (and even gravitation might well in the end be reduced to electricity). This theory of matter, which completely dominated the first third of the century, has slowly and almost silently disappeared – certainly without causing anything like a violent, or even a conscious, revolution. (It should be remembered, in this context, that at that time quantum mechanics was the theory of electrons and of their behaviour in electrical fields, especially in the electrostatic fields of positively charged nuclei.)
@@ -4454,9 +4384,6 @@ Section Id: Chapter05
 Title: Philosophy And Physics: The Influence On Theoretical And Experimental Physics Of Some Metaphysical Speculations On The Structure Of Matter
 Chapter Number: 5
 Content:
-5
-PHILOSOPHY AND PHYSICS
-The influence on theoretical and experimental physics of some metaphysical speculations on the structure of matter
 The following remarks are intended as an illustration of the important thesis that science is capable of solving philosophical problems and that modern science, at any rate, has something important to say to the philosopher about some of the classical problems of philosophy – especially about the old problem of matter. I intend to discuss certain aspects of the problem of matter since Descartes. And I intend to point out the interesting fact that some of these problems were solved, in collaboration, by speculative philosophers, such as Descartes, Leibniz, and Kant, who all helped by proposing important though tentative solutions and thus prepared the way for the work of experimental scientists and theorists of physics such as Faraday, Maxwell, Einstein, de Broglie, and Schrödinger.
 
 Section Num: 7
@@ -4658,7 +4585,6 @@ Title: Philosophy And Physics: The Influence On Theoretical And Experimental Phy
 Chapter Number: 5
 Header1: NOTES
 Content:
-NOTES
 1 See Maxwell’s masterly article Atom in the ninth edition of the Encyclopedia Britannica.
 2 For many years I have been in the habit of giving an outline of the story (which begins with Hesiod) in my lectures.
 3 I have criticized (Aristotelian) essentialism and also the theory of essential definitions in my books The Open Society and Its Enemies and The Poverty of Historicism; see the Indices, under ‘essence’ and ‘essentialism’.
@@ -4715,8 +4641,6 @@ Section Id: Chapter06
 Title: The Moral Responsibility Of The Scientist
 Chapter Number: 6
 Content:
-6
-THE MORAL RESPONSIBILITY OF THE SCIENTIST
 The topic I am going to discuss was not of my choosing, but was suggested by the organizers of this conference. I say this because I do not think that I can make any significant contribution to the solution of the grave problems involved. I nevertheless accepted the invitation to speak about it because I believe that in this respect we are all more or less in the same boat. I take it that our topic, ‘the moral responsibility of the scientist’, is a kind of euphemism for the issue of nuclear and biological warfare. But I shall try to approach our topic with some wider issues in mind.
 
 Section Num: 8
@@ -4973,7 +4897,6 @@ Title: The Moral Responsibility Of The Scientist
 Chapter Number: 6
 Header1: NOTE
 Content:
-NOTE
 1 See Hippocrates, with an English translation by W.H.S. Jones, volume I, Loeb Classical Library, William Heinemann, London/G.P. Putnam’s Sons, New York, 1923, pp. 299–301.
 This paper is a revised version of a brief address read, on 3 September 1968, to a special session, ‘Science and Ethics: The Moral Responsibility of the Scientist’, at the International Congress of Philosophy, held in Vienna. A version of this paper was published in Encounter in March, 1969, and a revised version in the Bulletin of Peace Proposals, Oslo, 1971. The paper has been further revised for the present publication. I am greatly indebted to my friend Ernst Gombrich for his help in the preparation of the original address.
 
@@ -4985,14 +4908,12 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: I
 Content:
-7
-A PLURALIST APPROACH TO THE PHILOSOPHY OF HISTORY
-I
 What may be called the philosophy of history persistently turns round three big questions.
 1 Is there a plot to history, and if so, what is it?
 2 What is the use of history?
 3 How are we to write history, or what is the method of history?
 (This also includes the ‘problem of historical knowledge’.)
+Answers to these three questions have been given, implicitly and explicitly, from the Bible and Homer down to our own day. And the answers have changed astonishingly little.
 
 Section Num: 9
 Paragraph Num: 2
@@ -5002,7 +4923,6 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: I
 Content:
-Answers to these three questions have been given, implicitly and explicitly, from the Bible and Homer down to our own day. And the answers have changed astonishingly little.
 The oldest answer to our first question, given in the Bible and in Homer, is theistic. There is a plot to history. But it is only dimly discernible, because it results from the will of God, or of the gods. And though it is perhaps not completely unfathomable, it is not easy to fathom. At any rate, there is something secret hidden behind the surface of events. It has to do with reward and punishment, with a kind of divine balance of justice – though only by the most discerning can justice be seen to be done.
 
 Section Num: 9
@@ -5252,7 +5172,6 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: II
 Content:
-II
 I will now proceed to our second question. What is the use of history?
 In an excellent paper entitled ‘Philosophy of History before Historicism’,9 Professor George H. Nadel traces the history of the answers to this question. Foremost among these answers is what he calls the Exemplar Theory of History: the theory that history is of educational value, especially for the political education of the statesman or general.
 
@@ -5348,7 +5267,6 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: III
 Content:
-III
 With the word ‘understand’ I now come to the third and, I think, most interesting question: the question of the method of history, and especially the question of historical understanding.
 For the last hundred years this question has been discussed very largely in terms of the difference in method between the natural sciences on the one hand, and the historical or humanistic sciences on the other. And there is an almost unanimous opinion that there is a big gulf between the two. There have been great quarrels about the details of this gulf. There are the famous German theorists, Windelband, Rickert, and Dilthey. There are the English theorists, foremost among them Collingwood. There is Professor Trevor-Roper, who objects to the intrinsic professionalism, and thus to the influence, of the natural scientist, and defends the view that history is for the layman. And there is Sir Isaiah Berlin, who warns us not ‘to underestimate the differences between the methods of natural science and those of history or common sense’.14
 
@@ -5780,7 +5698,6 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-NOTES
 1 Cp. the opening section of my ‘Science: Problems, Aims, Responsibilities’, chapter 4 of the present volume.
 2 The last paragraph closely follows p. 346 of my Conjectures and Refutations.
 3 Cp. my Poverty of Historicism, pp. 3f. and 17, my Open Society, volume II, pp. 208 and 255–6, and the interesting discussion in Alan Donagan’s paper ‘Popper’s Examination of Historicism’, in The Philosophy of Karl Popper, edited by P.A. Schilpp, in The Library of Living Philosophers, The Open Court Publishing Co., La Salle, Illinois, 1974, pp. 905–24.
@@ -5906,9 +5823,6 @@ Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
 Content:
-8
-MODELS, INSTRUMENTS, AND TRUTH
-The status of the rationality principle in the social sciences
 When I received the invitation to present to you my views on the methodology of the social sciences, I felt very honoured indeed. But I also felt a little uneasy, for the following reasons. My views on the methodology of the social sciences are the result of my admiration for economic theory: I began to develop them, some twenty-five years ago, by trying to generalize the method of theoretical economics.1 You will understand my fear that you may, as economists, find my views trivial – if not altogether out of date.
 
 Section Num: 10
@@ -5928,7 +5842,6 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 1. Problems, theories, and criticism
 Content:
-1. Problems, theories, and criticism
 The views on the methods of the social sciences that I am going to sketch are briefly these. The methods appropriate to the social sciences are totally different from the methods of the natural sciences as they are usually described by textbooks, by tradition, and by the majority of natural and social scientists. But this is so merely because all these textbooks and these traditions and these scientists are totally mistaken about the methods of the natural sciences. Once we get a proper understanding of the methods of the natural sciences, we can see that there is a great deal in common between them and the methods of the social sciences.
 
 Section Num: 10
@@ -6244,7 +6157,6 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 2. Models and situations
 Content:
-2. Models and situations
 In this second part of my lecture, I shall try to explain some of the similarities between the natural and the social sciences and also some of the dissimilarities.
 Let me begin by distinguishing between two kinds of problems of explanation or prediction.
 1 The first kind is that of explaining or predicting one or a smallish number of singular events. An example from the natural sciences would be, ‘When will the next lunar eclipse (or, say, the next two or three lunar eclipses) occur?’ (An example from the social sciences would be, ‘When will there be the next rise in the rate of unemployment in the Midlands, or in Western Ontario?’)
@@ -6412,7 +6324,6 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 3. An example of situational analysis
 Content:
-3. An example of situational analysis
 Let me explain, with the help of an example, what I call the ‘situational analysis of a social situation’ or the ‘logic of a social situation’ or, more briefly, ‘situational logic’.
 One of my standard examples is a pedestrian, let us call him Richard, who wants to catch a train and is in a hurry to cross a road crowded with moving and parked motor cars and other traffic. Let us assume that what we wish to explain are Richard’s somewhat erratic movements in making his way across the road.
 
@@ -6505,7 +6416,6 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 4. Psychologism
 Content:
-4. Psychologism
 The usual mistake here is to assume that in the case of human society the animation of a social model has to be provided by the human anima or psyche, and that here, therefore, we have to replace Newton’s laws of motion either by the laws of human psychology in general, or perhaps by the laws of individual psychology pertaining to the individual characters who are involved as actors in our situation.
 
 Section Num: 10
@@ -6567,8 +6477,8 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 5. Further examples
 Content:
-5. Further examples
 I have treated the example of Richard trying to cross the road in some detail, because I believe that it contains almost all the relevant elements of situational analysis as used in economics, in social anthropology, in the sociology of power politics, and in social or political history.
+To take a familiar example, the most important part of classical economic theory is the theory of perfect competition. It may be developed as the situational logic of an idealized or over-simplified social situation – the situation of people acting within the institutional framework of a perfectly free market in which buyers and sellers are equally informed of the physical qualities of the goods that are bought and sold. Similarly, the pure theory of monopoly or of duopoly is nothing but the situational logic of certain idealized social situations.
 
 Section Num: 10
 Paragraph Num: 65
@@ -6578,7 +6488,7 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 5. Further examples
 Content:
-To take a familiar example, the most important part of classical economic theory is the theory of perfect competition. It may be developed as the situational logic of an idealized or over-simplified social situation – the situation of people acting within the institutional framework of a perfectly free market in which buyers and sellers are equally informed of the physical qualities of the goods that are bought and sold. Similarly, the pure theory of monopoly or of duopoly is nothing but the situational logic of certain idealized social situations.
+Analogous remarks may be made, for example, about social anthropology. Social anthropology tries (or should try) to describe the institutional and traditional framework as well as the problems of a society in such a way that the typical actions of its members become rationally understandable as appropriate. It also tries to explain, in part, the institutional framework itself, and its changes, as the result (as a rule, the unintended result) of actions taken in certain historical situations, such as, for example, the clash of two cultures. (That much of the astonishing development of ancient Greece is influenced by culture clash may be seen, for example, from the scanty fragments that remain of the work of Hecataeus of Abdera.9)
 
 Section Num: 10
 Paragraph Num: 66
@@ -6586,9 +6496,10 @@ Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
-Header1: 5. Further examples
+Header1: 6. Problem situations
 Content:
-Analogous remarks may be made, for example, about social anthropology. Social anthropology tries (or should try) to describe the institutional and traditional framework as well as the problems of a society in such a way that the typical actions of its members become rationally understandable as appropriate. It also tries to explain, in part, the institutional framework itself, and its changes, as the result (as a rule, the unintended result) of actions taken in certain historical situations, such as, for example, the clash of two cultures. (That much of the astonishing development of ancient Greece is influenced by culture clash may be seen, for example, from the scanty fragments that remain of the work of Hecataeus of Abdera.9)
+What I have said so far is a brief outline of the methodology of the explanatory social sciences, especially economic theory and social anthropology. But it applies especially to historical explanations, which always operate with a rational reconstruction of a situation.10
+Perhaps the best field for this methodology is the history of science. Here the situation of the agent – the creative scientist – is the problem situation which he finds in his scientific field, though he may, of course, reframe it by looking at it in a new way. One may generalize this and say that whenever we wish to explain or understand history, we have to look at it as a history of problem situations.
 
 Section Num: 10
 Paragraph Num: 67
@@ -6596,26 +6507,13 @@ Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
-Header1: 6. Problem situations
-Content:
-6. Problem situations
-What I have said so far is a brief outline of the methodology of the explanatory social sciences, especially economic theory and social anthropology. But it applies especially to historical explanations, which always operate with a rational reconstruction of a situation.10
-Perhaps the best field for this methodology is the history of science. Here the situation of the agent – the creative scientist – is the problem situation which he finds in his scientific field, though he may, of course, reframe it by looking at it in a new way. One may generalize this and say that whenever we wish to explain or understand history, we have to look at it as a history of problem situations.
-
-Section Num: 10
-Paragraph Num: 68
-Book Title: The Myth of the Framework
-Section Id: Chapter08
-Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
-Chapter Number: 8
 Header1: 7. Instruments and truth: the falsity of social theories
 Content:
-7. Instruments and truth: the falsity of social theories
 I now turn to the last part of my lecture.11 In this, I intend first to develop certain arguments that favour pragmatism, but afterwards I will explain why I do not agree with pragmatism, and that I regard theories as steps towards the truth.
 You will remember my assertion that the rationality principle does not play the role of an empirical or psychological proposition, and, more especially, that it is not treated in the social sciences as subject to any kind of test. Tests, when available, are used to test a particular model, a particular situational analysis – but not the general method of situational analysis, and not, for this reason, the rationality principle: to uphold this is part of the method. (The general method is not testable, though it is arguable. The main argument in favour of it is that it appears to give rise to better testable explanatory hypotheses – that is, conjectural situational models – than other methods.12) Thus, if a test indicates that a certain model is less adequate than another one, then, since both operate with the rationality principle, we have no occasion to discard this principle.
 
 Section Num: 10
-Paragraph Num: 69
+Paragraph Num: 68
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6626,7 +6524,7 @@ This remark explains, I think, why the rationality principle has frequently been
 This point is of considerable interest. Those who say that the rationality principle is a priori mean, of course, that it is a priori valid, or a priori true. But it seems to me quite clear that they must be wrong. For the rationality principle seems to me clearly false – even in its weakest zero13 formulation, which may be put like this: ‘Agents always act in a manner appropriate to the situation in which they find themselves.’
 
 Section Num: 10
-Paragraph Num: 70
+Paragraph Num: 69
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6636,7 +6534,7 @@ Content:
 I think one can see very easily that this is not so. One has only to observe flustered drivers trying to get out of a traffic jam, or desperately trying to park their cars when there is hardly any parking space to be found, or none at all, in order to see that we do not always act in accordance with the rationality principle. (In thus hoping against hope, we do not act rationally, even though we act in accordance with a psychological mechanism whose evolution is rationally understandable.14) Moreover, there are, obviously, vast personal differences, not only in knowledge and skill – these are part of the situation – but also in assessing or understanding a situation. And this means that some people will act appropriately and others not.
 
 Section Num: 10
-Paragraph Num: 71
+Paragraph Num: 70
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6647,7 +6545,7 @@ But a principle that is not universally true is false. Thus the rationality prin
 Now if the rationality principle is false, then an explanation that consists of the conjunction of this principle and a model must also be false, even if the particular model in question is true.
 
 Section Num: 10
-Paragraph Num: 72
+Paragraph Num: 71
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6658,7 +6556,7 @@ But can the model be true? Can any model be true? I do not think so. Any model, 
 Take a Newtonian model of the solar system. Even if we assume that Newton’s laws of motion are true, the model would not be true. Though it contains a number of planets – in the form, incidentally, of mass-points, which they are not – it contains neither the meteorites nor the cosmic dust. It contains neither the pressure of the light of the sun nor that of cosmic radiation. It does not even contain the magnetic properties of the planets, or the electrical fields that result in their neighbourhood from the movement of these magnets. And – perhaps most important – it does not contain anything representing the action of the distant masses upon the bodies of the solar system. It is, like all models, a vast oversimplification.
 
 Section Num: 10
-Paragraph Num: 73
+Paragraph Num: 72
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6668,7 +6566,7 @@ Content:
 I think we have to admit that most successful scientific theories are lucky over-simplifications. But although this does not necessarily impugn the veracity of universal laws, it seems to be quite unavoidable in the construction of models, both in the natural and in the social sciences, that they over-simplify the facts, and thus do not represent the facts truly.
 
 Section Num: 10
-Paragraph Num: 74
+Paragraph Num: 73
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6678,18 +6576,17 @@ Content:
 Now if the rationality principle, which in the social sciences plays a role somewhat analogous to the universal laws of the natural sciences, is false, and if in addition the situational models are also false, then both the constituent elements of social theory are false. If we wish nevertheless to uphold the method of situational analysis as the proper method of the social sciences, as I certainly do, and if we wish to uphold the view that science searches for truth, are we not in a hopelessly difficult position?
 
 Section Num: 10
-Paragraph Num: 75
+Paragraph Num: 74
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
 Header1: 8. Instrumentalism
 Content:
-8. Instrumentalism
 There is a group of philosophers who may (somewhat precipitately) be pleased about what I have been saying: the pragmatists or instrumentalists. For it is their creed that we should not, or cannot, aim at ‘pure’ knowledge – or at truth – with our scientific theories: that scientific theories are nothing but instruments – instruments, that is, for prediction or practical application – and that we deceive ourselves if we think that theories may afford us either explanations or an understanding of what actually happens in the world.
 
 Section Num: 10
-Paragraph Num: 76
+Paragraph Num: 75
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6700,7 +6597,7 @@ Thus the instrumentalists might well rejoice, for all that I have said seems to 
 Now I have to admit that, owing to the authority of Niels Bohr, instrumentalism has become very fashionable among physicists. But the list of those who resisted the lure of this fashion includes Einstein, de Broglie, and Schrödinger. This gives me the courage to confess that I too am an anti-instrumentalist (or, as I may perhaps say, a realist). In fact I have elsewhere combated the creed of instrumentalism at some length,15 though I have so far criticized instrumentalism only as a philosophy of the physical sciences.
 
 Section Num: 10
-Paragraph Num: 77
+Paragraph Num: 76
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6710,7 +6607,7 @@ Content:
 What do we anti-instrumentalists assert? We admit, of course, that a scientific theory may be applied to all sorts of practical problems, either at once, when first invented, or at a later date. And we therefore have no objection to the assertion that all scientific theories are instruments – either actual or potential instruments. But we assert that they are not merely instruments. For we assert that we may learn from science something about the structure of our world: that scientific theories can offer genuinely satisfying explanations that can be understood and so add to our understanding of the world. And we assert – this is the crucially important point – that science aims at truth, or at getting nearer to the truth, however difficult it may be to approach truth, even with very moderate success.
 
 Section Num: 10
-Paragraph Num: 78
+Paragraph Num: 77
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6721,7 +6618,7 @@ The issue can be put in a nutshell: are scientific theories nothing but instrume
 But, you may ask, is it permissible to speak so glibly about the truth? And even if it is, is it permissible to speak so glibly about approaching truth or getting nearer to the truth? Are not all these words simply without meaning?
 
 Section Num: 10
-Paragraph Num: 79
+Paragraph Num: 78
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6731,6 +6628,17 @@ Content:
 These are important objections. Let me first deal with the question of the meaningfulness of the word ‘truth’.
 
 Section Num: 10
+Paragraph Num: 79
+Book Title: The Myth of the Framework
+Section Id: Chapter08
+Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
+Chapter Number: 8
+Header1: 9. Truth
+Content:
+It is strange that so many people should believe that there is no answer to Pilate’s question ‘What is truth?’. For, after all, in thousands of courts of justice thousands of witnesses are admonished every day to speak the truth. And most of them seem to know very well what is expected from them.
+In fact, there is an old answer to the question: ‘When is an assertion, or a proposition, or a statement, or a theory, or a belief true?’ The answer is: An assertion is true if it corresponds to, or agrees with, the facts.
+
+Section Num: 10
 Paragraph Num: 80
 Book Title: The Myth of the Framework
 Section Id: Chapter08
@@ -6738,8 +6646,8 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 9. Truth
 Content:
-9. Truth
-It is strange that so many people should believe that there is no answer to Pilate’s question ‘What is truth?’. For, after all, in thousands of courts of justice thousands of witnesses are admonished every day to speak the truth. And most of them seem to know very well what is expected from them.
+But what does it mean to say that an assertion or a theory corresponds to the facts? This question, too, has been satisfactorily answered – by the mathematician and logician Alfred Tarski.
+I cannot, of course, give a full account of Tarski’s theory here.16 Suffice it to say that it is a theory which is in complete accord with the common-sense view that the statements ‘snow is white’ and ‘grass is green’ are true, while the statements ‘snow is green’ and ‘grass is red’ are false.
 
 Section Num: 10
 Paragraph Num: 81
@@ -6749,8 +6657,7 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 9. Truth
 Content:
-In fact, there is an old answer to the question: ‘When is an assertion, or a proposition, or a statement, or a theory, or a belief true?’ The answer is: An assertion is true if it corresponds to, or agrees with, the facts.
-But what does it mean to say that an assertion or a theory corresponds to the facts? This question, too, has been satisfactorily answered – by the mathematician and logician Alfred Tarski.
+Tarski’s theory shows that we are fully entitled to use, without any qualms, the words ‘true’ and ‘false’ in their ordinary senses. It also shows that there cannot be, in any language comparable in its wealth of expressions to our ordinary European languages, a general criterion of truth – that is to say, a general method by which we could decide, of any given proposition, whether or not it is true.
 
 Section Num: 10
 Paragraph Num: 82
@@ -6760,8 +6667,7 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 9. Truth
 Content:
-I cannot, of course, give a full account of Tarski’s theory here.16 Suffice it to say that it is a theory which is in complete accord with the common-sense view that the statements ‘snow is white’ and ‘grass is green’ are true, while the statements ‘snow is green’ and ‘grass is red’ are false.
-Tarski’s theory shows that we are fully entitled to use, without any qualms, the words ‘true’ and ‘false’ in their ordinary senses. It also shows that there cannot be, in any language comparable in its wealth of expressions to our ordinary European languages, a general criterion of truth – that is to say, a general method by which we could decide, of any given proposition, whether or not it is true.
+Thus we are not, as a rule, able to decide of a statement or a theory whether it is true. Ascertaining truth may be a very difficult business, and often a practically impossible one. But the meaningfulness of the term ‘truth’ is affected by this no more than the meaningfulness of the term ‘father’ is affected by any difficulty in ascertaining fatherhood.
 
 Section Num: 10
 Paragraph Num: 83
@@ -6771,7 +6677,7 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 9. Truth
 Content:
-Thus we are not, as a rule, able to decide of a statement or a theory whether it is true. Ascertaining truth may be a very difficult business, and often a practically impossible one. But the meaningfulness of the term ‘truth’ is affected by this no more than the meaningfulness of the term ‘father’ is affected by any difficulty in ascertaining fatherhood.
+If we eliminate from language ambiguous terms like ‘yesterday’, a term which today means something different from what it will mean tomorrow, and if we take some further similar precautions, then it follows from Tarski’s theory that every statement in this purified language will be either true or false, with no third possibility. Moreover, we can have an operation of negation in our language such that if a proposition is not true, then its negation is true.
 
 Section Num: 10
 Paragraph Num: 84
@@ -6781,7 +6687,7 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: 9. Truth
 Content:
-If we eliminate from language ambiguous terms like ‘yesterday’, a term which today means something different from what it will mean tomorrow, and if we take some further similar precautions, then it follows from Tarski’s theory that every statement in this purified language will be either true or false, with no third possibility. Moreover, we can have an operation of negation in our language such that if a proposition is not true, then its negation is true.
+This shows that of all propositions one half will be true and the other half false. So we can be sure that there will be lots of true propositions, even though we may have great trouble in finding out which they are.
 
 Section Num: 10
 Paragraph Num: 85
@@ -6789,24 +6695,13 @@ Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
-Header1: 9. Truth
-Content:
-This shows that of all propositions one half will be true and the other half false. So we can be sure that there will be lots of true propositions, even though we may have great trouble in finding out which they are.
-
-Section Num: 10
-Paragraph Num: 86
-Book Title: The Myth of the Framework
-Section Id: Chapter08
-Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
-Chapter Number: 8
 Header1: 10. Approaching truth
 Content:
-10. Approaching truth
 I now turn to the second question – whether we can meaningfully speak about approaching truth, or getting nearer to the truth, or, more precisely, whether it can be meaningful to say of a theory that it is a better approximation to the truth than another theory.
 I worked on this question for a considerable time before I could produce an answer. But with the help of Tarski’s concept of truth, and a few other purely logical concepts (especially the concept of logical content, also due to Tarski), I think that I have been able to give a purely logical definition of the relation ‘a is a better approximation to the truth than b’, or ‘a is more similar to the truth than b’. This definition (which may be found in my Conjectures and Refutations17) is, like most definitions, of little significance in itself. What is significant is that it establishes one thing: that the much suspected phrase ‘a is a better approximation to the truth than b’ is certainly not meaningless.
 
 Section Num: 10
-Paragraph Num: 87
+Paragraph Num: 86
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6817,7 +6712,7 @@ There are many examples in physics of competing theories which form a sequence o
 For example, Copernicus’ model appears to be a better approximation to the truth than Ptolemy’s, Kepler’s a better approximation than Copernicus’, Newton’s theory a better approximation still, and Einstein’s better again.
 
 Section Num: 10
-Paragraph Num: 88
+Paragraph Num: 87
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6827,19 +6722,18 @@ Content:
 It is very interesting in this connection to note that Einstein did not present his theory of gravitation as a true theory. On the contrary, he argued that it could not be true, and he spent more than thirty years of his life trying to improve his own theory. But in spite of all this, he always believed that it was a better approximation to the truth than Newton’s theory and other theories (such as Milne’s).
 
 Section Num: 10
-Paragraph Num: 89
+Paragraph Num: 88
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
 Header1: 11. Reply to instrumentalism
 Content:
-11. Reply to instrumentalism
 I shall now conclude my lecture with a reply to instrumentalism. I will be very brief, and I will confine myself to the problem raised by the known falsity of social theories.
 I think that I am now in a position to answer those instrumentalists who earlier in this lecture may have welcomed my description of the methods of the social sciences as a confirmation of their philosophy of science.
 
 Section Num: 10
-Paragraph Num: 90
+Paragraph Num: 89
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6849,7 +6743,7 @@ Content:
 My answer is this: if my view of the social sciences and their methods is correct, then, admittedly, no explanatory theory in the social sciences can be expected to be true. Nevertheless, this need not trouble an anti-instrumentalist. For he may be able to show that those methods may be very good methods, in the sense that they make it possible for us to discuss critically which of the competing theories, or models, is a better approximation to the truth.
 
 Section Num: 10
-Paragraph Num: 91
+Paragraph Num: 90
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6859,7 +6753,7 @@ Content:
 This, I suggest, is the situation in the social sciences. In seeking pure knowledge our aim is, quite simply, to understand – to answer how-questions and why-questions (but not pseudo-questions of the ‘what is …?’ form). These are questions which are answered by giving an explanation. Thus all problems of pure knowledge are theoretical problems: they are problems of explanation.
 
 Section Num: 10
-Paragraph Num: 92
+Paragraph Num: 91
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6869,18 +6763,17 @@ Content:
 A problem of this kind may well have originated in a practical one. For example, a practical problem such as ‘What can be done to combat poverty?’ has led to the purely theoretical problem ‘Why are people poor?’ and from there to the theory of wages and prices, and so on – in other words, to pure economic theory, which of course constantly creates its own new theoretical problems. In the development of the theory, the problems dealt with – and especially the unsolved problems – multiply, and they become differentiated, as they always do when our knowledge grows.
 
 Section Num: 10
-Paragraph Num: 93
+Paragraph Num: 92
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
 Header1: 12. Rationality and the status of the rationality principle18
 Content:
-12. Rationality and the status of the rationality principle18
 My views on the rationality principle have been closely questioned. I have been asked whether there is not some confusion in what I say about the status of the ‘principle of acting adequately to the situation’ (that is, of my own version of the ‘rationality principle’). I was told, quite rightly, that I should make up my mind whether I want it to be a methodological principle, or an empirical conjecture. If it were a methodological principle, it would be clear why it could not be empirically tested and why it could not be empirically false (but only part of a successful or unsuccessful methodology). If it were an empirical conjecture, it would become part of the various social theories – the ‘animating part’ of every social model. But then it would have to be part of some empirical theory, and would have to be tested along with the rest of that theory, and rejected if found wanting.
 
 Section Num: 10
-Paragraph Num: 94
+Paragraph Num: 93
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6891,7 +6784,7 @@ This second case is the one that corresponds better to my own view of the status
 Now if a theory is tested and found faulty, then we have always to decide which of its various constituent parts we shall make accountable for its failure. My thesis is that it is sound methodological policy to decide not to make the rationality principle, but the rest of the theory – that is, the model – accountable.
 
 Section Num: 10
-Paragraph Num: 95
+Paragraph Num: 94
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6901,7 +6794,7 @@ Content:
 In this way it may appear that in our search for better theories we treat the rationality principle as if it were a logical or a metaphysical principle exempt from refutation: as unfalsifiable, or as a priori valid. But this appearance is misleading. There are, as I have indicated, good reasons to believe that the rationality principle, even in my minimum formulation, is actually false, though a good approximation to truth. Thus it cannot be said that I treat it as a priori valid.
 
 Section Num: 10
-Paragraph Num: 96
+Paragraph Num: 95
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6912,18 +6805,17 @@ I hold, however, that it is good policy, a good methodological device, to refrai
 The main argument in favour of this policy is that our model is far more interesting and informative, and far better testable, than the principle of the adequacy of our actions. We do not learn much in learning that this is not strictly true: we know this already. Moreover, in spite of being false, it is as a rule sufficiently near to the truth: if we can refute our theory empirically, then its breakdown will, as a rule, be pretty drastic, and though the falsity of the rationality principle may be a contributing factor, the main responsibility will normally attach to the model. Also, the attempt to replace the rationality principle by another one seems to lead to complete arbitrariness in our model-building. And lastly, we must not forget that we can test a theory only as a whole, and that the test consists in finding the better of two competing theories which may have much in common, and that most of them have the principle of adequacy in common.
 
 Section Num: 10
-Paragraph Num: 97
+Paragraph Num: 96
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
 Header1: 13. ‘Irrational’ actions
 Content:
-13. ‘Irrational’ actions
 But suppose that we are interested in a certain action not as an approximation to, but as a deviation from, the action prescribed by the logic of the situation as I have so far discussed it. Suppose that our problem is to understand the actions of a person who acts inappropriately to his situation.19
 
 Section Num: 10
-Paragraph Num: 98
+Paragraph Num: 97
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6933,7 +6825,7 @@ Content:
 Churchill said in The World Crisis20 that wars are not won but only lost – that, in effect, they are competitions in incompetence. Does not this remark provide us with a kind of model for typical social and historical situations: a model not animated by the rationality principle of the adequacy of our actions, but by a principle of inadequacy?
 
 Section Num: 10
-Paragraph Num: 99
+Paragraph Num: 98
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6944,7 +6836,7 @@ The answer is that Churchill’s dictum means that most war leaders are inadequa
 In order to understand their (more or less inadequate) actions, we have therefore to reconstruct a wider view of the situation than their own. This must be done in such a way that we can see how and why the situation as they saw it (with their limited experience, their limited or overblown aims, their limited or overexcited imagination) led them to act as they did – that is to say, adequately for their inadequate view of the situational structure. Churchill himself uses this method of interpretation with great success, for example in his careful analysis of the failure of the Auchinleck-Ritchie team (in volume IV of The Second World War).21
 
 Section Num: 10
-Paragraph Num: 100
+Paragraph Num: 99
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6954,7 +6846,7 @@ Content:
 It is interesting to me that we employ the rationality principle to the limit of what is possible whenever we try to understand the action of a madman. We try to explain a madman’s actions, as far as possible, by his aims (which may be monomaniacal) and by the ‘information’ on which he acts – that is to say, by his convictions (which may be obsessions, that is, false theories so tenaciously held that they become practically incorrigible). In so explaining the actions of a madman we explain them in terms of our wider knowledge of a problem situation which comprises his own, narrower, view of his problem situation. And understanding his actions means seeing their adequacy according to his view – his madly mistaken view – of the problem situation.
 
 Section Num: 10
-Paragraph Num: 101
+Paragraph Num: 100
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6964,7 +6856,7 @@ Content:
 We may in this way even try to explain how he arrived at his madly mistaken view: how certain experiences shattered his originally sane view of the world and led him to adopt another – the most rational view he could develop in accordance with the information at his disposal – and how he had to make this new view incorrigible, precisely because it would break down at once under the pressure of refuting instances, which would leave him (so far as he could see) stranded without any interpretation of his world – a situation to be avoided at all costs, from a rational point of view, since it would make all rational action impossible.
 
 Section Num: 10
-Paragraph Num: 102
+Paragraph Num: 101
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6974,7 +6866,7 @@ Content:
 Freud has often been described as the discoverer of human irrationality. But this is a misinterpretation, and a very superficial one to boot. Freud’s theory of the typical origin of a neurosis falls entirely into our schema of explanations incorporating both a situational model and the rationality principle. For he explains a neurosis as an attitude adopted in early childhood because it was the best available way out of a situation which the child was unable to understand and cope with. Thus the adoption of the neurosis becomes a rational act of the child – as rational, say, as the act of a man who, jumping back when confronted by the danger of being run over by a car, collides with a bicyclist. It is rational in the sense that the child chose what appeared to him the immediate, or the obvious, or perhaps the lesser evil – the less intolerable of two possibilities.
 
 Section Num: 10
-Paragraph Num: 103
+Paragraph Num: 102
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6985,7 +6877,7 @@ I shall say no more here about Freud’s method of therapy than that it is even 
 But if we thus explain everything in terms of the rationality principle, does it not become tautological? By no means. For a tautology is obviously true, whilst we make use of the rationality principle merely as a good approximation to the truth, recognizing that it is not true.
 
 Section Num: 10
-Paragraph Num: 104
+Paragraph Num: 103
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6996,7 +6888,7 @@ But if this is so, what becomes of the distinction between rationality and irrat
 This is an important question. The main distinction, I suggest, is that a healthy person’s beliefs are not incorrigible: a healthy person shows a certain readiness to correct his beliefs. He may do so only reluctantly, yet he is nevertheless ready to correct his views under the pressure of events, of the opinions held by others, and of critical arguments.
 
 Section Num: 10
-Paragraph Num: 105
+Paragraph Num: 104
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7006,7 +6898,7 @@ Content:
 If this is so then we can say that the mentality of the man with definitely fixed views, the ‘committed’ man, is akin to that of the madman. It may be that all his fixed opinions are ‘adequate’ in the sense that they happen to coincide with the best opinion available at the time. But in so far as he is committed, he is not rational: he will resist any change, any correction. And since he cannot be in the possession of the precise truth (nobody is) he will resist rational correction of even wildly mistaken beliefs. And he will resist even if their correction is widely accepted during his lifetime.
 
 Section Num: 10
-Paragraph Num: 106
+Paragraph Num: 105
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7016,7 +6908,7 @@ Content:
 Thus when those who praise commitment and irrational faith describe themselves as irrationalists (or post-rationalists) I agree with them. They are irrationalists, even if they are capable of reasoning. For they take pride in rendering themselves incapable of breaking out of their shell: in making themselves prisoners of their manias. They make themselves spiritually unfree, by an action whose adoption we may explain (following the psychiatrists) as one that is rationally understandable: understandable, for example, as an action which they commit owing to fear – fear of being compelled, by criticism, to surrender a view that they dare not give up since they make it (or believe they make it) the basis of their whole life. (‘Free commitment’ and fanaticism – which, we know, can border on madness – are thus related in the most dangerous manner.)
 
 Section Num: 10
-Paragraph Num: 107
+Paragraph Num: 106
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7027,7 +6919,7 @@ To sum up: we should distinguish between rationality as a personal attitude (whi
 Rationality as a personal attitude is the attitude of readiness to correct one’s beliefs. In its intellectually most highly developed form it is the readiness to discuss one’s beliefs critically, and to correct them in the light of critical discussions with other people.
 
 Section Num: 10
-Paragraph Num: 108
+Paragraph Num: 107
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7037,18 +6929,17 @@ Content:
 The ‘rationality principle’, on the other hand, has nothing to do with the assumption that men are rational in this sense – that they always adopt a rational attitude. It is, rather, a minimum principle (since it assumes no more than the adequacy of our actions to our problem situations as we see them) which animates almost all our explanatory situational models, and which, although we know that it is not true, we have some reason to regard as a good approximation to the truth. Its adoption reduces considerably the arbitrariness of our models, an arbitrariness which becomes capricious indeed if we try to do without this principle.
 
 Section Num: 10
-Paragraph Num: 109
+Paragraph Num: 108
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
 Header1: NOTES
 Content:
-NOTES
 1 I was particularly impressed by Hayek’s formulation that economics is the ‘logic of choice’. (Cp., for example, F.A. von Hayek, ‘Economics and Knowledge’ (1936) reprinted in Individualism and Economic Order, Routledge & Kegan Paul and the University of Chicago Press, Chicago, 1948; see p. 35.) This led me to my formulation of the ‘logic of the situation’ (cp. my Poverty of Historicism, p. 149). This seemed to me to embrace, for example, the logic of choice and the logic of historical problem situations. (The origin of this idea may explain why I rarely stressed the fact that I did not look at the logic of the situation as a deterministic theory: I had in mind the logic of situational choices.)
 
 Section Num: 10
-Paragraph Num: 110
+Paragraph Num: 109
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7060,7 +6951,7 @@ Content:
 4 See ‘Degrees of Explanation’, in F.A. von Hayek, Studies in Philosophy, Politics and Economics, Routledge & Kegan Paul, London, 1967, pp. 3–21.
 
 Section Num: 10
-Paragraph Num: 111
+Paragraph Num: 110
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7072,7 +6963,7 @@ Content:
 Consider, for example, the old controversy in economics about profit maximization. According to the theory of profit maximization, the businessman maximizes his (monetary) profits by a policy of marginal cost pricing. In a paper by R.L. Hall and C.J. Hitch (‘Price Theory and Business Behaviour’, Oxford Economic Papers, 2, 1939, pp. 12–45), however, this theory was criticized on the basis of empirical evidence, obtained by means of questionnaires, about the way in which businessmen decided their pricing policy. It has been suggested that this evidence shows the theory of profit maximization to be false. This led defenders of the theory to suggest that it was not meant to describe the actual behaviour of businessmen, but that it was only a tool, or an instrument, for prediction. Thus both groups seem to have been in agreement in assuming that the profit maximization theory psychologized the aims and the information of the agents (businessmen) in the typical social situation considered.
 
 Section Num: 10
-Paragraph Num: 112
+Paragraph Num: 111
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7083,7 +6974,7 @@ Against all this, I suggest that the method of situational logic is not concerne
 As to the status of the profit maximization model (from the point of view here discussed), not only could one admit its falsity as a model of businessmen’s psychological motivation without being forced into instrumentalism, but even if it is false as a theory of businessmen’s behaviour, it may be still valued as an approximation to the truth.
 
 Section Num: 10
-Paragraph Num: 113
+Paragraph Num: 112
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7093,7 +6984,7 @@ Content:
 I should not object to alternative situational models in which, say, businessmen’s behaviour is explained in terms of an aim to increase the standing of their firm or even their own position within it. In such a model, the maximization of profits might enter, not as an aim, but as the result of a kind of situational constraint. (Cp. Adam Smith, The Wealth of Nations, book I, chapter XI, part I: ‘… good management, … can never be universally established but in consequence of that free and universal competition which forces everybody to have recourse to it for the sake of self-defence’. The italics are mine. I owe this reference to Jeremy Shearmur.) It is doubtful whether the difference between such a model and the view that takes the maximization of profits as an aim is worth bothering about, though this will, of course, depend on what we want to explain: on what we regard as our problem.
 
 Section Num: 10
-Paragraph Num: 114
+Paragraph Num: 113
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7108,7 +6999,7 @@ Content:
 12 The sentence in parentheses was added in 1974. The problem of the status of the rationality principle is more fully discussed in section 12.
 
 Section Num: 10
-Paragraph Num: 115
+Paragraph Num: 114
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7122,7 +7013,7 @@ Content:
 17 See my Conjectures and Refutations, chapter 10 and addendum 3 (and also my Objective Knowledge, chapters 2 and 9). For criticism of my definition, see David Miller, ‘The Truth-likeness of Truthlikeness’, Analysis, 33, 1972, pp. 50–5. See also, in The British Journal for the Philosophy of Science, 25, 1974: David Miller, ‘Popper’s Qualitative Theory of Verisimilitude’, pp. 166–77; David Miller, ‘On the Comparison of False Theories by their Bases’, pp. 178–88; and Pavel Tichý, ‘On Popper’s Definitions of Verisimilitude’, pp. 155–60.
 
 Section Num: 10
-Paragraph Num: 116
+Paragraph Num: 115
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7134,7 +7025,7 @@ Content:
 It seems to me now that there are at least three senses of ‘rationality’ (and, accordingly, of the ‘rationality principle’), all objective, yet differing with regard to the objectivity of the situation in which the agent is acting: (1) The situation as it actually was – the objective situation which the historian tries to reconstruct. Part of this objective situation is (2) The situation as the agent actually saw it. But I suggest that there is a third sense intermediate between (1) and (2): (3) The situation as the agent could (within the objective situation) have seen it, and perhaps ought to have seen it. It is clear that there will be three senses of the ‘rationality principle’ corresponding to these three senses of ‘the situation’. It is further clear that the difference between (1) and the two other versions of the rationality principle will play a part in our understanding of action, especially in the historian’s attempt to explain failure, and that the difference between (2) and (3) will play a similar part. (2) and (3), it should be stressed, form in their turn part of (a more or less elaborate analysis of) the objective situation (1). Moreover, if there is a clash between (2) and (3), then we may well say that the agent did not act rationally. (Such a clash would, I think, be described by psychoanalysts as a failure of the reality principle.) (3) may well include an appreciation of the difficulties in seeing certain aspects of the situation as they were.
 
 Section Num: 10
-Paragraph Num: 117
+Paragraph Num: 116
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -7153,8 +7044,6 @@ Section Id: Chapter09
 Title: Epistemology And Industrialization
 Chapter Number: 9
 Content:
-9
-EPISTEMOLOGY AND INDUSTRIALIZATION
 Francis Bacon looked forward to an alteration in the form of production and to the effective control of nature by man, as a result of a change in the ways of thinking.
 Karl Marx
 
@@ -7166,7 +7055,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: I
 Content:
-I
 In a famous and highly dramatic passage of his chief work, Plato demands that philosophers should be kings and, vice versa, that kings – or autocratic rulers – should be fully trained philosophers.1 Plato’s proposal that philosophers should be kings has pleased many philosophers, and some of them have taken it quite seriously. Personally I do not find it an attractive proposal. Quite apart from the fact that I am against any form of autocracy or dictatorship, including the dictatorship of the wisest and best, philosophers do not seem to me particularly well suited for the job. Take for example the case of Thomas Masaryk, the creator, first president and, one might say, the philosopher-king of the Czechoslovak Republic. Masaryk was not only a fully trained philosopher, but also a born statesman and a great and admirable man. And his creation, the Czechoslovak Republic, was an unparalleled political achievement. Yet the dissolution of the Old Austrian Empire was also partly Masaryk’s work. And this proved a disaster for Europe and the world. For the instability that followed this dissolution was largely responsible for the rise of Nazism and finally even for the downfall of Masaryk’s own Czechoslovak Republic. And it is significant that Masaryk’s doctrine that ‘Austria-Hungary, this antinational … state, must be dismembered’2 (to use his own words) was derived from a mistaken philosophical doctrine: from the philosophical principle of the National State.3 But this principle, the principle of political nationalism, is not only an unfortunate and even a mischievous conception, it is also one that is actually impossible to realize. This is because Nations – in the sense of those who advocate this principle – do not exist: they are theoretical constructs, and the theories in which they are constructed are wholly inadequate, and completely inapplicable to Europe. For the political theory of nationalism rests on the assumption that there are ethnic groups which at the same time are also linguistic groups, and which happen also to inhabit geographically unified and coherent regions with natural boundaries that are defensible from a military point of view – groups which are united by a common language, a common territory, a common history, a common culture, and a common fate. The boundaries of the regions inhabited by these groups should, according to the theory of the Nation State, form boundaries of the new national states.
 
 Section Num: 11
@@ -7251,7 +7139,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: II
 Content:
-II
 The political power of philosophical ideas – and often enough of harmful or immature or downright silly philosophical ideas – is a fact that might well depress and even terrify us. And indeed, it would be quite true to say that almost all our wars are ideological wars: religious wars or ideological-religious persecutions.
 
 Section Num: 11
@@ -7302,7 +7189,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: III
 Content:
-III
 All I have said so far was meant to suggest to you an attitude towards philosophy which might perhaps be formulated like this. Just as there are good and evil religions – religions that encourage the good or the evil in man – so there are good and evil philosophical ideas, and true and false philosophical theories. We must therefore neither revere nor revile religion as such, or philosophy as such. Rather, we must evaluate religious and philosophical ideas with critical and selective minds. The terrifying power of ideas burdens all of us with grave responsibilities. We must not accept or refuse them unthinkingly. We must judge them critically.
 
 Section Num: 11
@@ -7365,7 +7251,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: IV
 Content:
-IV
 What I have said thus far bears heavily upon my main subject. Yet it is only an introduction. For the task of outlining the influence of European philosophy on the history of Europe in one short hour confronted me with some difficult and fairly fundamental decisions. I decided to limit myself to three closely connected problems. I want to discuss the little-known role which a highly immature philosophical theory has played in the rise of the three most distinctive and characteristic forces in European history. The three forces I have in mind are the following:
 
 Section Num: 11
@@ -7430,7 +7315,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: V
 Content:
-V
 When we seek to understand the distinctive character of European or Western civilization, one feature leaps to the mind. European civilization is an industrial civilization. It is based upon industrialization on the grand scale. It uses engines, sources of energy which are non-muscular. In this, European and American civilization differ fundamentally from all the other great civilizations, which are or were mainly agrarian and whose industry depended on manual labour.
 
 Section Num: 11
@@ -7482,7 +7366,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: VI
 Content:
-VI
 Before going into details I would like to explain briefly my own opinion about this particular version of epistemological optimism.18
 I am myself a rationalist, and an epistemological optimist. Yet I am no friend of that mighty rationalist religion of which Bacon is the founder. My objection to this religion is purely philosophical. And I should like to emphasize that it has nothing whatever to do with the present hangover – the intellectual anti-climax of the nuclear bomb19 (or with other undesirable unintended consequences of the growth of scientific knowledge and technology). My objection to the religion of mastery over nature, to the idea that knowledge is power, is, quite simply, that knowledge is something far better than power. Bacon’s formula ‘knowledge is power’ (‘nam et ipsa scientia potestas est’) was an attempt to advertise knowledge. It takes it for granted that power is always something good, and it promises that you will be repaid in terms of power if you make the unpleasant effort needed to attain knowledge. Yet I believe that Lord Acton was right when he said: ‘Power tends to corrupt; and absolute power corrupts absolutely.’20 Of course, I do not deny that power can be tamed, that it may sometimes be used for very good things – for instance, in the hands of a good physician. But I am afraid that even physicians not infrequently succumb to the temptation to make their patients feel their power.
 
@@ -7524,7 +7407,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: VII
 Content:
-VII
 This leads us to a question which I call the historical problem of Bacon: how can we explain the immense influence of this logically and rationally quite unimportant philosopher?
 I have already briefly hinted at my solution of this problem. In spite of everything I have said, Bacon is the spiritual father of modern science. Not because of his philosophy of science and his theory of induction, but because he became the founder and prophet of a rationalist church – a kind of anti-church. This church was founded not on a rock but on the vision and the promise of a scientific and industrial society – a society based on man’s mastery over nature. Bacon’s promise is the promise of self-liberation of mankind through knowledge.25
 
@@ -7629,7 +7511,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: VIII
 Content:
-VIII
 But here one could raise an important objection. Was not the idea of applied knowledge, the idea that knowledge is power, already an influence in the Middle Ages? Was there not astrology that served the desire for power, and alchemy, the search for the Philosopher’s Stone?
 The objection is important and can help us to bring out more clearly the influence of epistemological optimism. For that peculiar optimism was lacking in the medieval alchemists and astrologers. They searched for a secret which, they believed, had once been known in antiquity but had later been forgotten. They looked for the key to wisdom in old parchments.
 
@@ -7661,7 +7542,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: IX
 Content:
-IX
 Bacon himself (and with him many other Renaissance sages) belonged to two worlds: he belonged to the old world of mysticism and word magic combined with the authoritarian faith in some lost secret, the (Neo-Platonic30) Wisdom of the Ancients.31 At the same time he belonged to the new world of an anti-authoritarian confidence in our own power of adding to our wisdom and thereby of further increasing our power. This made Bacon’s prophetic message apt to grow into a new religion, and ultimately into the new message of the Enlightenment. This new message of the European Enlightenment might perhaps be summed up in the somewhat equivocal formula: God helps those who help themselves – a formula which has sometimes been taken quite seriously as a statement of the responsibility imposed by God on us, and sometimes as a manifesto of the self-emancipation and the self-reliance of a secular, fatherless society.32
 
 Section Num: 11
@@ -7692,7 +7572,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: X
 Content:
-X
 I may perhaps now remind you of my programme, which was to outline the decisive part played by philosophical ideas, and more precisely by epistemological optimism, in the development of three characteristic forces of European history:
 1 our industrial civilization;
 2 our science, and its influence; and
@@ -7717,7 +7596,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: XI
 Content:
-XI
 The science of the Renaissance may be regarded as the direct continuation of the Greek cosmology of the Ionians and the Pythagoreans, the Platonists and the Aristotelians, the Atomists and the Geometers. The method of Galileo and of Kepler is the critical, the rational, the hypothetical method of these forerunners of theirs.34 Hypotheses are invented and criticized. Under the influence of criticism they are modified. When the modifications become unsatisfactory, they are discarded, and new hypotheses are advanced. One typical example is the Ptolemaic geocentric cosmology with its modifications and auxiliary hypotheses, the epicycles. When they became too cumbrous, Copernicus rediscovered the heliocentric cosmology of Aristarchus. The heliocentric hypothesis, too, led to grave difficulties. But they were triumphantly resolved by Kepler and Newton. Thus the method of science consists of boldly advancing tentative hypotheses and of submitting them to critical tests. Since Einstein we know that it can never lead to certainty. For whether Newton or Einstein is right, we have learned from Einstein at least one thing: that Newton’s theory, too, is only a hypothesis, a conjecture, and perhaps a false one, in spite of its incredible success in predicting with the greatest precision almost all astronomical phenomena within our solar system, and even beyond.
 
 Section Num: 11
@@ -7771,7 +7649,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: XII
 Content:
-XII
 But the great masters of this method were not aware of the fact that this was their method. They believed in the possibility of reaching absolute certainty in knowledge. A radical version of epistemological optimism inspired them (as it inspired Bacon). It led them from success to success. Nevertheless it was uncritical, and logically untenable.
 
 Section Num: 11
@@ -7835,7 +7712,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: XIII
 Content:
-XIII
 In discussing my second point I have tried to show in what way epistemological optimism is responsible for the development of modern science. At the same time I have tried to discuss epistemological optimism and to evaluate and criticize this peculiar philosophy.
 All this we have to keep in mind when we now turn to glance at the development of modern liberalism. And since I am going to say something critical about it, I want first of all to state quite clearly and unmistakably that my sympathies are all for it. Indeed, while I am well aware of its many imperfections, I do think – with E.M. Forster and Pablo Casals – that democracy is the best and noblest form of social life that has so far arisen in the history of mankind. I am not a prophet, and I cannot deny the possibility that one day it will be destroyed. But whether or not it will in fact survive, we should work for its survival.
 
@@ -7858,7 +7734,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: XIV
 Content:
-XIV
 Epistemological over-optimism has two very different philosophies opposed to it: a pessimism which despairs of the possibility of knowledge, and a critical optimism which realizes that it is human to err and that fanaticism is usually the attempt to shout down the voices of one’s own doubts. Up to the twentieth century critical optimists were rare. Socrates, Erasmus, John Locke, Immanuel Kant, and John Stuart Mill were among the greatest of them.
 
 Section Num: 11
@@ -7910,9 +7785,9 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: NOTES
 Content:
-NOTES
 1 Plato, Republic, 473 c–e. In my Open Society, chapter 8, pp. 151f., I translated the passage as follows:
 Unless, in their cities, philosophers are vested with the might of kings, or those now called kings and oligarchs become genuine and fully qualified philosophers; and unless these two, political might and philosophy, are fused (while the many who nowadays follow their natural inclination for one of these two are suppressed by force), unless this happens, my dear Glaucon, there can be no rest; and the evil will not cease to be rampant in the cities – nor, I believe, in the race of men.
+2 See T. Masaryk, The New Europe (The Slav Standpoint), printed by Eyre and Spottiswoode, London, 1918, for private circulation, p. 68.
 
 Section Num: 11
 Paragraph Num: 73
@@ -7922,8 +7797,8 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: NOTES
 Content:
-2 See T. Masaryk, The New Europe (The Slav Standpoint), printed by Eyre and Spottiswoode, London, 1918, for private circulation, p. 68.
 3 It might, perhaps, be mentioned that Masaryk’s nationalism was moderate and humane: ‘I have never been a Chauvinist; I have not even been a nationalist …’ (Masaryk, p. 45). Nevertheless, he also said: ‘… we advocate the principle of nationality …’ (Masaryk, p. 52) and demanded the dismemberment of Austria-Hungary into national states. (See also note 53 to chapter 12 of my Open Society.) For a most interesting though different appraisal of Masaryk’s views, see A. van den Beld, Humanity: The Political and Social Philosophy of Thomas G. Masaryk, Mouton, The Hague, 1975.
+4 Iceland may be an exception. Cp. my Conjectures and Refutations, p. 368.
 
 Section Num: 11
 Paragraph Num: 74
@@ -7933,7 +7808,6 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: NOTES
 Content:
-4 Iceland may be an exception. Cp. my Conjectures and Refutations, p. 368.
 5 A.J.P. Taylor claims that ‘Czechoslovakia contained seven [nationalities]’ – that is, ‘Czechs, Slovaks, Germans, Magyars, Little Russians, Poles, Jews’. See The Hapsburg Monarchy, 1948, Peregrine Books edition, 1964, p. 274.
 6 Heinrich Heine, Zur Geschichte der Religion und Philosophie in Deutschland, 1833–4, book III (see p. 150 of Wolfgang Harich’s edition, Insel Verlag, Frankfurt, 1966). The passage was quoted in my Open Society, volume II, p. 109.
 7 Hayek has long stressed this point, which he says, has ‘long formed a fundamental part of the liberal creed’. See his Constitution of Liberty, Routledge & Kegan Paul, London, 1960, pp. 112f., the quotation in his text from J.S. Mill, and in his footnote 14 on p. 445 from Lord Keynes.
