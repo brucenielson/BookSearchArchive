@@ -506,7 +506,7 @@ def main() -> None:
         postgres_db_name='postgres',
         skip_content_func=skip_content,
         min_section_size=3000,
-        min_paragraph_size=400,
+        min_paragraph_size=300,
         verbose=True
     )
 
