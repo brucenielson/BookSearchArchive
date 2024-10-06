@@ -846,6 +846,7 @@ Content:
 NOTES
 1 Professor W.F. Bodmer concluded his Herbert Spencer Lecture, entitled ‘Bio-medical Advances: A Mixed Blessing?’, with the remark:
 Thus I believe that even if biomedical advances (and of course other scientific advances) are a mixed blessing – they are a blessing we cannot avoid and it is our job to see to it that the mixture comes out for the best. (See Problems of Scientific Revolution. Scientific Progress and Obstacles to Progress in the Sciences, The Herbert Spencer Lectures 1973, p. 41.)
+My own misgivings concerning scientific advance and stagnation arise mainly from the changed spirit of science, and from the unchecked growth of Big Science, which endangers great science. (See section IX of this lecture.) Biology seems to have escaped this danger so far, but not, of course, the closely related dangers of large-scale application.
 
 Section Num: 3
 Paragraph Num: 70
@@ -855,8 +856,9 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: NOTES
 Content:
-My own misgivings concerning scientific advance and stagnation arise mainly from the changed spirit of science, and from the unchecked growth of Big Science, which endangers great science. (See section IX of this lecture.) Biology seems to have escaped this danger so far, but not, of course, the closely related dangers of large-scale application.
 2 The formation of membrane proteins, of the first viruses, and of cells, may perhaps have been among the earliest inventions of new environmental niches, though it is possible that other environmental niches (perhaps networks of enzymes invented by otherwise naked genes) may have been invented even earlier.
+3 It is an open problem whether one can speak in these terms (‘in response’) about the genetic level (compare my conjecture about responding mutagens in section V). Yet if there were no variations, there could not be adaptation or evolution. And so we can say that the occurrence of mutations is either partly controlled by a need for them, or functions as if it were.
+4 When in this lecture I speak, for brevity’s sake, of ‘mutation’, the possibility of recombination is of course always tacitly included.
 
 Section Num: 3
 Paragraph Num: 71
@@ -866,8 +868,9 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: NOTES
 Content:
-3 It is an open problem whether one can speak in these terms (‘in response’) about the genetic level (compare my conjecture about responding mutagens in section V). Yet if there were no variations, there could not be adaptation or evolution. And so we can say that the occurrence of mutations is either partly controlled by a need for them, or functions as if it were.
-4 When in this lecture I speak, for brevity’s sake, of ‘mutation’, the possibility of recombination is of course always tacitly included.
+5 The realization of our ignorance has become pinpointed as a result, for example, of the astonishing revolution brought about by molecular biology.
+6 For the use of the term ‘blind’ (especially in the second sense) see D.T. Campbell, ‘Methodological Suggestions from a Comparative Psychology of Knowledge Processes’, Inquiry, 2, 1959, pp. 152–82; ‘Blind Variation and Selective Retention in Creative Thought as in Other Knowledge Processes’, Psychological Review, 67, 1960, pp. 380–400; and ‘Evolutionary Epistemology’, in The Philosophy of Karl Popper, in The Library of Living Philosophers, edited by P.A. Schilpp, The Open Court Publishing Co., La Salle, Illinois, 1974, pp. 413–63.
+7 While the ‘blindness’ of trials is relative to what we have found out in the past, randomness is relative to a set of elements (forming the ‘sample space’). On the genetic level these ‘elements’ are the four nucleotide bases. On the behavioural level they are the constituents of the organism’s repertoire of behaviour. These constituents may assume different weights with respect to different needs or goals, and the weights may change through experience (lowering the degree of ‘blindness’).
 
 Section Num: 3
 Paragraph Num: 72
@@ -877,8 +880,8 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: NOTES
 Content:
-5 The realization of our ignorance has become pinpointed as a result, for example, of the astonishing revolution brought about by molecular biology.
-6 For the use of the term ‘blind’ (especially in the second sense) see D.T. Campbell, ‘Methodological Suggestions from a Comparative Psychology of Knowledge Processes’, Inquiry, 2, 1959, pp. 152–82; ‘Blind Variation and Selective Retention in Creative Thought as in Other Knowledge Processes’, Psychological Review, 67, 1960, pp. 380–400; and ‘Evolutionary Epistemology’, in The Philosophy of Karl Popper, in The Library of Living Philosophers, edited by P.A. Schilpp, The Open Court Publishing Co., La Salle, Illinois, 1974, pp. 413–63.
+8 On the importance of active participation, see R. Held and A. Hein, ‘Movement-Produced Stimulation in the Development of Visually Guided Behaviour’, Journal of Comparative Physiological Psychology, 56, 1963, pp. 872–6. Cp. J.C. Eccles, Facing Reality: Philosophical Adventures by a Brain Scientist, Springer-Verlag, New York, 1970, pp. 66–7. The activity is, at least partly, one of producing hypotheses: see J. Krechevsky, ‘“Hypothesis” versus “Chance” in the Pre-Solution Period in Sensory Discrimination-learning’, University of California Publications in Psychology, 6, 1932, pp. 27–44 (reprinted in Animal Problem Solving, edited by A.J. Riopelle, Penguin Books, Harmondsworth, 1967, pp. 183–97).
+9 I may perhaps mention here some of the differences between my views and the views of the Gestalt school of psychology. (Of course, I accept the fact of Gestalt perception. I am dubious only about what may be called Gestalt philosophy.)
 
 Section Num: 3
 Paragraph Num: 73
@@ -888,31 +891,10 @@ Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: NOTES
 Content:
-7 While the ‘blindness’ of trials is relative to what we have found out in the past, randomness is relative to a set of elements (forming the ‘sample space’). On the genetic level these ‘elements’ are the four nucleotide bases. On the behavioural level they are the constituents of the organism’s repertoire of behaviour. These constituents may assume different weights with respect to different needs or goals, and the weights may change through experience (lowering the degree of ‘blindness’).
-
-Section Num: 3
-Paragraph Num: 74
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
-8 On the importance of active participation, see R. Held and A. Hein, ‘Movement-Produced Stimulation in the Development of Visually Guided Behaviour’, Journal of Comparative Physiological Psychology, 56, 1963, pp. 872–6. Cp. J.C. Eccles, Facing Reality: Philosophical Adventures by a Brain Scientist, Springer-Verlag, New York, 1970, pp. 66–7. The activity is, at least partly, one of producing hypotheses: see J. Krechevsky, ‘“Hypothesis” versus “Chance” in the Pre-Solution Period in Sensory Discrimination-learning’, University of California Publications in Psychology, 6, 1932, pp. 27–44 (reprinted in Animal Problem Solving, edited by A.J. Riopelle, Penguin Books, Harmondsworth, 1967, pp. 183–97).
-
-Section Num: 3
-Paragraph Num: 75
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
-9 I may perhaps mention here some of the differences between my views and the views of the Gestalt school of psychology. (Of course, I accept the fact of Gestalt perception. I am dubious only about what may be called Gestalt philosophy.)
 I conjecture that the unity, or the articulation, of perception is more closely dependent on the motor control systems and the efferent neural systems of the brain than on afferent systems: that it is closely dependent on the behavioural repertoire of the organism. I conjecture that a spider or a mouse will never have insight (as had Köhler’s ape) into the possible unity of the two sticks which can be joined together, because handling sticks of that size does not belong to their behavioural repertoire. All this may be interpreted as a kind of generalization of the James–Lange theory of emotions (1884; see William James, The Principles of Psychology, Macmillan & Co., London, 1890, volume II, pp. 449ff.), extending the theory from our emotions to our perceptions, (especially to Gestalt perceptions) which thus would not be ‘given’ to us (as in Gestalt theory) but rather ‘made’ by us, by decoding (comparatively ‘given’) clues. The fact that the clues may mislead (optical illusions in man, dummy illusions in animals, etc.) can be explained by the biological need to impose our behavioural interpretations upon highly simplified clues. The conjecture that our decoding of what the senses tell us depends on our behavioural repertoire may explain part of the gulf that lies between animals and man. For through the evolution of human language our repertoire has become almost unlimited.
 
 Section Num: 3
-Paragraph Num: 76
+Paragraph Num: 74
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -923,7 +905,7 @@ Content:
 11 See I.P. Pavlov, Conditioned Reflexes, Oxford University Press, London, 1927, especially pp. 11–12. In view of what he calls ‘exploratory behaviour’ and the closely related ‘freedom behaviour’ – both obviously genetically based – and of the significance of these for scientific activity, it seems to me that the behaviour of behaviourists who aim to supersede the value of freedom by what they call ‘positive reinforcement’ may be a symptom of an unconscious hostility to science. Incidentally, what B.F. Skinner (cp. his Beyond Freedom and Dignity, Alfred A. Knopf, New York, 1971) calls ‘the literature of freedom’ did not arise as a result of negative reinforcement, as he suggests. It arose, rather, with Aeschylus and Pindar, as a result of the victories of Marathon and Salamis.
 
 Section Num: 3
-Paragraph Num: 77
+Paragraph Num: 75
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -933,7 +915,7 @@ Content:
 12 Thus exploratory behaviour and problem solving create new conditions for the evolution of genetic systems, conditions which deeply affect the natural selection of these systems. One can say that once a certain latitude of behaviour has been attained – as it has been attained even by unicellular organisms (see especially the classic work of H.S. Jennings, The Behavior of the Lower Organisms, Columbia University Press, New York, 1906) – the initiative of the organism in selecting its ecology or habitat takes the lead, and natural selection within the new habitat follows the lead. In this way, Darwinism can simulate Lamarckism, and even Bergson’s ‘creative evolution’. This has been recognized by strict Darwinists. For a brilliant presentation and survey of the history, see Sir Alister Hardy, The Living Stream, Collins, London, 1965, especially lectures VI, VII, and VIII, where many references to earlier literature will be found, from James Hutton (who died in 1797) onwards (see pp. 178f.). See also Ernst Mayr, Animal Species and Evolution, The Belknap Press, Cambridge, Mass., and Oxford University Press, London, 1963, pp. 604ff. and 611; Erwin Schrödinger, Mind and Matter, Cambridge University Press, Cambridge, 1958, chapter 2; F.W. Braestrup, ‘The Evolutionary Significance of Learning’, in Videnskabelige Meddelelser fra Dansk Naturhistorisk Forening, 134, 1971, pp. 89–102 (with a bibliography); and also my first Herbert Spencer Lecture, 1961, now in my Objective Knowledge.
 
 Section Num: 3
-Paragraph Num: 78
+Paragraph Num: 76
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -944,7 +926,7 @@ Content:
 14 Behavioural psychologists who study ‘experimenter bias’ have found that some albino rats perform decidedly better than others if the experimenter is led to believe (wrongly) that the former belong to a strain selected for high intelligence. See Robert Rosenthal and Kermit L. Fode, ‘The Effect of Experimenter Bias on the Performance of the Albino Rat’, Behavioral Science, 8, 1963, pp. 183–9. The lesson drawn by the authors of this paper is that experiments should be made by ‘research assistants who do not know what outcome is desired’ (p. 188). Like Bacon, these authors pin their hopes on the empty mind, forgetting that the expectations of the director of research may communicate themselves, without explicit disclosure, to his research assistants, just as they seem to have communicated themselves from each research assistant to his rats.
 
 Section Num: 3
-Paragraph Num: 79
+Paragraph Num: 77
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -956,7 +938,7 @@ Content:
 17 Specific mutagens (acting selectively, perhaps on some particular sequence of codons rather than on others) are not known, I understand. Yet their existence would hardly be surprising in this field of surprises, and they might explain mutational ‘hot spots’. At any rate, there seems to be a real difficulty in concluding from the absence of known specific mutagens that specific mutagens do not exist. Thus it seems to me that the problem suggested in the text (the possibility of a reaction to certain strains by the production of mutagens) is still open.
 
 Section Num: 3
-Paragraph Num: 80
+Paragraph Num: 78
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -967,7 +949,7 @@ Content:
 19 See Niels Kai Jerne, ‘The Natural Selection Theory of Antibody Formation; Ten Years Later’, in Phage and the Origin of Molecular Biology, edited by J. Cairns et al., Cold Springs Harbor, New York, 1966, pp. 301–12; also ‘The Natural Selection Theory of Antibody Formation’, Proceedings of the National Academy of Science, 41, 1955, pp. 849–57; ‘Immunological Speculations’, Annual Review of Microbiology, 14, 1960, pp. 341–58; and ‘The Immune System’, Scientific American, 229, July 1973, pp. 52–60. See also Sir Macfarlane Burnet, ‘A Modification of Jerne’s Theory of Antibody Production, using the Concept of Clonal Selection’, Australian Journal of Science, 20, 1957, pp. 67–9; and The Clonal Selection Theory of Acquired Immunity, Cambridge University Press, Cambridge, 1959.
 
 Section Num: 3
-Paragraph Num: 81
+Paragraph Num: 79
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -976,19 +958,10 @@ Header1: NOTES
 Content:
 20 What I call ‘structures’ and ‘substructures’ are called ‘integrons’ by François Jacob, The Logic of Living Systems: a History of Heredity, Allen Lane, London, 1974, pp. 299–324.
 21 Something might be said here about the close connection between ‘the method of trial and the elimination of error’ and ‘selection’. All selection is error elimination. And what remains – after elimination – as ‘selected’ are merely those trials which have not been eliminated so far.
-
-Section Num: 3
-Paragraph Num: 82
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 22 The main difference from a photographic reproduction process is that the DNA molecule is not two-dimensional but linear: a long string of four kinds of substructures (‘bases’). These may be represented by dots coloured either red or green, or blue or yellow. The four basic colours are pairwise negatives (or complements) of each other. So the negative or complement of a string would consist of a string in which red is replaced by green, and blue by yellow – and vice versa. Here the colours represent the four letters (bases) which constitute the alphabet of the genetic code. Thus the complement of the original string contains a kind of translation of the original information into another yet closely related code. And the negative of this negative contains in turn the original information, stated in terms of the original (the genetic) code.
 
 Section Num: 3
-Paragraph Num: 83
+Paragraph Num: 80
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -996,20 +969,11 @@ Chapter Number: 1
 Header1: NOTES
 Content:
 This situation is utilized in replication, when first one pair of complementary strings separates and when next two pairs are formed as each of the strings selectively attaches to itself a new complement. The result is the replication of the original structure, by way of instruction. A very similar method is utilized in the second of the two main functions of the gene (DNA) – the control, by way of instruction, of the synthesis of proteins. Though the underlying mechanism of this second process is more complicated than that of replication, it is similar in principle.
-
-Section Num: 3
-Paragraph Num: 84
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 23 The term ‘aperiodic crystal’ (sometimes also ‘aperiodic solid’) is Erwin Schrödinger’s. See his What is Life?, Cambridge University Press, Cambridge, 1944.
 24 That atomic and molecular structures have something to do with quantum theory is almost trivial, considering that the peculiarities of quantum mechanics (such as eigenstates and eigenvalues) were introduced into physics in order to explain the structural stability of atoms.
 
 Section Num: 3
-Paragraph Num: 85
+Paragraph Num: 81
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1019,7 +983,7 @@ Content:
 The idea that the structural ‘wholeness’ of biological systems has also something to do with quantum theory was first discussed, I suppose, in Schrödinger’s small but great book What is Life?, which, it may be said, anticipated both the rise of molecular biology and of Max Delbrück’s influence on its development. In this book Schrödinger adopts a consciously ambivalent attitude towards the problem whether or not biology will turn out to be reducible to physics. In chapter 7, ‘Is Life Based on the Laws of Physics?’, he says (about living matter) first that ‘we must be prepared to find it working in a manner that cannot be reduced to the ordinary laws of physics’ (What is Life? & Mind and Matter, p. 81). But a little later he says that ‘the new principle’ (that is to say, ‘order from order’) ‘is not alien to physics’: it is ‘nothing else than the principle of quantum physics again’ (in the form of Nernst’s principle) (What is Life? & Mind and Matter, p. 88). My attitude is also an ambivalent one. On the one hand, I do not believe in complete reducibility. On the other hand, I think that reduction must be attempted. For even though it is likely to be only partially successful, even a very partial success would be a very great success.
 
 Section Num: 3
-Paragraph Num: 86
+Paragraph Num: 82
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1030,7 +994,7 @@ Thus my remarks in the text to which this note is appended (and which I have lef
 But my remarks were not clear enough. For in the discussion after the lecture Professor Hans Motz challenged what he believed to be my reductionism by referring to one of the papers of Eugene Wigner (‘The Probability of the Existence of a Self-Reproducing Unit’, chapter 15 of his Symmetries and Reflections: Scientific Essays, MIT Press, Cambridge, Mass., 1970, pp. 200–8). In this paper Wigner gives a kind of proof of the thesis that the probability is zero for a quantum theoretical system to contain a subsystem which reproduces itself. (Or, more precisely, the probability is zero for a system to change in such a manner that at one time it contains some subsystem and later a second subsystem which is a copy of the first.) I have been puzzled by this argument of Wigner’s since its first publication in 1961. And in my reply to Motz I pointed out that Wigner’s proof seemed to me refuted by the existence of Xerox machines (or by the growth of crystals), which must be regarded as quantum-mechanical rather than ‘biotonic’ systems. (It may be claimed that a Xerox copy or a crystal does not reproduce itself with sufficient precision. Yet the most puzzling thing about Wigner’s paper is that he does not refer to degrees of precision, and that absolute exactness – which is not required – is, it seems, excluded at once by Pauli’s principle.) I do not think that either the reducibility of biology to physics or else its irreducibility can be proved – at any rate not at present.
 
 Section Num: 3
-Paragraph Num: 87
+Paragraph Num: 83
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1039,30 +1003,21 @@ Header1: NOTES
 Content:
 25 Thus Einstein’s theory contradicts Newton’s theory (although it contains Newton’s theory as an approximation). In contradistinction to Newton’s theory, Einstein’s theory shows for example that in strong gravitational fields there cannot be a Keplerian elliptic orbit with appreciable eccentricity but without corresponding precession of the perihelion (as observed of Mercury).
 26 Even the collecting of butterflies is theory-impregnated (‘butterfly’ is a theoretical term, as is ‘water’: it involves a set of expectations). The recent accumulation of evidence concerning elementary particles can be interpreted as an accumulation of falsifications of the early electromagnetic theory of matter.
-
-Section Num: 3
-Paragraph Num: 88
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 27 An even more radical demand may be made. For we may demand that if the apparent laws of nature should change, then the new theory, invented to explain the new laws, should be able to explain the state of affairs both before and after the change, and also the change itself, from universal laws and (changing) initial conditions. Cp. my Logic of Scientific Discovery, section 79, especially p. 253.
-By stating these logical criteria for progress, I am implicitly rejecting the fashionable (anti-rationalistic) suggestion that two different theories such as Newton’s and Einstein’s are incommensurable. It may be true that two scientists with a verificationist attitude towards their favoured theories (Newtonian and Einsteinian physics, say) may fail to understand each other. But if their attitude is critical (as was Newton’s and Einstein’s) they will understand both theories, and see how they are related. See, for this problem, the excellent discussion of the comparability of Newton’s and Einstein’s theories by Troels Eggers Hansen in his paper ‘Confrontation and Objectivity’, Danish Yearbook of Philosophy, 7, 1972, pp. 13–72.
 
 Section Num: 3
-Paragraph Num: 89
+Paragraph Num: 84
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: NOTES
 Content:
+By stating these logical criteria for progress, I am implicitly rejecting the fashionable (anti-rationalistic) suggestion that two different theories such as Newton’s and Einstein’s are incommensurable. It may be true that two scientists with a verificationist attitude towards their favoured theories (Newtonian and Einsteinian physics, say) may fail to understand each other. But if their attitude is critical (as was Newton’s and Einstein’s) they will understand both theories, and see how they are related. See, for this problem, the excellent discussion of the comparability of Newton’s and Einstein’s theories by Troels Eggers Hansen in his paper ‘Confrontation and Objectivity’, Danish Yearbook of Philosophy, 7, 1972, pp. 13–72.
 28 The logical demands discussed here (cp. chapter 10 of my Conjectures and Refutations and chapter 5 of Objective Knowledge), although they seem to me of fundamental importance, do not, of course, exhaust what can be said about the rational method of science. For example, in my Postscript to the Logic of Scientific Discovery I have developed a theory of what I call ‘metaphysical research programmes’ (see my Realism and the Aim of Science, edited by W.W. Bartley, III, Hutchinson, London, 1983). This theory, it might be mentioned, in no way clashes with the theory of testing and of the revolutionary advance of science which I have outlined here. An example which I gave there of a metaphysical research programme is the use of the propensity theory of probability, which seems to have a wide range of applications.
 
 Section Num: 3
-Paragraph Num: 90
+Paragraph Num: 85
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1071,21 +1026,12 @@ Header1: NOTES
 Content:
 What I say in the text should not be taken to mean that rationality depends on having a criterion of rationality. Compare my criticism of ‘criterion philosophies’ in Addendum I, ‘Facts, Standards, and Truth’, to volume II of my Open Society.
 29 The story is reported by Paul A.M. Dirac, ‘The Evolution of the Physicist’s Picture of Nature’, Scientific American 208, 1963, no. 5, pp. 45–53. See especially p. 47.
-
-Section Num: 3
-Paragraph Num: 91
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 30 Cp. my criticism of the so-called ‘sociology of knowledge’ in chapter 23 of my Open Society, and pp. 155f. of my Poverty of Historicism.
 31 Cp. Jacques Hadamard, The Psychology of Invention in the Mathematical Field, Princeton University Press, Princeton, NJ, 1945, and Dover edition, New York, 1954.
 32 ‘A Conversation with Eugene Wigner’, Science, 181, 1973, pp. 527–33. See p. 533.
 
 Section Num: 3
-Paragraph Num: 92
+Paragraph Num: 86
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1095,20 +1041,11 @@ Content:
 33 For Aristarchus and Seleucus see Sir Thomas Heath, Aristarchus of Samos, Clarendon Press, Oxford, 1913.
 34 See Max Jammer, The Conceptual Development of Quantum Mechanics, McGraw-Hill, New York, 1966, pp. 40–2.
 35 See Heinrich Hertz, Electric Waves, Macmillan & Co., London, 1894; Dover edition, New York, 1962, pp. 12, 187f., 273.
-
-Section Num: 3
-Paragraph Num: 93
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 36 See Jammer, The Conceptual Development of Quantum Mechanics, pp. 43f., and Théo Kahan, ‘Un document historique de l’académie des sciences de Berlin sur l’activité scientifique d’Albert Einstein (1913)’, Archives internationales d’histoire des sciences, 15, 1962, pp. 337–42, especially p. 340.
 37 Compare Jammer’s slightly different translation in The Conceptual Development of Quantum Mechanics.
 
 Section Num: 3
-Paragraph Num: 94
+Paragraph Num: 87
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1117,19 +1054,10 @@ Header1: NOTES
 Content:
 38 Our western societies do not, by their structure, satisfy the need for a father-figure. I discussed the problems that arise from this fact briefly in my (unpublished) William James Lectures in Harvard, 1950. My late friend, the psychoanalyst Paul Federn, showed me shortly afterwards an earlier paper of his devoted to this problem.
 39 Fairly obvious examples are the roles of prophet played, in various movements, by Sigmund Freud, Arnold Schonberg, Karl Kraus, Ludwig Wittgenstein, and Herbert Marcuse.
-
-Section Num: 3
-Paragraph Num: 95
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 40 There are many kinds of ‘ideologies’ in the wide and (deliberately) vague sense of the term I used in the text, and therefore many aspects to the distinction between science and ideology. Two may be mentioned here. One is that scientific theories can be distinguished or ‘demarcated’ (see note 41) from non-scientific theories, which, nevertheless, may strongly influence scientists, and even inspire their work. (This influence, of course, may be good, or bad, or mixed.) A very different aspect is that of entrenchment: a scientific theory may function as an ideology if it becomes socially entrenched. This is why, when speaking of the distinction between scientific revolutions and ideological revolutions, I include among ideological revolutions changes in the social entrenchment of what may otherwise be a scientific theory.
 
 Section Num: 3
-Paragraph Num: 96
+Paragraph Num: 88
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1139,7 +1067,7 @@ Content:
 41 In order not to repeat myself too often, I did not mention in this lecture my suggestion for a criterion of the empirical character of a theory (falsifiability or refutability as the criterion of demarcation between empirical theories and non-empirical theories). Since in English ‘science’ means ‘empirical science’, and since the matter is sufficiently fully discussed in my books, I have written things like the following (for example, in Conjectures and Refutations, p. 39): ‘… in order to be ranked as scientific, [statements] must be capable of conflicting with possible, or conceivable, observations’. Some people seized upon this like a shot (as early as 1932, I think). ‘What about your own gospel?’ is the typical move. (I found this objection again in a book published in 1973.) My answer to the objection, however, was published in 1934 (see my Logic of Scientific Discovery, chapter 2, section 10 and elsewhere). I may restate my answer: my gospel is not ‘scientific’, i.e., it does not belong to empirical science, but it is, rather, a (normative) proposal. My gospel (and also my answer) is, incidentally, criticizable, though not just by observation – and it has been criticized.
 
 Section Num: 3
-Paragraph Num: 97
+Paragraph Num: 89
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1150,7 +1078,7 @@ Content:
 43 Further to my use of the vague term ‘ideology’ (which includes all kinds of theories, beliefs, and attitudes, including some that may influence scientists) it should be clear that I intend to cover by this term not only historicist fashions like ‘modernism’, but also serious, and rationally discussable, metaphysical and ethical ideas. I may perhaps refer to Jim Erikson, a former student of mine in Christchurch, New Zealand, who once said in a discussion: ‘We do not suggest that science invented intellectual honesty, but we do suggest that intellectual honesty invented science.’ A very similar idea is to be found in chapter 9 of Jacques Monod’s book Chance and Necessity, Alfred A. Knopf, New York, 1971. See also my Open Society, chapter 24. We might say, of course, that an ideology that has learned from the critical approach of the sciences is likely to be more rational than one that clashes with science.
 
 Section Num: 3
-Paragraph Num: 98
+Paragraph Num: 90
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1159,19 +1087,10 @@ Header1: NOTES
 Content:
 44 Ernst Rutherford, ‘The Development of the Theory of Atomic Structure’, in Background of Modern Science, edited by J. Needham and W. Pagel, Cambridge University Press, Cambridge, 1938, pp. 61–74. The quotation is from p. 68.
 45 See my ‘Quantum Mechanics without “The Observer”’, in Quantum Theory and Reality, edited by Mario Bunge, Springer-Verlag, New York, 1967, esp. pp. 8–9. (A revised version of this article now forms a chapter in volume III of my Postscript to the Logic of Scientific Discovery, see my Quantum Theory and the Schism in Physics, edited by W.W. Bartley, III, Hutchinson, London, 1982.)
-
-Section Num: 3
-Paragraph Num: 99
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 The fundamental idea (that the inertial mass of the electron is in part explicable as the inertia of the moving electromagnetic field) that led to the electromagnetic theory of matter is due to J.J. Thomson, ‘On the Electric and Magnetic Effects produced by the Motion of Electrified Bodies’, Philosophical Magazine, fifth series, 11, 1881, pp. 229–49, and to O’. Heaviside, ‘On the Electromagnetic Effects due to the Motion of Electrification through a Dielectric’, Philosophical Magazine, fifth series, 27, 1889, pp. 324–39. It was developed by W. Kaufmann (‘Die magnetische und elektrische Ablenkbarkeit der Bequerelstrahlen und die scheinbare Masse der Elektronen’, Gött. Nachr., 1901, pp. 143–55, ‘Ueber die elektromagnetische Masse des Elektrons’, 1902, pp. 291–6, ‘Ueber die “Elektromagnetische Masse” der Elektronen’, 1903, pp. 90–103) and M. Abraham (‘Dynamik des Elektrons’, Gött. Nachr., 1902, pp. 20–41, ‘Prinzipien der Dynamik des Elektrons’, Annalen der Physik, fourth series, 10, 1903, pp. 105–79) into the thesis that the mass of the electron is a purely electromagnetic effect. (See W. Kaufmann, ‘Die elektromagnetische Masse des Elektrons’, Physikalische Zeitschrift, 4, 1902–3, pp. 57–63 and M. Abraham, Theorie der Elektrizität, volume II, Leipzig, 1905, pp. 136–249.) The idea was strongly supported by H.A. Lorentz, ‘Elektromagnetische vershijnselen in een stelsel dat zich met willekeurige snelheid, kleiner dan die vanhet licht, beweegt’, Verslag van de Gewone Vergadering der Wis – en Natuurkundige Afdeeling, Koninklijke Akademie van Wetenschappen te Amsterdam, XII, 1903–4, second part, pp. 986–1009, and by Einstein’s special relativity, leading to results deviating from those of Kaufmann and Abraham. The electromagnetic theory of matter had a great ideological influence on scientists because of the fascinating possibility of explaining matter. It was shaken and modified by Rutherford’s discovery of the nucleus (and the proton) and by Chadwick’s discovery of the neutron, which may help to explain why its final overthrow by the theory of nuclear forces was hardly noticed.
 
 Section Num: 3
-Paragraph Num: 100
+Paragraph Num: 91
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1181,7 +1100,7 @@ Content:
 46 The revolutionary power of special relativity lies in a new point of view which allows the derivation and interpretation of the Lorentz transformations from two simple first principles. The greatness of this revolution can be best gauged by reading Abraham’s book (volume II, referred to in the preceding note). This book, which is slightly earlier than Poincaré’s and Einstein’s papers on relativity, contains a full discussion of the problem situation: of Lorentz’s theory of the Michelson experiment, and even of Lorentz’s local time. Abraham comes, e.g. on pp. 143f. and 370f., quite close to Einsteinian ideas. It even seems as if Max Abraham was better informed about the problem situation than was Einstein. Yet there is no realization of the revolutionary potentialities of the problem situation – quite the contrary. For Abraham writes in his Preface, dated March 1905: ‘The theory of electricity now appears to have entered a state of quieter development.’ This shows how hopeless it is even for a great scientist like Abraham to foresee the future development of his science.
 
 Section Num: 3
-Paragraph Num: 101
+Paragraph Num: 92
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1190,20 +1109,11 @@ Header1: NOTES
 Content:
 47 See H. Minkowski, ‘Space and Time’, in A. Einstein, H.A. Lorentz, H. Weyl, and H. Minkowski, The Principle of Relativity, Methuen, London, 1923 and Dover edition, New York, p. 75.
 48 Cornelius Lanczos, ‘Rationalism and the Physical World’, in Boston Studies in the Philosophy of Science, 3, edited by R.S. Cohen and M.W. Wartofsky, Reidel, Dordrecht, 1967, pp. 181–98. See p. 198.
-
-Section Num: 3
-Paragraph Num: 102
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 49 See my Conjectures and Refutations, p. 114 (with footnote 30). See also my Open Society, volume II, p. 20, and the criticism in my Logic of Scientific Discovery, p. 440. I pointed out this criticism in 1950 to P.W. Bridgman, who received it most generously.
 50 See A.S. Eddington, Space, Time and Gravitation, Cambridge University Press, Cambridge, 1935, pp. 162f. It is interesting in this context that Dirac (on p. 46 of the paper referred to in note 29 above) says that he now doubts whether four-dimensional thinking is a fundamental requirement of physics. (It is a fundamental requirement for driving a motor car.)
 
 Section Num: 3
-Paragraph Num: 103
+Paragraph Num: 93
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
@@ -1212,49 +1122,31 @@ Header1: NOTES
 Content:
 51 More precisely, a body falling from infinity with a velocity v > c/3½ towards the centre of a gravitational field will be constantly decelerated in approaching this centre.
 52 See the reference to Troels Eggers Hansen cited in note 27 above. See also Peter Havas, ‘Four-Dimensional Formulations of Newtonian Mechanics and their Relation to the Special and the General Theory of Relativity’, Reviews of Modern Physics, 36, 1964, pp. 938–65, and ‘Foundation Problems in General Relativity’, in Delaware Seminar in the Foundations of Physics, edited by M. Bunge, Springer-Verlag, New York, 1967, pp. 124–48. Of course, the comparison is not trivial: see for example pp. 52f. of E. Wigner’s book referred to in note 24 above.
-
-Section Num: 3
-Paragraph Num: 104
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 53 See Lanczos, ‘Rationalism and the Physical World’, p. 196.
 54 See Leopold Infeld, Quest, Victor Gollancz, London, 1941, p. 90.
-55 See Albert Einstein, ‘Die Feldgleichungen der Gravitation’, Preussische Akademie der Wissenschaften, Sitzungsberichte, 1915, pt. 2, pp. 844–7; ‘Die Grundlage der allgemeinen Relativitatstheorie’, Annalen der Physik, fourth series, 49, 1916, pp. 769–822.
 
 Section Num: 3
-Paragraph Num: 105
+Paragraph Num: 94
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: NOTES
 Content:
+55 See Albert Einstein, ‘Die Feldgleichungen der Gravitation’, Preussische Akademie der Wissenschaften, Sitzungsberichte, 1915, pt. 2, pp. 844–7; ‘Die Grundlage der allgemeinen Relativitatstheorie’, Annalen der Physik, fourth series, 49, 1916, pp. 769–822.
 56 Thus I believe that §2 of Einstein’s famous paper, ‘Die Grundlage der allgemeinen Relativitatstheorie’ (see note 55 above; English translation, ‘The Foundation of the General Theory of Relativity’, in The Principle of Relativity, pp. 111–64; see note 47 above) uses most questionable epistemological arguments against Newton’s absolute space and for a very important theory.
 57 Especially Heisenberg and Bohr.
-
-Section Num: 3
-Paragraph Num: 106
-Book Title: The Myth of the Framework
-Section Id: Chapter01
-Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
-Chapter Number: 1
-Header1: NOTES
-Content:
 58 Apparently it affected Max Delbrück. See Donald Fleming, ‘Émigré Physicists and the Biological Revolution’, Perspectives in American History, 2, Harvard, 1968, pp. 152–89, especially sections iv and v. (I owe this reference to Professor Mogens Blegvad.)
-59 It is clear that a physical theory that does not explain such constants as the electric elementary quantum (or the fine structure constant) is incomplete – to say nothing of the mass spectra of the elementary particles. See my paper ‘Quantum Mechanics without “The Observer”’, referred to in note 45.
 
 Section Num: 3
-Paragraph Num: 107
+Paragraph Num: 95
 Book Title: The Myth of the Framework
 Section Id: Chapter01
 Title: The Rationality Of Scientific Revolutions: Selection Versus Instruction
 Chapter Number: 1
 Header1: NOTES
 Content:
+59 It is clear that a physical theory that does not explain such constants as the electric elementary quantum (or the fine structure constant) is incomplete – to say nothing of the mass spectra of the elementary particles. See my paper ‘Quantum Mechanics without “The Observer”’, referred to in note 45.
 First published in Problems of Scientific Revolution. Scientific Progress and Obstacles to Progress in the Sciences, The Herbert Spencer Lectures 1973, edited by Rom Harré, Clarendon Press, Oxford, 1975. I wish to thank Troels Eggers Hansen, the Rev. Michael Sharratt, Dr Herbert Spengler, and Dr Martin Wenham for critical comments on this lecture.
 
 Section Num: 4
@@ -2185,6 +2077,7 @@ Header1: NOTES
 Content:
 3 For further discussion, see my Open Society and my Conjectures and Refutations (introduction and chapters 4 and 5).
 4 Cp. my Conjectures and Refutations, pp. 152f. The first two lines of my text are fragment B 16 and the next four fragments B 15. The remaining three fragments are B 18, 35, and 34 (according to H. Diels and W. Kranz, Fragmente der Vorsokratiker, 5th edition, Weidmann, Berlin, 1934; see also H. Fränkel, section 4 of The Pre-Socratics, edited by A.P.D. Mourelatos, Doubleday Anchor, New York, 1974). The translations are mine. Note, in the last quoted two lines, the contrast between the one final truth and the many guesses, or opinions, or conjectures.
+5 Parmenides used Xenophanes’ terminology. See my Conjectures and Refutations, for example pp. 11, 17, 145, 400, and 410. See also my Open Society, note 56 (section 8) to chapter 10.
 
 Section Num: 4
 Paragraph Num: 86
@@ -2194,8 +2087,14 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: NOTES
 Content:
-5 Parmenides used Xenophanes’ terminology. See my Conjectures and Refutations, for example pp. 11, 17, 145, 400, and 410. See also my Open Society, note 56 (section 8) to chapter 10.
 6 See Parmenides’ remark (in fragment B 6) on the muddled horde of erring mortals, always in two minds about things, in contrast to the one ‘well-rounded truth’. Cp. my Conjectures and Refutations, pp. 11, 164f.
+7 Theogony, 720–5.
+8 Iliad, VIII, 13–16; cp. Aeneid, VI, 577.
+9 See my Conjectures and Refutations, pp. 126ff., 138f., 150f., 413.
+10 Theogony, 720–5.
+11 The discovery, it appears, is due to Parmenides. See fragments B14–15:
+Bright’ning the night she glides round the earth with a light which is borrowed;
+Always she wistfully looks round for the rays of the sun.
 
 Section Num: 4
 Paragraph Num: 87
@@ -2205,11 +2104,8 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: NOTES
 Content:
-7 Theogony, 720–5.
-8 Iliad, VIII, 13–16; cp. Aeneid, VI, 577.
-9 See my Conjectures and Refutations, pp. 126ff., 138f., 150f., 413.
-10 Theogony, 720–5.
-11 The discovery, it appears, is due to Parmenides. See fragments B14–15:
+12 Conventionality is not quite the same as mere arbitrariness. For there may be better or worse conventions. See my Open Society, chapter 5, esp. pp. 64f.
+13 Hegel distinguishes, of course, between ‘appearance’ and ‘reality’. (Wallace translates ‘Wirklichkeit’ not by ‘reality’ but by ‘actuality’ – see, for example, his Logic of Hegel, Oxford, 1874, p. 7.) God is ‘most real’. He is ‘that which alone is truly real’, what exists accidentally is only ‘appearance’. Hegel writes: ‘Who would not be clever enough to see that much in his environment is not what it ought to be?’ And he says that philosophy ‘has to do only with the Idea, which is not so powerless that it only determines what ought to be and not what really is.’ (The quotations are from G.W.F. Hegel, Encyclopädie der philosophischen Wissenschaften im Grundrisse; Die Logik, Einleitung, § 6. See, for example, the Henning edition, Duncker and Humblot, Berlin, 1840, pp. 9–11. Cp. W. Wallace, The Logic of Hegel, pp. 7–9.) This is, of course, sufficient to muddle what is and what ought to be, and thus to defend practically any view (and perhaps its opposite).
 
 Section Num: 4
 Paragraph Num: 88
@@ -2219,35 +2115,13 @@ Title: The Myth Of The Framework
 Chapter Number: 2
 Header1: NOTES
 Content:
-Bright’ning the night she glides round the earth with a light which is borrowed;
-Always she wistfully looks round for the rays of the sun.
-12 Conventionality is not quite the same as mere arbitrariness. For there may be better or worse conventions. See my Open Society, chapter 5, esp. pp. 64f.
-13 Hegel distinguishes, of course, between ‘appearance’ and ‘reality’. (Wallace translates ‘Wirklichkeit’ not by ‘reality’ but by ‘actuality’ – see, for example, his Logic of Hegel, Oxford, 1874, p. 7.) God is ‘most real’. He is ‘that which alone is truly real’, what exists accidentally is only ‘appearance’. Hegel writes: ‘Who would not be clever enough to see that much in his environment is not what it ought to be?’ And he says that philosophy ‘has to do only with the Idea, which is not so powerless that it only determines what ought to be and not what really is.’ (The quotations are from G.W.F. Hegel, Encyclopädie der philosophischen Wissenschaften im Grundrisse; Die Logik, Einleitung, § 6. See, for example, the Henning edition, Duncker and Humblot, Berlin, 1840, pp. 9–11. Cp. W. Wallace, The Logic of Hegel, pp. 7–9.) This is, of course, sufficient to muddle what is and what ought to be, and thus to defend practically any view (and perhaps its opposite).
-
-Section Num: 4
-Paragraph Num: 89
-Book Title: The Myth of the Framework
-Section Id: Chapter02
-Title: The Myth Of The Framework
-Chapter Number: 2
-Header1: NOTES
-Content:
 14 See Alfred Tarski, Logic, Semantics, Metamathematics, translated by J.H. Woodger, Oxford University Press, London, 1956. I have expounded it in various places. See, for example, my Conjectures and Refutations, pp. 223–5.
 15 See Benjamin Lee Whorf, Language, Thought, and Reality, edited by John B. Carroll, MIT Press, Cambridge, Mass., 1956.
 16 See W.V.O. Quine, Word and Object, MIT Press, Cambridge, Mass., 1960, and Ontological Relativity and Other Essays, Columbia University Press, New York, 1969.
-
-Section Num: 4
-Paragraph Num: 90
-Book Title: The Myth of the Framework
-Section Id: Chapter02
-Title: The Myth Of The Framework
-Chapter Number: 2
-Header1: NOTES
-Content:
 17 I completely agree with Quine’s criticism of the museum theory (or zoo theory) of the meaning of words – the theory that the world is one museum with labelled showcases whose contents are the unambiguous referents of the words or labels. But there may be different museums. And the relevance of the contents of the showcases may depend on history – for example, on the problems which have been thrown up. But I am just as critical of any observationalist or behaviourist theory of the meaning of words. Translation, I conjecture, is a matter of conjecture and refutation – of conjecturing the other fellow’s problems and his background knowledge. This, I suggest, is the way a first language or a second language is learned. Observation of behaviour may pose problems, and may help by way of refutation. (See my Unended Quest, section 7.)
 
 Section Num: 4
-Paragraph Num: 91
+Paragraph Num: 89
 Book Title: The Myth of the Framework
 Section Id: Chapter02
 Title: The Myth Of The Framework
@@ -2258,7 +2132,7 @@ Content:
 19 When writing this section, I originally had in mind Thomas Kuhn and his book The Structure of Scientific Revolutions, Chicago University Press, Chicago, 1962, 1970. See also my contribution ‘Normal Science and its Dangers’ to Criticism and the Growth of Knowledge, pp. 51–8. However, as Kuhn points out, this interpretation was based on a misunderstanding of his views (see his ‘Reflections on my Critics’, in Criticism and the Growth of Knowledge, pp. 231–78, and his ‘Postscript 1969’ to the 2nd edition of The Structure of Scientific Revolutions), and I am very ready to accept his correction. Nevertheless, I regard the view here discussed as influential.
 
 Section Num: 4
-Paragraph Num: 92
+Paragraph Num: 90
 Book Title: The Myth of the Framework
 Section Id: Chapter02
 Title: The Myth Of The Framework
@@ -2268,19 +2142,10 @@ Content:
 20 For a criticism of Karl Mannheim, see chapters 23 and 24 of my Open Society.
 21 Few people seem to realize that by his equation E=mc2, Einstein resurrected the fluidum theory of heat (caloric) for which the question whether heat has any weight was regarded as crucial. According to Einstein’s theory, heat has weight – only it weighs very little.
 22 Cp. the discussion between Planck and Mach, especially Planck’s paper ‘Zur Machschen Theorie der physikalischen Erkenntnis’, Physikalische Zeitschrift, 11, 1910, pp. 1186–90.
-
-Section Num: 4
-Paragraph Num: 93
-Book Title: The Myth of the Framework
-Section Id: Chapter02
-Title: The Myth Of The Framework
-Chapter Number: 2
-Header1: NOTES
-Content:
 23 See, for example, J.S. Bell, ‘On the Einstein Podolsky Rosen Paradox’, Physics, 1, 1964, pp. 195–200, and ‘On the Problem of Hidden Variables in Quantum Mechanics’, Reviews of Modern Physics, 38, 1966, pp. 447–52. See also John F. Clauser, Michael A. Horne, Abner Shimony, and Richard A. Holt, ‘Proposed Experiment to Test Local Hidden Variable Theories’, Physical Review Letters, 13 October 1969. An extension or strengthening of the EPR paradox, described in my Logic of Scientific Discovery, pp. 446–8, seems to me to involve a decisive refutation of the Copenhagen interpretation, since the two simultaneous measurements together would allow simultaneous ‘reductions’ of the two wave packets which cannot be carried out within the theory. See also the paper by James Park and Henry Margenau, ‘Simultaneous Measurability in Quantum Theory’, International Journal of Theoretical Physics, 1, 1968, pp. 211–83.
 
 Section Num: 4
-Paragraph Num: 94
+Paragraph Num: 91
 Book Title: The Myth of the Framework
 Section Id: Chapter02
 Title: The Myth Of The Framework
@@ -2288,15 +2153,6 @@ Chapter Number: 2
 Header1: NOTES
 Content:
 24 See my ‘Quantum Mechanics without “The Observer”’, in Studies in the Foundations, Methodology and Philosophy of Science, volume II: Quantum Theory and Reality, edited by Mario Bunge, Springer-Verlag, New York, 1967. (A revised version of this article now forms a chapter in volume III of my Postscript to the Logic of Scientific Discovery; see my Quantum Theory and the Schism in Physics, edited by W.W. Bartley, III, Hutchinson, London, 1982.)
-
-Section Num: 4
-Paragraph Num: 95
-Book Title: The Myth of the Framework
-Section Id: Chapter02
-Title: The Myth Of The Framework
-Chapter Number: 2
-Header1: NOTES
-Content:
 25 See my Open Society, chapter 11, section II, or my ‘Quantum Mechanics without “The Observer”’, especially pp. 11–15, or my Conjectures and Refutations, pp. 19, 28 (section 9), 279, and 402.
 Based on a paper which was first prepared in 1965, a version of which was first published in The Abdication of Philosophy: Philosophy and the Public Good (The Schilpp Festschrift), edited by E. Freeman, The Open Court Publishing Co., La Salle, Illinois, 1976. I am indebted to Arne Petersen for various suggestions and corrections, and to Alan Musgrave for reminding me to include the diagnosis contained in section XVI. The motto is from Plato’s Crito, 49D.
 
@@ -2679,6 +2535,8 @@ NOTES
 1 H. Maus and F. Fürstenberg, eds, Der Positivismusstreit in der deutschen Soziologie, Luchterhand, Berlin, 1969.
 2 ‘What is Dialectic?’, Mind, XLIX, 1940, pp. 403ff. Reprinted in Conjectures and Refutations.
 3 The Vienna Circle consisted of men of originality and of the highest intellectual and moral standards. Not all of them were positivists, even if we mean by this term no more than a condemnation of speculative thought, although most of them were. I have always been in favour of criticizable speculative thought and, of course, of its criticism.
+4 The quotation is from Mannheim. It is discussed more fully in my Open Society, volume II, p. 215.
+5 The Poverty of Historicism, p. 155.
 
 Section Num: 5
 Paragraph Num: 35
@@ -2688,24 +2546,13 @@ Title: Reason Or Revolution?
 Chapter Number: 3
 Header1: NOTES
 Content:
-4 The quotation is from Mannheim. It is discussed more fully in my Open Society, volume II, p. 215.
-5 The Poverty of Historicism, p. 155.
 6 Cp. my Conjectures and Refutations, especially chapter 4.
 7 Karl Marx, Capital, volume II, 1872, ‘Nachwort’. (In some later editions this is described as ‘Preface to second edition’. The usual translation is not ‘mystifying’ but ‘mystified’. To me this sounds like a Germanism.)
-
-Section Num: 5
-Paragraph Num: 36
-Book Title: The Myth of the Framework
-Section Id: Chapter03
-Title: Reason Or Revolution?
-Chapter Number: 3
-Header1: NOTES
-Content:
 8 The phenomenon of normal science was discovered, but not criticized, by Thomas Kuhn in The Structure of Scientific Revolutions. Kuhn is, I believe, mistaken in thinking that ‘normal’ science is not only normal today but always was so. On the contrary, in the past – until 1939 – science was almost always critical, or ‘extraordinary’. There was no scientific ‘routine’.
 9 In the original publication of this article in Archives européennes de sociologie the three columns contained, respectively, the original German, a paraphrase into simple German of what seemed to be being asserted, and a translation of this paraphrase into English.
 
 Section Num: 5
-Paragraph Num: 37
+Paragraph Num: 36
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2718,7 +2565,7 @@ Content:
 This paper came into being as a result of a suggestion by Professor Raymond Aron. My paper ‘The Logic of the Social Sciences’ was first published in Germany as the third paper of a collection misnamed Der Positivismusstreit in der deutschen Soziologie (see note 1, below), in a manner which left it unexplained that it was the paper which had unwittingly sparked off this ‘Positivismusstreit’. (For a revised version of ‘The Logic of the Social Sciences’, see my In Search of a Better World, Routledge, London, 1992.) In 1970 I wrote a letter to the Times Literary Supplement (‘Dialectical Methodology’, TLS 69, 26 March 1970, pp. 388–9) in criticism of a review of the Positivismusstreit volume that had appeared there. Professor Aron suggested that I expand this letter, and explain my objections to the volume more fully. This I did in the present paper, which was first published in Archives européennes de sociologie, 11, 1970, pp. 252–62, and which is also appended to the English translation of the Positivismusstreit volume. (See Theodor W. Adorno, et al., eds, The Positivist Dispute in German Sociology, translated by Glyn Adey and David Frisby, Harper & Row, 1976.) The motto is from Robert Frost, ‘A Semi-Revolution’, in A Witness Tree.
 
 Section Num: 5
-Paragraph Num: 39
+Paragraph Num: 38
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2730,7 +2577,7 @@ I first heard of the Frankfurt School in the 1930s but decided then, on the basi
 In 1960, as recounted in my ‘Reason or Revolution?’, I was asked to open a discussion at a conference in Tübingen, and was told that Adorno would reply to my paper. This led me to another attempt at reading the publications of the Frankfurt School and especially Adorno’s books.
 
 Section Num: 5
-Paragraph Num: 40
+Paragraph Num: 39
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2740,7 +2587,7 @@ Content:
 Most of Adorno’s works may be divided into three groups. First, there are his essays on music, literature, or culture. These I found little to my taste. To me they read like imitations of Karl Kraus, the Viennese writer – bad imitations, because they lacked Kraus’ sense of humour. I had known, and heartily disliked, this kind of writing in my days in Vienna. I used to think of it as cultural snobbery, practised by a clique which regarded itself as a cultural élite. These essays, incidentally, are characterized by their social irrelevance.
 
 Section Num: 5
-Paragraph Num: 41
+Paragraph Num: 40
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2752,7 +2599,7 @@ Of course, Adorno was a Hegelian as well as a Marxist. And I am opposed to both:
 As to Marx, I have great respect for him as a thinker and as a fighter for a better world, though I disagree with him on many points of decisive importance. I have criticized his theories at considerable length. He is not always particularly easy to understand, but he always tries his best to be understandable. For he has something to say, and he wants people to understand him. But as to Adorno, I can neither agree nor disagree with most of his philosophy. In spite of all efforts to understand his philosophy, it seems to me that all of it, or almost all, is just words. He has nothing whatever to say, and he says it in Hegelian language.
 
 Section Num: 5
-Paragraph Num: 42
+Paragraph Num: 41
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2762,7 +2609,7 @@ Content:
 But there is a third group of his writings. The essays which belong to this third group are mainly complaints about the times we live in. But some of them are interesting and even moving. They give direct expression to his fears: to his anxiety, as he calls it himself, and to his deep depression. Adorno was a pessimist. After Hitler came to power – an event which, he says, surprised him as a politician – he despaired of mankind, and he surrendered his belief in the Marxist gospel of salvation. It is a voice of utmost despair which sounds from these essays – a tragic and pitiful voice.
 
 Section Num: 5
-Paragraph Num: 43
+Paragraph Num: 42
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2773,7 +2620,7 @@ But so far as Adorno’s pessimism is philosophical, its philosophical content i
 It is difficult to understand how a Marxist like Adorno could support a demand for more darkness. Marx, certainly, was for enlightenment. But Adorno has published, together with Horkheimer, a book under the title Dialectic of Enlightenment1 in which they try to show that the very idea of enlightenment leads, by its inner contradictions, into darkness – the darkness which we are allegedly in now. This is, of course, a Hegelian idea. Nevertheless, it remains a puzzle how a socialist, or a Marxist, or a humanist, like Adorno, can revert to such Romantic views, and prefer the maxim ‘more darkness’ to ‘more light’. Adorno acted on his maxim by publishing intentionally obscure and even oracular writings. It can only be explained by the nineteenth-century tradition of German philosophy, and by the ‘Rise of Oracular Philosophy’, as I call it in my Open Society – the rise of the school of the so-called German Idealists. Marx himself was brought up in this tradition, but he reacted forcefully against it, and in Capital he made a remark about it, and about Dialectic, that I always admired. Marx said in Capital: ‘In its mystifying form the Dialectic became the ruling fashion in Germany.’2 Dialectic is still the ruling fashion in Germany. And it is still ‘in its mystifying form’.
 
 Section Num: 5
-Paragraph Num: 44
+Paragraph Num: 43
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2783,7 +2630,7 @@ Content:
 But I would like also to say a few words about Horkheimer. Compared with Adorno, his writings are lucidity itself. But Horkheimer’s so-called ‘Critical Theory’ is empty – devoid of content. This is more or less admitted by the editor of Horkheimer’s Kritische Theorie, when he says: ‘To cast Horkheimer’s conception into the form of understandable (‘eingängige’) propositions is … almost impossible’.3 There remains only a vague and unoriginal Marxian historicism: Horkheimer does not say anything tenable that has not been said better before. His views may be said to be objectively uninteresting, including those with which I can agree.
 
 Section Num: 5
-Paragraph Num: 45
+Paragraph Num: 44
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2793,7 +2640,7 @@ Content:
 For I have found in Horkheimer some propositions with which I can agree. I can even agree with Horkheimer’s formulation of his ultimate aims. In the second volume of his book Kritische Theorie he says, after rejecting Utopianism: ‘Nevertheless, the idea of a future society as a community of free men … has a content to which we ought to remain loyal through all [historical] change.’4 I certainly agree with this idea, the idea of a society of free men (and also with the idea of loyalty to it). It is an idea that inspired the American and the French revolutions. Unfortunately, Horkheimer has nothing of the slightest interest to say about the problem of how to get nearer to this ideal aim.
 
 Section Num: 5
-Paragraph Num: 46
+Paragraph Num: 45
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2804,7 +2651,7 @@ In fact, Horkheimer rejects, without argument and in defiance of historical fact
 Marx’s own condemnation of our society makes sense. For Marx’s theory contains the promise of a better future. But the theory becomes vacuous and irresponsible if this promise is withdrawn, as it is by Adorno and Horkheimer. This is why Adorno found that life is not worth living. For life is really worth living only if we can work for a better world now, and for the immediate future.
 
 Section Num: 5
-Paragraph Num: 47
+Paragraph Num: 46
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2815,7 +2662,7 @@ It is a crime to exaggerate the ugliness and the baseness of the world: it is ug
 We can do much now to relieve suffering and, most important, to increase individual human freedom. We must not wait for a goddess of history or for a goddess of revolution to introduce better conditions into human affairs. History, and also a revolution, may easily fail us. It did fail the Frankfurt School, and it caused Adorno to despair. We must produce and critically try out ideas about what can and should be done now – and do it now.
 
 Section Num: 5
-Paragraph Num: 48
+Paragraph Num: 47
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2825,7 +2672,7 @@ Content:
 To sum up with a phrase of Raymond Aron, I regard the writings of the Frankfurt School as ‘opium of the intellectuals’.5
 
 Section Num: 5
-Paragraph Num: 49
+Paragraph Num: 48
 Book Title: The Myth of the Framework
 Section Id: Chapter03
 Title: Reason Or Revolution?
@@ -2837,15 +2684,6 @@ NOTES
 2 Karl Marx, Capital, volume II, 1872, ‘Nachwort’.
 3 Max Horkheimer, Kritische Theorie, edited by A. Schmidt, S. Fisher, Frankfurt, 1968, volume II, pp. 340f.
 4 Horkheimer, Kritische Theorie, p. 166.
-
-Section Num: 5
-Paragraph Num: 50
-Book Title: The Myth of the Framework
-Section Id: Chapter03
-Title: Reason Or Revolution?
-Chapter Number: 3
-Header1: NOTES
-Content:
 5 Raymond Aron, L’Opium des intellectuels, Calmann-Lévy, Paris, 1955.
 In December 1973 I was asked by the BBC if I would agree to be interviewed on the subject of the so-called ‘Frankfurt School’ for use in a programme on their work to be broadcast in January 1974. I prepared a brief paper (which was not, in fact, broadcast in this form because I was given only five minutes in which to speak) containing a few critical remarks I make in section I of my paper ‘Reason or Revolution’ about my attitude towards the Frankfurt School.
 
@@ -3946,6 +3784,7 @@ Content:
 NOTES
 1 The quotation is taken from ‘The Third Day’. The translation is my own. Cp. Stillman Drake’s translation, Dialogue Concerning the Two Chief World Systems, University of California Press, Berkeley and Los Angeles, 1953, pp. 327f.
 2 See, for example, J.C. Eccles, The Physiology of Nerve Cells, Johns Hopkins University Press, Baltimore and Oxford, 1957, pp. 182–4.
+3 When writing this I ought to have remembered the strange period from about 1929 or 1930 to 1932 or 1933, now easily forgotten, when the same feeling as described by Planck emerged again, though only for a short time, among some leading physicists. It is described by C.P. Snow in The Search where a Cambridge physicist whom he describes as ‘one of the greatest mathematical physicists’ and as ‘Newton’s successor’ is made to say: ‘In a sense, physics and chemistry are finished sciences.’ (Penguin edition, London, 1965, p. 162. See also p. 88 for suggestions about the identity of the physicist.) A somewhat similar attitude may be discerned in R.A. Millikan’s Time, Matter and Values, University of North Carolina Press, Chapel Hill, 1932, p. 46. The ‘finished science’ of those days was the electrical theory of matter, that is, the theory of protons and electrons: the structure of matter was to be explained by electrical forces (and even gravitation might well in the end be reduced to electricity). This theory of matter, which completely dominated the first third of the century, has slowly and almost silently disappeared – certainly without causing anything like a violent, or even a conscious, revolution. (It should be remembered, in this context, that at that time quantum mechanics was the theory of electrons and of their behaviour in electrical fields, especially in the electrostatic fields of positively charged nuclei.)
 
 Section Num: 6
 Paragraph Num: 100
@@ -3955,7 +3794,10 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: NOTES
 Content:
-3 When writing this I ought to have remembered the strange period from about 1929 or 1930 to 1932 or 1933, now easily forgotten, when the same feeling as described by Planck emerged again, though only for a short time, among some leading physicists. It is described by C.P. Snow in The Search where a Cambridge physicist whom he describes as ‘one of the greatest mathematical physicists’ and as ‘Newton’s successor’ is made to say: ‘In a sense, physics and chemistry are finished sciences.’ (Penguin edition, London, 1965, p. 162. See also p. 88 for suggestions about the identity of the physicist.) A somewhat similar attitude may be discerned in R.A. Millikan’s Time, Matter and Values, University of North Carolina Press, Chapel Hill, 1932, p. 46. The ‘finished science’ of those days was the electrical theory of matter, that is, the theory of protons and electrons: the structure of matter was to be explained by electrical forces (and even gravitation might well in the end be reduced to electricity). This theory of matter, which completely dominated the first third of the century, has slowly and almost silently disappeared – certainly without causing anything like a violent, or even a conscious, revolution. (It should be remembered, in this context, that at that time quantum mechanics was the theory of electrons and of their behaviour in electrical fields, especially in the electrostatic fields of positively charged nuclei.)
+4 What follows here, up to and including the first three paragraphs of section IX, is taken over, with very little change, from my Herbert Spencer Lecture of 1961. When I was giving the present lecture, I did not intend to publish the Spencer Lecture. But I have now published it as chapter 7 of my Objective Knowledge.
+5 Albert Einstein, On the Methods of Theoretical Physics, Clarendon Press, Oxford, 1933. (Also in Albert Einstein, The World as I See It, translated by Alan Harris, Watts, London, 1940.)
+6 More Letters of Charles Darwin, edited by Francis Darwin and A.C. Seward, Appleton, New York, 1903, volume I, p. 195. Darwin’s comment ends with the words (which I admit weaken it as a support of my thesis) ‘if it is to be of any service!’
+7 Cp. for example the so-called ‘Transportation Problem of Linear Programming’. See S. Vajda, An Introduction to Linear Programming and the Theory of Games, Methuen, London, 1960.
 
 Section Num: 6
 Paragraph Num: 101
@@ -3965,8 +3807,10 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: NOTES
 Content:
-4 What follows here, up to and including the first three paragraphs of section IX, is taken over, with very little change, from my Herbert Spencer Lecture of 1961. When I was giving the present lecture, I did not intend to publish the Spencer Lecture. But I have now published it as chapter 7 of my Objective Knowledge.
-5 Albert Einstein, On the Methods of Theoretical Physics, Clarendon Press, Oxford, 1933. (Also in Albert Einstein, The World as I See It, translated by Alan Harris, Watts, London, 1940.)
+8 Cp. G. Polya, How to Solve It, Princeton University Press, Princeton, NJ, 1948.
+9 The criticism by which we try to discover the weak spots of our theories leads to new problems. And by the distance between our original problems and these new problems we can gauge the progress made. Cp. my Conjectures and Refutations, p. 313.
+10 I may perhaps note, in this context, that the much suspected term ‘truth’ in the sense of ‘correspondence to the facts’ has been rehabilitated (and shown to be innocuous) by Alfred Tarski, and that, using Tarski’s theories, I have tried to do the same service to the terms ‘better approximation to the truth’ and of course ‘less good approximation to the truth’. (See chapter 10 and the addenda of my Conjectures and Refutations.)
+11 The explanatory power of a theory is discussed in my Logic of Scientific Discovery, as are some relevant meanings of the term ‘simplicity’ as applied to theories. More recently I have found it enlightening to interpret the simplicity of a theory as something that must be related to the problems which the theory is supposed to solve.
 
 Section Num: 6
 Paragraph Num: 102
@@ -3976,30 +3820,6 @@ Title: Science: Problems, Aims, Responsibilities
 Chapter Number: 4
 Header1: NOTES
 Content:
-6 More Letters of Charles Darwin, edited by Francis Darwin and A.C. Seward, Appleton, New York, 1903, volume I, p. 195. Darwin’s comment ends with the words (which I admit weaken it as a support of my thesis) ‘if it is to be of any service!’
-7 Cp. for example the so-called ‘Transportation Problem of Linear Programming’. See S. Vajda, An Introduction to Linear Programming and the Theory of Games, Methuen, London, 1960.
-
-Section Num: 6
-Paragraph Num: 103
-Book Title: The Myth of the Framework
-Section Id: Chapter04
-Title: Science: Problems, Aims, Responsibilities
-Chapter Number: 4
-Header1: NOTES
-Content:
-8 Cp. G. Polya, How to Solve It, Princeton University Press, Princeton, NJ, 1948.
-9 The criticism by which we try to discover the weak spots of our theories leads to new problems. And by the distance between our original problems and these new problems we can gauge the progress made. Cp. my Conjectures and Refutations, p. 313.
-10 I may perhaps note, in this context, that the much suspected term ‘truth’ in the sense of ‘correspondence to the facts’ has been rehabilitated (and shown to be innocuous) by Alfred Tarski, and that, using Tarski’s theories, I have tried to do the same service to the terms ‘better approximation to the truth’ and of course ‘less good approximation to the truth’. (See chapter 10 and the addenda of my Conjectures and Refutations.)
-
-Section Num: 6
-Paragraph Num: 104
-Book Title: The Myth of the Framework
-Section Id: Chapter04
-Title: Science: Problems, Aims, Responsibilities
-Chapter Number: 4
-Header1: NOTES
-Content:
-11 The explanatory power of a theory is discussed in my Logic of Scientific Discovery, as are some relevant meanings of the term ‘simplicity’ as applied to theories. More recently I have found it enlightening to interpret the simplicity of a theory as something that must be related to the problems which the theory is supposed to solve.
 Revised version of an address to the Plenary Session of the 47th Annual Meeting of the Federation of American Societies for Experimental Biology, Atlantic City, NJ, 17 April 1963, first published in Federation Proceedings, 22, 1963, pp. 961–72.
 
 Section Num: 7
@@ -4201,6 +4021,7 @@ NOTES
 1 See Maxwell’s masterly article Atom in the ninth edition of the Encyclopedia Britannica.
 2 For many years I have been in the habit of giving an outline of the story (which begins with Hesiod) in my lectures.
 3 I have criticized (Aristotelian) essentialism and also the theory of essential definitions in my books The Open Society and Its Enemies and The Poverty of Historicism; see the Indices, under ‘essence’ and ‘essentialism’.
+4 Descartes, Principia Philosophiae, Elzevir, Amsterdam, 1644, part II, point 33f. By asserting the infinite divisibility of matter, Descartes prepared the way for Leibniz’s non-extended monads. (Monad=point. A point is unextended and therefore immaterial.) In II, 36 Descartes asserts the conservation of the ‘quantity of motion’ (quantitas motūs): God Himself ‘who in the beginning created matter together with motion and rest, conserves in its totality as much of motion and rest as he originally put into it’. Note that this ‘quantity of motion’ is neither our ‘momentum’, which has a definite direction and which is indeed conserved, nor our ‘angular momentum’ but, rather, mass times the (non-vectorial) amount of velocity which, as Leibniz showed (Mathematische Schriften, edited by C.I. Gerhardt, Weidmann, Berlin and Halle, 1849–63, volume VI, pp. 117ff.), is not conserved. (On the other hand, ‘force’ – which Leibniz thought was conserved – is not conserved either, not even vis viva (mv2/2), that is, kinetic energy. The fact is that both Descartes and Leibniz had an intuitive idea of the conservation laws, and though Leibniz came nearer to the truth than Descartes, neither got very near.)
 
 Section Num: 7
 Paragraph Num: 22
@@ -4210,7 +4031,8 @@ Title: Philosophy And Physics: The Influence On Theoretical And Experimental Phy
 Chapter Number: 5
 Header1: NOTES
 Content:
-4 Descartes, Principia Philosophiae, Elzevir, Amsterdam, 1644, part II, point 33f. By asserting the infinite divisibility of matter, Descartes prepared the way for Leibniz’s non-extended monads. (Monad=point. A point is unextended and therefore immaterial.) In II, 36 Descartes asserts the conservation of the ‘quantity of motion’ (quantitas motūs): God Himself ‘who in the beginning created matter together with motion and rest, conserves in its totality as much of motion and rest as he originally put into it’. Note that this ‘quantity of motion’ is neither our ‘momentum’, which has a definite direction and which is indeed conserved, nor our ‘angular momentum’ but, rather, mass times the (non-vectorial) amount of velocity which, as Leibniz showed (Mathematische Schriften, edited by C.I. Gerhardt, Weidmann, Berlin and Halle, 1849–63, volume VI, pp. 117ff.), is not conserved. (On the other hand, ‘force’ – which Leibniz thought was conserved – is not conserved either, not even vis viva (mv2/2), that is, kinetic energy. The fact is that both Descartes and Leibniz had an intuitive idea of the conservation laws, and though Leibniz came nearer to the truth than Descartes, neither got very near.)
+5 Leibniz, Philosophische Schriften, edited by C.I. Gerhardt, Weidmann, Berlin, 1875–90, volume II, p. 170, lines 27f. J.W.N. Watkins has developed this argument in some detail, showing that for these ideas Leibniz was essentially dependent on Hobbes, whose term ‘conatus’ (translated into English by ‘endeavour’) Leibniz adopted, and which he identified with force. See J.W.N. Watkins, Hobbes’s System of Ideas, Hutchinson, London, 1965, pp. 122–32; 2nd edition, 1973, pp. 85–94.
+6 Boscovitch’s Philosophiae Naturalis Theoria Redacta ad Unicam Legem Virium in Natura Existentium was first published in 1758 in Vienna (the second, improved, edition was translated by J.M. Child as Theory of Natural Philosophy and published in London in 1922), Kant’s Metaphysicae cum geometria iunctae usus in philosophia naturali, cuius specimen I continet Monadologiam physicam (referred to in English as ‘Monadology’) in 1756 in Königsberg. Thirty years later Kant repudiated part of his Monadology in his Metaphysische Anfangsgründe der Naturwissenschaft, published in Riga in 1786 (translated by James W. Ellington as Metaphysical Foundations of Natural Science, Bobbs-Merrill, Indianapolis, 1970). Though the essential idea of Boscovitch’s monadology is to be found in Kant (see Kant, proposition V for the finite number of discrete monads present in finite bodies, and proposition X for the central forces that are attractive over long distances and repulsive over short distances, and for Kant’s explanation of extension), Kant’s work is rather sketchy as compared with Boscovitch’s. (Added 1973.) Restrictions on the size of this paper when it was originally presented prevented me from discussing Faraday. While Boscovitch developed the Newtonian research programme, which treated physical events as due to central forces (acting, however, at infinitely small distances – from one point to the next, as it were), it was Faraday’s revolutionary innovation that he broke with the dogma of central forces. Although Maxwell, with his models, still hoped, like Ampère, to reduce non-central forces to central forces, his theory in effect also broke with that dogma. It thereby achieved a generalization which, I suggest, inaugurated modern field theory, and so led to special and general relativity.
 
 Section Num: 7
 Paragraph Num: 23
@@ -4220,40 +4042,11 @@ Title: Philosophy And Physics: The Influence On Theoretical And Experimental Phy
 Chapter Number: 5
 Header1: NOTES
 Content:
-5 Leibniz, Philosophische Schriften, edited by C.I. Gerhardt, Weidmann, Berlin, 1875–90, volume II, p. 170, lines 27f. J.W.N. Watkins has developed this argument in some detail, showing that for these ideas Leibniz was essentially dependent on Hobbes, whose term ‘conatus’ (translated into English by ‘endeavour’) Leibniz adopted, and which he identified with force. See J.W.N. Watkins, Hobbes’s System of Ideas, Hutchinson, London, 1965, pp. 122–32; 2nd edition, 1973, pp. 85–94.
-
-Section Num: 7
-Paragraph Num: 24
-Book Title: The Myth of the Framework
-Section Id: Chapter05
-Title: Philosophy And Physics: The Influence On Theoretical And Experimental Physics Of Some Metaphysical Speculations On The Structure Of Matter
-Chapter Number: 5
-Header1: NOTES
-Content:
-6 Boscovitch’s Philosophiae Naturalis Theoria Redacta ad Unicam Legem Virium in Natura Existentium was first published in 1758 in Vienna (the second, improved, edition was translated by J.M. Child as Theory of Natural Philosophy and published in London in 1922), Kant’s Metaphysicae cum geometria iunctae usus in philosophia naturali, cuius specimen I continet Monadologiam physicam (referred to in English as ‘Monadology’) in 1756 in Königsberg. Thirty years later Kant repudiated part of his Monadology in his Metaphysische Anfangsgründe der Naturwissenschaft, published in Riga in 1786 (translated by James W. Ellington as Metaphysical Foundations of Natural Science, Bobbs-Merrill, Indianapolis, 1970). Though the essential idea of Boscovitch’s monadology is to be found in Kant (see Kant, proposition V for the finite number of discrete monads present in finite bodies, and proposition X for the central forces that are attractive over long distances and repulsive over short distances, and for Kant’s explanation of extension), Kant’s work is rather sketchy as compared with Boscovitch’s. (Added 1973.) Restrictions on the size of this paper when it was originally presented prevented me from discussing Faraday. While Boscovitch developed the Newtonian research programme, which treated physical events as due to central forces (acting, however, at infinitely small distances – from one point to the next, as it were), it was Faraday’s revolutionary innovation that he broke with the dogma of central forces. Although Maxwell, with his models, still hoped, like Ampère, to reduce non-central forces to central forces, his theory in effect also broke with that dogma. It thereby achieved a generalization which, I suggest, inaugurated modern field theory, and so led to special and general relativity.
-
-Section Num: 7
-Paragraph Num: 25
-Book Title: The Myth of the Framework
-Section Id: Chapter05
-Title: Philosophy And Physics: The Influence On Theoretical And Experimental Physics Of Some Metaphysical Speculations On The Structure Of Matter
-Chapter Number: 5
-Header1: NOTES
-Content:
 7 The argument is clearly stated by Kant in his Metaphysical Foundations of Natural Science, ‘General Observation on Mechanics’, pp. 115–17. See also his Monadology, proposition XIII, and his ‘Neuer Lehrbegriff der Bewegung und Ruhe’, 1758 (the section on the Principle of Continuity). Similar arguments may be found in Leibniz (see his Mathematische Schriften, volume II, p. 145), who says that it seems that only elasticity ‘makes bodies rebound’. The best statement of the argument is to be found in the work of Boscovitch.
-
-Section Num: 7
-Paragraph Num: 26
-Book Title: The Myth of the Framework
-Section Id: Chapter05
-Title: Philosophy And Physics: The Influence On Theoretical And Experimental Physics Of Some Metaphysical Speculations On The Structure Of Matter
-Chapter Number: 5
-Header1: NOTES
-Content:
 8 It is important to realize that Boscovitch’s forces are not to be identified with Newtonian forces: they are not equal to acceleration multiplied by mass, but equal to acceleration multiplied by a pure number (the number of monads). This point has been clarified by L.L. Whyte (in a very interesting note in Nature, 179, 1957, pp. 284f.). Whyte stresses the ‘kinematic’ aspects of Boscovitch’s theory (as opposed to its ‘dynamical’ aspects, in the sense of Newton’s dynamics). It seems to me that Whyte’s reply to Maxwell is correct. I may perhaps express this by saying that Boscovitch not only gives a theory of extension and gravity but also of Newtonian inertial mass. On the other hand, although Boscovitch’s forces are, as Whyte rightly stresses, from a formal or dimensional point of view accelerations, they are, from a physical and a metaphysical point of view, forces, very much like Newton’s: they are dispositions, existing in their own right; they are the causes that determine accelerations. Kant, on the other hand, thinks in purely Newtonian terms, and attributes inertia to his monads; see his Monadology, proposition XI.
 
 Section Num: 7
-Paragraph Num: 27
+Paragraph Num: 24
 Book Title: The Myth of the Framework
 Section Id: Chapter05
 Title: Philosophy And Physics: The Influence On Theoretical And Experimental Physics Of Some Metaphysical Speculations On The Structure Of Matter
@@ -4264,7 +4057,7 @@ Content:
 10 Like all such proofs Kant’s proof is invalid, even in the form here given, which is an attempt to improve a little on Kant’s own version. Kant illicitly identifies ‘moving’, in the sense of a moving (repelling) force, and ‘movable’; cp. the penultimate paragraph of his note 1 to theorem 4. The ambiguity is bad, but it brings out the fact that he wishes to identify the presence of a moving force with that of movable matter. The logical situation is, in brief, as follows. In this post-critical work, Kant’s transcendental idealism is used to remove – by a valid argument, incidentally – his original objections to the doctrine of continuous matter. But he now thinks, mistakenly, that he can prove continuity – by an argument which, though invalid, is interesting and important because it compelled him to push his dynamics to its very limits (and far beyond those limits which he anticipated in his definitions).
 
 Section Num: 7
-Paragraph Num: 28
+Paragraph Num: 25
 Book Title: The Myth of the Framework
 Section Id: Chapter05
 Title: Philosophy And Physics: The Influence On Theoretical And Experimental Physics Of Some Metaphysical Speculations On The Structure Of Matter
@@ -5228,6 +5021,7 @@ NOTES
 1 Cp. the opening section of my ‘Science: Problems, Aims, Responsibilities’, chapter 4 of the present volume.
 2 The last paragraph closely follows p. 346 of my Conjectures and Refutations.
 3 Cp. my Poverty of Historicism, pp. 3f. and 17, my Open Society, volume II, pp. 208 and 255–6, and the interesting discussion in Alan Donagan’s paper ‘Popper’s Examination of Historicism’, in The Philosophy of Karl Popper, edited by P.A. Schilpp, in The Library of Living Philosophers, The Open Court Publishing Co., La Salle, Illinois, 1974, pp. 905–24.
+4 For a discussion of historicist theories in the arts, and the undesirable consequences to which they have led, see my ‘Intellectual Autobiography’, especially sections 13 and 14, and Ernst Gombrich, ‘The Logic of Vanity Fair’, both in The Philosophy of Karl Popper, edited by P.A. Schilpp. My ‘Intellectual Autobiography’ is now independently published under the title Unended Quest.
 
 Section Num: 9
 Paragraph Num: 68
@@ -5237,8 +5031,10 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-4 For a discussion of historicist theories in the arts, and the undesirable consequences to which they have led, see my ‘Intellectual Autobiography’, especially sections 13 and 14, and Ernst Gombrich, ‘The Logic of Vanity Fair’, both in The Philosophy of Karl Popper, edited by P.A. Schilpp. My ‘Intellectual Autobiography’ is now independently published under the title Unended Quest.
 5 See Gombrich’s paper cited in note 4, and my reply on pp. 1174–80 of the same book.
+6 Cp. my discussion in chapter 2 above.
+7 An example of this may be found in the development of my ideas regarding the so-called ‘empirical basis’ of knowledge. Contrary to the commonsensical idea that our perceptions are given to us by the world, I have stressed, as a corrective, the role of our active participation: ‘Making comes before matching’. But this is itself in need of a further corrective. For if taken systematically, it would lead to idealism, with reality as our construction. So I then introduce the corrective idea that we get into contact with reality through an empirical refutation, much as does a man when he hits a brick wall.
+8 See my Poverty of Historicism, especially the first paragraph of section 31.
 
 Section Num: 9
 Paragraph Num: 69
@@ -5248,8 +5044,13 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-6 Cp. my discussion in chapter 2 above.
-7 An example of this may be found in the development of my ideas regarding the so-called ‘empirical basis’ of knowledge. Contrary to the commonsensical idea that our perceptions are given to us by the world, I have stressed, as a corrective, the role of our active participation: ‘Making comes before matching’. But this is itself in need of a further corrective. For if taken systematically, it would lead to idealism, with reality as our construction. So I then introduce the corrective idea that we get into contact with reality through an empirical refutation, much as does a man when he hits a brick wall.
+9 George H. Nadel, ‘Philosophy of History before Historicism’, The Critical Approach to Science and Philosophy, edited by Mario Bunge, The Free Press, Glencoe, Illinois, 1964, pp. 445–70.
+10 Cp. Nadel, p. 469, note 2.
+11 G.W.F. Hegel, The Philosophy of History; cp. Sibree’s translation, 1956, p. 6.
+12 Leopold von Ranke, Geschichte der Romanischen und Germanischen Völker, (1824), 3rd edition 1885, p. vii (my translation).
+13 See also chapter 6 of the present volume.
+14 Isaiah Berlin, Historical Inevitability, Auguste Comte Memorial Trust Lecture, Oxford University Press, London, 1954; see p. 11, footnote.
+15 George Thomson, The Inspiration of Science, Oxford University Press, London, 1961.
 
 Section Num: 9
 Paragraph Num: 70
@@ -5259,10 +5060,9 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-8 See my Poverty of Historicism, especially the first paragraph of section 31.
-9 George H. Nadel, ‘Philosophy of History before Historicism’, The Critical Approach to Science and Philosophy, edited by Mario Bunge, The Free Press, Glencoe, Illinois, 1964, pp. 445–70.
-10 Cp. Nadel, p. 469, note 2.
-11 G.W.F. Hegel, The Philosophy of History; cp. Sibree’s translation, 1956, p. 6.
+16 F.A. von Hayek, Studies in Philosophy, Politics, and Economics, Routledge & Kegan Paul, London, 1967, p. viii. (The reader may be reminded that the present essay was first published as a contribution to a Hayek Festschrift, and that the lecture on which it was based was given in 1967.)
+17 Cp. my Objective Knowledge, pp. 243 and 287.
+18 The following comment in the Preface of W. Letwin’s The Origins of Scientific Economics, Methuen & Co., 1963, p. ix, is most interesting in this connection: ‘They [the inventors of economic theories at the end of the seventeenth century] created scientific theories, yet they generally did not do so deliberately, nor did they do it even for the sake of knowledge, but rather their scientific accomplishments were a by-product of their efforts to convince others to accede to certain economic policies. To show how these practical, and often mercenary, objectives led certain men to build a new science, the first social science, is my chief purpose.’
 
 Section Num: 9
 Paragraph Num: 71
@@ -5272,9 +5072,9 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-12 Leopold von Ranke, Geschichte der Romanischen und Germanischen Völker, (1824), 3rd edition 1885, p. vii (my translation).
-13 See also chapter 6 of the present volume.
-14 Isaiah Berlin, Historical Inevitability, Auguste Comte Memorial Trust Lecture, Oxford University Press, London, 1954; see p. 11, footnote.
+19 This example is based on the account in Macaulay’s History of England, chapter XXI. For a more recent discussion of the currency crisis and the various economic theories that were put forward in the course of the controversy, see W. Letwin, The Origins of Scientific Economics, pp. 64–75 and 166–71, and J.K. Horsefield, British Monetary Experiments 1650–1710, G. Bell & Sons, London, 1960, pp. 23–70. (According to Horsefield, Newton’s memorandum on the currency crisis was in favour of devaluation.)
+20 Only the relativity of truth is contested here. Relevance is relative, but this does not give rise to a problem of historical relativity. There can be no real clash between different claims to relevance: this is just one of the reasons for a pluralist approach to the philosophy of history.
+21 Hugh R. Trevor-Roper, History: Professional and Lay, Clarendon Press, Oxford, 1957, pp.21f.
 
 Section Num: 9
 Paragraph Num: 72
@@ -5284,8 +5084,10 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-15 George Thomson, The Inspiration of Science, Oxford University Press, London, 1961.
-16 F.A. von Hayek, Studies in Philosophy, Politics, and Economics, Routledge & Kegan Paul, London, 1967, p. viii. (The reader may be reminded that the present essay was first published as a contribution to a Hayek Festschrift, and that the lecture on which it was based was given in 1967.)
+22 See, for example, p. 13: ‘… the view which I wish to express springs from the conviction that history is a humane study and that the study of the humanities requires a different method from the study of the sciences.’
+23 Peter Havas, ‘Four-Dimensional Formulations of Newtonian Mechanics and Their Relation to the Special and the General Theory of Relativity’, Reviews of Modern Physics, 36, 1964, pp. 938–65.
+24 Lord Acton, Inaugural Lecture on the Study of History, London, 1895. Cp. his Lectures on Modern History, 1906, or Essays in the Liberal Interpretation of History, edited by W.H. McNeill, University of Chicago Press, Chicago and London, 1967, pp. 350f.
+25 Cp. G.R. Elton, The Practice of History, Sydney University Press, Sydney, 1967, p. 127.
 
 Section Num: 9
 Paragraph Num: 73
@@ -5295,8 +5097,11 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-17 Cp. my Objective Knowledge, pp. 243 and 287.
-18 The following comment in the Preface of W. Letwin’s The Origins of Scientific Economics, Methuen & Co., 1963, p. ix, is most interesting in this connection: ‘They [the inventors of economic theories at the end of the seventeenth century] created scientific theories, yet they generally did not do so deliberately, nor did they do it even for the sake of knowledge, but rather their scientific accomplishments were a by-product of their efforts to convince others to accede to certain economic policies. To show how these practical, and often mercenary, objectives led certain men to build a new science, the first social science, is my chief purpose.’
+26 It can hardly be said to be a criticism that Acton did not succeed in carrying his somewhat optimistic plans to a ‘practical conclusion’.
+27 Elton, pp. 127f.
+28 Elton, p. 128.
+29 This was seen clearly by Ranke’s contemporary, Gustav Droysen. In his lectures on historical method he says: ‘For research does not proceed by random discoveries; it seeks something. It must know what it is looking for if it is to find anything at all.’ Johann Gustav Droysen, Historik: Vorlesungen über Enzyklopädie und Methodologie der Geschichte, edited by Rudolf Hübner, 1936, p. 35. (I owe this reference to Kims Collins.)
+30 R.G. Collingwood, The Idea of History, Oxford University Press, London, 1946, p. 283.
 
 Section Num: 9
 Paragraph Num: 74
@@ -5306,7 +5111,8 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-19 This example is based on the account in Macaulay’s History of England, chapter XXI. For a more recent discussion of the currency crisis and the various economic theories that were put forward in the course of the controversy, see W. Letwin, The Origins of Scientific Economics, pp. 64–75 and 166–71, and J.K. Horsefield, British Monetary Experiments 1650–1710, G. Bell & Sons, London, 1960, pp. 23–70. (According to Horsefield, Newton’s memorandum on the currency crisis was in favour of devaluation.)
+31 See my Poverty of Historicism, pp. 149f.; my Open Society, volume II, pp. 97 and 265; chapter 4 of my Objective Knowledge, and chapter 8 of the present volume.
+32 Since this paper was first published in Roads to Freedom, Margit Hurup Nielsen has drawn my attention to the fact that my interpretation of Collingwood is perhaps controversial, in that it seems now to be widely accepted that Collingwood, when talking of re-enactment, was talking of a reconstruction, by the historian, of something close to what I would call the objective thought contents of the historical agent, as distinct from a re-experiencing of his feelings. If this interpretation is correct, then Collingwood’s views are closer to mine than I had supposed. But there are nevertheless important points at issue between us, some of which are brought out in my text following note 34.
 
 Section Num: 9
 Paragraph Num: 75
@@ -5316,8 +5122,9 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-20 Only the relativity of truth is contested here. Relevance is relative, but this does not give rise to a problem of historical relativity. There can be no real clash between different claims to relevance: this is just one of the reasons for a pluralist approach to the philosophy of history.
-21 Hugh R. Trevor-Roper, History: Professional and Lay, Clarendon Press, Oxford, 1957, pp.21f.
+33 More precisely, my theory is an objectivist theory of subjective understanding. Thus I share with the ‘subjectivist’ approach an emphasis on the situation as understood by the agent, and reject attempts to explain human action in ‘objective’ terms where ‘objective’ means ‘behaviourist’ or ‘physicalist’. For this objectivist theory of understanding, see chapter 4 of my Objective Knowledge.
+34 Galileo Galilei, Dialogue Concerning the Two Chief World Systems, translated by Stillman Drake, University of California Press, Berkeley and Los Angeles, 1967, p. 462. (Cp. my Objective Knowledge, p. 173.)
+35 Since this lecture was first published I have discussed this idea in much more detail. See particularly chapters 3, 4, and 8 of my Objective Knowledge, sections 38f. of my Unended Quest, sections 20–6 of my replies in The Philosophy of Karl Popper, and chapter P2 of The Self and Its Brain. What I have here called exosomatic artefacts I now usually call World 3.
 
 Section Num: 9
 Paragraph Num: 76
@@ -5327,65 +5134,6 @@ Title: A Pluralist Approach To The Philosophy Of History
 Chapter Number: 7
 Header1: NOTES
 Content:
-22 See, for example, p. 13: ‘… the view which I wish to express springs from the conviction that history is a humane study and that the study of the humanities requires a different method from the study of the sciences.’
-23 Peter Havas, ‘Four-Dimensional Formulations of Newtonian Mechanics and Their Relation to the Special and the General Theory of Relativity’, Reviews of Modern Physics, 36, 1964, pp. 938–65.
-
-Section Num: 9
-Paragraph Num: 77
-Book Title: The Myth of the Framework
-Section Id: Chapter07
-Title: A Pluralist Approach To The Philosophy Of History
-Chapter Number: 7
-Header1: NOTES
-Content:
-24 Lord Acton, Inaugural Lecture on the Study of History, London, 1895. Cp. his Lectures on Modern History, 1906, or Essays in the Liberal Interpretation of History, edited by W.H. McNeill, University of Chicago Press, Chicago and London, 1967, pp. 350f.
-25 Cp. G.R. Elton, The Practice of History, Sydney University Press, Sydney, 1967, p. 127.
-26 It can hardly be said to be a criticism that Acton did not succeed in carrying his somewhat optimistic plans to a ‘practical conclusion’.
-
-Section Num: 9
-Paragraph Num: 78
-Book Title: The Myth of the Framework
-Section Id: Chapter07
-Title: A Pluralist Approach To The Philosophy Of History
-Chapter Number: 7
-Header1: NOTES
-Content:
-27 Elton, pp. 127f.
-28 Elton, p. 128.
-29 This was seen clearly by Ranke’s contemporary, Gustav Droysen. In his lectures on historical method he says: ‘For research does not proceed by random discoveries; it seeks something. It must know what it is looking for if it is to find anything at all.’ Johann Gustav Droysen, Historik: Vorlesungen über Enzyklopädie und Methodologie der Geschichte, edited by Rudolf Hübner, 1936, p. 35. (I owe this reference to Kims Collins.)
-
-Section Num: 9
-Paragraph Num: 79
-Book Title: The Myth of the Framework
-Section Id: Chapter07
-Title: A Pluralist Approach To The Philosophy Of History
-Chapter Number: 7
-Header1: NOTES
-Content:
-30 R.G. Collingwood, The Idea of History, Oxford University Press, London, 1946, p. 283.
-31 See my Poverty of Historicism, pp. 149f.; my Open Society, volume II, pp. 97 and 265; chapter 4 of my Objective Knowledge, and chapter 8 of the present volume.
-32 Since this paper was first published in Roads to Freedom, Margit Hurup Nielsen has drawn my attention to the fact that my interpretation of Collingwood is perhaps controversial, in that it seems now to be widely accepted that Collingwood, when talking of re-enactment, was talking of a reconstruction, by the historian, of something close to what I would call the objective thought contents of the historical agent, as distinct from a re-experiencing of his feelings. If this interpretation is correct, then Collingwood’s views are closer to mine than I had supposed. But there are nevertheless important points at issue between us, some of which are brought out in my text following note 34.
-
-Section Num: 9
-Paragraph Num: 80
-Book Title: The Myth of the Framework
-Section Id: Chapter07
-Title: A Pluralist Approach To The Philosophy Of History
-Chapter Number: 7
-Header1: NOTES
-Content:
-33 More precisely, my theory is an objectivist theory of subjective understanding. Thus I share with the ‘subjectivist’ approach an emphasis on the situation as understood by the agent, and reject attempts to explain human action in ‘objective’ terms where ‘objective’ means ‘behaviourist’ or ‘physicalist’. For this objectivist theory of understanding, see chapter 4 of my Objective Knowledge.
-34 Galileo Galilei, Dialogue Concerning the Two Chief World Systems, translated by Stillman Drake, University of California Press, Berkeley and Los Angeles, 1967, p. 462. (Cp. my Objective Knowledge, p. 173.)
-
-Section Num: 9
-Paragraph Num: 81
-Book Title: The Myth of the Framework
-Section Id: Chapter07
-Title: A Pluralist Approach To The Philosophy Of History
-Chapter Number: 7
-Header1: NOTES
-Content:
-35 Since this lecture was first published I have discussed this idea in much more detail. See particularly chapters 3, 4, and 8 of my Objective Knowledge, sections 38f. of my Unended Quest, sections 20–6 of my replies in The Philosophy of Karl Popper, and chapter P2 of The Self and Its Brain. What I have here called exosomatic artefacts I now usually call World 3.
 Based on a lecture delivered in Oxford on 3 November 1967. First published in Roads to Freedom: Essays in Honour of Friedrich A. von Hayek, edited by Erich Streissler, Gottfried Haberler, Friedrich A. Lutz, and Fritz Machlup, Routledge & Kegan Paul, London, 1969. This paper has been revised in the light of suggestions by Kims Collins, Maurice Cranston, and Jeremy Shearmur.
 
 Section Num: 10
@@ -6373,6 +6121,8 @@ Header1: NOTES
 Content:
 NOTES
 1 I was particularly impressed by Hayek’s formulation that economics is the ‘logic of choice’. (Cp., for example, F.A. von Hayek, ‘Economics and Knowledge’ (1936) reprinted in Individualism and Economic Order, Routledge & Kegan Paul and the University of Chicago Press, Chicago, 1948; see p. 35.) This led me to my formulation of the ‘logic of the situation’ (cp. my Poverty of Historicism, p. 149). This seemed to me to embrace, for example, the logic of choice and the logic of historical problem situations. (The origin of this idea may explain why I rarely stressed the fact that I did not look at the logic of the situation as a deterministic theory: I had in mind the logic of situational choices.)
+2 Sections 12 and 13, added after the original lecture (see note 19), contain a further discussion of the ‘rationality principle’.
+3 Here the word ‘only’ is intended to stress my opposition to that empiricist tradition which looks upon science as being based on observations and experiments. Of course, this passage needs to be amplified – for example, by a discussion of corroboration. Cp. appendix *ix of my Logic of Scientific Discovery and chapter 10 of my Conjectures and Refutations.
 
 Section Num: 10
 Paragraph Num: 92
@@ -6382,8 +6132,10 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: NOTES
 Content:
-2 Sections 12 and 13, added after the original lecture (see note 19), contain a further discussion of the ‘rationality principle’.
-3 Here the word ‘only’ is intended to stress my opposition to that empiricist tradition which looks upon science as being based on observations and experiments. Of course, this passage needs to be amplified – for example, by a discussion of corroboration. Cp. appendix *ix of my Logic of Scientific Discovery and chapter 10 of my Conjectures and Refutations.
+4 See ‘Degrees of Explanation’, in F.A. von Hayek, Studies in Philosophy, Politics and Economics, Routledge & Kegan Paul, London, 1967, pp. 3–21.
+5 Physical laws (say, that of conservation of energy) ‘prohibit’ the occurrence of certain things (say, the construction of a perpetual motion machine). Cp. my Logic of Scientific Discovery, p. 69 and my Poverty of Historicism, p. 61.
+6 It seems to me that we clarify the nature of social theory if, as is suggested in the text, we de-psychologize the aims, information, and knowledge of the actors in typical social situations. (Note that this is not a concession to behaviourism.)
+Consider, for example, the old controversy in economics about profit maximization. According to the theory of profit maximization, the businessman maximizes his (monetary) profits by a policy of marginal cost pricing. In a paper by R.L. Hall and C.J. Hitch (‘Price Theory and Business Behaviour’, Oxford Economic Papers, 2, 1939, pp. 12–45), however, this theory was criticized on the basis of empirical evidence, obtained by means of questionnaires, about the way in which businessmen decided their pricing policy. It has been suggested that this evidence shows the theory of profit maximization to be false. This led defenders of the theory to suggest that it was not meant to describe the actual behaviour of businessmen, but that it was only a tool, or an instrument, for prediction. Thus both groups seem to have been in agreement in assuming that the profit maximization theory psychologized the aims and the information of the agents (businessmen) in the typical social situation considered.
 
 Section Num: 10
 Paragraph Num: 93
@@ -6393,43 +6145,12 @@ Title: Models, Instruments, And Truth: The Status Of The Rationality Principle I
 Chapter Number: 8
 Header1: NOTES
 Content:
-4 See ‘Degrees of Explanation’, in F.A. von Hayek, Studies in Philosophy, Politics and Economics, Routledge & Kegan Paul, London, 1967, pp. 3–21.
-5 Physical laws (say, that of conservation of energy) ‘prohibit’ the occurrence of certain things (say, the construction of a perpetual motion machine). Cp. my Logic of Scientific Discovery, p. 69 and my Poverty of Historicism, p. 61.
-
-Section Num: 10
-Paragraph Num: 94
-Book Title: The Myth of the Framework
-Section Id: Chapter08
-Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
-Chapter Number: 8
-Header1: NOTES
-Content:
-6 It seems to me that we clarify the nature of social theory if, as is suggested in the text, we de-psychologize the aims, information, and knowledge of the actors in typical social situations. (Note that this is not a concession to behaviourism.)
-Consider, for example, the old controversy in economics about profit maximization. According to the theory of profit maximization, the businessman maximizes his (monetary) profits by a policy of marginal cost pricing. In a paper by R.L. Hall and C.J. Hitch (‘Price Theory and Business Behaviour’, Oxford Economic Papers, 2, 1939, pp. 12–45), however, this theory was criticized on the basis of empirical evidence, obtained by means of questionnaires, about the way in which businessmen decided their pricing policy. It has been suggested that this evidence shows the theory of profit maximization to be false. This led defenders of the theory to suggest that it was not meant to describe the actual behaviour of businessmen, but that it was only a tool, or an instrument, for prediction. Thus both groups seem to have been in agreement in assuming that the profit maximization theory psychologized the aims and the information of the agents (businessmen) in the typical social situation considered.
-
-Section Num: 10
-Paragraph Num: 95
-Book Title: The Myth of the Framework
-Section Id: Chapter08
-Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
-Chapter Number: 8
-Header1: NOTES
-Content:
 Against all this, I suggest that the method of situational logic is not concerned with what the agent’s actual thoughts were when performing the action (compare the case of Richard’s crossing the street). In consequence, evidence from questionnaires about psychological motivation is not necessarily relevant to the testing of a theory about situational logic.
 As to the status of the profit maximization model (from the point of view here discussed), not only could one admit its falsity as a model of businessmen’s psychological motivation without being forced into instrumentalism, but even if it is false as a theory of businessmen’s behaviour, it may be still valued as an approximation to the truth.
-
-Section Num: 10
-Paragraph Num: 96
-Book Title: The Myth of the Framework
-Section Id: Chapter08
-Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
-Chapter Number: 8
-Header1: NOTES
-Content:
 I should not object to alternative situational models in which, say, businessmen’s behaviour is explained in terms of an aim to increase the standing of their firm or even their own position within it. In such a model, the maximization of profits might enter, not as an aim, but as the result of a kind of situational constraint. (Cp. Adam Smith, The Wealth of Nations, book I, chapter XI, part I: ‘… good management, … can never be universally established but in consequence of that free and universal competition which forces everybody to have recourse to it for the sake of self-defence’. The italics are mine. I owe this reference to Jeremy Shearmur.) It is doubtful whether the difference between such a model and the view that takes the maximization of profits as an aim is worth bothering about, though this will, of course, depend on what we want to explain: on what we regard as our problem.
 
 Section Num: 10
-Paragraph Num: 97
+Paragraph Num: 94
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6440,34 +6161,25 @@ Content:
 8 Cp. my Poverty of Historicism, pp. 141f., for a discussion of the ‘zero method’.
 9 Cp. H. Diels and W. Kranz, Die Fragmente der Vorsokratiker, 6th edition, Weidmannsche Verlagsbuchhandlung, Berlin-Grunewald, 1951–2, volume II, pp. 240–4.
 10 See my ‘On the Theory of the Objective Mind’, chapter 4 in my Objective Knowledge, especially sections 9–12. Cp., particularly, the discussion of R.G. Collingwood in section 12.
-
-Section Num: 10
-Paragraph Num: 98
-Book Title: The Myth of the Framework
-Section Id: Chapter08
-Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
-Chapter Number: 8
-Header1: NOTES
-Content:
 11 That is, of the original lecture.
 12 The sentence in parentheses was added in 1974. The problem of the status of the rationality principle is more fully discussed in section 12.
-13 Cp. the reference given in note 8.
-14 The sentence in parentheses was added in 1974.
 
 Section Num: 10
-Paragraph Num: 99
+Paragraph Num: 95
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
 Chapter Number: 8
 Header1: NOTES
 Content:
+13 Cp. the reference given in note 8.
+14 The sentence in parentheses was added in 1974.
 15 See my Conjectures and Refutations, chapter 3.
 16 I have discussed it in my Conjectures and Refutations – see, for example, pp. 223–7 – and in my Objective Knowledge – see especially pp. 308–18 and chapter 9.
 17 See my Conjectures and Refutations, chapter 10 and addendum 3 (and also my Objective Knowledge, chapters 2 and 9). For criticism of my definition, see David Miller, ‘The Truth-likeness of Truthlikeness’, Analysis, 33, 1972, pp. 50–5. See also, in The British Journal for the Philosophy of Science, 25, 1974: David Miller, ‘Popper’s Qualitative Theory of Verisimilitude’, pp. 166–77; David Miller, ‘On the Comparison of False Theories by their Bases’, pp. 178–88; and Pavel Tichý, ‘On Popper’s Definitions of Verisimilitude’, pp. 155–60.
 
 Section Num: 10
-Paragraph Num: 100
+Paragraph Num: 96
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6476,19 +6188,10 @@ Header1: NOTES
 Content:
 18 This section, and the final one (which formed part of it) were added after the lecture, on the basis of the discussion following the lecture.
 19 In the earlier part of the lecture, I was concerned with the rationality principle considered as the view that people act appropriately to the objective situation in which they find themselves (including their knowledge and skills). In what follows, I am concerned with the view that people act in a manner appropriate to the situation as they see it.
-
-Section Num: 10
-Paragraph Num: 101
-Book Title: The Myth of the Framework
-Section Id: Chapter08
-Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
-Chapter Number: 8
-Header1: NOTES
-Content:
 It seems to me now that there are at least three senses of ‘rationality’ (and, accordingly, of the ‘rationality principle’), all objective, yet differing with regard to the objectivity of the situation in which the agent is acting: (1) The situation as it actually was – the objective situation which the historian tries to reconstruct. Part of this objective situation is (2) The situation as the agent actually saw it. But I suggest that there is a third sense intermediate between (1) and (2): (3) The situation as the agent could (within the objective situation) have seen it, and perhaps ought to have seen it. It is clear that there will be three senses of the ‘rationality principle’ corresponding to these three senses of ‘the situation’. It is further clear that the difference between (1) and the two other versions of the rationality principle will play a part in our understanding of action, especially in the historian’s attempt to explain failure, and that the difference between (2) and (3) will play a similar part. (2) and (3), it should be stressed, form in their turn part of (a more or less elaborate analysis of) the objective situation (1). Moreover, if there is a clash between (2) and (3), then we may well say that the agent did not act rationally. (Such a clash would, I think, be described by psychoanalysts as a failure of the reality principle.) (3) may well include an appreciation of the difficulties in seeing certain aspects of the situation as they were.
 
 Section Num: 10
-Paragraph Num: 102
+Paragraph Num: 97
 Book Title: The Myth of the Framework
 Section Id: Chapter08
 Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
@@ -6497,15 +6200,6 @@ Header1: NOTES
 Content:
 With regard to the paper, I could be said, using these formulations, to have worked with (1) and (3) in the earlier sections, and with (2) in the final sections. I might add that, in my view, we sometimes act in a manner not adequate to the situation in any of the senses (1), (2), or (3) – in other words, that the rationality principle is not universally true as a description of our ways of acting.
 20 Winston Churchill, The World Crisis, Thornton Butterworth, London, 1923–31.
-
-Section Num: 10
-Paragraph Num: 103
-Book Title: The Myth of the Framework
-Section Id: Chapter08
-Title: Models, Instruments, And Truth: The Status Of The Rationality Principle In The Social Sciences
-Chapter Number: 8
-Header1: NOTES
-Content:
 21 Winston Churchill, The Second World War, volume IV: The Hinge of Fate, Cassell & Co., London, 1951. See chapter 26.
 Based on a lecture delivered in the Department of Economics, Harvard University, on 26 February 1963. The lecture was revised after it was delivered and two new sections (12 and 13) were added in 1963 and 1964. An extract of this paper has been published in French, under the title ‘La rationalité et le statut du principe de rationalité’ in Les fondements philosophiques des systèmes économiques: Textes de Jacques Rueff et essais rédigés en son honneur, edited by E.M. Claassen, Payot, Paris, 1967, pp. 142–50. The paper has been left unchanged, apart from certain minor corrections, the addition of the notes, and a few other additions as indicated in the notes.
 
@@ -7184,6 +6878,8 @@ Content:
 NOTES
 1 Plato, Republic, 473 c–e. In my Open Society, chapter 8, pp. 151f., I translated the passage as follows:
 Unless, in their cities, philosophers are vested with the might of kings, or those now called kings and oligarchs become genuine and fully qualified philosophers; and unless these two, political might and philosophy, are fused (while the many who nowadays follow their natural inclination for one of these two are suppressed by force), unless this happens, my dear Glaucon, there can be no rest; and the evil will not cease to be rampant in the cities – nor, I believe, in the race of men.
+2 See T. Masaryk, The New Europe (The Slav Standpoint), printed by Eyre and Spottiswoode, London, 1918, for private circulation, p. 68.
+3 It might, perhaps, be mentioned that Masaryk’s nationalism was moderate and humane: ‘I have never been a Chauvinist; I have not even been a nationalist …’ (Masaryk, p. 45). Nevertheless, he also said: ‘… we advocate the principle of nationality …’ (Masaryk, p. 52) and demanded the dismemberment of Austria-Hungary into national states. (See also note 53 to chapter 12 of my Open Society.) For a most interesting though different appraisal of Masaryk’s views, see A. van den Beld, Humanity: The Political and Social Philosophy of Thomas G. Masaryk, Mouton, The Hague, 1975.
 
 Section Num: 11
 Paragraph Num: 63
@@ -7193,8 +6889,10 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: NOTES
 Content:
-2 See T. Masaryk, The New Europe (The Slav Standpoint), printed by Eyre and Spottiswoode, London, 1918, for private circulation, p. 68.
-3 It might, perhaps, be mentioned that Masaryk’s nationalism was moderate and humane: ‘I have never been a Chauvinist; I have not even been a nationalist …’ (Masaryk, p. 45). Nevertheless, he also said: ‘… we advocate the principle of nationality …’ (Masaryk, p. 52) and demanded the dismemberment of Austria-Hungary into national states. (See also note 53 to chapter 12 of my Open Society.) For a most interesting though different appraisal of Masaryk’s views, see A. van den Beld, Humanity: The Political and Social Philosophy of Thomas G. Masaryk, Mouton, The Hague, 1975.
+4 Iceland may be an exception. Cp. my Conjectures and Refutations, p. 368.
+5 A.J.P. Taylor claims that ‘Czechoslovakia contained seven [nationalities]’ – that is, ‘Czechs, Slovaks, Germans, Magyars, Little Russians, Poles, Jews’. See The Hapsburg Monarchy, 1948, Peregrine Books edition, 1964, p. 274.
+6 Heinrich Heine, Zur Geschichte der Religion und Philosophie in Deutschland, 1833–4, book III (see p. 150 of Wolfgang Harich’s edition, Insel Verlag, Frankfurt, 1966). The passage was quoted in my Open Society, volume II, p. 109.
+7 Hayek has long stressed this point, which he says, has ‘long formed a fundamental part of the liberal creed’. See his Constitution of Liberty, Routledge & Kegan Paul, London, 1960, pp. 112f., the quotation in his text from J.S. Mill, and in his footnote 14 on p. 445 from Lord Keynes.
 
 Section Num: 11
 Paragraph Num: 64
@@ -7204,9 +6902,10 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: NOTES
 Content:
-4 Iceland may be an exception. Cp. my Conjectures and Refutations, p. 368.
-5 A.J.P. Taylor claims that ‘Czechoslovakia contained seven [nationalities]’ – that is, ‘Czechs, Slovaks, Germans, Magyars, Little Russians, Poles, Jews’. See The Hapsburg Monarchy, 1948, Peregrine Books edition, 1964, p. 274.
-6 Heinrich Heine, Zur Geschichte der Religion und Philosophie in Deutschland, 1833–4, book III (see p. 150 of Wolfgang Harich’s edition, Insel Verlag, Frankfurt, 1966). The passage was quoted in my Open Society, volume II, p. 109.
+8 Marx does so in the ‘Author’s Preface to the Second German Edition’ of Capital, dated London, 24 January 1873; see p. 871 of the Everyman edition of Capital, volume I; p. 27 of the Lawrence & Wishart edition, volume I.
+9 This brief account is based on the analysis of Marx’s theory that I give in my Open Society, chapters 13–21. See especially chapter 15, pp. 108f., footnote 13 on p. 326, and the references given there to Marx’s ‘Preface’ to his A Contribution to the Critique of Political Economy and his The Poverty of Philosophy.
+10 Cp. my Open Society, volume II, pp. 83 and 108.
+11 See John Stuart Mill, Autobiography, chapter 4, first edition, 1873, p. 105, Houghton Mifflin/Oxford University Press edition, edited by J. Stillinger, 1969, 1971, p. 64. It seems that Mill believed at the time that the only means of realizing his programme was by the voluntary adoption of birth control by the ‘labouring classes’. (The quotation in the text continues: ‘through a voluntary restriction of the increase of their numbers’.) There is no reason to think that he gave up his support for birth control. But in his Autobiography, chapter 7 (1st edition, p. 231; Stillinger edition, p. 138) he indicates (possibly under the influence of his wife: note the sudden ‘we’ instead of ‘I’ on the page referred to) that a necessary additional means was a changed attitude towards private property and the adoption of a form of socialism.
 
 Section Num: 11
 Paragraph Num: 65
@@ -7216,8 +6915,9 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: NOTES
 Content:
-7 Hayek has long stressed this point, which he says, has ‘long formed a fundamental part of the liberal creed’. See his Constitution of Liberty, Routledge & Kegan Paul, London, 1960, pp. 112f., the quotation in his text from J.S. Mill, and in his footnote 14 on p. 445 from Lord Keynes.
-8 Marx does so in the ‘Author’s Preface to the Second German Edition’ of Capital, dated London, 24 January 1873; see p. 871 of the Everyman edition of Capital, volume I; p. 27 of the Lawrence & Wishart edition, volume I.
+12 The quotations are from Martin Luther’s De servo arbitrio (The Bondage of the Will), 1525, a book written in reply to Erasmus’ De libero arbitrio (A Diatribe or Discourse Concerning Free Choice), 1524. The translations are my own. See De servo arbitrio in D. Martin Luther’s Werke, Kritische Gesamtausgabe (Weimarer Ausgabe), 18. Band, Hermann Böhlans Nachfolger, Weimar, 1908, p. 626. Cp. Luther’s Works, volume 33, Career of the Reformer III, Fortress Press, Philadelphia, 1972, pp. 52–3; or Martin Luther, Ausgewählte Werke, edited by H.H. Borcherdt and G. Merz, Ergänzungsreihe, erster Band, 1954, p. 35.
+13 This passage was written in 1959.
+14 Decisions (‘making up our minds’) are unavoidable, even in science. What scientists do all the time is to decide in the light of argument. But we should distinguish between critical and tentative decisions and dogmatic decisions or commitments. It is the latter type of decision which has given rise to ‘decisionism’.
 
 Section Num: 11
 Paragraph Num: 66
@@ -7227,8 +6927,9 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: NOTES
 Content:
-9 This brief account is based on the analysis of Marx’s theory that I give in my Open Society, chapters 13–21. See especially chapter 15, pp. 108f., footnote 13 on p. 326, and the references given there to Marx’s ‘Preface’ to his A Contribution to the Critique of Political Economy and his The Poverty of Philosophy.
-10 Cp. my Open Society, volume II, pp. 83 and 108.
+15 It will be clear from the context that I am using the term ‘rationalism’ in its wide sense, and not in the narrow sense in which it is used in opposition to ‘empiricism’.
+16 For a discussion of epistemological optimism, see ‘On the Sources of Knowledge and of Ignorance’ in my Conjectures and Refutations, pp. 5ff.
+17 Only quite recently, and many years after I first arrived at my not too favourable opinion of Bacon’s philosophy as well as at the view that he was the prophet of the industrial revolution, I came across the admirable and highly original book by Benjamin Farrington, Francis Bacon, Philosopher of Industrial Science, (Schuman, New York, 1949; Collier, New York, 1961; Lawrence & Wishart, London, 1951). Though Farrington treats Bacon from a philosophical point of view very different from my own, our results concerning Bacon’s influence on the industrial revolution are strikingly similar. Indeed, Farrington quotes (on p. 136 of the 1961 American edition) the passage from Marx’s Capital which I have now adopted as a motto for this chapter. In that passage Marx says: ‘… Francis Bacon looked forward to an alteration in the form of production and to the effective control of nature by man, as a result of a change in the ways of thinking’ (my italics). I certainly agree with what Marx says here, though my interpretation hardly fits Marx’s own view of the relation between ‘the mode of production of material life’ and ‘the general character of the social, political and intellectual processes of life’. For Marx says in his ‘Preface’ to A Contribution to the Critique of Political Economy (cp. Lawrence & Wishart edition, 1971, pp. 20–1; Karl Marx, Selected Writings in Sociology and Social Philosophy, edited by T.B. Bottomore and M. Rubel, Penguin edition, 1963, p. 67), ‘The mode of production of material life determines the general character of the social, political and intellectual processes of life. It is not the consciousness of men that determines their existence but, on the contrary their social existence determines their consciousness.’ This can hardly be squared with interpreting Bacon as one of those who helped to bring about the industrial revolution ‘as a result of a change in the ways of thinking’.
 
 Section Num: 11
 Paragraph Num: 67
@@ -7238,65 +6939,13 @@ Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: NOTES
 Content:
-11 See John Stuart Mill, Autobiography, chapter 4, first edition, 1873, p. 105, Houghton Mifflin/Oxford University Press edition, edited by J. Stillinger, 1969, 1971, p. 64. It seems that Mill believed at the time that the only means of realizing his programme was by the voluntary adoption of birth control by the ‘labouring classes’. (The quotation in the text continues: ‘through a voluntary restriction of the increase of their numbers’.) There is no reason to think that he gave up his support for birth control. But in his Autobiography, chapter 7 (1st edition, p. 231; Stillinger edition, p. 138) he indicates (possibly under the influence of his wife: note the sudden ‘we’ instead of ‘I’ on the page referred to) that a necessary additional means was a changed attitude towards private property and the adoption of a form of socialism.
-
-Section Num: 11
-Paragraph Num: 68
-Book Title: The Myth of the Framework
-Section Id: Chapter09
-Title: Epistemology And Industrialization
-Chapter Number: 9
-Header1: NOTES
-Content:
-12 The quotations are from Martin Luther’s De servo arbitrio (The Bondage of the Will), 1525, a book written in reply to Erasmus’ De libero arbitrio (A Diatribe or Discourse Concerning Free Choice), 1524. The translations are my own. See De servo arbitrio in D. Martin Luther’s Werke, Kritische Gesamtausgabe (Weimarer Ausgabe), 18. Band, Hermann Böhlans Nachfolger, Weimar, 1908, p. 626. Cp. Luther’s Works, volume 33, Career of the Reformer III, Fortress Press, Philadelphia, 1972, pp. 52–3; or Martin Luther, Ausgewählte Werke, edited by H.H. Borcherdt and G. Merz, Ergänzungsreihe, erster Band, 1954, p. 35.
-
-Section Num: 11
-Paragraph Num: 69
-Book Title: The Myth of the Framework
-Section Id: Chapter09
-Title: Epistemology And Industrialization
-Chapter Number: 9
-Header1: NOTES
-Content:
-13 This passage was written in 1959.
-14 Decisions (‘making up our minds’) are unavoidable, even in science. What scientists do all the time is to decide in the light of argument. But we should distinguish between critical and tentative decisions and dogmatic decisions or commitments. It is the latter type of decision which has given rise to ‘decisionism’.
-15 It will be clear from the context that I am using the term ‘rationalism’ in its wide sense, and not in the narrow sense in which it is used in opposition to ‘empiricism’.
-
-Section Num: 11
-Paragraph Num: 70
-Book Title: The Myth of the Framework
-Section Id: Chapter09
-Title: Epistemology And Industrialization
-Chapter Number: 9
-Header1: NOTES
-Content:
-16 For a discussion of epistemological optimism, see ‘On the Sources of Knowledge and of Ignorance’ in my Conjectures and Refutations, pp. 5ff.
-17 Only quite recently, and many years after I first arrived at my not too favourable opinion of Bacon’s philosophy as well as at the view that he was the prophet of the industrial revolution, I came across the admirable and highly original book by Benjamin Farrington, Francis Bacon, Philosopher of Industrial Science, (Schuman, New York, 1949; Collier, New York, 1961; Lawrence & Wishart, London, 1951). Though Farrington treats Bacon from a philosophical point of view very different from my own, our results concerning Bacon’s influence on the industrial revolution are strikingly similar. Indeed, Farrington quotes (on p. 136 of the 1961 American edition) the passage from Marx’s Capital which I have now adopted as a motto for this chapter. In that passage Marx says: ‘… Francis Bacon looked forward to an alteration in the form of production and to the effective control of nature by man, as a result of a change in the ways of thinking’ (my italics). I certainly agree with what Marx says here, though my interpretation hardly fits Marx’s own view of the relation between ‘the mode of production of material life’ and ‘the general character of the social, political and intellectual processes of life’. For Marx says in his ‘Preface’ to A Contribution to the Critique of Political Economy (cp. Lawrence & Wishart edition, 1971, pp. 20–1; Karl Marx, Selected Writings in Sociology and Social Philosophy, edited by T.B. Bottomore and M. Rubel, Penguin edition, 1963, p. 67), ‘The mode of production of material life determines the general character of the social, political and intellectual processes of life. It is not the consciousness of men that determines their existence but, on the contrary their social existence determines their consciousness.’ This can hardly be squared with interpreting Bacon as one of those who helped to bring about the industrial revolution ‘as a result of a change in the ways of thinking’.
-
-Section Num: 11
-Paragraph Num: 71
-Book Title: The Myth of the Framework
-Section Id: Chapter09
-Title: Epistemology And Industrialization
-Chapter Number: 9
-Header1: NOTES
-Content:
 18 Cp. my ‘Science: Problems, Aims, Responsibilities’, chapter 4 of the present volume.
 19 In the original lecture I mentioned at this point that my critical attitude towards Bacon predated the creation of nuclear weapons (I criticized Bacon in 1934), and that I remained a great admirer of Albert Einstein and Niels Bohr even though their theories fathered the atom bomb.
 20 John Emerich, Letter to Mandell Creighton, 5 April 1887. Cp. John Emerich, Essays on Freedom and Power, edited by Gertrude Himmelfarb, Meridian Books, Thames & Hudson, London, 1956, p. 335.
-
-Section Num: 11
-Paragraph Num: 72
-Book Title: The Myth of the Framework
-Section Id: Chapter09
-Title: Epistemology And Industrialization
-Chapter Number: 9
-Header1: NOTES
-Content:
 21 I referred to this in my Open Society, volume I, p. 139. See Immanuel Kant, On Eternal Peace, Appendix, in Kants gesammelte Schriften, edited by Königlich Preussischen Akademie der Wissenschaften, VIII, Gruyter, Berlin and Leipzig, 1923, p. 370. Cp. Kant’s Political Writings, edited by H. Reiss, Cambridge University Press, Cambridge, 1971, p. 116: ‘It is true, alas, that the saying “Honesty is the best policy” embodies a theory which is frequently contradicted by practice. Yet the equally theoretical proposition “Honesty is better than any policy” infinitely transcends all objections, and is indeed an indispensable condition of any policy whatever.’
 
 Section Num: 11
-Paragraph Num: 73
+Paragraph Num: 68
 Book Title: The Myth of the Framework
 Section Id: Chapter09
 Title: Epistemology And Industrialization
@@ -7308,7 +6957,7 @@ Content:
 24 Kepler is not mentioned at all by Bacon. See Ellis’ ‘Preface’ to the Descriptio Globi Intellectualis, in The Works of Francis Bacon, edited by James Spedding, Robert Leslie Ellis, and Douglas Denon Heath, Longman & Co., London, 1862–75, volume III, pp. 723–6; on Copernicus, see III, p. 229 and V, p. 517 (also IV, p. 373); on Galileo, see II, p. 596 (Bacon on Galileo’s theory of the tides) and, for example, V, pp. 541–2; on Gilbert, see III, pp. 292–3 and V, p. 202 (also V, pp. 454, 493, 515 and 537).
 
 Section Num: 11
-Paragraph Num: 74
+Paragraph Num: 69
 Book Title: The Myth of the Framework
 Section Id: Chapter09
 Title: Epistemology And Industrialization
@@ -7318,20 +6967,11 @@ Content:
 25 Cp. my ‘Emancipation Through Knowledge’ in my In Search of a Better World.
 26 Francis Bacon, New Atlantis, in The Works of Francis Bacon, volume III, pp. 114f.
 27 The quotations are from Novum Organum, 109th Aphorism. Cp. The Works of Francis Bacon, volume I, pp. 207f. The translation is my own. Cp. James Spedding’s translation in The Works of Francis Bacon, volume IV, pp. 99f.
-
-Section Num: 11
-Paragraph Num: 75
-Book Title: The Myth of the Framework
-Section Id: Chapter09
-Title: Epistemology And Industrialization
-Chapter Number: 9
-Header1: NOTES
-Content:
 28 Cp., for example, Sir Henry Lyons, The Royal Society 1660–1940, Cambridge University Press, Cambridge, 1944, Appendix I: ‘Second Charter: 22 April 1663’. The quotation in my text is from p. 329 of this Appendix.
 29 See The Works of Francis Bacon, volume III, p. 294: ‘…for the glory of the Creator and the relief of man’s estate’. Cp. also Rawley’s introduction ‘To the Reader’ to New Atlantis (published in 1627): ‘… a college instituted for the interpreting of nature and the producing of great and marvellous works for the benefit of men …’ (The Works of Francis Bacon, volume III, p. 127.)
 
 Section Num: 11
-Paragraph Num: 76
+Paragraph Num: 70
 Book Title: The Myth of the Framework
 Section Id: Chapter09
 Title: Epistemology And Industrialization
@@ -7339,36 +6979,27 @@ Chapter Number: 9
 Header1: NOTES
 Content:
 30 I should perhaps have said, rather, Hermeticism. See, notably, P. Rossi, Francis Bacon: From Magic to Science, Routledge & Kegan Paul, London, 1968 (first published in Italian in 1957); Francis Yates, Giordano Bruno and the Hermetic Tradition, Routledge & Kegan Paul, London, 1964; Francis Yates, ‘The Hermetic Tradition in Renaissance Science’, in Art, Science and History in the Renaissance, edited by C.S. Singleton, Baltimore, 1967. For a recent discussion see D.K. Probst, Francis Bacon and the Transformation of the Hermetic Tradition into the Rationalist Church, D.Sc. thesis, Université Libre de Bruxelles, Faculté des Sciences, Service de Chimie Physique II, 1972.
-
-Section Num: 11
-Paragraph Num: 77
-Book Title: The Myth of the Framework
-Section Id: Chapter09
-Title: Epistemology And Industrialization
-Chapter Number: 9
-Header1: NOTES
-Content:
 31 Cp. De Sapientia Veterum, in The Works of Francis Bacon, volume VI, pp. 619–86 (translation, pp. 689–764) and De Principiis Atque Originibus Secundum Fabulas Cupidinis et Coele in The Works of Francis Bacon, volume III, pp. 79–118 (translation, volume V, pp. 461–500), which interpreted a number of classical myths as cosmological allegories.
+
+Section Num: 11
+Paragraph Num: 71
+Book Title: The Myth of the Framework
+Section Id: Chapter09
+Title: Epistemology And Industrialization
+Chapter Number: 9
+Header1: NOTES
+Content:
 32 This term is a reference to the idea that our western societies do not, by their structure, satisfy a need for a father-figure. I discussed these problems, briefly, in my (unpublished) William James Lectures delivered in Harvard in 1950. (Cp. my Conjectures and Refutations, p. 375.)
-
-Section Num: 11
-Paragraph Num: 78
-Book Title: The Myth of the Framework
-Section Id: Chapter09
-Title: Epistemology And Industrialization
-Chapter Number: 9
-Header1: NOTES
-Content:
 33 I offer this view as an alternative historical conjecture to the theories of Max Weber and R.H. Tawney about the relation between ‘Religion’ and ‘the Rise of Capitalism’ (see Max Weber, The Protestant Ethic and the Spirit of Capitalism, G. Allen & Unwin, London, 1930; and R.H. Tawney, Religion and the Rise of Capitalism, Holland Memorial Lectures, 1922, first published 1926). The time at my disposal did not allow me to elaborate my conjecture – and even less to compare it critically with its competitors.
+34 Lest I be misunderstood, my comments pertain not so much to scientists as individuals as to the scientific tradition – the friendly-hostile cooperation of scientists – which itself emerged from the very developments we are discussing. Cp. my Objective Knowledge, chapter 4, section 9.
 
 Section Num: 11
-Paragraph Num: 79
+Paragraph Num: 72
 Book Title: The Myth of the Framework
 Section Id: Chapter09
 Title: Epistemology And Industrialization
 Chapter Number: 9
 Header1: NOTES
 Content:
-34 Lest I be misunderstood, my comments pertain not so much to scientists as individuals as to the scientific tradition – the friendly-hostile cooperation of scientists – which itself emerged from the very developments we are discussing. Cp. my Objective Knowledge, chapter 4, section 9.
 A lecture delivered in German on 13 June 1959, at the School of Economics, the University of St Gallen, Switzerland, in a series of lectures entitled ‘Europe: Inheritance and Future Tasks’, on the topic ‘The Influence of Philosophy upon some Fundamental Turning Points in the History of Europe’. First published, with revisions, in Ordo, 30, (Festschrift for F.A. von Hayek), Gustav Fischer Verlag, Stuttgart and New York, 1979. Jeremy Shearmur has provided the references in the notes. The motto is taken from Karl Marx, Capital, volume I, chapter 13, section 2 (the footnote on pp. 413ff of the Everyman’s Library edition, J.M. Dent & Sons Ltd., London, E.P. Dutton&; Co. Inc., New York, 1930 and subsequent impressions. Cp. Lawrence & Wishart, London/Progress Publishers, Moscow edition, 1963 and subsequent impressions, footnote 2 on p. 368).
 

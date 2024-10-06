@@ -342,8 +342,15 @@ class DocumentProcessor:
                     pass
 
                 p_str: str = str(p)
+                min_paragraph_size: int = self._min_paragraph_size
+                if header1.lower() == "notes":
+                    # If we're in the notes section, we want to combine paragraphs into larger sections
+                    # This is because the notes are often very short and we want to keep them together
+                    # And also so that they don't dominate a semantic search
+                    # We could just drop notes, but often they contain useful information
+                    min_paragraph_size = self._min_paragraph_size * 2
                 # If the combined paragraph is less than the minimum size combine it with the next paragraph
-                if len(combined_paragraph) + len(p_str) < self._min_paragraph_size:
+                if len(combined_paragraph) + len(p_str) < min_paragraph_size:
                     # However, if the next pargraph is a header, we want to start a new paragraph
                     # Unless the header came just after another header, in which case we want to combine them
                     if is_title_or_heading(next_p) and not is_title_or_heading(p):
