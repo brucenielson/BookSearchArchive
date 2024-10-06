@@ -277,7 +277,7 @@ class CustomDocumentSplitter:
 
             # If verbose is True, print the content when section_num changes and paragraph_num == 1
             # Otherwise, just save chapter info off
-            if section_num != last_section_num and paragraph_num == 1:
+            if True or section_num != last_section_num and paragraph_num == 1:
                 # Analyze the first two lines using the helper function
                 analysis_results: Dict[str, Optional[str]] = analyze_content(doc, paragraph_num)
 

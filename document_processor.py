@@ -69,7 +69,7 @@ class DocumentProcessor:
                  postgres_db_name: str = 'postgres',
                  skip_content_func: Optional[callable] = None,
                  min_section_size: int = 1000,
-                 min_paragraph_size: int = 1000,
+                 min_paragraph_size: int = 500,
                  embedder_model_name: Optional[str] = None,
                  verbose: bool = False
                  ) -> None:
@@ -229,19 +229,42 @@ class DocumentProcessor:
             yield docs, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
+        def is_header1(paragraph: Tag) -> bool:
+            return (paragraph.name == 'h1' or
+                    (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and 'h1' in paragraph.attrs['class']))
+
+        def is_header2(paragraph: Tag) -> bool:
+            return (paragraph.name == 'h2' or
+                    (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and 'h2' in paragraph.attrs['class']))
+
         def is_section_header(paragraph: Tag) -> bool:
             if paragraph is None:
                 return False
-            elif hasattr(paragraph, 'name') and (paragraph.name == 'h1' or paragraph.name == 'h2'):
-                # This is an actual header
-                return True
-            elif (hasattr(paragraph, 'name') and paragraph.name == 'p' and
-                  hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-                  ('h1' in paragraph.attrs['class'] or 'h2' in paragraph.attrs['class'])):
-                # This is a paragraph that is styled like a header
+            elif is_header1(paragraph) or is_header2(paragraph):
                 return True
             else:
                 return False
+
+        def is_title(paragraph: Tag) -> bool:
+            # noinspection SpellCheckingInspection
+            keywords: List[str] = ['title', 'chtitle', 'tochead']
+            if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
+                for cls in paragraph.attrs['class']:
+                    cls_lower = cls.lower()
+                    if any(cls_lower.startswith(keyword) or cls_lower.endswith(keyword) for keyword in keywords):
+                        return True
+            return False
+
+        def is_title_or_heading(paragraph: Tag) -> bool:
+            if paragraph is None:
+                return False
+            else:
+                return (is_title(paragraph) or is_header1(paragraph) or
+                        is_header2(paragraph) or is_chapter_number(paragraph))
+
+        def is_chapter_number(paragraph: Tag) -> bool:
+            return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
+                    'chno' in paragraph.attrs['class'] and paragraph.text.isdigit())
 
         def create_paragraph(p_text, book_info, section_info, sec_num, p_num, h1, h2) -> Tuple[ByteStream, Dict[str, str]]:
             p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_text}</body></html>"
@@ -288,28 +311,52 @@ class DocumentProcessor:
             para_num: int = 0
             j: int
             for j, p in enumerate(paragraphs):
+                updated: bool = False
                 next_p: Optional[Tag] = None
                 if j < len(paragraphs) - 1:
                     next_p = paragraphs[j + 1]
+                prev_p: Optional[Tag] = None
+                if j > 0:
+                    prev_p = paragraphs[j - 1]
 
-                if p.name == 'h1' or (hasattr(p, 'attrs') and 'class' in p.attrs and 'h1' in p.attrs['class']):
-                    header1 = p.text.title()
-                elif p.name == 'h2' or (hasattr(p, 'attrs') and 'class' in p.attrs and 'h2' in p.attrs['class']):
-                    header2 = p.text.title()
-                elif hasattr(p, 'attrs') and 'class' in p.attrs and any(cls.endswith('title') for cls in p.attrs['class']):
-                    title += p.text.title() + " "
-                elif hasattr(p, 'attrs') and 'class' in p.attrs and 'chno' in p.attrs['class'] and p.text.isdigit():
+                if is_header1(p):
+                    header1 = p.text
+                    updated = True
+                elif is_header2(p):
+                    header2 = p.text
+                    updated = True
+                elif is_title(p):
+                    if title == "":
+                        title = p.text.title()
+                    else:
+                        title += ": " + p.text.title()
+                    updated = True
+                elif is_chapter_number(p):
                     chapter_number = int(p.text)
-                elif hasattr(p, 'attrs') and 'class' in p.attrs and 'section' in p.attrs['class']:
-                    section_name = p.text
+                    updated = True
+
+                if not updated and p.name != 'p':
+                    pass
+
+                if section.id == 'Chapter02':
+                    pass
 
                 p_str: str = str(p)
-                if len(combined_paragraph) + len(p_str) < self._min_paragraph_size and not is_section_header(next_p):
-                    combined_paragraph += "\n" + p_str
-                    # If it's the last paragraph, process it
-                    if j == len(paragraphs) - 1:
+                # If the combined paragraph is less than the minimum size combine it with the next paragraph
+                if len(combined_paragraph) + len(p_str) < self._min_paragraph_size:
+                    # However, if the next pargraph is a header, we want to start a new paragraph
+                    # Unless the header came just after another header, in which case we want to combine them
+                    if is_title_or_heading(next_p) and not is_title_or_heading(p):
+                        # Next paragraph is a header (and the current isn't), so break the paragraph here
+                        p_str = combined_paragraph + "\n" + p_str
+                        combined_paragraph = ""
+                    elif j == len(paragraphs) - 1:
+                        # If it's the last paragraph, then b
+                        combined_paragraph += "\n" + p_str
                         p_str = combined_paragraph
                     else:
+                        # Combine this paragraph with the previous ones
+                        combined_paragraph += "\n" + p_str
                         continue
                 else:
                     p_str = combined_paragraph + "\n" + p_str
@@ -323,11 +370,19 @@ class DocumentProcessor:
                     "paragraph_num": str(para_num),
                     "book_title": book.title,
                     "section_id": section.id,
-                    "section_title": section.title,
-                    "header1": header1,
-                    "header2": header2,
                     "file_path": file_path
                 }
+                if title:
+                    meta_node["title"] = title
+                if chapter_number:
+                    meta_node["chapter_number"] = str(chapter_number)
+                if header1:
+                    meta_node["header1"] = header1
+                if header2:
+                    meta_node["header2"] = header2
+                if section.title:
+                    meta_node["section_title"] = section.title
+
                 # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
                 temp_meta.append(meta_node)
@@ -459,7 +514,7 @@ def main() -> None:
         postgres_db_name='postgres',
         skip_content_func=skip_content,
         min_section_size=3000,
-        min_paragraph_size=1000,
+        min_paragraph_size=500,
         verbose=True
     )
 
