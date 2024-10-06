@@ -297,6 +297,11 @@ class DocumentProcessor:
                 #     prev_p = paragraphs[j - 1]
 
                 if is_header1(p):
+                    # Any <br/> found in this Tag must be replaced with a space. But we want to still have it be a Tag
+                    # so that it can be processed as a paragraph
+                    for br in p.find_all('br'):
+                        br.insert_after(' ')
+
                     header1 = p.text.strip()
                     updated = True
                 elif is_header2(p):
@@ -490,8 +495,8 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
-    # "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
+    # epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
