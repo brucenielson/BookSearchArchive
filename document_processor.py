@@ -237,14 +237,6 @@ class DocumentProcessor:
             return (paragraph.name == 'h2' or
                     (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and 'h2' in paragraph.attrs['class']))
 
-        def is_section_header(paragraph: Tag) -> bool:
-            if paragraph is None:
-                return False
-            elif is_header1(paragraph) or is_header2(paragraph):
-                return True
-            else:
-                return False
-
         def is_title(paragraph: Tag) -> bool:
             # noinspection SpellCheckingInspection
             keywords: List[str] = ['title', 'chtitle', 'tochead']
@@ -263,24 +255,9 @@ class DocumentProcessor:
                         is_header2(paragraph) or is_chapter_number(paragraph))
 
         def is_chapter_number(paragraph: Tag) -> bool:
+            # noinspection SpellCheckingInspection
             return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
                     'chno' in paragraph.attrs['class'] and paragraph.text.isdigit())
-
-        def create_paragraph(p_text, book_info, section_info, sec_num, p_num, h1, h2) -> Tuple[ByteStream, Dict[str, str]]:
-            p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_text}</body></html>"
-            b_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
-            m_node: Dict[str, str] = {
-                "section_num": str(sec_num),
-                "paragraph_num": str(p_num),
-                "book_title": book_info.title,
-                "section_id": section_info.id,
-                "section_title": section_info.title,
-                "header1": h1,
-                "header2": h2,
-                "file_path": file_path
-            }
-            # self._print_verbose(meta_node)
-            return b_stream, m_node
 
         docs_list: List[ByteStream] = []
         meta_list: List[Dict[str, str]] = []
@@ -303,7 +280,6 @@ class DocumentProcessor:
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             combined_paragraph: str = ""
-            meta: Dict[str, str] = {}
             header1: str = ""
             header2: str = ""
             title: str = ""
@@ -315,9 +291,9 @@ class DocumentProcessor:
                 next_p: Optional[Tag] = None
                 if j < len(paragraphs) - 1:
                     next_p = paragraphs[j + 1]
-                prev_p: Optional[Tag] = None
-                if j > 0:
-                    prev_p = paragraphs[j - 1]
+                # prev_p: Optional[Tag] = None
+                # if j > 0:
+                #     prev_p = paragraphs[j - 1]
 
                 if is_header1(p):
                     header1 = p.text
@@ -345,7 +321,7 @@ class DocumentProcessor:
                 min_paragraph_size: int = self._min_paragraph_size
                 if header1.lower() == "notes":
                     # If we're in the notes section, we want to combine paragraphs into larger sections
-                    # This is because the notes are often very short and we want to keep them together
+                    # This is because the notes are often very short, and we want to keep them together
                     # And also so that they don't dominate a semantic search
                     # We could just drop notes, but often they contain useful information
                     min_paragraph_size = self._min_paragraph_size * 2
