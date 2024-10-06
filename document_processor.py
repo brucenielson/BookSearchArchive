@@ -286,6 +286,7 @@ class DocumentProcessor:
             chapter_number: int = 0
             para_num: int = 0
             j: int
+            combined_chars: int = 0
             for j, p in enumerate(paragraphs):
                 updated: bool = False
                 next_p: Optional[Tag] = None
@@ -296,19 +297,19 @@ class DocumentProcessor:
                 #     prev_p = paragraphs[j - 1]
 
                 if is_header1(p):
-                    header1 = p.text
+                    header1 = p.text.strip()
                     updated = True
                 elif is_header2(p):
-                    header2 = p.text
+                    header2 = p.text.strip()
                     updated = True
                 elif is_title(p):
                     if title == "":
-                        title = p.text.title()
+                        title = p.text.strip().title()
                     else:
-                        title += ": " + p.text.title()
+                        title += ": " + p.text.strip().title()
                     updated = True
                 elif is_chapter_number(p):
-                    chapter_number = int(p.text)
+                    chapter_number = int(p.text.strip())
                     updated = True
 
                 if not updated and p.name != 'p':
@@ -317,7 +318,8 @@ class DocumentProcessor:
                 if section.id == 'Chapter02':
                     pass
 
-                p_str: str = str(p)
+                p_str: str = str(p)  # p.text.strip()
+                p_str_chars: int = len(p.text)
                 min_paragraph_size: int = self._min_paragraph_size
                 if header1.lower() == "notes":
                     # If we're in the notes section, we want to combine paragraphs into larger sections
@@ -326,24 +328,30 @@ class DocumentProcessor:
                     # We could just drop notes, but often they contain useful information
                     min_paragraph_size = self._min_paragraph_size * 2
                 # If the combined paragraph is less than the minimum size combine it with the next paragraph
-                if len(combined_paragraph) + len(p_str) < min_paragraph_size:
+                if combined_chars + p_str_chars < min_paragraph_size:
                     # However, if the next pargraph is a header, we want to start a new paragraph
                     # Unless the header came just after another header, in which case we want to combine them
                     if is_title_or_heading(next_p) and not is_title_or_heading(p):
                         # Next paragraph is a header (and the current isn't), so break the paragraph here
                         p_str = combined_paragraph + "\n" + p_str
+                        p_str_chars += combined_chars
                         combined_paragraph = ""
+                        combined_chars = 0
                     elif j == len(paragraphs) - 1:
                         # If it's the last paragraph, then b
                         combined_paragraph += "\n" + p_str
+                        combined_chars += p_str_chars
                         p_str = combined_paragraph
                     else:
                         # Combine this paragraph with the previous ones
                         combined_paragraph += "\n" + p_str
+                        combined_chars += p_str_chars
                         continue
                 else:
                     p_str = combined_paragraph + "\n" + p_str
+                    p_str_chars += combined_chars
                     combined_paragraph = ""
+                    combined_chars = 0
                 para_num += 1
                 total_text += p_str
                 p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
@@ -483,6 +491,7 @@ class DocumentProcessor:
 
 def main() -> None:
     epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    # "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
@@ -497,7 +506,7 @@ def main() -> None:
         postgres_db_name='postgres',
         skip_content_func=skip_content,
         min_section_size=3000,
-        min_paragraph_size=500,
+        min_paragraph_size=400,
         verbose=True
     )
 
