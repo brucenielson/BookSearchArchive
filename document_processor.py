@@ -271,10 +271,10 @@ class DocumentProcessor:
             section_html: str = section.get_body_content().decode('utf-8')
             # print(section_html)
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
-            print()
-            print("HTML:")
-            print(section_soup)
-            print()
+            # print()
+            # print("HTML:")
+            # print(section_soup)
+            # print()
             paragraphs: List[Any] = section_soup.find_all(['p', 'h1', 'h2'])
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
@@ -303,9 +303,15 @@ class DocumentProcessor:
                         br.insert_after(' ')
 
                     header1 = p.text.strip()
+                    # We want title case except for really short titles like "I", "II", "III", etc.
+                    if len(header1) > 5:
+                        header1 = header1.title()
                     updated = True
                 elif is_header2(p):
                     header2 = p.text.strip()
+                    # We want title case except for really short titles like "I", "II", "III", etc.
+                    if len(header2) > 5:
+                        header2 = header2.title()
                     updated = True
                 elif is_title(p):
                     if title == "":
@@ -499,7 +505,8 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    epub_file_path: str = "documents"
+    # epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
