@@ -1,34 +1,3 @@
-Section Num: 1
-Paragraph Num: 2
-Book Title: All Life is Problem Solving
-Section Id: ch7
-Title: Preface
-Content:
-The selection of chapters has been made with the help and advice of my assistant, Mrs Melitta Mew, and Dr Klaus Stadler from Piper Verlag. I am deeply grateful to them both.
-I
-The first part of this book is called ‘Questions of natural science’. What I have in mind are mainly biology and the unfathomable wealth of living forms.
-
-
-
-
-Section Num: 1
-Paragraph Num: 7
-Book Title: All Life is Problem Solving
-Section Id: ch7
-Title: Preface
-Content:
-II
-The second part of this book, ‘Thoughts on history and polities’, consists of a number of occasional pieces. It offers no advice or prescriptions, least of all infallible ones, but it does make the case for an attitude of responsibility.
-I am naturally in favour of democracy – but not in the way that most of its advocates are. Winston Churchill once said: ‘Democracy is the worst form of government, only excepting all other forms of government.’ We have nothing better than to abide by majority decisions. A majority government is accountable, a coalition government much less so, and a minority government still less.
-
-
-Section Num: 2
-Paragraph Num: 1
-Book Title: All Life is Problem Solving
-Section Id: ch9
-Content:
-1
-
 Section Num: 9
 Paragraph Num: 10
 Book Title: The Open Society and Its Enemies (New One-Volume Edition)
