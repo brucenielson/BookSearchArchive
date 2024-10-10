@@ -1,0 +1,21 @@
+SELECT *
+FROM book_archive
+WHERE meta->>'book_title' = 'The Myth of the Framework'
+and meta->>'chapter_number' = '4'
+--AND meta->>'section_num' = '1'
+--and meta->>'paragraph_num' = '1'
+
+
+SELECT *
+FROM book_archive
+WHERE meta ? 'subsection_num';
+
+
+SELECT *
+FROM book_archive
+WHERE meta->>'book_title' = 'The Myth of the Framework'
+and meta ? 'paragraph_num'
+and meta->>'section_title' = 'Chapter08'
+ORDER BY (meta->>'paragraph_num')::int;
+
+
