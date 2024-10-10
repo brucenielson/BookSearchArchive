@@ -308,7 +308,6 @@ class DocumentProcessor:
                     for anchor in page_anchors:
                         page_id = anchor.get('id')
                         page_number = page_id.split('_')[-1]
-                        print(f"Detected page number: {page_number}")
 
                 if is_header1(p):
                     # Any <br/> found in this Tag must be replaced with a space. But we want to still have it be a Tag
@@ -332,6 +331,9 @@ class DocumentProcessor:
                         title = p.text.strip().title()
                     else:
                         title += ": " + p.text.strip().title()
+                    # Replace 'S with 's after title casing
+                    title = title.replace("'S", "'s")
+                    title = title.replace("’S", "’s")
                     updated = True
                 elif is_chapter_number(p):
                     chapter_number = int(p.text.strip())

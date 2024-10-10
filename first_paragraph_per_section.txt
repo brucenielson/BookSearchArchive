@@ -2,7 +2,7 @@ Section Num: 1
 Paragraph Num: 1
 Book Title: The Myth of the Framework
 Section Id: Author
-Title: Author’S Note, 1993
+Title: Author’s Note, 1993
 Page Number: ix
 Content:
 I do not regard myself as an expert in either science or philosophy. I have, however, tried hard all my life to understand something of the world we live in. Scientific knowledge, and the human rationality that produces it, are, I believe, always fallible, or subject to error. But they are, I believe, also the pride of mankind. For man is, so far as I know, the only thing in the universe that tries to understand what it is all about. May we continue to do so, and may we also be aware of the severe limitations of all our contributions.
@@ -11,7 +11,7 @@ Section Num: 1
 Paragraph Num: 2
 Book Title: The Myth of the Framework
 Section Id: Author
-Title: Author’S Note, 1993
+Title: Author’s Note, 1993
 Page Number: ix
 Content:
 For many years I have argued against intellectual fashions in the sciences, and even more against intellectual fashions in philosophy. The fashionable thinker is, in the main, a prisoner of his fashion, and I regard freedom, political freedom as well as a free and open mind, as one of the greatest, if not the greatest, value that our life can offer us.
@@ -20,7 +20,7 @@ Section Num: 1
 Paragraph Num: 3
 Book Title: The Myth of the Framework
 Section Id: Author
-Title: Author’S Note, 1993
+Title: Author’s Note, 1993
 Page Number: ix
 Content:
 Today it has become fashionable in the sciences to appeal to the specialized knowledge and authority of experts, and fashionable in philosophy to denigrate science and rationality. Oftentimes, this denigration of science and rationality is due to a mistaken theory of science and rationality – a theory which speaks of science and rationality in terms of specializations, experts, and authority. But science and rationality have really very little to do with specialization and the appeal to expert authority. On the contrary, these intellectual fashions are actually an obstacle to both. For just as the fashionable thinker is a prisoner of his fashion, the expert is a prisoner of his specialization. And it is the freedom from intellectual fashions and specializations that makes science and rationality possible.
@@ -29,7 +29,7 @@ Section Num: 1
 Paragraph Num: 4
 Book Title: The Myth of the Framework
 Section Id: Author
-Title: Author’S Note, 1993
+Title: Author’s Note, 1993
 Page Number: x
 Content:
 Today, the appeal to the authority of experts is sometimes excused by the immensity of our specialized knowledge. And it is sometimes defended by philosophical theories that speak of science and rationality in terms of specializations, experts, and authority. But in my view, the appeal to the authority of experts should be neither excused nor defended. It should, on the contrary, be recognized for what it is – an intellectual fashion – and it should be attacked by a frank acknowledgement of how little we know, and how much that little is due to people who have worked in many fields at the same time. And it should also be attacked by the recognition that the orthodoxy produced by intellectual fashions, specialization, and the appeal to authorities is the death of knowledge, and that the growth of knowledge depends entirely upon disagreement.
@@ -38,7 +38,7 @@ Section Num: 1
 Paragraph Num: 5
 Book Title: The Myth of the Framework
 Section Id: Author
-Title: Author’S Note, 1993
+Title: Author’s Note, 1993
 Page Number: x
 Content:
 This is my excuse for collecting in a slim volume a few essays written in defence of science and rationality.
@@ -48,7 +48,7 @@ Section Num: 1
 Paragraph Num: 6
 Book Title: The Myth of the Framework
 Section Id: Author
-Title: Author’S Note, 1993
+Title: Author’s Note, 1993
 Page Number: x
 Content:
 Some of what is said in these essays will undoubtedly be familiar to those who know my other works. But I believe that there is also much in these essays that will not be so familiar. And I have, in any event, tried hard to make every point and every argument as simple and as clear as I could.
@@ -58,7 +58,7 @@ Section Num: 1
 Paragraph Num: 7
 Book Title: The Myth of the Framework
 Section Id: Author
-Title: Author’S Note, 1993
+Title: Author’s Note, 1993
 Page Number: x
 Content:
 K.R.P.
