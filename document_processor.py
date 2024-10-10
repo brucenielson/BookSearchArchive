@@ -325,6 +325,9 @@ class DocumentProcessor:
                     if len(header_text) > 5:
                         header_text = header_text.strip().title()
 
+                    # Remove any headers that are lower than the current one
+                    headers = {level: text for level, text in headers.items() if level < header_level}
+
                     if header_text:
                         headers[header_level] = header_text
                     updated = True
