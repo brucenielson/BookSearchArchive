@@ -325,10 +325,8 @@ class DocumentProcessor:
                     if len(header_text) > 5:
                         header_text = header_text.strip().title()
 
-                    headers[header_level] = header_text
-                    if header_level == 2:
-                        if headers[2] == 'Truth And Content: Verisimilitude Versus Probability':
-                            pass
+                    if header_text:
+                        headers[header_level] = header_text
                     updated = True
 
                 elif is_title(p):
