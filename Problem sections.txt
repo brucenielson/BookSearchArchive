@@ -1,0 +1,17 @@
+Section Num: 9
+Paragraph Num: 10
+Book Title: The Open Society and Its Enemies (New One-Volume Edition)
+Section Id: chapter6
+Content:
+What do we really mean when we speak of ‘Justice’? I do not think that verbal questions of this kind are particularly important, or that it is possible to make a definite answer to them, since such terms are always used in various senses. However, I think that most of us, especially those whose general outlook is humanitarian, mean something like this: (a) an equal distribution of the burden of citizenship, i.e. of those limitations of freedom which are necessary in social life4; (b) equal treatment of the citizens before the law, provided, of course, that (c) the laws show neither favour nor disfavour towards individual citizens or groups or classes; (d) impartiality of the courts of justice; and (e) an equal share in the advantages (and not only in the burden) which membership of the state may offer to its citizens. If Plato had meant by ‘justice’ anything of this kind, then my claim that his programme is purely totalitarian would certainly be wrong and all those would be right who believe that Plato’s politics rested upon an acceptable humanitarian basis. But the fact is that he meant by ‘justice’ something entirely different.
+
+
+Section Num: 30
+Paragraph Num: 247
+Book Title: The Open Society and Its Enemies (New One-Volume Edition)
+Section Id: notes1
+Header 2: NOTES TO CHAPTER SIX
+Content:
+(2) For Aristotle’s elaboration of these ideas, cp. esp. his Politics, III, 9, 1, 1280a (see also 1282b–1284b and 1301b29), where he writes: ‘All men cling to justice of some kind, but their conceptions are imperfect, and do not embrace the whole Idea. For example, justice is thought (by democrats) to be equality; and so it is, although it is not equality for all, but only for equals. And justice is thought (by oligarchs) to be inequality; and so it is, although it is not inequality for all, but only for unequals.’ Cp. also Nichom. Eth., 1131b27, 1158b30 ff.
+
+
