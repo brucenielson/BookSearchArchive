@@ -230,8 +230,10 @@ class DocumentProcessor:
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         def is_header1(paragraph: Tag) -> bool:
-            return (paragraph.name == 'h1' or
-                    (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and 'h1' in paragraph.attrs['class']))
+            subsection_classes: List[str] = ['h1', 'pre-title1']
+            return (paragraph.name.lower() == 'h1' or
+                    (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
+                     any(cls.lower() in [c.lower() for c in paragraph.attrs['class']] for cls in subsection_classes)))
 
         def is_header2(paragraph: Tag) -> bool:
             return (paragraph.name == 'h2' or
@@ -240,12 +242,10 @@ class DocumentProcessor:
         def is_title(paragraph: Tag) -> bool:
             # noinspection SpellCheckingInspection
             keywords: List[str] = ['title', 'chtitle', 'tochead']
-            if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
-                for cls in paragraph.attrs['class']:
-                    cls_lower = cls.lower()
-                    if any(cls_lower.startswith(keyword) or cls_lower.endswith(keyword) for keyword in keywords):
-                        return True
-            return False
+
+            return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
+                    any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
+                        for cls in paragraph.attrs['class'] for keyword in keywords))
 
         def is_title_or_heading(paragraph: Tag) -> bool:
             if paragraph is None:
@@ -255,9 +255,13 @@ class DocumentProcessor:
                         is_header2(paragraph) or is_chapter_number(paragraph))
 
         def is_chapter_number(paragraph: Tag) -> bool:
+            # List of class names to check for chapter numbers
+            # noinspection SpellCheckingInspection
+            chapter_classes = ['chno', 'ch-num']
             # noinspection SpellCheckingInspection
             return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-                    'chno' in paragraph.attrs['class'] and paragraph.text.isdigit())
+                    any(cls in paragraph.attrs['class'] for cls in chapter_classes) and
+                    paragraph.text.isdigit())
 
         docs_list: List[ByteStream] = []
         meta_list: List[Dict[str, str]] = []
@@ -285,6 +289,7 @@ class DocumentProcessor:
             title: str = ""
             chapter_number: int = 0
             para_num: int = 0
+            page_number: str = ""
             j: int
             combined_chars: int = 0
             for j, p in enumerate(paragraphs):
@@ -295,6 +300,15 @@ class DocumentProcessor:
                 # prev_p: Optional[Tag] = None
                 # if j > 0:
                 #     prev_p = paragraphs[j - 1]
+
+                # Check if the paragraph contains an anchor with id starting with 'page_'
+                page_anchors = p.find_all('a', id=lambda x: x and x.startswith('page_'))
+                if page_anchors:
+                    # Extract the page number from the anchor tag id
+                    for anchor in page_anchors:
+                        page_id = anchor.get('id')
+                        page_number = page_id.split('_')[-1]
+                        print(f"Detected page number: {page_number}")
 
                 if is_header1(p):
                     # Any <br/> found in this Tag must be replaced with a space. But we want to still have it be a Tag
@@ -388,6 +402,8 @@ class DocumentProcessor:
                     meta_node["header_2"] = header2
                 if section.title:
                     meta_node["section_title"] = section.title
+                if page_number:
+                    meta_node["page_number"] = str(page_number)
 
                 # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
@@ -505,8 +521,8 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    epub_file_path: str = "documents/Karl Popper - All Life is Problem Solving-Taylor and Francis.epub"
-    # epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
+    # epub_file_path: str = "documents/Karl Popper - All Life is Problem Solving-Taylor and Francis.epub"
+    epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
