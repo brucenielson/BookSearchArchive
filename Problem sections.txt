@@ -104,3 +104,44 @@ Content:
 Header 1 to Header 3 without a header 2
 
 
+
+
+Book Title: Conjectures and Refutations
+Section Id: Ch012
+Page Number: 396
+Chapter Title: A Restatement Of Interactionism
+Header 1: 12 Language And The Body-Mind Problem
+Header 2: 1. Introduction
+Chapter Title: 12 Language And The Body-Mind Problem
+Section Name: 1. Introduction
+Content:
+This is a paper on the impossibility of a physicalistic causal theory of the human language.1
+1.1 It is not a paper on linguistic analysis (the analysis of word-usages). For I completely reject the claim of certain language analysts that the source of philosophical difficulties is to be found in the misuse of language. No doubt some people talk nonsense, but I claim (a) that there does not exist a logical or language-analytical method of detecting philosophical nonsense (which, by the way, does not stop short of the ranks of logicians, language analysts and semanticists); (b) that the belief that such a method exists—the belief more especially that philosophical nonsense can be unmasked as due to what Russell might have called ‘type-mistakes’ and what nowadays are sometimes called ‘category-mistakes’—is the aftermath of a philosophy of language which has since turned out to be baseless.
+
+We lost the "Chapter Title" (which is really a sub title)
+
+13493
+
+
+
+
+
+
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Id: id26
+Page Number: 3
+Chapter Title: Knowledge And The Shaping Of Reality: The Search For A Better World
+Chapter Title: Knowledge And The Shaping Of Reality: Knowledge And The Shaping Of Reality: The Search For A Better World
+Chapter Number: 1
+Content:
+The first half of the title of my lecture was not chosen by me, but by the organizers of the Alpbach Forum. Their title was: ‘Knowledge and the Shaping of Reality’.
+
+
+25184
+
+
+Unended Quest Notes section is splitting up more than it used to. Not sure why.
+
+
+
+
