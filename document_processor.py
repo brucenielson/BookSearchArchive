@@ -35,6 +35,51 @@ from custom_haystack_components import CustomDocumentSplitter, RemoveIllegalDocs
 import csv
 
 
+# Helper functions for processing EPUB or HTML content
+def get_header_level(paragraph: Tag) -> int:
+    """Return the level of the header (1 for h1, 2 for h2, etc.), or 0 if not a header."""
+    # Check for direct header tag
+    if paragraph.name.startswith('h') and paragraph.name[1:].isdigit():
+        return int(paragraph.name[1:])  # Extract the level from 'hX' or 'hXY'
+
+    # Check for class name equivalent to header tags
+    if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
+        for cls in paragraph.attrs['class']:
+            if cls.lower() == 'pre-title1':
+                return 1  # Equivalent to h1
+            if cls.lower().startswith('h') and cls[1:].isdigit():
+                return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
+    return 0
+
+
+def is_title(paragraph: Tag) -> bool:
+    # noinspection SpellCheckingInspection
+    keywords: List[str] = ['title', 'chtitle', 'tochead']
+
+    return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
+            any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
+                for cls in paragraph.attrs['class'] for keyword in keywords))
+
+
+def is_title_or_heading(paragraph: Tag) -> bool:
+    """Check if the paragraph is a title, heading, or chapter number."""
+    if paragraph is None:
+        return False
+
+    header_lvl: int = get_header_level(paragraph)
+    return is_title(paragraph) or header_lvl > 0 or is_chapter_number(paragraph)
+
+
+def is_chapter_number(paragraph: Tag) -> bool:
+    # List of class names to check for chapter numbers
+    # noinspection SpellCheckingInspection
+    chapter_classes = ['chno', 'ch-num']
+    # noinspection SpellCheckingInspection
+    return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
+            any(cls in paragraph.attrs['class'] for cls in chapter_classes) and
+            paragraph.text.isdigit())
+
+
 class DocumentProcessor:
     """
     A class that implements a Retrieval-Augmented Generation (RAG) system using Haystack and Pgvector.
@@ -229,46 +274,6 @@ class DocumentProcessor:
             yield docs, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        def get_header_level(paragraph: Tag) -> int:
-            """Return the level of the header (1 for h1, 2 for h2, etc.), or 0 if not a header."""
-            # Check for direct header tag
-            if paragraph.name.startswith('h') and paragraph.name[1:].isdigit():
-                return int(paragraph.name[1:])  # Extract the level from 'hX' or 'hXY'
-
-            # Check for class name equivalent to header tags
-            if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
-                for cls in paragraph.attrs['class']:
-                    if cls.lower() == 'pre-title1':
-                        return 1  # Equivalent to h1
-                    if cls.lower().startswith('h') and cls[1:].isdigit():
-                        return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
-            return 0
-
-        def is_title(paragraph: Tag) -> bool:
-            # noinspection SpellCheckingInspection
-            keywords: List[str] = ['title', 'chtitle', 'tochead']
-
-            return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-                    any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
-                        for cls in paragraph.attrs['class'] for keyword in keywords))
-
-        def is_title_or_heading(paragraph: Tag) -> bool:
-            """Check if the paragraph is a title, heading, or chapter number."""
-            if paragraph is None:
-                return False
-
-            header_lvl: int = get_header_level(paragraph)
-            return is_title(paragraph) or header_lvl > 0 or is_chapter_number(paragraph)
-
-        def is_chapter_number(paragraph: Tag) -> bool:
-            # List of class names to check for chapter numbers
-            # noinspection SpellCheckingInspection
-            chapter_classes = ['chno', 'ch-num']
-            # noinspection SpellCheckingInspection
-            return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-                    any(cls in paragraph.attrs['class'] for cls in chapter_classes) and
-                    paragraph.text.isdigit())
-
         docs_list: List[ByteStream] = []
         meta_list: List[Dict[str, str]] = []
         included_sections: List[str] = []
@@ -276,21 +281,25 @@ class DocumentProcessor:
         self._print_verbose()
         self._print_verbose(f"Book Title: {book.title}")
         section_num: int = 1
+        # Find all h1 tags in the current section
+        h1_tag_count: int = 0
         i: int
         for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
             section_html: str = section.get_body_content().decode('utf-8')
             # print(section_html)
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
+            h1_tag_count = len(section_soup.find_all('h1'))
             # print()
             # print("HTML:")
             # print(section_soup)
             # print()
-            paragraphs: List[Any] = section_soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+            paragraphs: List[Tag] = section_soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             combined_paragraph: str = ""
-            title: str = ""
+            title_tag_info: str = ""
+            chapter_title: str = ""
             chapter_number: int = 0
             para_num: int = 0
             page_number: str = ""
@@ -306,14 +315,15 @@ class DocumentProcessor:
                 # if j > 0:
                 #     prev_p = paragraphs[j - 1]
 
-                # Check if the paragraph contains an anchor with id starting with 'page_'
-                page_anchors = p.find_all('a', id=lambda x: x and x.startswith('page_'))
+                # Try to get a page number
+                page_anchors: List[Tag] = p.find_all('a', id=lambda x: x and x.startswith('page_'))
                 if page_anchors:
                     # Extract the page number from the anchor tag id
                     for anchor in page_anchors:
                         page_id = anchor.get('id')
                         page_number = page_id.split('_')[-1]
 
+                # Collect header information
                 header_level = get_header_level(p)
                 if header_level > 0:  # If it's a header
                     if header_level == 1:
@@ -331,19 +341,24 @@ class DocumentProcessor:
                     if header_text:
                         headers[header_level] = header_text
                     updated = True
-
+                # Is it a title tag?
                 elif is_title(p):
-                    if title == "":
-                        title = p.text.strip().title()
+                    if title_tag_info == "":
+                        title_tag_info = p.text.strip().title()
                     else:
-                        title += ": " + p.text.strip().title()
+                        title_tag_info += ": " + p.text.strip().title()
                     # Replace 'S with 's after title casing
-                    title = title.replace("'S", "'s")
-                    title = title.replace("’S", "’s")
+                    title_tag_info = title_tag_info.replace("'S", "'s")
+                    title_tag_info = title_tag_info.replace("’S", "’s")
                     updated = True
+                # Is it a chapter number tag?
                 elif is_chapter_number(p):
                     chapter_number = int(p.text.strip())
                     updated = True
+
+                # Set metadata
+                # Pick current title
+                chapter_title = section.title or title_tag_info or (headers.get(1, '') if h1_tag_count == 1 else '')
 
                 if not updated and p.name != 'p':
                     pass
@@ -403,8 +418,10 @@ class DocumentProcessor:
                     "section_id": section.id,
                     "file_path": file_path
                 }
-                if title:
-                    meta_node["title"] = title
+
+                # Chapter information
+                if chapter_title:
+                    meta_node["chapter_title"] = chapter_title
                 if chapter_number:
                     meta_node["chapter_number"] = str(chapter_number)
 
@@ -412,8 +429,6 @@ class DocumentProcessor:
                 for level, text in headers.items():
                     meta_node[f'header_{level}'] = text
 
-                if section.title:
-                    meta_node["section_title"] = section.title
                 if page_number:
                     meta_node["page_number"] = str(page_number)
 
