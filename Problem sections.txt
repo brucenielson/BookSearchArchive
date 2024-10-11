@@ -145,3 +145,42 @@ Unended Quest Notes section is splitting up more than it used to. Not sure why.
 
 
 
+
+Paragraph Num: 2
+Book Title: The Poverty of Historicism
+Section Id: ch10
+Section Name: The Anti-Naturalistic Doctrines Of Historicism
+Chapter Title: The Anti-Naturalistic Doctrines Of Historicism
+Section Name: I
+Content:
+Historicism asserts that the historical relativity of social laws makes most of the methods of physics inapplicable to sociology. Typical historicist arguments on which this view is based concern generalization, experiment, the complexity of social phenomena, the difficulties of exact prediction, and the significance of methodological essentialism. I will treat these arguments in turn.
+
+
+This section grabbed the chapter number (in roman numerals) and made it a section (subsection) name.
+
+
+
+
+Paragraph Num: 6
+Book Title: The Poverty of Historicism
+Section Id: ch11
+Chapter Title: The Pro-Naturalistic Doctrines Of Historicism
+Section Name: 11 Comparison With Astronomy. Long-Term Forecasts And Large-Scale Forecasts1
+
+Can I get rid of footnotes?
+
+
+
+Various problems with:
+Book Title: The World of Parmenides
+Section Id: Ch02
+Page Number: 67
+Chapter Title: An Attempt To Establish His Greatness: Addendum 1
+Section Name: The Unknown Xenophanes
+Header 2: A Note To The Quotation From Xenophanes (Dk 21B25) In Section 4 Above
+Content:
+
+Section Name is really name of chapter. Why did it skip "Essay 2"? Chapter Title is sub title. Then we keep adding 'Addendums' on (happens in previous chapter too)
+
+
+

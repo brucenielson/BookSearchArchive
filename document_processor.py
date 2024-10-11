@@ -52,7 +52,11 @@ def get_header_level(paragraph: Tag) -> int:
     return 0
 
 
-def is_title(paragraph: Tag) -> bool:
+def is_title(paragraph: Tag, h1_count: int) -> bool:
+    header_level: int = get_header_level(paragraph)
+    if header_level == 1 and h1_count == 1:
+        return True
+
     # noinspection SpellCheckingInspection
     keywords: List[str] = ['title', 'chtitle', 'tochead']
 
@@ -61,13 +65,13 @@ def is_title(paragraph: Tag) -> bool:
                 for cls in paragraph.attrs['class'] for keyword in keywords))
 
 
-def is_title_or_heading(paragraph: Tag) -> bool:
+def is_title_or_heading(paragraph: Tag, h1_count: int) -> bool:
     """Check if the paragraph is a title, heading, or chapter number."""
     if paragraph is None:
         return False
 
     header_lvl: int = get_header_level(paragraph)
-    return is_title(paragraph) or header_lvl > 0 or is_chapter_number(paragraph)
+    return is_title(paragraph, h1_count) or header_lvl > 0 or is_chapter_number(paragraph)
 
 
 def is_chapter_number(paragraph: Tag) -> bool:
@@ -323,26 +327,11 @@ class DocumentProcessor:
                         page_id = anchor.get('id')
                         page_number = page_id.split('_')[-1]
 
-                # Collect header information
-                header_level = get_header_level(p)
-                if header_level > 0:  # If it's a header
-                    if header_level == 1:
-                        for br in p.find_all('br'):
-                            br.insert_after(' ')
+                # Check for title information
+                if is_title(p, h1_tag_count):
+                    for br in p.find_all('br'):
+                        br.insert_after(' ')
 
-                    header_text = p.text.strip()
-
-                    if len(header_text) > 5:
-                        header_text = header_text.strip().title()
-
-                    # Remove any headers that are lower than the current one
-                    headers = {level: text for level, text in headers.items() if level < header_level}
-
-                    if header_text:
-                        headers[header_level] = header_text
-                    updated = True
-                # Is it a title tag?
-                elif is_title(p):
                     if title_tag_info == "":
                         title_tag_info = p.text.strip().title()
                     elif title_tag_info != p.text.strip().title():
@@ -361,15 +350,32 @@ class DocumentProcessor:
                 elif is_chapter_number(p):
                     chapter_number = int(p.text.strip())
                     updated = True
+                elif get_header_level(p) > 0:  # If it's a header
+                    header_level = get_header_level(p)
+                    if header_level == 1:
+                        for br in p.find_all('br'):
+                            br.insert_after(' ')
+
+                    header_text = p.text.strip()
+
+                    if len(header_text) > 5:
+                        header_text = header_text.strip().title()
+
+                    # Remove any headers that are lower than the current one
+                    headers = {level: text for level, text in headers.items() if level < header_level}
+
+                    if header_text:
+                        headers[header_level] = header_text
+                    updated = True
 
                 # Set metadata
                 # Pick current title
                 chapter_title = (chapter_title or section.title or title_tag_info or
                                  (headers.get(1, '') if h1_tag_count == 1 else ''))
-                # Merge header 1 and title tag
-                if headers.get(1, '') and headers.get(1, '') == chapter_title:
-                    # Delete header 1 as it is being used as chapter title
-                    del headers[1]
+                # # Merge header 1 and title tag
+                # if headers.get(1, '') and headers.get(1, '') == chapter_title:
+                #     # Delete header 1 as it is being used as chapter title
+                #     del headers[1]
 
                 # If we used the paragraph to fill in metadata, we don't want to include it in the text
                 if updated:
@@ -391,7 +397,7 @@ class DocumentProcessor:
                 if combined_chars + p_str_chars < min_paragraph_size:
                     # However, if the next pargraph is a header, we want to start a new paragraph
                     # Unless the header came just after another header, in which case we want to combine them
-                    if is_title_or_heading(next_p) and not is_title_or_heading(p):
+                    if is_title_or_heading(next_p, h1_tag_count) and not is_title_or_heading(p, h1_tag_count):
                         # Next paragraph is a header (and the current isn't), so break the paragraph here
                         p_str = combined_paragraph + "\n" + p_str
                         p_str_chars += combined_chars
