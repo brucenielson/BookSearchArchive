@@ -85,3 +85,22 @@ No pages numbers on:
 The Two Fundamental Problems of the Theory of Knowledge
 The Poverty of Historicism
 The Logic of Scientific Discovery
+
+
+Didn't World of Parmenides used to not write out due to being a duplicate to C&R
+
+
+
+
+
+Book Title: Unended Quest
+Section Id: footnotes
+Chapter Title: NOTES
+Header 1: NOTES
+Header 3: Scruples Of Conscience
+Page Number: 280
+Content:
+
+Header 1 to Header 3 without a header 2
+
+

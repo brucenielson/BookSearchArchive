@@ -419,6 +419,10 @@ class DocumentProcessor:
                     "file_path": file_path
                 }
 
+                # Page information
+                if page_number:
+                    meta_node["page_number"] = str(page_number)
+
                 # Chapter information
                 if chapter_title:
                     meta_node["chapter_title"] = chapter_title
@@ -427,10 +431,8 @@ class DocumentProcessor:
 
                 # Include headers in the metadata
                 for level, text in headers.items():
-                    meta_node[f'header_{level}'] = text
-
-                if page_number:
-                    meta_node["page_number"] = str(page_number)
+                    if level == 1 and text != chapter_title or level > 1:
+                        meta_node[f'header_{level}'] = text
 
                 # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
