@@ -229,15 +229,20 @@ class DocumentProcessor:
             yield docs, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        def is_header1(paragraph: Tag) -> bool:
-            subsection_classes: List[str] = ['h1', 'pre-title1']
-            return (paragraph.name.lower() == 'h1' or
-                    (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-                     any(cls.lower() in [c.lower() for c in paragraph.attrs['class']] for cls in subsection_classes)))
+        def get_header_level(paragraph: Tag) -> int:
+            """Return the level of the header (1 for h1, 2 for h2, etc.), or 0 if not a header."""
+            # Check for direct header tag
+            if paragraph.name.startswith('h') and paragraph.name[1:].isdigit():
+                return int(paragraph.name[1:])  # Extract the level from 'hX' or 'hXY'
 
-        def is_header2(paragraph: Tag) -> bool:
-            return (paragraph.name == 'h2' or
-                    (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and 'h2' in paragraph.attrs['class']))
+            # Check for class name equivalent to header tags
+            if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
+                for cls in paragraph.attrs['class']:
+                    if cls.lower() == 'pre-title1':
+                        return 1  # Equivalent to h1
+                    if cls.lower().startswith('h') and cls[1:].isdigit():
+                        return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
+            return 0
 
         def is_title(paragraph: Tag) -> bool:
             # noinspection SpellCheckingInspection
@@ -248,11 +253,12 @@ class DocumentProcessor:
                         for cls in paragraph.attrs['class'] for keyword in keywords))
 
         def is_title_or_heading(paragraph: Tag) -> bool:
+            """Check if the paragraph is a title, heading, or chapter number."""
             if paragraph is None:
                 return False
-            else:
-                return (is_title(paragraph) or is_header1(paragraph) or
-                        is_header2(paragraph) or is_chapter_number(paragraph))
+
+            header_lvl: int = get_header_level(paragraph)
+            return is_title(paragraph) or header_lvl > 0 or is_chapter_number(paragraph)
 
         def is_chapter_number(paragraph: Tag) -> bool:
             # List of class names to check for chapter numbers
@@ -279,17 +285,16 @@ class DocumentProcessor:
             # print("HTML:")
             # print(section_soup)
             # print()
-            paragraphs: List[Any] = section_soup.find_all(['p', 'h1', 'h2'])
+            paragraphs: List[Any] = section_soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             combined_paragraph: str = ""
-            header1: str = ""
-            header2: str = ""
             title: str = ""
             chapter_number: int = 0
             para_num: int = 0
             page_number: str = ""
+            headers: Dict[int, str] = {}  # Track headers by level
             j: int
             combined_chars: int = 0
             for j, p in enumerate(paragraphs):
@@ -309,23 +314,24 @@ class DocumentProcessor:
                         page_id = anchor.get('id')
                         page_number = page_id.split('_')[-1]
 
-                if is_header1(p):
-                    # Any <br/> found in this Tag must be replaced with a space. But we want to still have it be a Tag
-                    # so that it can be processed as a paragraph
-                    for br in p.find_all('br'):
-                        br.insert_after(' ')
+                header_level = get_header_level(p)
+                if header_level > 0:  # If it's a header
+                    if header_level == 1:
+                        for br in p.find_all('br'):
+                            br.insert_after(' ')
 
-                    header1 = p.text.strip()
-                    # We want title case except for really short titles like "I", "II", "III", etc.
-                    if len(header1) > 5:
-                        header1 = header1.title()
+                    header_text = p.text.strip()
+
+                    if len(header_text) > 5:
+                        header_text = header_text.strip().title()
+
+                    # Remove any headers that are lower than the current one
+                    headers = {level: text for level, text in headers.items() if level < header_level}
+
+                    if header_text:
+                        headers[header_level] = header_text
                     updated = True
-                elif is_header2(p):
-                    header2 = p.text.strip()
-                    # We want title case except for really short titles like "I", "II", "III", etc.
-                    if len(header2) > 5:
-                        header2 = header2.title()
-                    updated = True
+
                 elif is_title(p):
                     if title == "":
                         title = p.text.strip().title()
@@ -352,12 +358,15 @@ class DocumentProcessor:
                 p_str: str = str(p)  # p.text.strip()
                 p_str_chars: int = len(p.text)
                 min_paragraph_size: int = self._min_paragraph_size
-                if header1.lower() == "notes":
+
+                # If headers are present, adjust the minimum paragraph size for notes
+                if headers and headers.get(1, '').lower() == "notes":
                     # If we're in the notes section, we want to combine paragraphs into larger sections
                     # This is because the notes are often very short, and we want to keep them together
                     # And also so that they don't dominate a semantic search
                     # We could just drop notes, but often they contain useful information
                     min_paragraph_size = self._min_paragraph_size * 2
+
                 # If the combined paragraph is less than the minimum size combine it with the next paragraph
                 if combined_chars + p_str_chars < min_paragraph_size:
                     # However, if the next pargraph is a header, we want to start a new paragraph
@@ -398,10 +407,11 @@ class DocumentProcessor:
                     meta_node["title"] = title
                 if chapter_number:
                     meta_node["chapter_number"] = str(chapter_number)
-                if header1:
-                    meta_node["header_1"] = header1
-                if header2:
-                    meta_node["header_2"] = header2
+
+                # Include headers in the metadata
+                for level, text in headers.items():
+                    meta_node[f'header_{level}'] = text
+
                 if section.title:
                     meta_node["section_title"] = section.title
                 if page_number:
