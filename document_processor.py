@@ -345,11 +345,17 @@ class DocumentProcessor:
                 elif is_title(p):
                     if title_tag_info == "":
                         title_tag_info = p.text.strip().title()
-                    else:
+                    elif title_tag_info != p.text.strip().title():
                         title_tag_info += ": " + p.text.strip().title()
+                        chapter_title = ""
+
                     # Replace 'S with 's after title casing
                     title_tag_info = title_tag_info.replace("'S", "'s")
                     title_tag_info = title_tag_info.replace("’S", "’s")
+
+                    if chapter_title and chapter_title != title_tag_info:
+                        chapter_title += ": " + title_tag_info
+
                     updated = True
                 # Is it a chapter number tag?
                 elif is_chapter_number(p):
@@ -358,13 +364,12 @@ class DocumentProcessor:
 
                 # Set metadata
                 # Pick current title
-                chapter_title = section.title or title_tag_info or (headers.get(1, '') if h1_tag_count == 1 else '')
-
-                if not updated and p.name != 'p':
-                    pass
-
-                if section.id == 'Chapter02':
-                    pass
+                chapter_title = (chapter_title or section.title or title_tag_info or
+                                 (headers.get(1, '') if h1_tag_count == 1 else ''))
+                # Merge header 1 and title tag
+                if headers.get(1, '') and headers.get(1, '') == chapter_title:
+                    # Delete header 1 as it is being used as chapter title
+                    del headers[1]
 
                 # If we used the paragraph to fill in metadata, we don't want to include it in the text
                 if updated:
@@ -430,9 +435,17 @@ class DocumentProcessor:
                     meta_node["chapter_number"] = str(chapter_number)
 
                 # Include headers in the metadata
+                # Get top level header
+                top_header_level: int = 0
+                if headers:
+                    top_header_level = min(headers.keys())
                 for level, text in headers.items():
-                    if level == 1 and text != chapter_title or level > 1:
-                        meta_node[f'header_{level}'] = text
+                    if level == top_header_level:
+                        meta_node["section_name"] = text
+                    elif level == top_header_level - 1:
+                        meta_node["subsection_name"] = text
+                    else:
+                        meta_node[f"header_{level}"] = text
 
                 # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
@@ -440,14 +453,14 @@ class DocumentProcessor:
 
             if (len(total_text) > self._min_section_size
                     and section.id not in self._sections_to_skip.get(book.title, set())):
-                self._print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {section.title}. "
+                self._print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {chapter_title}. "
                                     f"Length: {len(total_text)}")
                 docs_list.extend(temp_docs)
                 meta_list.extend(temp_meta)
                 included_sections.append(book.title + ", " + section.id)
                 section_num += 1
             else:
-                self._print_verbose(f"Book: {book.title}; Title: {section.title}. Length: {len(total_text)}. Skipped.")
+                self._print_verbose(f"Book: {book.title}; Title: {chapter_title}. Length: {len(total_text)}. Skipped.")
 
         self._print_verbose(f"Sections included:")
         for section in included_sections:
