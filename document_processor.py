@@ -33,6 +33,7 @@ from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker
 import csv
+import re
 
 
 # Helper functions for processing EPUB or HTML content
@@ -52,17 +53,19 @@ def get_header_level(paragraph: Tag) -> int:
     return 0
 
 
-def is_title(paragraph: Tag, h1_count: int) -> bool:
-    header_level: int = get_header_level(paragraph)
-    if header_level == 1 and h1_count == 1:
-        return True
-
+def is_title(paragraph: Tag) -> bool:
     # noinspection SpellCheckingInspection
     keywords: List[str] = ['title', 'chtitle', 'tochead']
-
     return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
             any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
                 for cls in paragraph.attrs['class'] for keyword in keywords))
+
+
+def is_header1_title(paragraph: Tag, h1_count: int) -> bool:
+    header_level: int = get_header_level(paragraph)
+    if header_level == 1 and h1_count == 1:
+        return True
+    return False
 
 
 def is_title_or_heading(paragraph: Tag, h1_count: int) -> bool:
@@ -71,7 +74,8 @@ def is_title_or_heading(paragraph: Tag, h1_count: int) -> bool:
         return False
 
     header_lvl: int = get_header_level(paragraph)
-    return is_title(paragraph, h1_count) or header_lvl > 0 or is_chapter_number(paragraph)
+    is_title_or_title_h1: bool = is_title(paragraph) or is_header1_title(paragraph, h1_count)
+    return is_title_or_title_h1 or header_lvl > 0 or is_chapter_number(paragraph)
 
 
 def is_chapter_number(paragraph: Tag) -> bool:
@@ -82,6 +86,33 @@ def is_chapter_number(paragraph: Tag) -> bool:
     return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
             any(cls in paragraph.attrs['class'] for cls in chapter_classes) and
             paragraph.text.isdigit())
+
+
+def get_page_number(paragraph: Tag) -> str:
+    # Try to get a page number - return it as a string instead of an int to accommodate roman numerals
+    # Return None if none found on this paragraph
+    page_anchors: List[Tag] = paragraph.find_all('a', id=lambda x: x and x.startswith('page_'))
+    page_number: Optional[str] = None
+    if page_anchors:
+        # Extract the page number from the anchor tag id
+        for anchor in page_anchors:
+            page_id = anchor.get('id')
+            page_number = page_id.split('_')[-1]
+    return page_number
+
+
+def improved_title(text: str) -> str:
+    text = text.strip().title()
+    # Replace 'S with 's after title casing
+    text = text.replace("'S", "'s")
+    text = text.replace("’S", "’s")
+    return text
+
+
+def is_roman_numeral(s: str) -> bool:
+    # Correct placement of the case-insensitive flag at the start
+    roman_numeral_pattern = r'(?i)^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
+    return bool(re.match(roman_numeral_pattern, s.strip()))
 
 
 class DocumentProcessor:
@@ -285,14 +316,12 @@ class DocumentProcessor:
         self._print_verbose()
         self._print_verbose(f"Book Title: {book.title}")
         section_num: int = 1
-        # Find all h1 tags in the current section
-        h1_tag_count: int = 0
         i: int
         for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
             section_html: str = section.get_body_content().decode('utf-8')
             # print(section_html)
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
-            h1_tag_count = len(section_soup.find_all('h1'))
+            h1_tag_count: int = len(section_soup.find_all('h1'))
             # print()
             # print("HTML:")
             # print(section_soup)
@@ -302,7 +331,6 @@ class DocumentProcessor:
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             combined_paragraph: str = ""
-            title_tag_info: str = ""
             chapter_title: str = ""
             chapter_number: int = 0
             para_num: int = 0
@@ -312,70 +340,48 @@ class DocumentProcessor:
             combined_chars: int = 0
             for j, p in enumerate(paragraphs):
                 updated: bool = False
+                # Grab next tag
                 next_p: Optional[Tag] = None
                 if j < len(paragraphs) - 1:
                     next_p = paragraphs[j + 1]
-                # prev_p: Optional[Tag] = None
-                # if j > 0:
-                #     prev_p = paragraphs[j - 1]
 
-                # Try to get a page number
-                page_anchors: List[Tag] = p.find_all('a', id=lambda x: x and x.startswith('page_'))
-                if page_anchors:
-                    # Extract the page number from the anchor tag id
-                    for anchor in page_anchors:
-                        page_id = anchor.get('id')
-                        page_number = page_id.split('_')[-1]
+                # Clean up of paragraph text
+                for br in p.find_all('br'):
+                    br.insert_after(' ')
+
+                # If paragraph has a page number, update our page number
+                page_number = get_page_number(p) or page_number
 
                 # Check for title information
-                if is_title(p, h1_tag_count):
-                    for br in p.find_all('br'):
-                        br.insert_after(' ')
-
-                    if title_tag_info == "":
-                        title_tag_info = p.text.strip().title()
-                    elif title_tag_info != p.text.strip().title():
-                        title_tag_info += ": " + p.text.strip().title()
-                        chapter_title = ""
-
-                    # Replace 'S with 's after title casing
-                    title_tag_info = title_tag_info.replace("'S", "'s")
-                    title_tag_info = title_tag_info.replace("’S", "’s")
-
-                    if chapter_title and chapter_title != title_tag_info:
-                        chapter_title += ": " + title_tag_info
-
+                if is_title(p) or is_header1_title(p, h1_tag_count):
+                    if chapter_title == "":
+                        chapter_title = improved_title(p.text)
+                    elif chapter_title != improved_title(p.text):
+                        chapter_title += ": " + improved_title(p.text)
                     updated = True
                 # Is it a chapter number tag?
                 elif is_chapter_number(p):
                     chapter_number = int(p.text.strip())
                     updated = True
-                elif get_header_level(p) > 0:  # If it's a header
+                elif get_header_level(p) > 0:  # If it's a header (that isn't an h1 being used as a title)
                     header_level = get_header_level(p)
-                    if header_level == 1:
-                        for br in p.find_all('br'):
-                            br.insert_after(' ')
-
                     header_text = p.text.strip()
-
-                    if len(header_text) > 5:
-                        header_text = header_text.strip().title()
-
-                    # Remove any headers that are lower than the current one
+                    # Don't do Title Casing on Roman Numerals
+                    if is_roman_numeral(header_text):
+                        header_text = header_text.upper()
+                    else:
+                        header_text = improved_title(header_text)
+                    # Remove any headers that are lower than the current one (change of section)
                     headers = {level: text for level, text in headers.items() if level < header_level}
-
+                    # Save off header info
                     if header_text:
                         headers[header_level] = header_text
                     updated = True
 
                 # Set metadata
                 # Pick current title
-                chapter_title = (chapter_title or section.title or title_tag_info or
+                chapter_title = (chapter_title or section.title or
                                  (headers.get(1, '') if h1_tag_count == 1 else ''))
-                # # Merge header 1 and title tag
-                # if headers.get(1, '') and headers.get(1, '') == chapter_title:
-                #     # Delete header 1 as it is being used as chapter title
-                #     del headers[1]
 
                 # If we used the paragraph to fill in metadata, we don't want to include it in the text
                 if updated:
