@@ -68,14 +68,13 @@ def is_header1_title(paragraph: Tag, h1_count: int) -> bool:
     return False
 
 
-def is_title_or_heading(paragraph: Tag, h1_count: int) -> bool:
+def is_section_title(paragraph: Tag) -> bool:
     """Check if the paragraph is a title, heading, or chapter number."""
     if paragraph is None:
         return False
 
     header_lvl: int = get_header_level(paragraph)
-    is_title_or_title_h1: bool = is_title(paragraph) or is_header1_title(paragraph, h1_count)
-    return is_title_or_title_h1 or header_lvl > 0 or is_chapter_number(paragraph)
+    return is_title(paragraph) or header_lvl > 0 or is_chapter_number(paragraph)
 
 
 def is_chapter_number(paragraph: Tag) -> bool:
@@ -381,7 +380,7 @@ class DocumentProcessor:
                 if combined_chars + p_str_chars < min_paragraph_size:
                     # However, if the next pargraph is a header, we want to start a new paragraph
                     # Unless the header came just after another header, in which case we want to combine them
-                    if is_title_or_heading(next_p, h1_tag_count) and not is_title_or_heading(p, h1_tag_count):
+                    if is_section_title(next_p) and not is_section_title(p):
                         # Next paragraph is a header (and the current isn't), so break the paragraph here
                         p_str = combined_paragraph + "\n" + p_str
                         p_str_chars += combined_chars
