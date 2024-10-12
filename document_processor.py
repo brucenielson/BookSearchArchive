@@ -112,7 +112,10 @@ def improved_title(text: str) -> str:
     # else if the first word (before a space) is a roman numeral, don't title case
     elif is_roman_numeral(text.split(' ')[0]):
         # Do upper on first word and title case the rest
-        text = (text.split(' ')[0].upper() + ' ' + improved_title(text.split(' ', 1)[1]))
+        text = (text.split(' ')[0].upper() + ' ' + text.split(' ', 1)[1])
+    elif text.isupper():
+        # If all caps, title case
+        text = text.title()
     return text
 
 
