@@ -388,7 +388,7 @@ class DocumentProcessor:
                         combined_paragraph = ""
                         combined_chars = 0
                     elif j == len(paragraphs) - 1:
-                        # If it's the last paragraph, then b
+                        # If it's the last paragraph, then process this paragraph
                         combined_paragraph += "\n" + p_str
                         combined_chars += p_str_chars
                         p_str = combined_paragraph
