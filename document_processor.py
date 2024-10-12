@@ -101,21 +101,15 @@ def get_page_number(paragraph: Tag) -> str:
     return page_number
 
 
-def improved_title(text: str) -> str:
+def enhance_title(text: str) -> str:
     text = text.strip()
-    # Replace 'S with 's after title casing
-    text = text.replace("'S", "'s")
-    text = text.replace("’S", "’s")
-    # Don't do Title Casing on Roman Numerals
-    if is_roman_numeral(text):
-        text = text.upper()
-    # else if the first word (before a space) is a roman numeral, don't title case
-    elif is_roman_numeral(text.split(' ')[0]):
-        # Do upper on first word and title case the rest
-        text = (text.split(' ')[0].upper() + ' ' + text.split(' ', 1)[1])
-    elif text.isupper():
+    # If all caps but not a roman numeral and not first word before a space of a sentence roman numeral
+    if text.isupper() and not is_roman_numeral(text) and not is_roman_numeral(text.split(' ', 1)[0]):
         # If all caps, title case
         text = text.title()
+        # Replace 'S with 's after title casing
+        text = text.replace("'S", "'s")
+        text = text.replace("’S", "’s")
     return text
 
 
@@ -365,9 +359,9 @@ class DocumentProcessor:
                 # Check for title information
                 if is_title(p) or is_header1_title(p, h1_tag_count):
                     if chapter_title == "":
-                        chapter_title = improved_title(p.text)
-                    elif chapter_title != improved_title(p.text):
-                        chapter_title += ": " + improved_title(p.text)
+                        chapter_title = enhance_title(p.text)
+                    elif chapter_title != enhance_title(p.text):
+                        chapter_title += ": " + enhance_title(p.text)
                     updated = True
                 # Is it a chapter number tag?
                 elif is_chapter_number(p):
@@ -375,7 +369,7 @@ class DocumentProcessor:
                     updated = True
                 elif get_header_level(p) > 0:  # If it's a header (that isn't an h1 being used as a title)
                     header_level = get_header_level(p)
-                    header_text = improved_title(p.text)
+                    header_text = enhance_title(p.text)
                     # Remove any headers that are lower than the current one (change of section)
                     headers = {level: text for level, text in headers.items() if level < header_level}
                     # Save off header info
