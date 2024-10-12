@@ -184,3 +184,25 @@ Section Name is really name of chapter. Why did it skip "Essay 2"? Chapter Title
 
 
 
+This next skips a lot of text:
+
+Book Title: The World of Parmenides
+Section Num: 13
+Section Id: Appendix
+Paragraph Num: 37
+Page Number: 324
+Chapter Title: Popper’s late fragments on Greek philosophy
+Subsection Name: Appendix
+Headers 2: Fragment 2a
+Headers 3: III The difficulty of Parmenides’ argument
+Content:
+Parmenides’ central argument in its simplest form is:
+This is all. Parmenides draws from it the conclusions:
+This is a valid argument if it is assumed that
+Being = impenetrable material (the full).
+The argument can be refuted by assuming that
+Both the full and the void are existing.
+(It is not a problem that ‘being’ and ‘existing’ may be used as synonyms.)
+
+
+Also skips right over II header (which comes right before III The difficulty of Parmenides' argument
