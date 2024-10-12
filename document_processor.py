@@ -369,6 +369,11 @@ class DocumentProcessor:
                     # Don't do Title Casing on Roman Numerals
                     if is_roman_numeral(header_text):
                         header_text = header_text.upper()
+                    # else if the first word (before a space) is a roman numeral, don't title case
+                    elif is_roman_numeral(header_text.split(' ')[0]):
+                        # Do upper on first word and title case the rest
+                        header_text = (header_text.split(' ')[0].upper() + ' ' +
+                                       improved_title(header_text.split(' ', 1)[1]))
                     else:
                         header_text = improved_title(header_text)
                     # Remove any headers that are lower than the current one (change of section)
