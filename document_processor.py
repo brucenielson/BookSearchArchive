@@ -363,8 +363,14 @@ class DocumentProcessor:
                 p_str_chars: int = len(p.text)
                 min_paragraph_size: int = self._min_paragraph_size
 
+                # Get top level header
+                top_header_level: int = 0
+                if headers:
+                    top_header_level = min(headers.keys())
+
                 # If headers are present, adjust the minimum paragraph size for notes
-                if headers and headers.get(1, '').lower() == "notes":
+                if ((chapter_title and chapter_title.lower() == "notes") or
+                        (headers and headers[top_header_level].lower() == "notes")):
                     # If we're in the notes section, we want to combine paragraphs into larger sections
                     # This is because the notes are often very short, and we want to keep them together
                     # And also so that they don't dominate a semantic search
@@ -417,10 +423,6 @@ class DocumentProcessor:
                     paragraph_meta_data["chapter_number"] = str(chapter_number)
 
                 # Include headers in the metadata
-                # Get top level header
-                top_header_level: int = 0
-                if headers:
-                    top_header_level = min(headers.keys())
                 for level, text in headers.items():
                     if level == top_header_level:
                         paragraph_meta_data["section_name"] = text
