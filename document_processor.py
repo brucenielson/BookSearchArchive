@@ -426,7 +426,8 @@ class DocumentProcessor:
                     if level == top_header_level:
                         paragraph_meta_data["section_name"] = text
                     else:
-                        paragraph_meta_data[f"subsection_{level - top_header_level}"] = text
+                        paragraph_meta_data["subsection_name"] = paragraph_meta_data.get("subsection_name", "") + (
+                            ": " + text if "subsection_name" in paragraph_meta_data else text)
 
                 # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
