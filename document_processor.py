@@ -400,23 +400,21 @@ class DocumentProcessor:
                 total_text += p_str
                 p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
                 byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
-                meta_node: Dict[str, str] = {}
-                meta_node["section_num"] = str(section_meta_data["section_num"])
-                meta_node["paragraph_num"] = str(para_num)
+                paragraph_meta_data: Dict[str, str] = {}
                 # Combine meta_node with book_meta_data and section_meta_data
-                meta_node.update(book_meta_data)
-                # meta_node.update(section_meta_data)
-                meta_node["section_id"] = section_meta_data["section_id"]
+                paragraph_meta_data.update(book_meta_data)
+                paragraph_meta_data.update(section_meta_data)
+                paragraph_meta_data["paragraph_num"] = str(para_num)
 
                 # Page information
                 if page_number:
-                    meta_node["page_number"] = str(page_number)
+                    paragraph_meta_data["page_number"] = str(page_number)
 
                 # Chapter information
                 if chapter_title:
-                    meta_node["chapter_title"] = chapter_title
+                    paragraph_meta_data["chapter_title"] = chapter_title
                 if chapter_number:
-                    meta_node["chapter_number"] = str(chapter_number)
+                    paragraph_meta_data["chapter_number"] = str(chapter_number)
 
                 # Include headers in the metadata
                 # Get top level header
@@ -425,15 +423,15 @@ class DocumentProcessor:
                     top_header_level = min(headers.keys())
                 for level, text in headers.items():
                     if level == top_header_level:
-                        meta_node["section_name"] = text
+                        paragraph_meta_data["section_name"] = text
                     elif level == top_header_level - 1:
-                        meta_node["subsection_name"] = text
+                        paragraph_meta_data["subsection_name"] = text
                     else:
-                        meta_node[f"header_{level}"] = text
+                        paragraph_meta_data[f"header_{level}"] = text
 
                 # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
-                temp_meta.append(meta_node)
+                temp_meta.append(paragraph_meta_data)
 
             if (len(total_text) > self._min_section_size
                     and section.id not in self._sections_to_skip.get(book.title, set())):
