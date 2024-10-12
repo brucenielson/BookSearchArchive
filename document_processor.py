@@ -287,8 +287,16 @@ class DocumentProcessor:
         self._print_verbose()
         self._print_verbose(f"Book Title: {book.title}")
         section_num: int = 1
+        book_meta_data: Dict[str, str] = {
+            "book_title": book.title,
+            "file_path": file_path
+        }
         i: int
         for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
+            section_meta_data: Dict[str, str] = {
+                "section_num": str(section_num),
+                "section_id": section.id,
+            }
             section_html: str = section.get_body_content().decode('utf-8')
             # print(section_html)
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
@@ -347,7 +355,6 @@ class DocumentProcessor:
                 # If we used the paragraph to fill in metadata, we don't want to include it in the text
                 if updated:
                     continue
-
                 # Set metadata
                 # Pick current title
                 chapter_title = (chapter_title or section.title)
@@ -393,13 +400,13 @@ class DocumentProcessor:
                 total_text += p_str
                 p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
                 byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
-                meta_node: Dict[str, str] = {
-                    "section_num": str(section_num),
-                    "paragraph_num": str(para_num),
-                    "book_title": book.title,
-                    "section_id": section.id,
-                    "file_path": file_path
-                }
+                meta_node: Dict[str, str] = {}
+                meta_node["section_num"] = str(section_meta_data["section_num"])
+                meta_node["paragraph_num"] = str(para_num)
+                # Combine meta_node with book_meta_data and section_meta_data
+                meta_node.update(book_meta_data)
+                # meta_node.update(section_meta_data)
+                meta_node["section_id"] = section_meta_data["section_id"]
 
                 # Page information
                 if page_number:
