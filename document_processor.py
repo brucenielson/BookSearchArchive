@@ -124,28 +124,6 @@ def is_roman_numeral(s: str) -> bool:
 
 
 class DocumentProcessor:
-    """
-    A class that implements a Retrieval-Augmented Generation (RAG) system using Haystack and Pgvector.
-
-    This class provides functionality to set up and use a RAG system for question answering
-    tasks on a given corpus of text, currently from an EPUB file. It handles document
-    indexing, embedding, retrieval, and generation of responses using a language _model.
-
-    The system uses a Postgres database with the Pgvector extension for efficient
-    similarity search of embedded documents.
-
-    Public Methods:
-        draw_pipelines(): Visualize the RAG and document conversion pipelines.
-        generate_response(query: str): Generate a response to a given query.
-
-    Properties:
-        sentence_context_length: Get the context length of the sentence embedder.
-        sentence_embed_dims: Get the embedding dimensions of the sentence embedder.
-
-    The class handles initialization of the document store, embedding models,
-    and language models internally. It also manages the creation and execution
-    of the document processing and RAG pipelines.
-    """
     def __init__(self,
                  file_or_folder_path: str,
                  table_name: str = 'haystack_pgvector_docs',
@@ -161,21 +139,6 @@ class DocumentProcessor:
                  embedder_model_name: Optional[str] = None,
                  verbose: bool = False
                  ) -> None:
-        """
-        Initialize the HaystackPgvector instance.
-
-        Args:
-            table_name (str): Name of the table in the Pgvector database.
-            recreate_table (bool): Whether to recreate the database table.
-            file_or_folder_path (Optional[str]): Path to the EPUB file to be processed.
-            postgres_user_name (str): Username for Postgres database.
-            postgres_password (str): Password for Postgres database.
-            postgres_host (str): Host address for Postgres database.
-            postgres_port (int): Port number for Postgres database.
-            postgres_db_name (str): Name of the Postgres database.
-            embedder_model_name (Optional[str]): Name of the embedding _model to use.
-            min_section_size (int): Minimum size of a section to be considered for indexing.
-        """
 
         # Instance variables
         self._table_name: str = table_name
