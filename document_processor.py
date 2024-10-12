@@ -344,14 +344,13 @@ class DocumentProcessor:
                         headers[header_level] = header_text
                     updated = True
 
-                # Set metadata
-                # Pick current title
-                chapter_title = (chapter_title or section.title or
-                                 (headers.get(1, '') if h1_tag_count == 1 else ''))
-
                 # If we used the paragraph to fill in metadata, we don't want to include it in the text
                 if updated:
                     continue
+
+                # Set metadata
+                # Pick current title
+                chapter_title = (chapter_title or section.title)
 
                 p_str: str = str(p)  # p.text.strip()
                 p_str_chars: int = len(p.text)
