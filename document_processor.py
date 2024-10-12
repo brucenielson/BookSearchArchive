@@ -292,12 +292,12 @@ class DocumentProcessor:
             "file_path": file_path
         }
         i: int
-        for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
-            section_meta_data: Dict[str, str] = {
-                "section_num": str(section_num),
-                "section_id": section.id,
+        for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
+            item_meta_data: Dict[str, str] = {
+                "item_num": str(section_num),
+                "item_id": item.id,
             }
-            section_html: str = section.get_body_content().decode('utf-8')
+            section_html: str = item.get_body_content().decode('utf-8')
             # print(section_html)
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
             h1_tag_count: int = len(section_soup.find_all('h1'))
@@ -357,7 +357,7 @@ class DocumentProcessor:
                     continue
                 # Set metadata
                 # Pick current title
-                chapter_title = (chapter_title or section.title)
+                chapter_title = (chapter_title or item.title)
 
                 p_str: str = str(p)  # p.text.strip()
                 p_str_chars: int = len(p.text)
@@ -403,7 +403,7 @@ class DocumentProcessor:
                 paragraph_meta_data: Dict[str, str] = {}
                 # Combine meta_node with book_meta_data and section_meta_data
                 paragraph_meta_data.update(book_meta_data)
-                paragraph_meta_data.update(section_meta_data)
+                paragraph_meta_data.update(item_meta_data)
                 paragraph_meta_data["paragraph_num"] = str(para_num)
 
                 # Page information
@@ -423,30 +423,28 @@ class DocumentProcessor:
                     top_header_level = min(headers.keys())
                 for level, text in headers.items():
                     if level == top_header_level:
-                        paragraph_meta_data["subsection_name"] = text
-                    elif level == top_header_level - 1:
-                        paragraph_meta_data["subsection_name"] = text
+                        paragraph_meta_data["section_name"] = text
                     else:
-                        paragraph_meta_data[f"header_{level}"] = text
+                        paragraph_meta_data[f"Header_{level}"] = text
 
                 # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
                 temp_meta.append(paragraph_meta_data)
 
             if (len(total_text) > self._min_section_size
-                    and section.id not in self._sections_to_skip.get(book.title, set())):
+                    and item.id not in self._sections_to_skip.get(book.title, set())):
                 self._print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {chapter_title}. "
                                     f"Length: {len(total_text)}")
                 docs_list.extend(temp_docs)
                 meta_list.extend(temp_meta)
-                included_sections.append(book.title + ", " + section.id)
+                included_sections.append(book.title + ", " + item.id)
                 section_num += 1
             else:
                 self._print_verbose(f"Book: {book.title}; Title: {chapter_title}. Length: {len(total_text)}. Skipped.")
 
         self._print_verbose(f"Sections included:")
-        for section in included_sections:
-            self._print_verbose(section)
+        for item in included_sections:
+            self._print_verbose(item)
         self._print_verbose()
         return docs_list, meta_list
 
