@@ -423,7 +423,7 @@ class DocumentProcessor:
                     top_header_level = min(headers.keys())
                 for level, text in headers.items():
                     if level == top_header_level:
-                        paragraph_meta_data["section_name"] = text
+                        paragraph_meta_data["subsection_name"] = text
                     elif level == top_header_level - 1:
                         paragraph_meta_data["subsection_name"] = text
                     else:
