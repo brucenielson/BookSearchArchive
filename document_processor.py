@@ -318,7 +318,7 @@ class DocumentProcessor:
             j: int
             combined_chars: int = 0
             for j, p in enumerate(paragraphs):
-                if p.find('p'):
+                if p.find('p') or p.text.strip() == "":
                     # Skip paragraph tags that contain other paragraph tags
                     continue
 
