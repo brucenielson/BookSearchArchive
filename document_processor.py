@@ -387,6 +387,9 @@ class DocumentProcessor:
                 # Set metadata
                 # Pick current title
                 chapter_title = (chapter_title or item.title)
+                # If we have no chapter title, check if there is a 0 level header
+                if not chapter_title and headers and 0 in headers:
+                    chapter_title = headers[0]
 
                 p_str: str = str(tag)  # p.text.strip()
                 p_str_chars: int = len(tag.text)
