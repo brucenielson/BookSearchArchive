@@ -336,10 +336,6 @@ class DocumentProcessor:
             # Advance iter2 to be one ahead of iter1
             next(iter2, None)
             for j, tag in enumerate(iter1):
-
-                if para_num == 0 and item.id == 'ch10':
-                    pass  # 100649
-
                 try:
                     next_tag = next(iter2)
                 except StopIteration:
