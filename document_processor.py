@@ -304,7 +304,8 @@ class DocumentProcessor:
             # print("HTML:")
             # print(section_soup)
             # print()
-            paragraphs: List[Tag] = section_soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8'])
+            valid_tags: List[str] = ['p', 'ol', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
+            paragraphs: List[Tag] = section_soup.find_all(valid_tags)
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
@@ -317,8 +318,6 @@ class DocumentProcessor:
             j: int
             combined_chars: int = 0
             for j, p in enumerate(paragraphs):
-                if para_num == 36:
-                    pass
                 updated: bool = False
                 # Grab next tag
                 next_p: Optional[Tag] = None
@@ -364,6 +363,9 @@ class DocumentProcessor:
                 # Set metadata
                 # Pick current title
                 chapter_title = (chapter_title or item.title)
+
+                if para_num == 87 and chapter_title == 'Knowledge and the Shaping of Reality: The Search for a Better World':
+                    pass
 
                 p_str: str = str(p)  # p.text.strip()
                 p_str_chars: int = len(p.text)
@@ -539,7 +541,10 @@ class DocumentProcessor:
         meta: List[Dict[str, str]]
 
         for source, meta in self._load_files():
-            self._print_verbose(f"Processing document: {meta[0]['book_title']}")
+            title: str = (meta[0].get('book_title', '') + " " +
+                          meta[0].get('chapter_title', '') + " " +
+                          meta[0].get('section_name', '')).strip()
+            self._print_verbose(f"Processing document: {title} ")
 
             # If needed, you can batch process here instead of processing one by one
             # Pass the source and meta to the document conversion pipeline
@@ -556,8 +561,8 @@ def main() -> None:
     # epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     # epub_file_path: str = "documents/Karl Popper - The Open Society and Its Enemies-Princeton University Press (2013).epub"  # noqa: E501
-    epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
-    # epub_file_path: str = "documents"
+    # epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
+    epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
