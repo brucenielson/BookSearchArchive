@@ -340,7 +340,7 @@ class DocumentProcessor:
             next(iter2, None)
             for j, tag in enumerate(iter1):
 
-                if item.id == 'Ch07' and para_num == 336:
+                if item.id == 'notes1' and para_num == 0:
                     pass
 
                 try:
