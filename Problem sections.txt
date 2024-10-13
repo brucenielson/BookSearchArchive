@@ -259,3 +259,22 @@ The British habit of accepting hardship without grumbling.
 
 Why is VII showing up in text?
 
+
+Everything in this chapter:
+
+Book Title: Conjectures and Refutations
+Item Num: 7
+Item Id: Ch014
+Paragraph Num: 1
+Page Number: 409
+Chapter Title: 14 Self-Reference and Meaning in Ordinary Language
+Content:
+Theaetetus. Now listen to me attentively, Socrates, for what I shall put before you is not a little tricky.
+Socrates. I promise to do my best, Theaetetus, so long as you spare me the details of your achievements in the theory of numbers, and speak in a language which I, an ordinary man, can understand.
+
+It dumps nearly everything into the second paragraph.
+
+
+
+
+
