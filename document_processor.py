@@ -1,6 +1,4 @@
 # Pytorch imports
-from itertools import tee
-
 import torch
 # EPUB imports
 from bs4 import BeautifulSoup, Tag
@@ -36,6 +34,8 @@ from doc_content_checker import skip_content
 from custom_haystack_components import CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker
 import csv
 import re
+from copy import deepcopy
+from itertools import tee
 
 
 # Helper functions for processing EPUB or HTML content
@@ -57,6 +57,10 @@ def get_header_level(paragraph: Tag) -> Optional[int]:
 
 
 def is_title(paragraph: Tag) -> bool:
+    # # A title isn't a header
+    # headers: List[str] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
+    # if paragraph.name in headers:
+    #     return False
     # noinspection SpellCheckingInspection
     keywords: List[str] = ['title', 'chtitle', 'tochead']
     return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
@@ -131,7 +135,12 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
     # Unless it is a div tag. The Haystack HTML parse doesn't always handle those right, so
     # Dig one level deeper.
     if not tag.name == 'div' and tag.get_text(strip=True) and not tag.find(invalid_children):
-        yield tag
+        # Make a deep copy of the tag to avoid modifying the original
+        tag_copy: Tag = deepcopy(tag)
+        # Clean up of paragraph text
+        for br in tag_copy.find_all('br'):
+            br.insert_after(' ')
+        yield tag_copy
     else:
         # Recursively go through the children of the current tag
         for child in tag.children:
@@ -166,7 +175,7 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
                 chapter_title = title_text
         elif not chapter_title and get_header_level(tag) == 1 and h1_tag_count == 1:
             chapter_title = enhance_title(tag.text)
-        elif tag.name == 'p':
+        elif tag.name == 'p' and not is_chapter_number(tag):
             break
 
     return chapter_title
@@ -342,6 +351,8 @@ class DocumentProcessor:
         }
         i: int
         for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
+            if i == 3 and book.title == "The World of Parmenides":
+                pass
             item_meta_data: Dict[str, str] = {
                 "item_num": str(section_num),
                 "item_id": item.id,
@@ -383,10 +394,6 @@ class DocumentProcessor:
 
                 updated: bool = False
 
-                # Clean up of paragraph text
-                for br in tag.find_all('br'):
-                    br.insert_after(' ')
-
                 # If paragraph has a page number, update our page number
                 page_number = get_page_number(tag) or page_number
 
@@ -424,6 +431,8 @@ class DocumentProcessor:
                 chapter_title = (chapter_title or item.title)
 
                 if chapter_title != new_chapter_title:
+                    pass
+                elif chapter_title == new_chapter_title and chapter_title != "":
                     pass
 
                 # If we have no chapter title, check if there is a 0 level header
