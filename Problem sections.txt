@@ -259,3 +259,65 @@ The British habit of accepting hardship without grumbling.
 
 Why is VII showing up in text?
 
+
+Everything in this chapter:
+
+Book Title: Conjectures and Refutations
+Item Num: 7
+Item Id: Ch014
+Paragraph Num: 1
+Page Number: 409
+Chapter Title: 14 Self-Reference and Meaning in Ordinary Language
+Content:
+Theaetetus. Now listen to me attentively, Socrates, for what I shall put before you is not a little tricky.
+Socrates. I promise to do my best, Theaetetus, so long as you spare me the details of your achievements in the theory of numbers, and speak in a language which I, an ordinary man, can understand.
+
+It dumps nearly everything into the second paragraph.
+
+
+
+
+
+
+
+Page Number: 7
+Chapter Title: Knowledge and the Shaping of Reality: The Search for a Better World
+Chapter Number: 1
+Section Name: 1. Knowledge
+Content:
+This concludes for the moment my remarks on the subject of ‘knowledge’; I now turn to the subject of ‘reality’, so that I may conclude with a discussion of ‘the shaping of reality through knowledge’.
+2. Reality
+
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Item Num: 2
+@@ -26003,7 +26019,6 @@ Chapter Number: 1
+Section Name: XII
+Content:
+I have tried to explain world 3. And I come now to the third and final section of my lecture: On the shaping of reality.
+3. On the Shaping of Reality
+
+
+I lost the last line of each with new version
+25179
+
+
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Item Num: 3
+Item Id: id29
+Paragraph Num: 46
+Page Number: 42
+Chapter Title: On Knowledge and Ignorance
+Chapter Number: 2
+Section Name: Notes
+Content:
+You are the profits of my enterprise.
+Ladies and gentlemen, I hope that you will not condemn me if this time I let the Devil himself have the last word.
+1 Note that my English version of Faust’s speech is in some places extremely free; see the Endnote below.
+2 Translator’s note: Up to this point, the English text of this address is due to the author, and so are all the later verse translations.
+3 Of course there is no proof of the authenticity of Plato’s Apology, even prominent scholars have spoken out against it. But there are important grounds for accepting it. I am sure that Plato intended it to be regarded as genuine, and that it numbers amongst his early works, so that many witnesses were still alive when Plato wrote the Apology. As in all the early dialogues (at least before the Gorgias), Socrates employs in the Apology the method of refutation by practical examples (elenchos: 21 B—C); and he stresses his ignorance.
+
+Should break in the middle: 26704
+
+
+
+

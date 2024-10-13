@@ -1,4 +1,6 @@
 # Pytorch imports
+from itertools import tee
+
 import torch
 # EPUB imports
 from bs4 import BeautifulSoup, Tag
@@ -37,7 +39,7 @@ import re
 
 
 # Helper functions for processing EPUB or HTML content
-def get_header_level(paragraph: Tag) -> int:
+def get_header_level(paragraph: Tag) -> Optional[int]:
     """Return the level of the header (1 for h1, 2 for h2, etc.), or 0 if not a header."""
     # Check for direct header tag
     if paragraph.name.startswith('h') and paragraph.name[1:].isdigit():
@@ -45,12 +47,13 @@ def get_header_level(paragraph: Tag) -> int:
 
     # Check for class name equivalent to header tags
     if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
+        section_headers: List[str] = ['pre-title1', 'h']
         for cls in paragraph.attrs['class']:
-            if cls.lower() == 'pre-title1':
-                return 1  # Equivalent to h1
-            if cls.lower().startswith('h') and cls[1:].isdigit():
+            if cls.lower() in section_headers:
+                return 0  # Equivalent to h0 effectively
+            elif cls.lower().startswith('h') and cls[1:].isdigit():
                 return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
-    return 0
+    return None
 
 
 def is_title(paragraph: Tag) -> bool:
@@ -74,7 +77,7 @@ def is_section_title(paragraph: Tag) -> bool:
         return False
 
     header_lvl: int = get_header_level(paragraph)
-    return is_title(paragraph) or header_lvl > 0 or is_chapter_number(paragraph)
+    return is_title(paragraph) or header_lvl is not None or is_chapter_number(paragraph)
 
 
 def is_chapter_number(paragraph: Tag) -> bool:
@@ -120,6 +123,21 @@ def enhance_title(text: str) -> str:
 def is_roman_numeral(s: str) -> bool:
     roman_numeral_pattern = r'(?i)^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
     return bool(re.match(roman_numeral_pattern, s.strip()))
+
+
+def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
+    invalid_children: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
+    # If the tag has no <p> tags or header tags under it and contains text, yield it
+    # Unless it is a div tag. The Haystack HTML parse doesn't always handle those right, so
+    # Dig one level deeper.
+    if not tag.name == 'div' and tag.get_text(strip=True) and not tag.find(invalid_children):
+        yield tag
+    else:
+        # Recursively go through the children of the current tag
+        for child in tag.children:
+            if isinstance(child, Tag):
+                # Yield the child tags that meet the criteria
+                yield from recursive_yield_tags(child)
 
 
 class DocumentProcessor:
@@ -304,8 +322,6 @@ class DocumentProcessor:
             # print("HTML:")
             # print(section_soup)
             # print()
-            valid_tags: List[str] = ['p', 'ol', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
-            paragraphs: List[Tag] = section_soup.find_all(valid_tags)
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
@@ -317,42 +333,48 @@ class DocumentProcessor:
             headers: Dict[int, str] = {}  # Track headers by level
             j: int
             combined_chars: int = 0
-            for j, p in enumerate(paragraphs):
-                if p.find('p') or p.text.strip() == "":
-                    # Skip paragraph tags that contain other paragraph tags
-                    continue
+            # Setup iterators
+            tags = recursive_yield_tags(section_soup)
+            iter1, iter2 = tee(tags)
+            # Advance iter2 to be one ahead of iter1
+            next(iter2, None)
+            for j, tag in enumerate(iter1):
+
+                if item.id == 'Ch07' and para_num == 336:
+                    pass
+
+                try:
+                    next_tag = next(iter2)
+                except StopIteration:
+                    next_tag = None  # This handles the final tag case
 
                 updated: bool = False
-                # Grab next tag
-                next_p: Optional[Tag] = None
-                if j < len(paragraphs) - 1:
-                    next_p = paragraphs[j + 1]
 
                 # Clean up of paragraph text
-                for br in p.find_all('br'):
+                for br in tag.find_all('br'):
                     br.insert_after(' ')
 
                 # If paragraph has a page number, update our page number
-                page_number = get_page_number(p) or page_number
+                page_number = get_page_number(tag) or page_number
 
                 # Check for title information
-                if is_title(p) or is_header1_title(p, h1_tag_count):
+                if is_title(tag) or is_header1_title(tag, h1_tag_count):
                     if chapter_title == "":
-                        chapter_title = enhance_title(p.text)
-                    elif chapter_title != enhance_title(p.text):
-                        chapter_title += ": " + enhance_title(p.text)
+                        chapter_title = enhance_title(tag.text)
+                    elif chapter_title != enhance_title(tag.text):
+                        chapter_title += ": " + enhance_title(tag.text)
                     updated = True
                 # Is it a chapter number tag?
-                elif is_chapter_number(p):
-                    chapter_number = int(p.text.strip())
+                elif is_chapter_number(tag):
+                    chapter_number = int(tag.text.strip())
                     updated = True
-                elif get_header_level(p) > 0:  # If it's a header (that isn't an h1 being used as a title)
-                    header_level = get_header_level(p)
-                    header_text = enhance_title(p.text)
+                elif get_header_level(tag) is not None:  # If it's a header (that isn't a h1 being used as a title)
+                    header_level = get_header_level(tag)
+                    header_text = enhance_title(tag.text)
                     # If header level is h5 or greater, treat it as a paragraph but still start a new section
                     if header_level >= 6:
                         # Transform the header tag to be a paragraph tag
-                        p.name = 'p'
+                        tag.name = 'p'
                     else:
                         # Remove any headers that are lower than the current one (change of section)
                         headers = {level: text for level, text in headers.items() if level < header_level}
@@ -367,12 +389,12 @@ class DocumentProcessor:
                 # Set metadata
                 # Pick current title
                 chapter_title = (chapter_title or item.title)
+                # If we have no chapter title, check if there is a 0 level header
+                if not chapter_title and headers and 0 in headers:
+                    chapter_title = headers[0]
 
-                if para_num == 87 and chapter_title == 'Knowledge and the Shaping of Reality: The Search for a Better World':
-                    pass
-
-                p_str: str = str(p)  # p.text.strip()
-                p_str_chars: int = len(p.text)
+                p_str: str = str(tag)  # p.text.strip()
+                p_str_chars: int = len(tag.text)
                 min_paragraph_size: int = self._min_paragraph_size
 
                 # Get top level header
@@ -393,13 +415,13 @@ class DocumentProcessor:
                 if combined_chars + p_str_chars < min_paragraph_size:
                     # However, if the next pargraph is a header, we want to start a new paragraph
                     # Unless the header came just after another header, in which case we want to combine them
-                    if is_section_title(next_p) and not is_section_title(p):
+                    if is_section_title(next_tag) and not is_section_title(tag):
                         # Next paragraph is a header (and the current isn't), so break the paragraph here
                         p_str = combined_paragraph + "\n" + p_str
                         p_str_chars += combined_chars
                         combined_paragraph = ""
                         combined_chars = 0
-                    elif j == len(paragraphs) - 1:
+                    elif next_tag is None:
                         # If it's the last paragraph, then process this paragraph
                         combined_paragraph += "\n" + p_str
                         combined_chars += p_str_chars
