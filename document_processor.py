@@ -47,11 +47,10 @@ def get_header_level(paragraph: Tag) -> Optional[int]:
 
     # Check for class name equivalent to header tags
     if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
+        section_headers: List[str] = ['pre-title1', 'h']
         for cls in paragraph.attrs['class']:
-            if cls.lower() == 'pre-title1':
-                return 1  # Equivalent to h1
-            elif cls.lower() == 'h':
-                return 0
+            if cls.lower() in section_headers:
+                return 0  # Equivalent to h0 effectively
             elif cls.lower().startswith('h') and cls[1:].isdigit():
                 return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
     return None
