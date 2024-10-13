@@ -304,7 +304,7 @@ class DocumentProcessor:
             # print("HTML:")
             # print(section_soup)
             # print()
-            paragraphs: List[Tag] = section_soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+            paragraphs: List[Tag] = section_soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8'])
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
@@ -317,6 +317,8 @@ class DocumentProcessor:
             j: int
             combined_chars: int = 0
             for j, p in enumerate(paragraphs):
+                if para_num == 36:
+                    pass
                 updated: bool = False
                 # Grab next tag
                 next_p: Optional[Tag] = None
@@ -344,12 +346,17 @@ class DocumentProcessor:
                 elif get_header_level(p) > 0:  # If it's a header (that isn't an h1 being used as a title)
                     header_level = get_header_level(p)
                     header_text = enhance_title(p.text)
-                    # Remove any headers that are lower than the current one (change of section)
-                    headers = {level: text for level, text in headers.items() if level < header_level}
-                    # Save off header info
-                    if header_text:
-                        headers[header_level] = header_text
-                    updated = True
+                    # If header level is h5 or greater, treat it as a paragraph but still start a new section
+                    if header_level >= 6:
+                        # Transform the header tag to be a paragraph tag
+                        p.name = 'p'
+                    else:
+                        # Remove any headers that are lower than the current one (change of section)
+                        headers = {level: text for level, text in headers.items() if level < header_level}
+                        # Save off header info
+                        if header_text:
+                            headers[header_level] = header_text
+                        updated = True
 
                 # If we used the paragraph to fill in metadata, we don't want to include it in the text
                 if updated:
@@ -549,7 +556,8 @@ def main() -> None:
     # epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     # epub_file_path: str = "documents/Karl Popper - The Open Society and Its Enemies-Princeton University Press (2013).epub"  # noqa: E501
-    epub_file_path: str = "documents"
+    epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
+    # epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
