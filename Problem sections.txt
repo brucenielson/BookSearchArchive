@@ -206,3 +206,38 @@ Both the full and the void are existing.
 
 
 Also skips right over II header (which comes right before III The difficulty of Parmenides' argument
+
+
+<p class="text_noindent">Parmenides’ central argument in its simplest form is:<br/> <br/> </p>
+<ol style="margin-left: 1.5em;">
+<li><span class="italic">Being is</span>.</li>
+<li><span class="italic">Non-being cannot be being</span>.<br/>(For non-being = being is <span class="italic">absurd</span>; it cannot even be thought of.) Therefore</li>
+<li><span class="italic">Non-being cannot exist</span>.<br/>(The nothing cannot exist.)<br/><br/></li>
+</ol>
+<p class="text_noindent">This is all. Parmenides draws from it the conclusions:</p>
+
+
+
+umber: 25
+Chapter Title: Knowledge and the Shaping of Reality: The Search for a Better World
+Chapter Number: 1
+Section Name: XII
+Content:
+Accordingly, those who have reflected upon the status of mathematics have in the main reached two opinions. And we have in effect two philosophies of mathematics.
+Mathematics is the work of mankind. For it is based upon our intuition; or it is our construction; or it is our invention. (Intuitionism; constructivism; conventionalism.)
+Mathematics is a field that exists objectively in its own right. It is an infinitely rich field of objective truths, which we do not create, but confront objectively. And we can discover more than a few of these truths. (This conception of mathematics is usually described as ‘Platonism’.)
+
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Item Num: 2
+Item Id: id26
+Paragraph Num: 89
+Page Number: 25
+Chapter Title: Knowledge and the Shaping of Reality: The Search for a Better World
+Chapter Number: 1
+Section Name: XII
+Content:
+Mathematics is the work of mankind. For it is based upon our intuition; or it is our construction; or it is our invention. (Intuitionism; constructivism; conventionalism.)
+Mathematics is a field that exists objectively in its own right. It is an infinitely rich field of objective truths, which we do not create, but confront objectively. And we can discover more than a few of these truths. (This conception of mathematics is usually described as ‘Platonism’.)
+
+
+
