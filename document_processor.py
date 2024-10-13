@@ -127,7 +127,9 @@ def is_roman_numeral(s: str) -> bool:
 
 def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
     invalid_children: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
-    # If the tag has no <p> tags and contains text, yield it
+    # If the tag has no <p> tags or header tags under it and contains text, yield it
+    # Unless it is a div tag. The Haystack HTML parse doesn't always handle those right, so
+    # Dig one level deeper.
     if not tag.name == 'div' and tag.get_text(strip=True) and not tag.find(invalid_children):
         yield tag
     else:
@@ -338,7 +340,7 @@ class DocumentProcessor:
             next(iter2, None)
             for j, tag in enumerate(iter1):
 
-                if item.id == 'id29' and para_num == 45:
+                if item.id == 'Ch07' and para_num == 336:
                     pass
 
                 try:
