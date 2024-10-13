@@ -240,4 +240,22 @@ Mathematics is the work of mankind. For it is based upon our intuition; or it is
 Mathematics is a field that exists objectively in its own right. It is an infinitely rich field of objective truths, which we do not create, but confront objectively. And we can discover more than a few of these truths. (This conception of mathematics is usually described as ‘Platonism’.)
 
 
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Item Num: 12
+Item Id: id5
+Paragraph Num: 32
+Page Number: 160
+Chapter Title: Public Opinion and Liberal Principles
+Chapter Number: 11
+Content:
+VII. A Short List of Political Illustrations
+This is a list containing cases which should be worthy of careful analysis.
+The Hoare–Laval plan and its defeat by the unreasonable moral enthusiasm of public opinion.
+The Abdication of Edward VIII.
+Munich.
+Unconditional surrender.
+The Crichel Down case.
+The British habit of accepting hardship without grumbling.
+
+Why is VII showing up in text?
 

@@ -318,6 +318,10 @@ class DocumentProcessor:
             j: int
             combined_chars: int = 0
             for j, p in enumerate(paragraphs):
+                if p.find('p'):
+                    # Skip paragraph tags that contain other paragraph tags
+                    continue
+
                 updated: bool = False
                 # Grab next tag
                 next_p: Optional[Tag] = None
