@@ -81,3 +81,181 @@ The simplest examples may be found in the construction of skyscrapers. A skyscra
 
 
 
+No pages numbers on: 
+The Two Fundamental Problems of the Theory of Knowledge
+The Poverty of Historicism
+The Logic of Scientific Discovery
+
+
+Didn't World of Parmenides used to not write out due to being a duplicate to C&R
+
+
+
+
+
+Book Title: Unended Quest
+Section Id: footnotes
+Chapter Title: NOTES
+Header 1: NOTES
+Header 3: Scruples Of Conscience
+Page Number: 280
+Content:
+
+Header 1 to Header 3 without a header 2
+
+
+
+
+Book Title: Conjectures and Refutations
+Section Id: Ch012
+Page Number: 396
+Chapter Title: A Restatement Of Interactionism
+Header 1: 12 Language And The Body-Mind Problem
+Header 2: 1. Introduction
+Chapter Title: 12 Language And The Body-Mind Problem
+Section Name: 1. Introduction
+Content:
+This is a paper on the impossibility of a physicalistic causal theory of the human language.1
+1.1 It is not a paper on linguistic analysis (the analysis of word-usages). For I completely reject the claim of certain language analysts that the source of philosophical difficulties is to be found in the misuse of language. No doubt some people talk nonsense, but I claim (a) that there does not exist a logical or language-analytical method of detecting philosophical nonsense (which, by the way, does not stop short of the ranks of logicians, language analysts and semanticists); (b) that the belief that such a method exists—the belief more especially that philosophical nonsense can be unmasked as due to what Russell might have called ‘type-mistakes’ and what nowadays are sometimes called ‘category-mistakes’—is the aftermath of a philosophy of language which has since turned out to be baseless.
+
+We lost the "Chapter Title" (which is really a sub title)
+
+13493
+
+
+
+
+
+
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Section Id: id26
+Page Number: 3
+Chapter Title: Knowledge And The Shaping Of Reality: The Search For A Better World
+Chapter Title: Knowledge And The Shaping Of Reality: Knowledge And The Shaping Of Reality: The Search For A Better World
+Chapter Number: 1
+Content:
+The first half of the title of my lecture was not chosen by me, but by the organizers of the Alpbach Forum. Their title was: ‘Knowledge and the Shaping of Reality’.
+
+
+25184
+
+
+Unended Quest Notes section is splitting up more than it used to. Not sure why.
+
+
+
+
+
+Paragraph Num: 2
+Book Title: The Poverty of Historicism
+Section Id: ch10
+Section Name: The Anti-Naturalistic Doctrines Of Historicism
+Chapter Title: The Anti-Naturalistic Doctrines Of Historicism
+Section Name: I
+Content:
+Historicism asserts that the historical relativity of social laws makes most of the methods of physics inapplicable to sociology. Typical historicist arguments on which this view is based concern generalization, experiment, the complexity of social phenomena, the difficulties of exact prediction, and the significance of methodological essentialism. I will treat these arguments in turn.
+
+
+This section grabbed the chapter number (in roman numerals) and made it a section (subsection) name.
+
+
+
+
+Paragraph Num: 6
+Book Title: The Poverty of Historicism
+Section Id: ch11
+Chapter Title: The Pro-Naturalistic Doctrines Of Historicism
+Section Name: 11 Comparison With Astronomy. Long-Term Forecasts And Large-Scale Forecasts1
+
+Can I get rid of footnotes?
+
+
+
+Various problems with:
+Book Title: The World of Parmenides
+Section Id: Ch02
+Page Number: 67
+Chapter Title: An Attempt To Establish His Greatness: Addendum 1
+Section Name: The Unknown Xenophanes
+Header 2: A Note To The Quotation From Xenophanes (Dk 21B25) In Section 4 Above
+Content:
+
+Section Name is really name of chapter. Why did it skip "Essay 2"? Chapter Title is sub title. Then we keep adding 'Addendums' on (happens in previous chapter too)
+
+
+
+This next skips a lot of text:
+
+Book Title: The World of Parmenides
+Section Num: 13
+Section Id: Appendix
+Paragraph Num: 37
+Page Number: 324
+Chapter Title: Popper’s late fragments on Greek philosophy
+Subsection Name: Appendix
+Headers 2: Fragment 2a
+Headers 3: III The difficulty of Parmenides’ argument
+Content:
+Parmenides’ central argument in its simplest form is:
+This is all. Parmenides draws from it the conclusions:
+This is a valid argument if it is assumed that
+Being = impenetrable material (the full).
+The argument can be refuted by assuming that
+Both the full and the void are existing.
+(It is not a problem that ‘being’ and ‘existing’ may be used as synonyms.)
+
+
+Also skips right over II header (which comes right before III The difficulty of Parmenides' argument
+
+
+<p class="text_noindent">Parmenides’ central argument in its simplest form is:<br/> <br/> </p>
+<ol style="margin-left: 1.5em;">
+<li><span class="italic">Being is</span>.</li>
+<li><span class="italic">Non-being cannot be being</span>.<br/>(For non-being = being is <span class="italic">absurd</span>; it cannot even be thought of.) Therefore</li>
+<li><span class="italic">Non-being cannot exist</span>.<br/>(The nothing cannot exist.)<br/><br/></li>
+</ol>
+<p class="text_noindent">This is all. Parmenides draws from it the conclusions:</p>
+
+
+
+umber: 25
+Chapter Title: Knowledge and the Shaping of Reality: The Search for a Better World
+Chapter Number: 1
+Section Name: XII
+Content:
+Accordingly, those who have reflected upon the status of mathematics have in the main reached two opinions. And we have in effect two philosophies of mathematics.
+Mathematics is the work of mankind. For it is based upon our intuition; or it is our construction; or it is our invention. (Intuitionism; constructivism; conventionalism.)
+Mathematics is a field that exists objectively in its own right. It is an infinitely rich field of objective truths, which we do not create, but confront objectively. And we can discover more than a few of these truths. (This conception of mathematics is usually described as ‘Platonism’.)
+
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Item Num: 2
+Item Id: id26
+Paragraph Num: 89
+Page Number: 25
+Chapter Title: Knowledge and the Shaping of Reality: The Search for a Better World
+Chapter Number: 1
+Section Name: XII
+Content:
+Mathematics is the work of mankind. For it is based upon our intuition; or it is our construction; or it is our invention. (Intuitionism; constructivism; conventionalism.)
+Mathematics is a field that exists objectively in its own right. It is an infinitely rich field of objective truths, which we do not create, but confront objectively. And we can discover more than a few of these truths. (This conception of mathematics is usually described as ‘Platonism’.)
+
+
+Book Title: In Search of a Better World: Lectures and Essays from Thirty Years
+Item Num: 12
+Item Id: id5
+Paragraph Num: 32
+Page Number: 160
+Chapter Title: Public Opinion and Liberal Principles
+Chapter Number: 11
+Content:
+VII. A Short List of Political Illustrations
+This is a list containing cases which should be worthy of careful analysis.
+The Hoare–Laval plan and its defeat by the unreasonable moral enthusiasm of public opinion.
+The Abdication of Edward VIII.
+Munich.
+Unconditional surrender.
+The Crichel Down case.
+The British habit of accepting hardship without grumbling.
+
+Why is VII showing up in text?
+

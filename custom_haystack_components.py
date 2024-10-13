@@ -259,25 +259,25 @@ class CustomDocumentSplitter:
     @component.output_types(documents=List[Document])
     def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
         processed_docs: List[Document] = []
-        last_section_num: Optional[int] = None  # Track the last section number
+        last_item_num: Optional[int] = None  # Track the last section number
         sections_to_skip: set = set()  # Sections to skip
 
         current_chapter_number: Optional[int] = None  # Store chapter number for the section
         current_chapter_title: Optional[str] = None  # Store chapter title for the section
 
         for doc in documents:
-            # Extract section_num and paragraph_num from the metadata
-            section_num: int = int(doc.meta.get("section_num"))
+            # Extract item_num and paragraph_num from the metadata
+            item_num: int = int(doc.meta.get("item_num"))
             paragraph_num: int = int(doc.meta.get("paragraph_num"))
             book_title: str = doc.meta.get("book_title")
 
             # If this is a section to skip, go to the next document
-            if (book_title, section_num) in sections_to_skip:
+            if (book_title, item_num) in sections_to_skip:
                 continue
 
-            # If verbose is True, print the content when section_num changes and paragraph_num == 1
+            # If verbose is True, print the content when item_num changes and paragraph_num == 1
             # Otherwise, just save chapter info off
-            if True or section_num != last_section_num and paragraph_num == 1:
+            if True or item_num != last_item_num and paragraph_num == 1:
                 # Analyze the first two lines using the helper function
                 analysis_results: Dict[str, Optional[str]] = analyze_content(doc, paragraph_num)
 
@@ -311,10 +311,10 @@ class CustomDocumentSplitter:
                         # Skip this section
                         print(f"Skipping section {doc.meta.get('book_title')} / {doc.meta.get('section_title')} "
                               f"due to content check")
-                    sections_to_skip.add((doc.meta.get("book_title"), section_num))
+                    sections_to_skip.add((doc.meta.get("book_title"), item_num))
                     continue
 
-            elif section_num == last_section_num:
+            elif item_num == last_item_num:
                 # Apply stored chapter number and chapter title to all paragraphs in the same section
                 if current_chapter_number is not None:
                     doc.meta["chapter_number"] = current_chapter_number
@@ -329,8 +329,8 @@ class CustomDocumentSplitter:
                     if analysis_results.get("subsection_title") is not None:
                         doc.meta["subsection_title"] = analysis_results["subsection_title"]
 
-            # Update the last_section_num
-            last_section_num = section_num
+            # Update the last_item_num
+            last_item_num = item_num
 
             # Process and extend documents
             processed_docs.extend(self.process_document(doc))
