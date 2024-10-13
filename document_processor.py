@@ -140,6 +140,38 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
                 yield from recursive_yield_tags(child)
 
 
+def get_chapter_title(top_tag: BeautifulSoup) -> str:
+    # Get the chapter title from the tag
+    chapter_title: str = ""
+    # Search for the chapter title within the tags that come before the first paragraph tag (that isn't
+    # stylized to look like a header tag)
+    # Use is_title to check for a specific title tag
+    # If that fails you can use get_header_level to look for either an h1 or h2 tag but ONLY if that is the sole
+    # h1 or h2 tag in the whole section.
+    # There may be more than one title (like a subtible) and you'll want to combine them via ": " separators.
+    # Use enhance_title to clean up the title text.
+    # Once you find your first paragraph that isn't a title or header, you can assume you've got the full title.
+
+    # Create iterator using recursive_yield_tags
+    tags = recursive_yield_tags(top_tag)
+    # Count h1 tags
+    h1_tag_count: int = len(top_tag.find_all('h1'))
+    h2_tag_count: int = len(top_tag.find_all('h2'))
+    for tag in tags:
+        if is_title(tag):
+            title_text = enhance_title(tag.text)
+            if chapter_title:
+                chapter_title += ": " + title_text
+            else:
+                chapter_title = title_text
+        elif not chapter_title and get_header_level(tag) == 1 and h1_tag_count == 1:
+            chapter_title = enhance_title(tag.text)
+        elif tag.name == 'p':
+            break
+
+    return chapter_title
+
+
 class DocumentProcessor:
     def __init__(self,
                  file_or_folder_path: str,
@@ -314,10 +346,12 @@ class DocumentProcessor:
                 "item_num": str(section_num),
                 "item_id": item.id,
             }
-            section_html: str = item.get_body_content().decode('utf-8')
+            item_html: str = item.get_body_content().decode('utf-8')
             # print(section_html)
-            section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
-            h1_tag_count: int = len(section_soup.find_all('h1'))
+            item_soup: BeautifulSoup = BeautifulSoup(item_html, 'html.parser')
+            h1_tag_count: int = len(item_soup.find_all('h1'))
+            chapter_title: str = ""
+            new_chapter_title: str = get_chapter_title(item_soup)
             # print()
             # print("HTML:")
             # print(section_soup)
@@ -326,7 +360,6 @@ class DocumentProcessor:
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             combined_paragraph: str = ""
-            chapter_title: str = ""
             chapter_number: int = 0
             para_num: int = 0
             page_number: str = ""
@@ -334,7 +367,7 @@ class DocumentProcessor:
             j: int
             combined_chars: int = 0
             # Setup iterators
-            tags = recursive_yield_tags(section_soup)
+            tags = recursive_yield_tags(item_soup)
             iter1, iter2 = tee(tags)
             # Advance iter2 to be one ahead of iter1
             next(iter2, None)
@@ -389,6 +422,10 @@ class DocumentProcessor:
                 # Set metadata
                 # Pick current title
                 chapter_title = (chapter_title or item.title)
+
+                if chapter_title != new_chapter_title:
+                    pass
+
                 # If we have no chapter title, check if there is a 0 level header
                 if not chapter_title and headers and 0 in headers:
                     chapter_title = headers[0]
