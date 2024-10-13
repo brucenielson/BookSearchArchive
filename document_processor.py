@@ -594,3 +594,15 @@ if __name__ == "__main__":
 # TODO: Get code to work with upgraded Haystack version
 # TODO: There has got to be a way to get actual page numbers from an EPUB file
 # TODO: Add PDF support (and maybe other document types)
+
+# Possible new approach:
+# iter1, iter2 = tee(section_soup.descendants)
+# next(iter2, None)
+#
+# for j, (p, next_p) in enumerate(zip(iter1, iter2)):
+#     if isinstance(p, Tag) and p.get_text(strip=True):
+#         if p.find(valid_tags):
+#             # This tag contains a paragraph, so skip it
+#             continue
+#     elif not isinstance(p, Tag):
+#         continue
