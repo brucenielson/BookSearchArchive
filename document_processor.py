@@ -50,9 +50,11 @@ def get_header_level(paragraph: Tag) -> int:
         for cls in paragraph.attrs['class']:
             if cls.lower() == 'pre-title1':
                 return 1  # Equivalent to h1
-            if cls.lower().startswith('h') and cls[1:].isdigit():
+            elif cls.lower() == 'h':
+                return 0
+            elif cls.lower().startswith('h') and cls[1:].isdigit():
                 return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
-    return 0
+    return -1
 
 
 def is_title(paragraph: Tag) -> bool:
@@ -76,7 +78,7 @@ def is_section_title(paragraph: Tag) -> bool:
         return False
 
     header_lvl: int = get_header_level(paragraph)
-    return is_title(paragraph) or header_lvl > 0 or is_chapter_number(paragraph)
+    return is_title(paragraph) or header_lvl > -1 or is_chapter_number(paragraph)
 
 
 def is_chapter_number(paragraph: Tag) -> bool:
@@ -336,6 +338,10 @@ class DocumentProcessor:
             # Advance iter2 to be one ahead of iter1
             next(iter2, None)
             for j, tag in enumerate(iter1):
+
+                if item.id == 'id29' and para_num == 45:
+                    pass
+
                 try:
                     next_tag = next(iter2)
                 except StopIteration:
@@ -361,7 +367,7 @@ class DocumentProcessor:
                 elif is_chapter_number(tag):
                     chapter_number = int(tag.text.strip())
                     updated = True
-                elif get_header_level(tag) > 0:  # If it's a header (that isn't a h1 being used as a title)
+                elif get_header_level(tag) > -1:  # If it's a header (that isn't a h1 being used as a title)
                     header_level = get_header_level(tag)
                     header_text = enhance_title(tag.text)
                     # If header level is h5 or greater, treat it as a paragraph but still start a new section
