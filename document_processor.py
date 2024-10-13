@@ -39,7 +39,7 @@ import re
 
 
 # Helper functions for processing EPUB or HTML content
-def get_header_level(paragraph: Tag) -> int:
+def get_header_level(paragraph: Tag) -> Optional[int]:
     """Return the level of the header (1 for h1, 2 for h2, etc.), or 0 if not a header."""
     # Check for direct header tag
     if paragraph.name.startswith('h') and paragraph.name[1:].isdigit():
@@ -54,7 +54,7 @@ def get_header_level(paragraph: Tag) -> int:
                 return 0
             elif cls.lower().startswith('h') and cls[1:].isdigit():
                 return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
-    return -1
+    return None
 
 
 def is_title(paragraph: Tag) -> bool:
@@ -78,7 +78,7 @@ def is_section_title(paragraph: Tag) -> bool:
         return False
 
     header_lvl: int = get_header_level(paragraph)
-    return is_title(paragraph) or header_lvl > -1 or is_chapter_number(paragraph)
+    return is_title(paragraph) or header_lvl is not None or is_chapter_number(paragraph)
 
 
 def is_chapter_number(paragraph: Tag) -> bool:
@@ -367,7 +367,7 @@ class DocumentProcessor:
                 elif is_chapter_number(tag):
                     chapter_number = int(tag.text.strip())
                     updated = True
-                elif get_header_level(tag) > -1:  # If it's a header (that isn't a h1 being used as a title)
+                elif get_header_level(tag) is not None:  # If it's a header (that isn't a h1 being used as a title)
                     header_level = get_header_level(tag)
                     header_text = enhance_title(tag.text)
                     # If header level is h5 or greater, treat it as a paragraph but still start a new section
