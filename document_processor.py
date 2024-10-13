@@ -125,8 +125,9 @@ def is_roman_numeral(s: str) -> bool:
 
 
 def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
+    invalid_children: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
     # If the tag has no <p> tags and contains text, yield it
-    if not tag.name == 'div' and tag.get_text(strip=True) and not tag.find('p'):
+    if not tag.name == 'div' and tag.get_text(strip=True) and not tag.find(invalid_children):
         yield tag
     else:
         # Recursively go through the children of the current tag
@@ -318,7 +319,6 @@ class DocumentProcessor:
             # print("HTML:")
             # print(section_soup)
             # print()
-            valid_tags: List[str] = ['p', 'ol', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
