@@ -33,31 +33,96 @@ from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker
 import csv
+import re
+
+
+# Helper functions for processing EPUB or HTML content
+def get_header_level(paragraph: Tag) -> int:
+    """Return the level of the header (1 for h1, 2 for h2, etc.), or 0 if not a header."""
+    # Check for direct header tag
+    if paragraph.name.startswith('h') and paragraph.name[1:].isdigit():
+        return int(paragraph.name[1:])  # Extract the level from 'hX' or 'hXY'
+
+    # Check for class name equivalent to header tags
+    if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
+        for cls in paragraph.attrs['class']:
+            if cls.lower() == 'pre-title1':
+                return 1  # Equivalent to h1
+            if cls.lower().startswith('h') and cls[1:].isdigit():
+                return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
+    return 0
+
+
+def is_title(paragraph: Tag) -> bool:
+    # noinspection SpellCheckingInspection
+    keywords: List[str] = ['title', 'chtitle', 'tochead']
+    return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
+            any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
+                for cls in paragraph.attrs['class'] for keyword in keywords))
+
+
+def is_header1_title(paragraph: Tag, h1_count: int) -> bool:
+    header_level: int = get_header_level(paragraph)
+    if header_level == 1 and h1_count == 1:
+        return True
+    return False
+
+
+def is_section_title(paragraph: Tag) -> bool:
+    """Check if the paragraph is a title, heading, or chapter number."""
+    if paragraph is None:
+        return False
+
+    header_lvl: int = get_header_level(paragraph)
+    return is_title(paragraph) or header_lvl > 0 or is_chapter_number(paragraph)
+
+
+def is_chapter_number(paragraph: Tag) -> bool:
+    # List of class names to check for chapter numbers
+    # noinspection SpellCheckingInspection
+    chapter_classes = ['chno', 'ch-num']
+    # noinspection SpellCheckingInspection
+    return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
+            any(cls in paragraph.attrs['class'] for cls in chapter_classes) and
+            paragraph.text.isdigit())
+
+
+def get_page_number(paragraph: Tag) -> str:
+    # Try to get a page number - return it as a string instead of an int to accommodate roman numerals
+    # Return None if none found on this paragraph
+    page_anchors: List[Tag] = paragraph.find_all('a', id=lambda x: x and x.startswith('page_'))
+    page_number: Optional[str] = None
+    if page_anchors:
+        # Extract the page number from the anchor tag id
+        for anchor in page_anchors:
+            page_id = anchor.get('id')
+            page_number = page_id.split('_')[-1]
+    return page_number
+
+
+def enhance_title(text: str) -> str:
+    text = text.strip()
+    # If all caps but not a roman numeral and not first word before a space of a sentence roman numeral
+    if text.isupper() and not is_roman_numeral(text):
+        # If first word before a space is a roman numeral, leave that part as is
+        first_word = text.split(' ', 1)[0]
+        if is_roman_numeral(first_word) and first_word != text:
+            text = first_word + text[len(first_word):].title()
+        else:
+            # If all caps, title case
+            text = text.title()
+        # Replace 'S with 's after title casing
+        text = text.replace("'S", "'s")
+        text = text.replace("’S", "’s")
+    return text
+
+
+def is_roman_numeral(s: str) -> bool:
+    roman_numeral_pattern = r'(?i)^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
+    return bool(re.match(roman_numeral_pattern, s.strip()))
 
 
 class DocumentProcessor:
-    """
-    A class that implements a Retrieval-Augmented Generation (RAG) system using Haystack and Pgvector.
-
-    This class provides functionality to set up and use a RAG system for question answering
-    tasks on a given corpus of text, currently from an EPUB file. It handles document
-    indexing, embedding, retrieval, and generation of responses using a language _model.
-
-    The system uses a Postgres database with the Pgvector extension for efficient
-    similarity search of embedded documents.
-
-    Public Methods:
-        draw_pipelines(): Visualize the RAG and document conversion pipelines.
-        generate_response(query: str): Generate a response to a given query.
-
-    Properties:
-        sentence_context_length: Get the context length of the sentence embedder.
-        sentence_embed_dims: Get the embedding dimensions of the sentence embedder.
-
-    The class handles initialization of the document store, embedding models,
-    and language models internally. It also manages the creation and execution
-    of the document processing and RAG pipelines.
-    """
     def __init__(self,
                  file_or_folder_path: str,
                  table_name: str = 'haystack_pgvector_docs',
@@ -73,21 +138,6 @@ class DocumentProcessor:
                  embedder_model_name: Optional[str] = None,
                  verbose: bool = False
                  ) -> None:
-        """
-        Initialize the HaystackPgvector instance.
-
-        Args:
-            table_name (str): Name of the table in the Pgvector database.
-            recreate_table (bool): Whether to recreate the database table.
-            file_or_folder_path (Optional[str]): Path to the EPUB file to be processed.
-            postgres_user_name (str): Username for Postgres database.
-            postgres_password (str): Password for Postgres database.
-            postgres_host (str): Host address for Postgres database.
-            postgres_port (int): Port number for Postgres database.
-            postgres_db_name (str): Name of the Postgres database.
-            embedder_model_name (Optional[str]): Name of the embedding _model to use.
-            min_section_size (int): Minimum size of a section to be considered for indexing.
-        """
 
         # Instance variables
         self._table_name: str = table_name
@@ -229,46 +279,6 @@ class DocumentProcessor:
             yield docs, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        def get_header_level(paragraph: Tag) -> int:
-            """Return the level of the header (1 for h1, 2 for h2, etc.), or 0 if not a header."""
-            # Check for direct header tag
-            if paragraph.name.startswith('h') and paragraph.name[1:].isdigit():
-                return int(paragraph.name[1:])  # Extract the level from 'hX' or 'hXY'
-
-            # Check for class name equivalent to header tags
-            if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
-                for cls in paragraph.attrs['class']:
-                    if cls.lower() == 'pre-title1':
-                        return 1  # Equivalent to h1
-                    if cls.lower().startswith('h') and cls[1:].isdigit():
-                        return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
-            return 0
-
-        def is_title(paragraph: Tag) -> bool:
-            # noinspection SpellCheckingInspection
-            keywords: List[str] = ['title', 'chtitle', 'tochead']
-
-            return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-                    any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
-                        for cls in paragraph.attrs['class'] for keyword in keywords))
-
-        def is_title_or_heading(paragraph: Tag) -> bool:
-            """Check if the paragraph is a title, heading, or chapter number."""
-            if paragraph is None:
-                return False
-
-            header_lvl: int = get_header_level(paragraph)
-            return is_title(paragraph) or header_lvl > 0 or is_chapter_number(paragraph)
-
-        def is_chapter_number(paragraph: Tag) -> bool:
-            # List of class names to check for chapter numbers
-            # noinspection SpellCheckingInspection
-            chapter_classes = ['chno', 'ch-num']
-            # noinspection SpellCheckingInspection
-            return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-                    any(cls in paragraph.attrs['class'] for cls in chapter_classes) and
-                    paragraph.text.isdigit())
-
         docs_list: List[ByteStream] = []
         meta_list: List[Dict[str, str]] = []
         included_sections: List[str] = []
@@ -276,21 +286,31 @@ class DocumentProcessor:
         self._print_verbose()
         self._print_verbose(f"Book Title: {book.title}")
         section_num: int = 1
+        book_meta_data: Dict[str, str] = {
+            "book_title": book.title,
+            "file_path": file_path
+        }
         i: int
-        for i, section in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
-            section_html: str = section.get_body_content().decode('utf-8')
+        for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
+            item_meta_data: Dict[str, str] = {
+                "item_num": str(section_num),
+                "item_id": item.id,
+            }
+            section_html: str = item.get_body_content().decode('utf-8')
             # print(section_html)
             section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
+            h1_tag_count: int = len(section_soup.find_all('h1'))
             # print()
             # print("HTML:")
             # print(section_soup)
             # print()
-            paragraphs: List[Any] = section_soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+            valid_tags: List[str] = ['p', 'ol', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
+            paragraphs: List[Tag] = section_soup.find_all(valid_tags)
             temp_docs: List[ByteStream] = []
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             combined_paragraph: str = ""
-            title: str = ""
+            chapter_title: str = ""
             chapter_number: int = 0
             para_num: int = 0
             page_number: str = ""
@@ -298,69 +318,71 @@ class DocumentProcessor:
             j: int
             combined_chars: int = 0
             for j, p in enumerate(paragraphs):
+                if p.find('p') or p.text.strip() == "":
+                    # Skip paragraph tags that contain other paragraph tags
+                    continue
+
                 updated: bool = False
+                # Grab next tag
                 next_p: Optional[Tag] = None
                 if j < len(paragraphs) - 1:
                     next_p = paragraphs[j + 1]
-                # prev_p: Optional[Tag] = None
-                # if j > 0:
-                #     prev_p = paragraphs[j - 1]
 
-                # Check if the paragraph contains an anchor with id starting with 'page_'
-                page_anchors = p.find_all('a', id=lambda x: x and x.startswith('page_'))
-                if page_anchors:
-                    # Extract the page number from the anchor tag id
-                    for anchor in page_anchors:
-                        page_id = anchor.get('id')
-                        page_number = page_id.split('_')[-1]
+                # Clean up of paragraph text
+                for br in p.find_all('br'):
+                    br.insert_after(' ')
 
-                header_level = get_header_level(p)
-                if header_level > 0:  # If it's a header
-                    if header_level == 1:
-                        for br in p.find_all('br'):
-                            br.insert_after(' ')
+                # If paragraph has a page number, update our page number
+                page_number = get_page_number(p) or page_number
 
-                    header_text = p.text.strip()
-
-                    if len(header_text) > 5:
-                        header_text = header_text.strip().title()
-
-                    # Remove any headers that are lower than the current one
-                    headers = {level: text for level, text in headers.items() if level < header_level}
-
-                    if header_text:
-                        headers[header_level] = header_text
+                # Check for title information
+                if is_title(p) or is_header1_title(p, h1_tag_count):
+                    if chapter_title == "":
+                        chapter_title = enhance_title(p.text)
+                    elif chapter_title != enhance_title(p.text):
+                        chapter_title += ": " + enhance_title(p.text)
                     updated = True
-
-                elif is_title(p):
-                    if title == "":
-                        title = p.text.strip().title()
-                    else:
-                        title += ": " + p.text.strip().title()
-                    # Replace 'S with 's after title casing
-                    title = title.replace("'S", "'s")
-                    title = title.replace("’S", "’s")
-                    updated = True
+                # Is it a chapter number tag?
                 elif is_chapter_number(p):
                     chapter_number = int(p.text.strip())
                     updated = True
-
-                if not updated and p.name != 'p':
-                    pass
-
-                if section.id == 'Chapter02':
-                    pass
+                elif get_header_level(p) > 0:  # If it's a header (that isn't an h1 being used as a title)
+                    header_level = get_header_level(p)
+                    header_text = enhance_title(p.text)
+                    # If header level is h5 or greater, treat it as a paragraph but still start a new section
+                    if header_level >= 6:
+                        # Transform the header tag to be a paragraph tag
+                        p.name = 'p'
+                    else:
+                        # Remove any headers that are lower than the current one (change of section)
+                        headers = {level: text for level, text in headers.items() if level < header_level}
+                        # Save off header info
+                        if header_text:
+                            headers[header_level] = header_text
+                        updated = True
 
                 # If we used the paragraph to fill in metadata, we don't want to include it in the text
                 if updated:
                     continue
+                # Set metadata
+                # Pick current title
+                chapter_title = (chapter_title or item.title)
+
+                if para_num == 87 and chapter_title == 'Knowledge and the Shaping of Reality: The Search for a Better World':
+                    pass
 
                 p_str: str = str(p)  # p.text.strip()
                 p_str_chars: int = len(p.text)
                 min_paragraph_size: int = self._min_paragraph_size
 
+                # Get top level header
+                top_header_level: int = 0
+                if headers:
+                    top_header_level = min(headers.keys())
+
                 # If headers are present, adjust the minimum paragraph size for notes
-                if headers and headers.get(1, '').lower() == "notes":
+                if ((chapter_title and chapter_title.lower() == "notes") or
+                        (headers and headers[top_header_level].lower() == "notes")):
                     # If we're in the notes section, we want to combine paragraphs into larger sections
                     # This is because the notes are often very short, and we want to keep them together
                     # And also so that they don't dominate a semantic search
@@ -371,14 +393,14 @@ class DocumentProcessor:
                 if combined_chars + p_str_chars < min_paragraph_size:
                     # However, if the next pargraph is a header, we want to start a new paragraph
                     # Unless the header came just after another header, in which case we want to combine them
-                    if is_title_or_heading(next_p) and not is_title_or_heading(p):
+                    if is_section_title(next_p) and not is_section_title(p):
                         # Next paragraph is a header (and the current isn't), so break the paragraph here
                         p_str = combined_paragraph + "\n" + p_str
                         p_str_chars += combined_chars
                         combined_paragraph = ""
                         combined_chars = 0
                     elif j == len(paragraphs) - 1:
-                        # If it's the last paragraph, then b
+                        # If it's the last paragraph, then process this paragraph
                         combined_paragraph += "\n" + p_str
                         combined_chars += p_str_chars
                         p_str = combined_paragraph
@@ -396,45 +418,48 @@ class DocumentProcessor:
                 total_text += p_str
                 p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
                 byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
-                meta_node: Dict[str, str] = {
-                    "section_num": str(section_num),
-                    "paragraph_num": str(para_num),
-                    "book_title": book.title,
-                    "section_id": section.id,
-                    "file_path": file_path
-                }
-                if title:
-                    meta_node["title"] = title
+                paragraph_meta_data: Dict[str, str] = {}
+                # Combine meta_node with book_meta_data and section_meta_data
+                paragraph_meta_data.update(book_meta_data)
+                paragraph_meta_data.update(item_meta_data)
+                paragraph_meta_data["paragraph_num"] = str(para_num)
+
+                # Page information
+                if page_number:
+                    paragraph_meta_data["page_number"] = str(page_number)
+
+                # Chapter information
+                if chapter_title:
+                    paragraph_meta_data["chapter_title"] = chapter_title
                 if chapter_number:
-                    meta_node["chapter_number"] = str(chapter_number)
+                    paragraph_meta_data["chapter_number"] = str(chapter_number)
 
                 # Include headers in the metadata
                 for level, text in headers.items():
-                    meta_node[f'header_{level}'] = text
-
-                if section.title:
-                    meta_node["section_title"] = section.title
-                if page_number:
-                    meta_node["page_number"] = str(page_number)
+                    if level == top_header_level:
+                        paragraph_meta_data["section_name"] = text
+                    else:
+                        paragraph_meta_data["subsection_name"] = paragraph_meta_data.get("subsection_name", "") + (
+                            ": " + text if "subsection_name" in paragraph_meta_data else text)
 
                 # self._print_verbose(meta_node)
                 temp_docs.append(byte_stream)
-                temp_meta.append(meta_node)
+                temp_meta.append(paragraph_meta_data)
 
             if (len(total_text) > self._min_section_size
-                    and section.id not in self._sections_to_skip.get(book.title, set())):
-                self._print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {section.title}. "
+                    and item.id not in self._sections_to_skip.get(book.title, set())):
+                self._print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {chapter_title}. "
                                     f"Length: {len(total_text)}")
                 docs_list.extend(temp_docs)
                 meta_list.extend(temp_meta)
-                included_sections.append(book.title + ", " + section.id)
+                included_sections.append(book.title + ", " + item.id)
                 section_num += 1
             else:
-                self._print_verbose(f"Book: {book.title}; Title: {section.title}. Length: {len(total_text)}. Skipped.")
+                self._print_verbose(f"Book: {book.title}; Title: {chapter_title}. Length: {len(total_text)}. Skipped.")
 
         self._print_verbose(f"Sections included:")
-        for section in included_sections:
-            self._print_verbose(section)
+        for item in included_sections:
+            self._print_verbose(item)
         self._print_verbose()
         return docs_list, meta_list
 
@@ -520,7 +545,10 @@ class DocumentProcessor:
         meta: List[Dict[str, str]]
 
         for source, meta in self._load_files():
-            self._print_verbose(f"Processing document: {meta[0]['book_title']}")
+            title: str = (meta[0].get('book_title', '') + " " +
+                          meta[0].get('chapter_title', '') + " " +
+                          meta[0].get('section_name', '')).strip()
+            self._print_verbose(f"Processing document: {title} ")
 
             # If needed, you can batch process here instead of processing one by one
             # Pass the source and meta to the document conversion pipeline
@@ -537,6 +565,7 @@ def main() -> None:
     # epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     # epub_file_path: str = "documents/Karl Popper - The Open Society and Its Enemies-Princeton University Press (2013).epub"  # noqa: E501
+    # epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
     epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
@@ -569,3 +598,15 @@ if __name__ == "__main__":
 # TODO: Get code to work with upgraded Haystack version
 # TODO: There has got to be a way to get actual page numbers from an EPUB file
 # TODO: Add PDF support (and maybe other document types)
+
+# Possible new approach:
+# iter1, iter2 = tee(section_soup.descendants)
+# next(iter2, None)
+#
+# for j, (p, next_p) in enumerate(zip(iter1, iter2)):
+#     if isinstance(p, Tag) and p.get_text(strip=True):
+#         if p.find(valid_tags):
+#             # This tag contains a paragraph, so skip it
+#             continue
+#     elif not isinstance(p, Tag):
+#         continue
