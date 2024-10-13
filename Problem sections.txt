@@ -1,70 +1,32 @@
-Section Num: 30
-Paragraph Num: 247
+No chapter title of "Notes"
+
 Book Title: The Open Society and Its Enemies (New One-Volume Edition)
-Section Id: notes1
-Header 2: NOTES TO CHAPTER SIX
+Item Num: 30
+Item Id: notes1
+Paragraph Num: 247
+Page Number: 572
+Section Name: Notes To Chapter Six
 Content:
 (2) For Aristotle’s elaboration of these ideas, cp. esp. his Politics, III, 9, 1, 1280a (see also 1282b–1284b and 1301b29), where he writes: ‘All men cling to justice of some kind, but their conceptions are imperfect, and do not embrace the whole Idea. For example, justice is thought (by democrats) to be equality; and so it is, although it is not equality for all, but only for equals. And justice is thought (by oligarchs) to be inequality; and so it is, although it is not inequality for all, but only for unequals.’ Cp. also Nichom. Eth., 1131b27, 1158b30 ff.
 
 
 
-Section Num: 3
-Paragraph Num: 87
-@@ -10317,141 +10402,203 @@ Book Title: Conjectures and Refutations
-Section Id: Ch010
-Header 1: 10 Truth, Rationality, And The Growth Of Scientific Knowledge
-Header 2: 3. Truth And Content: Verisimilitude Versus Probability
-Header 3: XI
-Header 5: 
-Page Number: 316
-Content:
-If we now work with the (perhaps fictitious) assumption that the content and truth-content of a theory a are in principle measurable, then we can go slightly beyond this definition and can define Vs(a), that is to say, a measure of the verisimilitude or truthlikeness of a. The simplest definition will be
 
-Section Num: 3
-Paragraph Num: 88
-Book Title: Conjectures and Refutations
-Section Id: Ch010
-Header 1: 10 Truth, Rationality, And The Growth Of Scientific Knowledge
-Header 2: 3. Truth And Content: Verisimilitude Versus Probability
-Header 3: XI
-Header 5: 
-Page Number: 317
-Content:
-where CtT(a) is a measure of the truth-content of a, and CtF(a) is a measure of the falsity-content of a. A slightly more complicated but in some respects preferable definition will be found in section 3 of the Addenda to the present volume.
-It is obvious that Vs(a) satisfies our two demands, according to which Vs(a) should increase
+This entry lacks a chapter title which should be either "10" or "The Open Society and Its Enemies" when I look at the EPUB itself
 
-
-
-
-Section Num: 13
-Paragraph Num: 147
+Book Title: The Open Society and Its Enemies (New One-Volume Edition)
+Item Num: 13
+Item Id: chapter10
 Paragraph Num: 150
-Book Title: The Open Society and Its Enemies (New One-Volume Edition)
-Section Id: chapter10
-Page Number: 211
-Header 3: Addenda
-Header 4: Iv (1965)
-Header 5: Added In 1961
 Page Number: 212
-Content:
-1 ‘A’ stands in this Addendum for the American editions of 1950 and 1956; ‘E’ for the present edition and for the English editions from 1932 on.
-2 Added in 1965. That the word ‘douleia’ in the passage in question (Republic 563d) bears this literal meaning (in addition to the figurative meaning which Professor Levinson correctly attributes to it) is confirmed by Shorey, the great Platonist and open enemy of democracy, whom Professor Levinson considers an authority on Plato’s text. (I can often agree with Shorey’s interpretation of Plato because he rarely tries to humanize or liberalize Plato’s text.) For in a footnote which Shorey attaches to the word ‘servitude’ (douleia) in his translation of Republic 563d, he refers to two parallel passages: Gorgias 491e, and Laws 890a. The first of these reads in W. R. M. Lamb’s translation (Loeb Edition): ‘For how can a man be happy if he is a slave to anybody at all?’ Here the phrase ‘to be a slave’ has, like the one in the Republic, not only the figurative meaning ‘to submit oneself’ but also the literal meaning; indeed, the whole point is the merging of the two meanings. The passage from the Laws 890a (an elaborate attack on certain Sophists of the Great Generation) reads in Bury’s translation (Loeb Edition) as follows: ‘these teachers [who corrupt the young men] attract them towards the life … “according to nature” which consists in being master over the rest, in reality [ale–theia], instead of being a slave to others, according to legal convention.’ Plato clearly alludes here among others to those Sophists (p. 70E = p. 70A and note 13 to chapter 5) who taught that men cannot be slaves ‘by nature’ or ‘in truth’, but only ‘by legal convention’ (by legal fiction). Thus Shorey connects the crucial passage of the Republic by this reference at least indirectly to the great classical discussion of the theory of slavery (‘slavery’ in the literal sense).
-
-Section Num: 13
-Paragraph Num: 148
-Paragraph Num: 151
-Book Title: The Open Society and Its Enemies (New One-Volume Edition)
-Section Id: chapter10
-Page Number: 211
-Header 3: Addenda
-Header 4: Iv (1965)
-Header 5: Added In 1961
-Page Number: 212
+Section Name: Addenda
+Subsection Name: IV (1965)
 Content:
 3 It is by no means the only instance, as may be seen from my chapter 8. The passage quoted in the text to note 2, for example (Rep., 389b), is a different instance from the passage (Rep., 460a) which Professor Levinson has in mind. There are several other passages. See Rep., 415d and especially Tim., 18e, which prove that Plato finds his instruction to lie of sufficient importance to be included in the very brief summary of the Republic. (See also Laws, 663d down to 664b.)
 
 
 
+Start here and continue working up
 
 
 
