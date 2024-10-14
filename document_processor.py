@@ -1,6 +1,4 @@
 # Pytorch imports
-from itertools import tee
-
 import torch
 # EPUB imports
 from bs4 import BeautifulSoup, Tag
@@ -36,6 +34,8 @@ from doc_content_checker import skip_content
 from custom_haystack_components import CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker
 import csv
 import re
+from copy import deepcopy
+from itertools import tee
 
 
 # Helper functions for processing EPUB or HTML content
@@ -56,12 +56,14 @@ def get_header_level(paragraph: Tag) -> Optional[int]:
     return None
 
 
-def is_title(paragraph: Tag) -> bool:
+def is_title(tag: Tag) -> bool:
+    # # A title isn't a header
     # noinspection SpellCheckingInspection
     keywords: List[str] = ['title', 'chtitle', 'tochead']
-    return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-            any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
-                for cls in paragraph.attrs['class'] for keyword in keywords))
+    is_a_title: bool = (hasattr(tag, 'attrs') and 'class' in tag.attrs and
+                        any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
+                            for cls in tag.attrs['class'] for keyword in keywords))
+    return is_a_title
 
 
 def is_header1_title(paragraph: Tag, h1_count: int) -> bool:
@@ -71,13 +73,13 @@ def is_header1_title(paragraph: Tag, h1_count: int) -> bool:
     return False
 
 
-def is_section_title(paragraph: Tag) -> bool:
-    """Check if the paragraph is a title, heading, or chapter number."""
-    if paragraph is None:
+def is_section_title(tag: Tag) -> bool:
+    """Check if the tag is a title, heading, or chapter number."""
+    if tag is None:
         return False
 
-    header_lvl: int = get_header_level(paragraph)
-    return is_title(paragraph) or header_lvl is not None or is_chapter_number(paragraph)
+    header_lvl: int = get_header_level(tag)
+    return is_title(tag) or header_lvl is not None or is_chapter_number(tag)
 
 
 def is_chapter_number(paragraph: Tag) -> bool:
@@ -131,13 +133,72 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
     # Unless it is a div tag. The Haystack HTML parse doesn't always handle those right, so
     # Dig one level deeper.
     if not tag.name == 'div' and tag.get_text(strip=True) and not tag.find(invalid_children):
-        yield tag
+        # Make a deep copy of the tag to avoid modifying the original
+        tag_copy: Tag = deepcopy(tag)
+        # Clean up of paragraph text
+        for br in tag_copy.find_all('br'):
+            br.insert_after(' ')
+        yield tag_copy
     else:
         # Recursively go through the children of the current tag
         for child in tag.children:
             if isinstance(child, Tag):
                 # Yield the child tags that meet the criteria
                 yield from recursive_yield_tags(child)
+
+
+def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
+    if not tags:
+        return "", 0, ""
+    # Get the chapter title from the tag
+    chapter_title: str = ""
+    # Search for the chapter title within the tags that come before the first paragraph tag (that isn't
+    # stylized to look like a header tag)
+    # Use is_title to check for a specific title tag
+    # If that fails you can use get_header_level to look for either an h1 or h2 tag but ONLY if that is the sole
+    # h1 or h2 tag in the whole section.
+    # There may be more than one title (like a subtitle) and you'll want to combine them via ": " separators.
+    # Use enhance_title to clean up the title text.
+    # Once you find your first paragraph that isn't a title or header, you can assume you've got the full title.
+
+    # Create iterator using recursive_yield_tags
+    top_tag = tags[0]
+    # Count h1 tags
+    # h1_tags: List[Tag] = top_tag.find_all('h1')
+    # Remove any h1 tags that have class 'ch_num'
+    h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
+    h1_tag_count: int = len(h1_tags)
+    h2_tag_count: int = len(top_tag.find_all('h2'))
+    chapter_number: int = 0
+    tags_to_delete: List[int] = []
+    first_page_number: str = ""
+    for i, tag in enumerate(tags):
+        first_page_number = get_page_number(tag) or first_page_number
+        if is_title(tag):
+            # This tag is used in the title, so we need to delete the tag from the list of tags
+            tags_to_delete.append(i)
+            title_text = enhance_title(tag.text)
+            if chapter_title:
+                chapter_title += ": " + title_text
+            else:
+                chapter_title = title_text
+        elif is_chapter_number(tag):
+            tags_to_delete.append(i)
+            chapter_number = int(tag.text.strip())
+        elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
+            tags_to_delete.append(i)
+            title_text = enhance_title(tag.text)
+            chapter_title = title_text
+        elif tag.name == 'p' and not is_chapter_number(tag):
+            # We allow a couple of paragraphs before the title for quotes and such
+            if chapter_title or i > 2:
+                break
+
+    # Delete the tags that were used in the title
+    for i in sorted(tags_to_delete, reverse=True):
+        del tags[i]
+
+    return chapter_title, chapter_number, first_page_number
 
 
 class DocumentProcessor:
@@ -310,14 +371,16 @@ class DocumentProcessor:
         }
         i: int
         for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
+            if item.id == 'Ch00' and book.title == "Conjectures and Refutations":
+                pass
             item_meta_data: Dict[str, str] = {
                 "item_num": str(section_num),
                 "item_id": item.id,
             }
-            section_html: str = item.get_body_content().decode('utf-8')
+            item_html: str = item.get_body_content().decode('utf-8')
             # print(section_html)
-            section_soup: BeautifulSoup = BeautifulSoup(section_html, 'html.parser')
-            h1_tag_count: int = len(section_soup.find_all('h1'))
+            item_soup: BeautifulSoup = BeautifulSoup(item_html, 'html.parser')
+            h1_tag_count: int = len(item_soup.find_all('h1'))
             # print()
             # print("HTML:")
             # print(section_soup)
@@ -326,48 +389,35 @@ class DocumentProcessor:
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             combined_paragraph: str = ""
-            chapter_title: str = ""
-            chapter_number: int = 0
             para_num: int = 0
-            page_number: str = ""
+            page_number: str
             headers: Dict[int, str] = {}  # Track headers by level
             j: int
             combined_chars: int = 0
-            # Setup iterators
-            tags = recursive_yield_tags(section_soup)
-            iter1, iter2 = tee(tags)
+            chapter_title: str = ""
+            new_chapter_title: str
+            # convert item_soup to a list of tags using recursive_yield_tags
+            tags: List[Tag] = list(recursive_yield_tags(item_soup))
+            h1_tags: List[Tag] = item_soup.find_all('h1')
+            new_chapter_title, chapter_number, page_number = get_chapter_info(tags, h1_tags)
             # Advance iter2 to be one ahead of iter1
-            next(iter2, None)
-            for j, tag in enumerate(iter1):
+            for j, tag in enumerate(tags):
 
-                if item.id == 'Ch07' and para_num == 336:
+                if item.id == 'notes1' and para_num == 0:
                     pass
 
-                try:
-                    next_tag = next(iter2)
-                except StopIteration:
-                    next_tag = None  # This handles the final tag case
-
-                updated: bool = False
-
-                # Clean up of paragraph text
-                for br in tag.find_all('br'):
-                    br.insert_after(' ')
+                prev_tag: Tag = tags[j - 1] if j > 0 else None
+                next_tag: Tag = tags[j + 1] if j < len(tags) - 1 else None
 
                 # If paragraph has a page number, update our page number
                 page_number = get_page_number(tag) or page_number
 
                 # Check for title information
                 if is_title(tag) or is_header1_title(tag, h1_tag_count):
-                    if chapter_title == "":
-                        chapter_title = enhance_title(tag.text)
-                    elif chapter_title != enhance_title(tag.text):
-                        chapter_title += ": " + enhance_title(tag.text)
-                    updated = True
+                    continue
                 # Is it a chapter number tag?
                 elif is_chapter_number(tag):
-                    chapter_number = int(tag.text.strip())
-                    updated = True
+                    continue
                 elif get_header_level(tag) is not None:  # If it's a header (that isn't a h1 being used as a title)
                     header_level = get_header_level(tag)
                     header_text = enhance_title(tag.text)
@@ -381,14 +431,18 @@ class DocumentProcessor:
                         # Save off header info
                         if header_text:
                             headers[header_level] = header_text
-                        updated = True
+                        continue
 
-                # If we used the paragraph to fill in metadata, we don't want to include it in the text
-                if updated:
-                    continue
                 # Set metadata
                 # Pick current title
-                chapter_title = (chapter_title or item.title)
+                # chapter_title = (chapter_title or item.title)
+                chapter_title = new_chapter_title or item.title
+
+                if chapter_title != new_chapter_title:
+                    pass
+                elif chapter_title == new_chapter_title and chapter_title != "":
+                    pass
+
                 # If we have no chapter title, check if there is a 0 level header
                 if not chapter_title and headers and 0 in headers:
                     chapter_title = headers[0]
@@ -588,6 +642,7 @@ def main() -> None:
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     # epub_file_path: str = "documents/Karl Popper - The Open Society and Its Enemies-Princeton University Press (2013).epub"  # noqa: E501
     # epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
+    # epub_file_path: str = "documents/Karl Popper - The Poverty of Historicism-Routledge (2002).epub"
     epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
