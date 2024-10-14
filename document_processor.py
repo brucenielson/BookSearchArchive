@@ -180,6 +180,7 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
             title_text = enhance_title(tag.text)
             chapter_title = title_text
         elif tag.name == 'p' and not is_chapter_number(tag):
+            # We allow a couple of paragraphs before the title for quotes and such
             if i > 2:
                 break
 
@@ -397,22 +398,16 @@ class DocumentProcessor:
                 except StopIteration:
                     next_tag = None  # This handles the final tag case
 
-                updated: bool = False
-
                 # If paragraph has a page number, update our page number
                 page_number = get_page_number(tag) or page_number
 
                 # Check for title information
                 if is_title(tag) or is_header1_title(tag, h1_tag_count):
-                    if chapter_title == "":
-                        chapter_title = enhance_title(tag.text)
-                    elif chapter_title != enhance_title(tag.text):
-                        chapter_title += ": " + enhance_title(tag.text)
-                    updated = True
+                    continue
                 # Is it a chapter number tag?
                 elif is_chapter_number(tag):
                     chapter_number = int(tag.text.strip())
-                    updated = True
+                    continue
                 elif get_header_level(tag) is not None:  # If it's a header (that isn't a h1 being used as a title)
                     header_level = get_header_level(tag)
                     header_text = enhance_title(tag.text)
@@ -426,11 +421,8 @@ class DocumentProcessor:
                         # Save off header info
                         if header_text:
                             headers[header_level] = header_text
-                        updated = True
+                        continue
 
-                # If we used the paragraph to fill in metadata, we don't want to include it in the text
-                if updated:
-                    continue
                 # Set metadata
                 # Pick current title
                 # chapter_title = (chapter_title or item.title)
