@@ -147,7 +147,7 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
                 yield from recursive_yield_tags(child)
 
 
-def get_chapter_title(top_tag: BeautifulSoup) -> str:
+def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int]:
     # Get the chapter title from the tag
     chapter_title: str = ""
     # Search for the chapter title within the tags that come before the first paragraph tag (that isn't
@@ -167,6 +167,7 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
     h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
     h1_tag_count: int = len(h1_tags)
     h2_tag_count: int = len(top_tag.find_all('h2'))
+    chapter_number: int = 0
     for i, tag in enumerate(tags_iter):
         if is_title(tag):
             title_text = enhance_title(tag.text)
@@ -175,6 +176,7 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
             else:
                 chapter_title = title_text
         elif is_chapter_number(tag):
+            chapter_number = int(tag.text.strip())
             continue
         elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
             title_text = enhance_title(tag.text)
@@ -184,7 +186,7 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
             if i > 2:
                 break
 
-    return chapter_title
+    return chapter_title, chapter_number
 
 
 class DocumentProcessor:
@@ -368,7 +370,9 @@ class DocumentProcessor:
             item_soup: BeautifulSoup = BeautifulSoup(item_html, 'html.parser')
             h1_tag_count: int = len(item_soup.find_all('h1'))
             chapter_title: str = ""
-            new_chapter_title: str = get_chapter_title(item_soup)
+            new_chapter_title: str
+            chapter_number: int = 0
+            new_chapter_title, chapter_number = get_chapter_info(item_soup)
             # print()
             # print("HTML:")
             # print(section_soup)
@@ -377,7 +381,6 @@ class DocumentProcessor:
             temp_meta: List[Dict[str, str]] = []
             total_text: str = ""
             combined_paragraph: str = ""
-            chapter_number: int = 0
             para_num: int = 0
             page_number: str = ""
             headers: Dict[int, str] = {}  # Track headers by level
@@ -406,7 +409,6 @@ class DocumentProcessor:
                     continue
                 # Is it a chapter number tag?
                 elif is_chapter_number(tag):
-                    chapter_number = int(tag.text.strip())
                     continue
                 elif get_header_level(tag) is not None:  # If it's a header (that isn't a h1 being used as a title)
                     header_level = get_header_level(tag)
