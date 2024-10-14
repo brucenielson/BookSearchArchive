@@ -162,13 +162,12 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
     # Create iterator using recursive_yield_tags
     tags = recursive_yield_tags(top_tag)
     # Count h1 tags
-    h1_tag_count: int = len(top_tag.find_all('h1'))
     h1_tags: List[Tag] = top_tag.find_all('h1')
     # Remove any h1 tags that have class 'ch_num'
     h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
     h1_tag_count: int = len(h1_tags)
     h2_tag_count: int = len(top_tag.find_all('h2'))
-    for tag in tags:
+    for i, tag in enumerate(tags):
         if is_title(tag):
             title_text = enhance_title(tag.text)
             if chapter_title:
@@ -179,12 +178,10 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
             continue
         elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
             title_text = enhance_title(tag.text)
-            if chapter_title:
-                chapter_title += ": " + title_text
-            else:
-                chapter_title = title_text
+            chapter_title = title_text
         elif tag.name == 'p' and not is_chapter_number(tag):
-            break
+            if i > 2:
+                break
 
     return chapter_title
 
@@ -437,7 +434,7 @@ class DocumentProcessor:
                 # Set metadata
                 # Pick current title
                 # chapter_title = (chapter_title or item.title)
-                chapter_title = new_chapter_title or item.title or chapter_title
+                chapter_title = new_chapter_title or item.title
 
                 if chapter_title != new_chapter_title:
                     pass
