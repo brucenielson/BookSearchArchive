@@ -147,7 +147,7 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
                 yield from recursive_yield_tags(child)
 
 
-def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int]:
+def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int, Optional[Iterator[Tag]]]:
     # Get the chapter title from the tag
     chapter_title: str = ""
     # Search for the chapter title within the tags that come before the first paragraph tag (that isn't
@@ -161,6 +161,7 @@ def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int]:
 
     # Create iterator using recursive_yield_tags
     tags_iter: Iterator[Tag] = recursive_yield_tags(top_tag)
+    save_iter: Iterator[Tag] = None
     # Count h1 tags
     h1_tags: List[Tag] = top_tag.find_all('h1')
     # Remove any h1 tags that have class 'ch_num'
@@ -170,15 +171,18 @@ def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int]:
     chapter_number: int = 0
     for i, tag in enumerate(tags_iter):
         if is_title(tag):
+            save_iter, tags_iter = tee(tags_iter)
             title_text = enhance_title(tag.text)
             if chapter_title:
                 chapter_title += ": " + title_text
             else:
                 chapter_title = title_text
         elif is_chapter_number(tag):
+            save_iter, tags_iter = tee(tags_iter)
             chapter_number = int(tag.text.strip())
             continue
         elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
+            save_iter, tags_iter = tee(tags_iter)
             title_text = enhance_title(tag.text)
             chapter_title = title_text
         elif tag.name == 'p' and not is_chapter_number(tag):
@@ -186,7 +190,7 @@ def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int]:
             if i > 2:
                 break
 
-    return chapter_title, chapter_number
+    return chapter_title, chapter_number, save_iter
 
 
 class DocumentProcessor:
@@ -372,7 +376,8 @@ class DocumentProcessor:
             chapter_title: str = ""
             new_chapter_title: str
             chapter_number: int = 0
-            new_chapter_title, chapter_number = get_chapter_info(item_soup)
+            save_iter: Iterator[Tag]
+            new_chapter_title, chapter_number, save_iter = get_chapter_info(item_soup)
             # print()
             # print("HTML:")
             # print(section_soup)
