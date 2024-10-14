@@ -155,7 +155,7 @@ def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int, Optional[Iterato
     # Use is_title to check for a specific title tag
     # If that fails you can use get_header_level to look for either an h1 or h2 tag but ONLY if that is the sole
     # h1 or h2 tag in the whole section.
-    # There may be more than one title (like a subtible) and you'll want to combine them via ": " separators.
+    # There may be more than one title (like a subtitle) and you'll want to combine them via ": " separators.
     # Use enhance_title to clean up the title text.
     # Once you find your first paragraph that isn't a title or header, you can assume you've got the full title.
 
@@ -169,26 +169,25 @@ def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int, Optional[Iterato
     h1_tag_count: int = len(h1_tags)
     h2_tag_count: int = len(top_tag.find_all('h2'))
     chapter_number: int = 0
+    save_iter, tags_iter = tee(tags_iter)
     for i, tag in enumerate(tags_iter):
         if is_title(tag):
-            save_iter, tags_iter = tee(tags_iter)
             title_text = enhance_title(tag.text)
             if chapter_title:
                 chapter_title += ": " + title_text
             else:
                 chapter_title = title_text
         elif is_chapter_number(tag):
-            save_iter, tags_iter = tee(tags_iter)
             chapter_number = int(tag.text.strip())
-            continue
         elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
-            save_iter, tags_iter = tee(tags_iter)
             title_text = enhance_title(tag.text)
             chapter_title = title_text
         elif tag.name == 'p' and not is_chapter_number(tag):
             # We allow a couple of paragraphs before the title for quotes and such
-            if i > 2:
+            if chapter_title or i > 2:
                 break
+
+        next(save_iter)
 
     return chapter_title, chapter_number, save_iter
 
@@ -373,11 +372,6 @@ class DocumentProcessor:
             # print(section_html)
             item_soup: BeautifulSoup = BeautifulSoup(item_html, 'html.parser')
             h1_tag_count: int = len(item_soup.find_all('h1'))
-            chapter_title: str = ""
-            new_chapter_title: str
-            chapter_number: int = 0
-            save_iter: Iterator[Tag]
-            new_chapter_title, chapter_number, save_iter = get_chapter_info(item_soup)
             # print()
             # print("HTML:")
             # print(section_soup)
@@ -391,9 +385,17 @@ class DocumentProcessor:
             headers: Dict[int, str] = {}  # Track headers by level
             j: int
             combined_chars: int = 0
+            chapter_title: str = ""
+            new_chapter_title: str
+            save_iter: Iterator[Tag]
+            tags_iter: Iterator[Tag]
+            new_chapter_title, chapter_number, save_iter = get_chapter_info(item_soup)
             # Setup iterators
-            tags = recursive_yield_tags(item_soup)
-            iter1, iter2 = tee(tags)
+            if save_iter is None:
+                tags_iter = recursive_yield_tags(item_soup)
+            else:
+                tags_iter = save_iter
+            iter1, iter2 = tee(tags_iter)
             # Advance iter2 to be one ahead of iter1
             next(iter2, None)
             for j, tag in enumerate(iter1):
