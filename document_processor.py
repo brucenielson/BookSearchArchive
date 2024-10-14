@@ -56,16 +56,14 @@ def get_header_level(paragraph: Tag) -> Optional[int]:
     return None
 
 
-def is_title(paragraph: Tag) -> bool:
+def is_title(tag: Tag) -> bool:
     # # A title isn't a header
-    # headers: List[str] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
-    # if paragraph.name in headers:
-    #     return False
     # noinspection SpellCheckingInspection
     keywords: List[str] = ['title', 'chtitle', 'tochead']
-    return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-            any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
-                for cls in paragraph.attrs['class'] for keyword in keywords))
+    is_a_title: bool = (hasattr(tag, 'attrs') and 'class' in tag.attrs and
+                        any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
+                            for cls in tag.attrs['class'] for keyword in keywords))
+    return is_a_title
 
 
 def is_header1_title(paragraph: Tag, h1_count: int) -> bool:
@@ -75,13 +73,13 @@ def is_header1_title(paragraph: Tag, h1_count: int) -> bool:
     return False
 
 
-def is_section_title(paragraph: Tag) -> bool:
-    """Check if the paragraph is a title, heading, or chapter number."""
-    if paragraph is None:
+def is_section_title(tag: Tag) -> bool:
+    """Check if the tag is a title, heading, or chapter number."""
+    if tag is None:
         return False
 
-    header_lvl: int = get_header_level(paragraph)
-    return is_title(paragraph) or header_lvl is not None or is_chapter_number(paragraph)
+    header_lvl: int = get_header_level(tag)
+    return is_title(tag) or header_lvl is not None or is_chapter_number(tag)
 
 
 def is_chapter_number(paragraph: Tag) -> bool:
@@ -165,6 +163,10 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
     tags = recursive_yield_tags(top_tag)
     # Count h1 tags
     h1_tag_count: int = len(top_tag.find_all('h1'))
+    h1_tags: List[Tag] = top_tag.find_all('h1')
+    # Remove any h1 tags that have class 'ch_num'
+    h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
+    h1_tag_count: int = len(h1_tags)
     h2_tag_count: int = len(top_tag.find_all('h2'))
     for tag in tags:
         if is_title(tag):
@@ -173,8 +175,14 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
                 chapter_title += ": " + title_text
             else:
                 chapter_title = title_text
-        elif not chapter_title and get_header_level(tag) == 1 and h1_tag_count == 1:
-            chapter_title = enhance_title(tag.text)
+        elif is_chapter_number(tag):
+            continue
+        elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
+            title_text = enhance_title(tag.text)
+            if chapter_title:
+                chapter_title += ": " + title_text
+            else:
+                chapter_title = title_text
         elif tag.name == 'p' and not is_chapter_number(tag):
             break
 
@@ -351,7 +359,7 @@ class DocumentProcessor:
         }
         i: int
         for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
-            if i == 3 and book.title == "The World of Parmenides":
+            if i == 9 and book.title == "The Poverty of Historicism":
                 pass
             item_meta_data: Dict[str, str] = {
                 "item_num": str(section_num),
@@ -428,7 +436,8 @@ class DocumentProcessor:
                     continue
                 # Set metadata
                 # Pick current title
-                chapter_title = (chapter_title or item.title)
+                # chapter_title = (chapter_title or item.title)
+                chapter_title = new_chapter_title or item.title or chapter_title
 
                 if chapter_title != new_chapter_title:
                     pass
@@ -634,6 +643,7 @@ def main() -> None:
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     # epub_file_path: str = "documents/Karl Popper - The Open Society and Its Enemies-Princeton University Press (2013).epub"  # noqa: E501
     # epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
+    # epub_file_path: str = "documents/Karl Popper - The Poverty of Historicism-Routledge (2002).epub"
     epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
