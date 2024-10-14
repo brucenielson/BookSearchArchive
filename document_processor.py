@@ -161,7 +161,7 @@ def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int, Optional[Iterato
 
     # Create iterator using recursive_yield_tags
     tags_iter: Iterator[Tag] = recursive_yield_tags(top_tag)
-    save_iter: Iterator[Tag] = None
+    save_iter: Optional[Iterator[Tag]] = None
     # Count h1 tags
     h1_tags: List[Tag] = top_tag.find_all('h1')
     # Remove any h1 tags that have class 'ch_num'
