@@ -160,7 +160,7 @@ def get_chapter_title(top_tag: BeautifulSoup) -> str:
     # Once you find your first paragraph that isn't a title or header, you can assume you've got the full title.
 
     # Create iterator using recursive_yield_tags
-    tags_iter = recursive_yield_tags(top_tag)
+    tags_iter: Iterator[Tag] = recursive_yield_tags(top_tag)
     # Count h1 tags
     h1_tags: List[Tag] = top_tag.find_all('h1')
     # Remove any h1 tags that have class 'ch_num'
