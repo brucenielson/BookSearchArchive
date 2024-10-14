@@ -147,7 +147,9 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
                 yield from recursive_yield_tags(child)
 
 
-def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int, Optional[Iterator[Tag]]]:
+def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
+    if not tags:
+        return "", 0, ""
     # Get the chapter title from the tag
     chapter_title: str = ""
     # Search for the chapter title within the tags that come before the first paragraph tag (that isn't
@@ -160,26 +162,31 @@ def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int, Optional[Iterato
     # Once you find your first paragraph that isn't a title or header, you can assume you've got the full title.
 
     # Create iterator using recursive_yield_tags
-    tags_iter: Iterator[Tag] = recursive_yield_tags(top_tag)
-    save_iter: Optional[Iterator[Tag]] = None
+    top_tag = tags[0]
     # Count h1 tags
-    h1_tags: List[Tag] = top_tag.find_all('h1')
+    # h1_tags: List[Tag] = top_tag.find_all('h1')
     # Remove any h1 tags that have class 'ch_num'
     h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
     h1_tag_count: int = len(h1_tags)
     h2_tag_count: int = len(top_tag.find_all('h2'))
     chapter_number: int = 0
-    save_iter, tags_iter = tee(tags_iter)
-    for i, tag in enumerate(tags_iter):
+    tags_to_delete: List[int] = []
+    first_page_number: str = ""
+    for i, tag in enumerate(tags):
+        first_page_number = get_page_number(tag) or first_page_number
         if is_title(tag):
+            # This tag is used in the title, so we need to delete the tag from the list of tags
+            tags_to_delete.append(i)
             title_text = enhance_title(tag.text)
             if chapter_title:
                 chapter_title += ": " + title_text
             else:
                 chapter_title = title_text
         elif is_chapter_number(tag):
+            tags_to_delete.append(i)
             chapter_number = int(tag.text.strip())
         elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
+            tags_to_delete.append(i)
             title_text = enhance_title(tag.text)
             chapter_title = title_text
         elif tag.name == 'p' and not is_chapter_number(tag):
@@ -187,9 +194,11 @@ def get_chapter_info(top_tag: BeautifulSoup) -> Tuple[str, int, Optional[Iterato
             if chapter_title or i > 2:
                 break
 
-        next(save_iter)
+    # Delete the tags that were used in the title
+    for i in sorted(tags_to_delete, reverse=True):
+        del tags[i]
 
-    return chapter_title, chapter_number, save_iter
+    return chapter_title, chapter_number, first_page_number
 
 
 class DocumentProcessor:
@@ -362,7 +371,7 @@ class DocumentProcessor:
         }
         i: int
         for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
-            if i == 9 and book.title == "The Poverty of Historicism":
+            if item.id == 'Ch00' and book.title == "Conjectures and Refutations":
                 pass
             item_meta_data: Dict[str, str] = {
                 "item_num": str(section_num),
@@ -381,32 +390,24 @@ class DocumentProcessor:
             total_text: str = ""
             combined_paragraph: str = ""
             para_num: int = 0
-            page_number: str = ""
+            page_number: str
             headers: Dict[int, str] = {}  # Track headers by level
             j: int
             combined_chars: int = 0
             chapter_title: str = ""
             new_chapter_title: str
-            save_iter: Iterator[Tag]
-            tags_iter: Iterator[Tag]
-            new_chapter_title, chapter_number, save_iter = get_chapter_info(item_soup)
-            # Setup iterators
-            if save_iter is None:
-                tags_iter = recursive_yield_tags(item_soup)
-            else:
-                tags_iter = save_iter
-            iter1, iter2 = tee(tags_iter)
+            # convert item_soup to a list of tags using recursive_yield_tags
+            tags: List[Tag] = list(recursive_yield_tags(item_soup))
+            h1_tags: List[Tag] = item_soup.find_all('h1')
+            new_chapter_title, chapter_number, page_number = get_chapter_info(tags, h1_tags)
             # Advance iter2 to be one ahead of iter1
-            next(iter2, None)
-            for j, tag in enumerate(iter1):
+            for j, tag in enumerate(tags):
 
                 if item.id == 'notes1' and para_num == 0:
                     pass
 
-                try:
-                    next_tag = next(iter2)
-                except StopIteration:
-                    next_tag = None  # This handles the final tag case
+                prev_tag: Tag = tags[j - 1] if j > 0 else None
+                next_tag: Tag = tags[j + 1] if j < len(tags) - 1 else None
 
                 # If paragraph has a page number, update our page number
                 page_number = get_page_number(tag) or page_number
