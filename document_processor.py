@@ -36,6 +36,7 @@ import csv
 import re
 from copy import deepcopy
 from itertools import tee
+from html_parser import HTMLParser
 
 
 # Helper functions for processing EPUB or HTML content
@@ -370,6 +371,7 @@ class DocumentProcessor:
             "file_path": file_path
         }
         i: int
+        item: epub.EpubHtml
         for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
             if item.id == 'Ch00' and book.title == "Conjectures and Refutations":
                 pass
@@ -377,166 +379,173 @@ class DocumentProcessor:
                 "item_num": str(section_num),
                 "item_id": item.id,
             }
+            book_meta_data.update(item_meta_data)
             item_html: str = item.get_body_content().decode('utf-8')
-            # print(section_html)
-            item_soup: BeautifulSoup = BeautifulSoup(item_html, 'html.parser')
-            h1_tag_count: int = len(item_soup.find_all('h1'))
-            # print()
-            # print("HTML:")
-            # print(section_soup)
-            # print()
-            temp_docs: List[ByteStream] = []
-            temp_meta: List[Dict[str, str]] = []
-            total_text: str = ""
-            combined_paragraph: str = ""
-            para_num: int = 0
-            page_number: str
-            headers: Dict[int, str] = {}  # Track headers by level
-            j: int
-            combined_chars: int = 0
-            chapter_title: str = ""
-            new_chapter_title: str
-            # convert item_soup to a list of tags using recursive_yield_tags
-            tags: List[Tag] = list(recursive_yield_tags(item_soup))
-            h1_tags: List[Tag] = item_soup.find_all('h1')
-            new_chapter_title, chapter_number, page_number = get_chapter_info(tags, h1_tags)
-            # Advance iter2 to be one ahead of iter1
-            for j, tag in enumerate(tags):
+            parser = HTMLParser(item_html, book_meta_data)
+            temp_docs: List[ByteStream]
+            temp_meta: List[Dict[str, str]]
+            temp_docs, temp_meta = parser.parse_metadata()
 
-                if item.id == 'notes1' and para_num == 0:
-                    pass
+            # # print(section_html)
+            # item_soup: BeautifulSoup = BeautifulSoup(item_html, 'html.parser')
+            # h1_tag_count: int = len(item_soup.find_all('h1'))
+            # # print()
+            # # print("HTML:")
+            # # print(section_soup)
+            # # print()
+            # total_text: str = ""
+            # combined_paragraph: str = ""
+            # para_num: int = 0
+            # page_number: str
+            # headers: Dict[int, str] = {}  # Track headers by level
+            # j: int
+            # combined_chars: int = 0
+            # chapter_title: str = ""
+            # new_chapter_title: str
+            # # convert item_soup to a list of tags using recursive_yield_tags
+            # tags: List[Tag] = list(recursive_yield_tags(item_soup))
+            # h1_tags: List[Tag] = item_soup.find_all('h1')
+            # new_chapter_title, chapter_number, page_number = get_chapter_info(tags, h1_tags)
+            # # Advance iter2 to be one ahead of iter1
+            # for j, tag in enumerate(tags):
+            #
+            #     if item.id == 'notes1' and para_num == 0:
+            #         pass
+            #
+            #     prev_tag: Tag = tags[j - 1] if j > 0 else None
+            #     next_tag: Tag = tags[j + 1] if j < len(tags) - 1 else None
+            #
+            #     # If paragraph has a page number, update our page number
+            #     page_number = get_page_number(tag) or page_number
+            #
+            #     # Check for title information
+            #     if is_title(tag) or is_header1_title(tag, h1_tag_count):
+            #         continue
+            #     # Is it a chapter number tag?
+            #     elif is_chapter_number(tag):
+            #         continue
+            #     elif get_header_level(tag) is not None:  # If it's a header (that isn't a h1 being used as a title)
+            #         header_level = get_header_level(tag)
+            #         header_text = enhance_title(tag.text)
+            #         # If header level is h5 or greater, treat it as a paragraph but still start a new section
+            #         if header_level >= 6:
+            #             # Transform the header tag to be a paragraph tag
+            #             tag.name = 'p'
+            #         else:
+            #             # Remove any headers that are lower than the current one (change of section)
+            #             headers = {level: text for level, text in headers.items() if level < header_level}
+            #             # Save off header info
+            #             if header_text:
+            #                 headers[header_level] = header_text
+            #             continue
+            #
+            #     # Set metadata
+            #     # Pick current title
+            #     # chapter_title = (chapter_title or item.title)
+            #     chapter_title = new_chapter_title or item.title
+            #
+            #     if chapter_title != new_chapter_title:
+            #         pass
+            #     elif chapter_title == new_chapter_title and chapter_title != "":
+            #         pass
+            #
+            #     # If we have no chapter title, check if there is a 0 level header
+            #     if not chapter_title and headers and 0 in headers:
+            #         chapter_title = headers[0]
+            #
+            #     p_str: str = str(tag)  # p.text.strip()
+            #     p_str_chars: int = len(tag.text)
+            #     min_paragraph_size: int = self._min_paragraph_size
+            #
+            #     # Get top level header
+            #     top_header_level: int = 0
+            #     if headers:
+            #         top_header_level = min(headers.keys())
+            #
+            #     # If headers are present, adjust the minimum paragraph size for notes
+            #     if ((chapter_title and chapter_title.lower() == "notes") or
+            #             (headers and headers[top_header_level].lower() == "notes")):
+            #         # If we're in the notes section, we want to combine paragraphs into larger sections
+            #         # This is because the notes are often very short, and we want to keep them together
+            #         # And also so that they don't dominate a semantic search
+            #         # We could just drop notes, but often they contain useful information
+            #         min_paragraph_size = self._min_paragraph_size * 2
+            #
+            #     # If the combined paragraph is less than the minimum size combine it with the next paragraph
+            #     if combined_chars + p_str_chars < min_paragraph_size:
+            #         # However, if the next pargraph is a header, we want to start a new paragraph
+            #         # Unless the header came just after another header, in which case we want to combine them
+            #         if is_section_title(next_tag) and not is_section_title(tag):
+            #             # Next paragraph is a header (and the current isn't), so break the paragraph here
+            #             p_str = combined_paragraph + "\n" + p_str
+            #             p_str_chars += combined_chars
+            #             combined_paragraph = ""
+            #             combined_chars = 0
+            #         elif next_tag is None:
+            #             # If it's the last paragraph, then process this paragraph
+            #             combined_paragraph += "\n" + p_str
+            #             combined_chars += p_str_chars
+            #             p_str = combined_paragraph
+            #         else:
+            #             # Combine this paragraph with the previous ones
+            #             combined_paragraph += "\n" + p_str
+            #             combined_chars += p_str_chars
+            #             continue
+            #     else:
+            #         p_str = combined_paragraph + "\n" + p_str
+            #         p_str_chars += combined_chars
+            #         combined_paragraph = ""
+            #         combined_chars = 0
+            #     para_num += 1
+            #     total_text += p_str
+            #     p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
+            #     byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
+            #     paragraph_meta_data: Dict[str, str] = {}
+            #     # Combine meta_node with book_meta_data and section_meta_data
+            #     paragraph_meta_data.update(book_meta_data)
+            #     paragraph_meta_data.update(item_meta_data)
+            #     paragraph_meta_data["paragraph_num"] = str(para_num)
+            #
+            #     # Page information
+            #     if page_number:
+            #         paragraph_meta_data["page_number"] = str(page_number)
+            #
+            #     # Chapter information
+            #     if chapter_title:
+            #         paragraph_meta_data["chapter_title"] = chapter_title
+            #     if chapter_number:
+            #         paragraph_meta_data["chapter_number"] = str(chapter_number)
+            #
+            #     # Include headers in the metadata
+            #     for level, text in headers.items():
+            #         if level == top_header_level:
+            #             paragraph_meta_data["section_name"] = text
+            #         else:
+            #             paragraph_meta_data["subsection_name"] = paragraph_meta_data.get("subsection_name", "") + (
+            #                 ": " + text if "subsection_name" in paragraph_meta_data else text)
+            #
+            #     # self._print_verbose(meta_node)
+            #     temp_docs.append(byte_stream)
+            #     temp_meta.append(paragraph_meta_data)
 
-                prev_tag: Tag = tags[j - 1] if j > 0 else None
-                next_tag: Tag = tags[j + 1] if j < len(tags) - 1 else None
-
-                # If paragraph has a page number, update our page number
-                page_number = get_page_number(tag) or page_number
-
-                # Check for title information
-                if is_title(tag) or is_header1_title(tag, h1_tag_count):
-                    continue
-                # Is it a chapter number tag?
-                elif is_chapter_number(tag):
-                    continue
-                elif get_header_level(tag) is not None:  # If it's a header (that isn't a h1 being used as a title)
-                    header_level = get_header_level(tag)
-                    header_text = enhance_title(tag.text)
-                    # If header level is h5 or greater, treat it as a paragraph but still start a new section
-                    if header_level >= 6:
-                        # Transform the header tag to be a paragraph tag
-                        tag.name = 'p'
-                    else:
-                        # Remove any headers that are lower than the current one (change of section)
-                        headers = {level: text for level, text in headers.items() if level < header_level}
-                        # Save off header info
-                        if header_text:
-                            headers[header_level] = header_text
-                        continue
-
-                # Set metadata
-                # Pick current title
-                # chapter_title = (chapter_title or item.title)
-                chapter_title = new_chapter_title or item.title
-
-                if chapter_title != new_chapter_title:
-                    pass
-                elif chapter_title == new_chapter_title and chapter_title != "":
-                    pass
-
-                # If we have no chapter title, check if there is a 0 level header
-                if not chapter_title and headers and 0 in headers:
-                    chapter_title = headers[0]
-
-                p_str: str = str(tag)  # p.text.strip()
-                p_str_chars: int = len(tag.text)
-                min_paragraph_size: int = self._min_paragraph_size
-
-                # Get top level header
-                top_header_level: int = 0
-                if headers:
-                    top_header_level = min(headers.keys())
-
-                # If headers are present, adjust the minimum paragraph size for notes
-                if ((chapter_title and chapter_title.lower() == "notes") or
-                        (headers and headers[top_header_level].lower() == "notes")):
-                    # If we're in the notes section, we want to combine paragraphs into larger sections
-                    # This is because the notes are often very short, and we want to keep them together
-                    # And also so that they don't dominate a semantic search
-                    # We could just drop notes, but often they contain useful information
-                    min_paragraph_size = self._min_paragraph_size * 2
-
-                # If the combined paragraph is less than the minimum size combine it with the next paragraph
-                if combined_chars + p_str_chars < min_paragraph_size:
-                    # However, if the next pargraph is a header, we want to start a new paragraph
-                    # Unless the header came just after another header, in which case we want to combine them
-                    if is_section_title(next_tag) and not is_section_title(tag):
-                        # Next paragraph is a header (and the current isn't), so break the paragraph here
-                        p_str = combined_paragraph + "\n" + p_str
-                        p_str_chars += combined_chars
-                        combined_paragraph = ""
-                        combined_chars = 0
-                    elif next_tag is None:
-                        # If it's the last paragraph, then process this paragraph
-                        combined_paragraph += "\n" + p_str
-                        combined_chars += p_str_chars
-                        p_str = combined_paragraph
-                    else:
-                        # Combine this paragraph with the previous ones
-                        combined_paragraph += "\n" + p_str
-                        combined_chars += p_str_chars
-                        continue
-                else:
-                    p_str = combined_paragraph + "\n" + p_str
-                    p_str_chars += combined_chars
-                    combined_paragraph = ""
-                    combined_chars = 0
-                para_num += 1
-                total_text += p_str
-                p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
-                byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
-                paragraph_meta_data: Dict[str, str] = {}
-                # Combine meta_node with book_meta_data and section_meta_data
-                paragraph_meta_data.update(book_meta_data)
-                paragraph_meta_data.update(item_meta_data)
-                paragraph_meta_data["paragraph_num"] = str(para_num)
-
-                # Page information
-                if page_number:
-                    paragraph_meta_data["page_number"] = str(page_number)
-
-                # Chapter information
-                if chapter_title:
-                    paragraph_meta_data["chapter_title"] = chapter_title
-                if chapter_number:
-                    paragraph_meta_data["chapter_number"] = str(chapter_number)
-
-                # Include headers in the metadata
-                for level, text in headers.items():
-                    if level == top_header_level:
-                        paragraph_meta_data["section_name"] = text
-                    else:
-                        paragraph_meta_data["subsection_name"] = paragraph_meta_data.get("subsection_name", "") + (
-                            ": " + text if "subsection_name" in paragraph_meta_data else text)
-
-                # self._print_verbose(meta_node)
-                temp_docs.append(byte_stream)
-                temp_meta.append(paragraph_meta_data)
-
-            if (len(total_text) > self._min_section_size
+            if (parser.total_text_length() > self._min_section_size
                     and item.id not in self._sections_to_skip.get(book.title, set())):
-                self._print_verbose(f"Book: {book.title}; Section {section_num}. Section Title: {chapter_title}. "
-                                    f"Length: {len(total_text)}")
+                self._print_verbose(f"Book: {book.title}; Section {section_num}. "
+                                    f"Section Title: {parser.chapter_title}. "
+                                    f"Length: {parser.total_text_length()}")
                 docs_list.extend(temp_docs)
                 meta_list.extend(temp_meta)
                 included_sections.append(book.title + ", " + item.id)
                 section_num += 1
             else:
-                self._print_verbose(f"Book: {book.title}; Title: {chapter_title}. Length: {len(total_text)}. Skipped.")
+                self._print_verbose(f"Book: {book.title}; Title: {parser.chapter_title}. "
+                                    f"Length: {parser.total_text_length()}. Skipped.")
 
         self._print_verbose(f"Sections included:")
         for item in included_sections:
             self._print_verbose(item)
         self._print_verbose()
+
         return docs_list, meta_list
 
     def _doc_converter_pipeline(self) -> None:
