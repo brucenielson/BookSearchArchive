@@ -1,7 +1,6 @@
 # Pytorch imports
 import torch
 # EPUB imports
-from bs4 import Tag
 from ebooklib import epub, ITEM_DOCUMENT
 # Haystack imports
 # noinspection PyPackageRequirements
@@ -213,6 +212,7 @@ class DocumentProcessor:
             }
             book_meta_data.update(item_meta_data)
             item_html: str = item.get_body_content().decode('utf-8')
+
             parser = HTMLParser(item_html, book_meta_data, min_paragraph_size=self._min_paragraph_size)
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
@@ -263,7 +263,11 @@ class DocumentProcessor:
 
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
-        doc_convert_pipe.add_component("converter", HTMLToDocument())
+        # doc_convert_pipe.add_component("epub_loader", EPubLoader(min_paragraph_size=self._min_paragraph_size,
+        #                                                          min_section_size=self._min_section_size,
+        #                                                          verbose=self._verbose))
+        # doc_convert_pipe.add_component("html_parser", HTMLParserComponent())
+        doc_convert_pipe.add_component("html_converter", HTMLToDocument())
         doc_convert_pipe.add_component("remove_illegal_docs", instance=RemoveIllegalDocs())
         doc_convert_pipe.add_component("cleaner", DocumentCleaner())
         doc_convert_pipe.add_component("splitter", custom_splitter)
@@ -275,7 +279,10 @@ class DocumentProcessor:
                                                       policy=DuplicatePolicy.OVERWRITE))
         doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
-        doc_convert_pipe.connect("converter", "remove_illegal_docs")
+        # doc_convert_pipe.connect("epub_loader.sources", "html_converter.sources")
+        # doc_convert_pipe.connect("epub_loader.meta", "html_converter.meta")
+        # doc_convert_pipe.connect("html_parser", "converter")
+        doc_convert_pipe.connect("html_converter", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
         doc_convert_pipe.connect("splitter", "duplicate_checker")
@@ -318,16 +325,15 @@ class DocumentProcessor:
 
         source: List[ByteStream]
         meta: List[Dict[str, str]]
+        # self._doc_convert_pipeline.run({"epub_loader": {"file_or_folder_path": self._file_or_folder_path}})
 
         for source, meta in self._load_files():
-            title: str = (meta[0].get('book_title', '') + " " +
-                          meta[0].get('chapter_title', '') + " " +
-                          meta[0].get('section_name', '')).strip()
-            self._print_verbose(f"Processing document: {title} ")
+            self._print_verbose(f"Processing document: {meta[0].get('book_title', '')} ")
 
             # If needed, you can batch process here instead of processing one by one
             # Pass the source and meta to the document conversion pipeline
-            results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": source, "meta": meta}})
+            results: Dict[str, Any] = self._doc_convert_pipeline.run({"html_converter": {"sources": source,
+                                                                                         "meta": meta}})
             written = results["final_counter"]["documents_written"]
             total_written += written
             self._print_verbose(f"Wrote {written} documents for {meta[0]['book_title']}.")
@@ -373,4 +379,3 @@ if __name__ == "__main__":
 
 # TODO: Get code to work with upgraded Haystack version
 # TODO: Add PDF support (and maybe other document types)
-

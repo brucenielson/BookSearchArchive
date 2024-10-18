@@ -23,23 +23,37 @@ from pathlib import Path
 
 
 @component
-class EPUBLoader:
-    def __init__(self, min_paragraph_size:int = 300, min_section_size: int = 1000, verbose: bool = False) -> None:
+class EPubLoader:
+    def __init__(self, min_paragraph_size: int = 300, min_section_size: int = 1000, verbose: bool = False) -> None:
         self._min_section_size: int = min_section_size
         self._min_paragraph_size: int = min_paragraph_size
         self._verbose: bool = verbose
-        self._sections_to_skip: Optional[Dict[str, set]] = None
         self._is_directory: bool = False
         self._file_or_folder_path: str = ""
+        self._sections_to_skip: Dict[str, Set[str]] = {}
 
-    @component.output_types(documents=List[Document], meta_data=Dict[str, str])
+    @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
     def run(self, file_or_folder_path: str) -> Dict[str, Any]:
-        # Load the EPUB file
-        documents: List[ByteStream]
-        meta_data: Dict[str, str]
         self._file_or_folder_path = file_or_folder_path
-        documents, meta_data = self._load_files()
-        return {"documents": documents, "meta_data": meta_data}
+        # Determine if the path is a file or directory
+        if Path(self._file_or_folder_path).is_file():
+            self._is_directory = False
+        elif Path(self._file_or_folder_path).is_dir():
+            self._is_directory = True
+        else:
+            raise ValueError("The provided path must be a valid file or directory.")
+
+        self._sections_to_skip = self._load_sections_to_skip()
+        # Load the EPUB file
+        documents: List[ByteStream] = []
+        meta_data: List[Dict[str, str]] = []
+        for result in self._load_files():
+            docs: List[ByteStream]
+            meta: List[Dict[str, str]]
+            docs, meta = result
+            documents.extend(docs)
+            meta_data.extend(meta)
+        return {"sources": documents, "meta": meta_data}
 
     def _load_files(self) -> Iterator[Tuple[ByteStream, Dict[str, str]]]:
         # Determine if the path is a file or directory
