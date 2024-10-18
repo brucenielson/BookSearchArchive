@@ -213,7 +213,7 @@ class DocumentProcessor:
             }
             book_meta_data.update(item_meta_data)
             item_html: str = item.get_body_content().decode('utf-8')
-            parser = HTMLParser(item_html, book_meta_data)
+            parser = HTMLParser(item_html, book_meta_data, min_paragraph_size=self._min_paragraph_size)
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
             temp_docs, temp_meta = parser.run()
