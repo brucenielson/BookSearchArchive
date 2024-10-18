@@ -24,8 +24,9 @@ from pathlib import Path
 
 @component
 class EPUBLoader:
-    def __init__(self, min_section_size: int = 1000, verbose: bool = False) -> None:
+    def __init__(self, min_paragraph_size:int = 300, min_section_size: int = 1000, verbose: bool = False) -> None:
         self._min_section_size: int = min_section_size
+        self._min_paragraph_size: int = min_paragraph_size
         self._verbose: bool = verbose
         self._sections_to_skip: Optional[Dict[str, set]] = None
         self._is_directory: bool = False
@@ -78,7 +79,7 @@ class EPUBLoader:
             }
             book_meta_data.update(item_meta_data)
             item_html: str = item.get_body_content().decode('utf-8')
-            parser = HTMLParser(item_html, book_meta_data)
+            parser = HTMLParser(item_html, book_meta_data, min_paragraph_size=self._min_paragraph_size)
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
             temp_docs, temp_meta = parser.run()
