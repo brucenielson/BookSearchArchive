@@ -1,6 +1,9 @@
+import csv
+
+from ebooklib import ITEM_DOCUMENT, epub
 # noinspection PyPackageRequirements
 from haystack import Document, component
-from typing import List, Optional, Dict, Any, Union, Callable
+from typing import List, Optional, Dict, Any, Union, Callable, Iterator, Tuple, Set
 from collections import defaultdict
 import itertools
 from math import inf
@@ -13,6 +16,135 @@ from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 from sentence_transformers import SentenceTransformer
 import re
+from html_parser import HTMLParser
+# noinspection PyPackageRequirements
+from haystack.dataclasses import ByteStream
+from pathlib import Path
+
+
+@component
+class EPUBLoader:
+    def __init__(self, min_section_size: int = 1000, verbose: bool = False) -> None:
+        self._min_section_size: int = min_section_size
+        self._verbose: bool = verbose
+        self._sections_to_skip: Optional[Dict[str, set]] = None
+        self._is_directory: bool = False
+        self._file_or_folder_path: str = ""
+
+    @component.output_types(documents=List[Document], meta_data=Dict[str, str])
+    def run(self, file_or_folder_path: str) -> Dict[str, Any]:
+        # Load the EPUB file
+        documents: List[ByteStream]
+        meta_data: Dict[str, str]
+        self._file_or_folder_path = file_or_folder_path
+        documents, meta_data = self._load_files()
+        return {"documents": documents, "meta_data": meta_data}
+
+    def _load_files(self) -> Iterator[Tuple[ByteStream, Dict[str, str]]]:
+        # Determine if the path is a file or directory
+        if Path(self._file_or_folder_path).is_file():
+            self._is_directory = False
+        elif Path(self._file_or_folder_path).is_dir():
+            self._is_directory = True
+        else:
+            raise ValueError("The provided path must be a valid file or directory.")
+
+        if self._is_directory:
+            for file_path in Path(self._file_or_folder_path).glob('*.epub'):
+                docs, meta = self._load_epub(str(file_path))
+                yield docs, meta
+        else:
+            docs, meta = self._load_epub(self._file_or_folder_path)
+            yield docs, meta
+
+    def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
+        docs_list: List[ByteStream] = []
+        meta_list: List[Dict[str, str]] = []
+        included_sections: List[str] = []
+        book: epub.EpubBook = epub.read_epub(file_path)
+        self._print_verbose()
+        self._print_verbose(f"Book Title: {book.title}")
+        section_num: int = 1
+        book_meta_data: Dict[str, str] = {
+            "book_title": book.title,
+            "file_path": file_path
+        }
+        i: int
+        item: epub.EpubHtml
+        for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
+            item_meta_data: Dict[str, str] = {
+                "item_num": str(section_num),
+                "item_id": item.id,
+            }
+            book_meta_data.update(item_meta_data)
+            item_html: str = item.get_body_content().decode('utf-8')
+            parser = HTMLParser(item_html, book_meta_data)
+            temp_docs: List[ByteStream]
+            temp_meta: List[Dict[str, str]]
+            temp_docs, temp_meta = parser.run()
+
+            if (parser.total_text_length() > self._min_section_size
+                    and item.id not in self._sections_to_skip.get(book.title, set())):
+                self._print_verbose(f"Book: {book.title}; Section {section_num}. "
+                                    f"Section Title: {parser.chapter_title}. "
+                                    f"Length: {parser.total_text_length()}")
+                docs_list.extend(temp_docs)
+                meta_list.extend(temp_meta)
+                included_sections.append(book.title + ", " + item.id)
+                section_num += 1
+            else:
+                self._print_verbose(f"Book: {book.title}; Title: {parser.chapter_title}. "
+                                    f"Length: {parser.total_text_length()}. Skipped.")
+
+        self._print_verbose(f"Sections included:")
+        for item in included_sections:
+            self._print_verbose(item)
+        self._print_verbose()
+
+        return docs_list, meta_list
+
+    def _print_verbose(self, *args, **kwargs) -> None:
+        if self._verbose:
+            print(*args, **kwargs)
+
+    def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
+        sections_to_skip: Dict[str, Set[str]] = {}
+        if self._is_directory:
+            csv_path = Path(self._file_or_folder_path) / "sections_to_skip.csv"
+        else:
+            # Get the directory of the file and then look for the csv file in that directory
+            csv_path = Path(self._file_or_folder_path).parent / "sections_to_skip.csv"
+
+        if csv_path.exists():
+            with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
+                reader: csv.DictReader[str] = csv.DictReader(csvfile)
+                row: dict[str, str]
+                for row in reader:
+                    book_title: str = row['Book Title'].strip()
+                    section_title: str = row['Section Title'].strip()
+                    if book_title and section_title:
+                        if book_title not in sections_to_skip:
+                            sections_to_skip[book_title] = set()
+                        sections_to_skip[book_title].add(section_title)
+
+            # Count total sections to skip across all books
+            skip_count: int = sum(len(sections) for _, sections in sections_to_skip.items())
+            self._print_verbose(f"Loaded {skip_count} sections to skip.")
+        else:
+            self._print_verbose("No sections_to_skip.csv file found. Processing all sections.")
+
+        return sections_to_skip
+
+
+@component
+class HTMLParserComponent:
+    @component.output_types(documents=List[Document], meta_data=Dict[str, str])
+    def run(self, html_page: str, page_meta_data: Dict[str, str]) -> Dict[str, Any]:
+        parser = HTMLParser(html_page, page_meta_data)
+        documents: List[ByteStream]
+        meta_data: List[Dict[str, str]]
+        documents, meta_data = parser.run()
+        return {"documents": documents, "meta_data": meta_data}
 
 
 def print_documents(documents: List[Document]) -> None:

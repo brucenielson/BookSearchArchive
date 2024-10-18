@@ -186,7 +186,7 @@ class HTMLParser:
     def chapter_title(self):
         return self._chapter_title
 
-    def parse_metadata(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
+    def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         h1_tag_count: int = len(self._item_soup.find_all('h1'))
         temp_docs: List[ByteStream] = []
         temp_meta: List[Dict[str, str]] = []

@@ -373,8 +373,6 @@ class DocumentProcessor:
         i: int
         item: epub.EpubHtml
         for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
-            if item.id == 'Ch00' and book.title == "Conjectures and Refutations":
-                pass
             item_meta_data: Dict[str, str] = {
                 "item_num": str(section_num),
                 "item_id": item.id,
@@ -384,7 +382,7 @@ class DocumentProcessor:
             parser = HTMLParser(item_html, book_meta_data)
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
-            temp_docs, temp_meta = parser.parse_metadata()
+            temp_docs, temp_meta = parser.run()
 
             if (parser.total_text_length() > self._min_section_size
                     and item.id not in self._sections_to_skip.get(book.title, set())):
