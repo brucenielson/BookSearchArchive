@@ -122,20 +122,20 @@ def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
     # Search for the chapter title within the tags that come before the first paragraph tag (that isn't
     # stylized to look like a header tag)
     # Use is_title to check for a specific title tag
-    # If that fails you can use get_header_level to look for either an h1 or h2 tag but ONLY if that is the sole
+    # If that fails you can use get_header_level to look for either a h1 or h2 tag but ONLY if that is the sole
     # h1 or h2 tag in the whole section.
     # There may be more than one title (like a subtitle) and you'll want to combine them via ": " separators.
     # Use enhance_title to clean up the title text.
     # Once you find your first paragraph that isn't a title or header, you can assume you've got the full title.
 
     # Create iterator using recursive_yield_tags
-    top_tag = tags[0]
     # Count h1 tags
     # h1_tags: List[Tag] = top_tag.find_all('h1')
     # Remove any h1 tags that have class 'ch_num'
     h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
     h1_tag_count: int = len(h1_tags)
-    h2_tag_count: int = len(top_tag.find_all('h2'))
+    # TODO: Check for titles using an H2 tag if there is only one h2 tag
+    # h2_tag_count: int = len(top_tag.find_all('h2'))
     chapter_number: int = 0
     tags_to_delete: List[int] = []
     first_page_number: str = ""
@@ -202,7 +202,7 @@ class HTMLParser:
         self._chapter_title, chapter_number, page_number = get_chapter_info(tags, h1_tags)
         # Advance iter2 to be one ahead of iter1
         for j, tag in enumerate(tags):
-            prev_tag: Tag = tags[j - 1] if j > 0 else None
+            # prev_tag: Tag = tags[j - 1] if j > 0 else None
             next_tag: Tag = tags[j + 1] if j < len(tags) - 1 else None
 
             # If paragraph has a page number, update our page number
