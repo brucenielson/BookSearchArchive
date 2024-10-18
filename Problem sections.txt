@@ -36,10 +36,6 @@ The Poverty of Historicism
 The Logic of Scientific Discovery
 
 
-Didn't World of Parmenides used to not write out due to being a duplicate to C&R
-
-
-
 
 
 Book Title: Unended Quest
@@ -242,5 +238,10 @@ It has two regular quotes (paragraphs) ahead of the title!
 
 
 
+Processing document: The World of Parmenides 
+Split 1259 documents into 1280 documents
+Batches: 100%|██████████| 40/40 [04:05<00:00,  6.14s/it]
+Wrote 1262 documents for The World of Parmenides.
 
+Which documents didn't process? What book were they a duplicate of?
 
