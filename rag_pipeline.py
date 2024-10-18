@@ -423,6 +423,12 @@ def main() -> None:
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"
+    print()
+    print()
+    print("Query: " + query)
+    print()
+    # Pause for user to hit enter
+    input("Press Enter to continue...")
     rag_processor.generate_response(query)
 
 
