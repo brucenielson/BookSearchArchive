@@ -3,7 +3,7 @@ import csv
 from ebooklib import ITEM_DOCUMENT, epub
 # noinspection PyPackageRequirements
 from haystack import Document, component
-from typing import List, Optional, Dict, Any, Union, Callable, Iterator, Tuple, Set
+from typing import List, Optional, Dict, Any, Union, Callable, Tuple, Set
 from collections import defaultdict
 import itertools
 from math import inf
@@ -69,6 +69,7 @@ class EPubLoader:
             }
             book_meta_data.update(item_meta_data)
             item_html: str = item.get_body_content().decode('utf-8')
+            
             parser = HTMLParser(item_html, book_meta_data, min_paragraph_size=self._min_paragraph_size)
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
@@ -148,8 +149,6 @@ def print_documents(documents: List[Document]) -> None:
             for key, value in doc.meta.items():
                 if key == 'file_path':  # Skip 'file_path'
                     continue
-                if key == 'section_headings':
-                    pass
                 # Print the key-value pair, wrapped at 80 characters
                 print(textwrap.fill(f"{key.replace('_', ' ').title()}: {value}", width=80))
 
