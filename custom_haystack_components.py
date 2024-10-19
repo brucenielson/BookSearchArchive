@@ -29,48 +29,22 @@ class EPubLoader:
         self._min_paragraph_size: int = min_paragraph_size
         self._verbose: bool = verbose
         self._is_directory: bool = False
-        self._file_or_folder_path: str = ""
+        self._file_path: str = ""
         self._sections_to_skip: Dict[str, Set[str]] = {}
 
     @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
-    def run(self, file_or_folder_path: str) -> Dict[str, Any]:
-        self._file_or_folder_path = file_or_folder_path
-        # Determine if the path is a file or directory
-        if Path(self._file_or_folder_path).is_file():
-            self._is_directory = False
-        elif Path(self._file_or_folder_path).is_dir():
-            self._is_directory = True
-        else:
-            raise ValueError("The provided path must be a valid file or directory.")
-
+    def run(self, file_path: str) -> Dict[str, Any]:
+        self._file_path = file_path
         self._sections_to_skip = self._load_sections_to_skip()
         # Load the EPUB file
-        documents: List[ByteStream] = []
-        meta_data: List[Dict[str, str]] = []
-        for result in self._load_files():
-            docs: List[ByteStream]
-            meta: List[Dict[str, str]]
-            docs, meta = result
-            documents.extend(docs)
-            meta_data.extend(meta)
-        return {"sources": documents, "meta": meta_data}
+        sources: List[ByteStream]
+        meta: List[Dict[str, str]]
+        sources, meta = self._load_file()
+        return {"sources": sources, "meta": meta}
 
-    def _load_files(self) -> Iterator[Tuple[ByteStream, Dict[str, str]]]:
-        # Determine if the path is a file or directory
-        if Path(self._file_or_folder_path).is_file():
-            self._is_directory = False
-        elif Path(self._file_or_folder_path).is_dir():
-            self._is_directory = True
-        else:
-            raise ValueError("The provided path must be a valid file or directory.")
-
-        if self._is_directory:
-            for file_path in Path(self._file_or_folder_path).glob('*.epub'):
-                docs, meta = self._load_epub(str(file_path))
-                yield docs, meta
-        else:
-            docs, meta = self._load_epub(self._file_or_folder_path)
-            yield docs, meta
+    def _load_file(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
+        sources, meta = self._load_epub(self._file_path)
+        return sources, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         docs_list: List[ByteStream] = []
@@ -100,15 +74,15 @@ class EPubLoader:
 
             if (parser.total_text_length() > self._min_section_size
                     and item.id not in self._sections_to_skip.get(book.title, set())):
-                self._print_verbose(f"Book: {book.title}; Section {section_num}. "
-                                    f"Section Title: {parser.chapter_title}. "
+                self._print_verbose(f"Book: {book.title}; Section #{section_num}. "
+                                    f"Chapter: {parser.chapter_title}. "
                                     f"Length: {parser.total_text_length()}")
                 docs_list.extend(temp_docs)
                 meta_list.extend(temp_meta)
                 included_sections.append(book.title + ", " + item.id)
                 section_num += 1
             else:
-                self._print_verbose(f"Book: {book.title}; Title: {parser.chapter_title}. "
+                self._print_verbose(f"Book: {book.title}; Chapter: {parser.chapter_title}. "
                                     f"Length: {parser.total_text_length()}. Skipped.")
 
         self._print_verbose(f"Sections included:")
@@ -125,10 +99,10 @@ class EPubLoader:
     def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
         sections_to_skip: Dict[str, Set[str]] = {}
         if self._is_directory:
-            csv_path = Path(self._file_or_folder_path) / "sections_to_skip.csv"
+            csv_path = Path(self._file_path) / "sections_to_skip.csv"
         else:
             # Get the directory of the file and then look for the csv file in that directory
-            csv_path = Path(self._file_or_folder_path).parent / "sections_to_skip.csv"
+            csv_path = Path(self._file_path).parent / "sections_to_skip.csv"
 
         if csv_path.exists():
             with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:

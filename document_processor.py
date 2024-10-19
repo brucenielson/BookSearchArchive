@@ -30,7 +30,8 @@ from pathlib import Path
 from typing_extensions import Set
 from generator_model import get_secret
 from doc_content_checker import skip_content
-from custom_haystack_components import CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker
+from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
+                                        EPubLoader)
 import csv
 from html_parser import HTMLParser
 
@@ -182,14 +183,17 @@ class DocumentProcessor:
         if self._doc_convert_pipeline is not None:
             self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
 
-    def _load_files(self) -> Iterator[Tuple[ByteStream, Dict[str, str]]]:
+    def _load_files(self) -> str:  # Iterator[Tuple[ByteStream, Dict[str, str]]]:
         if self._is_directory:
             for file_path in Path(self._file_or_folder_path).glob('*.epub'):
-                docs, meta = self._load_epub(str(file_path))
-                yield docs, meta
+                yield str(file_path)
+        #         docs, meta = self._load_epub(str(file_path))
+        #         yield docs, meta
         else:
-            docs, meta = self._load_epub(self._file_or_folder_path)
-            yield docs, meta
+            path: Path = Path(self._file_or_folder_path)
+            yield str(path)
+            # docs, meta = self._load_epub(self._file_or_folder_path)
+            # yield docs, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         docs_list: List[ByteStream] = []
@@ -263,9 +267,9 @@ class DocumentProcessor:
 
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
-        # doc_convert_pipe.add_component("epub_loader", EPubLoader(min_paragraph_size=self._min_paragraph_size,
-        #                                                          min_section_size=self._min_section_size,
-        #                                                          verbose=self._verbose))
+        doc_convert_pipe.add_component("epub_loader", EPubLoader(min_paragraph_size=self._min_paragraph_size,
+                                                                 min_section_size=self._min_section_size,
+                                                                 verbose=self._verbose))
         # doc_convert_pipe.add_component("html_parser", HTMLParserComponent())
         doc_convert_pipe.add_component("html_converter", HTMLToDocument())
         doc_convert_pipe.add_component("remove_illegal_docs", instance=RemoveIllegalDocs())
@@ -279,8 +283,8 @@ class DocumentProcessor:
                                                       policy=DuplicatePolicy.OVERWRITE))
         doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
-        # doc_convert_pipe.connect("epub_loader.sources", "html_converter.sources")
-        # doc_convert_pipe.connect("epub_loader.meta", "html_converter.meta")
+        doc_convert_pipe.connect("epub_loader.sources", "html_converter.sources")
+        doc_convert_pipe.connect("epub_loader.meta", "html_converter.meta")
         # doc_convert_pipe.connect("html_parser", "converter")
         doc_convert_pipe.connect("html_converter", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
@@ -327,16 +331,12 @@ class DocumentProcessor:
         meta: List[Dict[str, str]]
         # self._doc_convert_pipeline.run({"epub_loader": {"file_or_folder_path": self._file_or_folder_path}})
 
-        for source, meta in self._load_files():
-            self._print_verbose(f"Processing document: {meta[0].get('book_title', '')} ")
-
-            # If needed, you can batch process here instead of processing one by one
-            # Pass the source and meta to the document conversion pipeline
-            results: Dict[str, Any] = self._doc_convert_pipeline.run({"html_converter": {"sources": source,
-                                                                                         "meta": meta}})
+        for file_path in self._load_files():
+            self._print_verbose(f"Processing file: {file_path} ")
+            results: Dict[str, Any] = self._doc_convert_pipeline.run({"epub_loader": {"file_path": file_path}})
             written = results["final_counter"]["documents_written"]
             total_written += written
-            self._print_verbose(f"Wrote {written} documents for {meta[0]['book_title']}.")
+            self._print_verbose(f"Wrote {written} documents for {file_path}.")
 
         self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
 
