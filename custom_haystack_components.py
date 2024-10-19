@@ -33,7 +33,9 @@ class EPubLoader:
         self._sections_to_skip: Dict[str, Set[str]] = {}
 
     @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
-    def run(self, file_path: str) -> Dict[str, Any]:
+    def run(self, file_path: Union[str, Path]) -> Dict[str, Any]:
+        if isinstance(file_path, Path):
+            file_path = str(file_path)
         self._file_path = file_path
         self._sections_to_skip = self._load_sections_to_skip()
         # Load the EPUB file

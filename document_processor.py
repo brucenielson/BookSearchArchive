@@ -183,17 +183,13 @@ class DocumentProcessor:
         if self._doc_convert_pipeline is not None:
             self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
 
-    def _load_files(self) -> str:  # Iterator[Tuple[ByteStream, Dict[str, str]]]:
+    def _load_files(self) -> str:
         if self._is_directory:
             for file_path in Path(self._file_or_folder_path).glob('*.epub'):
                 yield str(file_path)
-        #         docs, meta = self._load_epub(str(file_path))
-        #         yield docs, meta
         else:
             path: Path = Path(self._file_or_folder_path)
             yield str(path)
-            # docs, meta = self._load_epub(self._file_or_folder_path)
-            # yield docs, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         docs_list: List[ByteStream] = []
