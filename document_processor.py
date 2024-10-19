@@ -1,7 +1,5 @@
 # Pytorch imports
 import torch
-# EPUB imports
-from ebooklib import epub, ITEM_DOCUMENT
 # Haystack imports
 # noinspection PyPackageRequirements
 from haystack import Pipeline, Document
@@ -25,7 +23,7 @@ from haystack.document_stores.types import DuplicatePolicy
 # noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
 # Other imports
-from typing import List, Optional, Dict, Any, Tuple, Iterator
+from typing import List, Optional, Dict, Any
 from pathlib import Path
 from typing_extensions import Set
 from generator_model import get_secret
@@ -33,7 +31,6 @@ from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader)
 import csv
-from html_parser import HTMLParser
 
 
 class DocumentProcessor:
@@ -191,53 +188,6 @@ class DocumentProcessor:
             path: Path = Path(self._file_or_folder_path)
             yield str(path)
 
-    def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        docs_list: List[ByteStream] = []
-        meta_list: List[Dict[str, str]] = []
-        included_sections: List[str] = []
-        book: epub.EpubBook = epub.read_epub(file_path)
-        self._print_verbose()
-        self._print_verbose(f"Book Title: {book.title}")
-        section_num: int = 1
-        book_meta_data: Dict[str, str] = {
-            "book_title": book.title,
-            "file_path": file_path
-        }
-        i: int
-        item: epub.EpubHtml
-        for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
-            item_meta_data: Dict[str, str] = {
-                "item_num": str(section_num),
-                "item_id": item.id,
-            }
-            book_meta_data.update(item_meta_data)
-            item_html: str = item.get_body_content().decode('utf-8')
-
-            parser = HTMLParser(item_html, book_meta_data, min_paragraph_size=self._min_paragraph_size)
-            temp_docs: List[ByteStream]
-            temp_meta: List[Dict[str, str]]
-            temp_docs, temp_meta = parser.run()
-
-            if (parser.total_text_length() > self._min_section_size
-                    and item.id not in self._sections_to_skip.get(book.title, set())):
-                self._print_verbose(f"Book: {book.title}; Section {section_num}. "
-                                    f"Section Title: {parser.chapter_title}. "
-                                    f"Length: {parser.total_text_length()}")
-                docs_list.extend(temp_docs)
-                meta_list.extend(temp_meta)
-                included_sections.append(book.title + ", " + item.id)
-                section_num += 1
-            else:
-                self._print_verbose(f"Book: {book.title}; Title: {parser.chapter_title}. "
-                                    f"Length: {parser.total_text_length()}. Skipped.")
-
-        self._print_verbose(f"Sections included:")
-        for item in included_sections:
-            self._print_verbose(item)
-        self._print_verbose()
-
-        return docs_list, meta_list
-
     def _doc_converter_pipeline(self) -> None:
         self._setup_embedder()
         # Create the custom splitter
@@ -343,7 +293,6 @@ def main() -> None:
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     # epub_file_path: str = "documents/Karl Popper - The Open Society and Its Enemies-Princeton University Press (2013).epub"  # noqa: E501
     # epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
-    # epub_file_path: str = "documents/Karl Popper - The Poverty of Historicism-Routledge (2002).epub"
     epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
