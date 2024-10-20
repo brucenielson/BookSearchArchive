@@ -29,7 +29,7 @@ from typing_extensions import Set
 from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
-                                        EPubLoader)
+                                        EPubLoader, HTMLParserComponent)
 import csv
 
 
@@ -83,10 +83,6 @@ class DocumentProcessor:
         self._postgres_connection_str: str = (f"postgresql://{postgres_user_name}:{postgres_password}@"
                                               f"{postgres_host}:{postgres_port}/{postgres_db_name}")
 
-        # Sections to skip
-        self._sections_to_skip: Dict[str, Set[str]] = self._load_sections_to_skip()
-        for book_title, sections in self._sections_to_skip.items():
-            self._print_verbose(f"Skipping sections for book '{book_title}': {sections}")
         self._print_verbose("Initializing document store")
 
         self._document_store: Optional[PgvectorDocumentStore] = None
@@ -128,34 +124,6 @@ class DocumentProcessor:
             return self._sentence_embedder.embedding_backend.model.get_sentence_embedding_dimension()
         else:
             return None
-
-    def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
-        sections_to_skip: Dict[str, Set[str]] = {}
-        if self._is_directory:
-            csv_path = Path(self._file_or_folder_path) / "sections_to_skip.csv"
-        else:
-            # Get the directory of the file and then look for the csv file in that directory
-            csv_path = Path(self._file_or_folder_path).parent / "sections_to_skip.csv"
-
-        if csv_path.exists():
-            with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
-                reader: csv.DictReader[str] = csv.DictReader(csvfile)
-                row: dict[str, str]
-                for row in reader:
-                    book_title: str = row['Book Title'].strip()
-                    section_title: str = row['Section Title'].strip()
-                    if book_title and section_title:
-                        if book_title not in sections_to_skip:
-                            sections_to_skip[book_title] = set()
-                        sections_to_skip[book_title].add(section_title)
-
-            # Count total sections to skip across all books
-            skip_count: int = sum(len(sections) for _, sections in sections_to_skip.items())
-            self._print_verbose(f"Loaded {skip_count} sections to skip.")
-        else:
-            self._print_verbose("No sections_to_skip.csv file found. Processing all sections.")
-
-        return sections_to_skip
 
     def _print_verbose(self, *args, **kwargs) -> None:
         if self._verbose:
@@ -213,10 +181,11 @@ class DocumentProcessor:
 
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
-        doc_convert_pipe.add_component("epub_loader", EPubLoader(min_paragraph_size=self._min_paragraph_size,
-                                                                 min_section_size=self._min_section_size,
-                                                                 verbose=self._verbose))
-        # doc_convert_pipe.add_component("html_parser", HTMLParserComponent())
+        doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
+        doc_convert_pipe.add_component("html_parser",
+                                       HTMLParserComponent(min_paragraph_size=self._min_paragraph_size,
+                                                           min_section_size=self._min_section_size,
+                                                           verbose=self._verbose))
         doc_convert_pipe.add_component("html_converter", HTMLToDocument())
         doc_convert_pipe.add_component("remove_illegal_docs", instance=RemoveIllegalDocs())
         doc_convert_pipe.add_component("cleaner", DocumentCleaner())
@@ -229,9 +198,10 @@ class DocumentProcessor:
                                                       policy=DuplicatePolicy.OVERWRITE))
         doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
-        doc_convert_pipe.connect("epub_loader.sources", "html_converter.sources")
-        doc_convert_pipe.connect("epub_loader.meta", "html_converter.meta")
-        # doc_convert_pipe.connect("html_parser", "converter")
+        doc_convert_pipe.connect("epub_loader.html_pages", "html_parser.html_pages")
+        doc_convert_pipe.connect("epub_loader.meta", "html_parser.meta")
+        doc_convert_pipe.connect("html_parser.sources", "html_converter.sources")
+        doc_convert_pipe.connect("html_parser.meta", "html_converter.meta")
         doc_convert_pipe.connect("html_converter", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
