@@ -124,6 +124,12 @@ class HTMLParserComponent:
 
         for i, html_page in enumerate(html_pages):
             page_meta_data: Dict[str, str] = meta[i]
+            parser: HTMLParser
+            # if page_meta_data.get("item_id").lower().startswith('notes'):
+            #     parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size * 2)
+            # else:
+            #     parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
+
             parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
@@ -545,7 +551,7 @@ class CustomDocumentSplitter:
         split_length = 10  # Start with 10 sentences
         while split_length > 0:
             splitter = DocumentSplitter(
-                split_by="function",
+                split_by="sentence",
                 split_length=split_length,
                 split_overlap=min(1, split_length - 1),
                 split_threshold=min(3, split_length),
