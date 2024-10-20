@@ -115,7 +115,7 @@ class HTMLParserComponent:
         self._verbose: bool = verbose
         self._sections_to_skip: Dict[str, Set[str]] = {}
 
-    @component.output_types(sources=List[ByteStream], meta=Dict[str, str])
+    @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
     def run(self, html_pages: List[str], meta: List[Dict[str, str]]) -> Dict[str, Any]:
         docs_list: List[ByteStream] = []
         meta_list: List[Dict[str, str]] = []
