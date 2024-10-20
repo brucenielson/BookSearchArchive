@@ -512,22 +512,33 @@ class CustomDocumentSplitter:
         return split_docs
 
     def find_optimal_split(self, document: Document) -> List[Document]:
-        def split_into_sentences(text: str) -> List[str]:
-            # Define a regular expression pattern to split by sentence delimiters:
-            # period, newline, question mark, exclamation point
-            pattern = r'(\.|\n|\?|!)'
+        import re
+        from typing import List
 
-            # Use re.split to split the text while retaining the delimiters in the result
+        def split_into_sentences(text: str) -> List[str]:
+            if text.startswith('54 Or, as Carnap would put it'):
+                pass
+
+            # Define a pattern to split sentences while preserving spaces and newlines
+            pattern = r'(?:(?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=[A-Z])|((?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=$)|(\n)'
+
+            # Split the text using the pattern, this keeps delimiters (spaces/newlines) in the list
             units = re.split(pattern, text)
 
-            # Combine text and delimiter into a single unit
-            combined_units = []
-            for i in range(0, len(units) - 1, 2):
-                combined_units.append(units[i] + units[i + 1])
+            # Filter out any None values that might occur in the result
+            units = [unit for unit in units if unit is not None]
 
-            # If there's an unmatched unit (no following delimiter), append it
-            if len(units) % 2 != 0:
-                combined_units.append(units[-1])
+            # Combine text and delimiter into a single unit (pairs of text and spaces/newlines)
+            combined_units = []
+            i = 0
+            while i < len(units):
+                # Combine pairs of text and space/newline where applicable
+                if i + 1 < len(units):
+                    combined_units.append(units[i] + units[i + 1])
+                    i += 2
+                else:
+                    combined_units.append(units[i])
+                    i += 1
 
             return combined_units
 
@@ -543,6 +554,8 @@ class CustomDocumentSplitter:
             split_docs = splitter.run(documents=[document])["documents"]
 
             # Check if all split documents fit within max_seq_length
+            # TODO: If split_docs still doesn't pass after reducing split_length to 1, then try to save off the
+            # paragraphs that did fit and then run this again with a word split
             if all(self.count_tokens(doc.content) <= self._max_seq_length for doc in split_docs):
                 return split_docs
 
