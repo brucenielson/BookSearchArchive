@@ -1,8 +1,5 @@
 # Pytorch imports
 import torch
-# EPUB imports
-from bs4 import BeautifulSoup, Tag
-from ebooklib import epub, ITEM_DOCUMENT
 # Haystack imports
 # noinspection PyPackageRequirements
 from haystack import Pipeline, Document
@@ -26,180 +23,14 @@ from haystack.document_stores.types import DuplicatePolicy
 # noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
 # Other imports
-from typing import List, Optional, Dict, Any, Tuple, Iterator
+from typing import List, Optional, Dict, Any
 from pathlib import Path
 from typing_extensions import Set
 from generator_model import get_secret
 from doc_content_checker import skip_content
-from custom_haystack_components import CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker
+from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
+                                        EPubLoader, HTMLParserComponent)
 import csv
-import re
-from copy import deepcopy
-from itertools import tee
-from html_parser import HTMLParser
-
-
-# Helper functions for processing EPUB or HTML content
-def get_header_level(paragraph: Tag) -> Optional[int]:
-    """Return the level of the header (1 for h1, 2 for h2, etc.), or 0 if not a header."""
-    # Check for direct header tag
-    if paragraph.name.startswith('h') and paragraph.name[1:].isdigit():
-        return int(paragraph.name[1:])  # Extract the level from 'hX' or 'hXY'
-
-    # Check for class name equivalent to header tags
-    if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
-        section_headers: List[str] = ['pre-title1', 'h']
-        for cls in paragraph.attrs['class']:
-            if cls.lower() in section_headers:
-                return 0  # Equivalent to h0 effectively
-            elif cls.lower().startswith('h') and cls[1:].isdigit():
-                return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
-    return None
-
-
-def is_title(tag: Tag) -> bool:
-    # # A title isn't a header
-    # noinspection SpellCheckingInspection
-    keywords: List[str] = ['title', 'chtitle', 'tochead']
-    is_a_title: bool = (hasattr(tag, 'attrs') and 'class' in tag.attrs and
-                        any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
-                            for cls in tag.attrs['class'] for keyword in keywords))
-    return is_a_title
-
-
-def is_header1_title(paragraph: Tag, h1_count: int) -> bool:
-    header_level: int = get_header_level(paragraph)
-    if header_level == 1 and h1_count == 1:
-        return True
-    return False
-
-
-def is_section_title(tag: Tag) -> bool:
-    """Check if the tag is a title, heading, or chapter number."""
-    if tag is None:
-        return False
-
-    header_lvl: int = get_header_level(tag)
-    return is_title(tag) or header_lvl is not None or is_chapter_number(tag)
-
-
-def is_chapter_number(paragraph: Tag) -> bool:
-    # List of class names to check for chapter numbers
-    # noinspection SpellCheckingInspection
-    chapter_classes = ['chno', 'ch-num']
-    # noinspection SpellCheckingInspection
-    return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-            any(cls in paragraph.attrs['class'] for cls in chapter_classes) and
-            paragraph.text.isdigit())
-
-
-def get_page_number(paragraph: Tag) -> str:
-    # Try to get a page number - return it as a string instead of an int to accommodate roman numerals
-    # Return None if none found on this paragraph
-    page_anchors: List[Tag] = paragraph.find_all('a', id=lambda x: x and x.startswith('page_'))
-    page_number: Optional[str] = None
-    if page_anchors:
-        # Extract the page number from the anchor tag id
-        for anchor in page_anchors:
-            page_id = anchor.get('id')
-            page_number = page_id.split('_')[-1]
-    return page_number
-
-
-def enhance_title(text: str) -> str:
-    text = text.strip()
-    # If all caps but not a roman numeral and not first word before a space of a sentence roman numeral
-    if text.isupper() and not is_roman_numeral(text):
-        # If first word before a space is a roman numeral, leave that part as is
-        first_word = text.split(' ', 1)[0]
-        if is_roman_numeral(first_word) and first_word != text:
-            text = first_word + text[len(first_word):].title()
-        else:
-            # If all caps, title case
-            text = text.title()
-        # Replace 'S with 's after title casing
-        text = text.replace("'S", "'s")
-        text = text.replace("’S", "’s")
-    return text
-
-
-def is_roman_numeral(s: str) -> bool:
-    roman_numeral_pattern = r'(?i)^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
-    return bool(re.match(roman_numeral_pattern, s.strip()))
-
-
-def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
-    invalid_children: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
-    # If the tag has no <p> tags or header tags under it and contains text, yield it
-    # Unless it is a div tag. The Haystack HTML parse doesn't always handle those right, so
-    # Dig one level deeper.
-    if not tag.name == 'div' and tag.get_text(strip=True) and not tag.find(invalid_children):
-        # Make a deep copy of the tag to avoid modifying the original
-        tag_copy: Tag = deepcopy(tag)
-        # Clean up of paragraph text
-        for br in tag_copy.find_all('br'):
-            br.insert_after(' ')
-        yield tag_copy
-    else:
-        # Recursively go through the children of the current tag
-        for child in tag.children:
-            if isinstance(child, Tag):
-                # Yield the child tags that meet the criteria
-                yield from recursive_yield_tags(child)
-
-
-def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
-    if not tags:
-        return "", 0, ""
-    # Get the chapter title from the tag
-    chapter_title: str = ""
-    # Search for the chapter title within the tags that come before the first paragraph tag (that isn't
-    # stylized to look like a header tag)
-    # Use is_title to check for a specific title tag
-    # If that fails you can use get_header_level to look for either an h1 or h2 tag but ONLY if that is the sole
-    # h1 or h2 tag in the whole section.
-    # There may be more than one title (like a subtitle) and you'll want to combine them via ": " separators.
-    # Use enhance_title to clean up the title text.
-    # Once you find your first paragraph that isn't a title or header, you can assume you've got the full title.
-
-    # Create iterator using recursive_yield_tags
-    top_tag = tags[0]
-    # Count h1 tags
-    # h1_tags: List[Tag] = top_tag.find_all('h1')
-    # Remove any h1 tags that have class 'ch_num'
-    h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
-    h1_tag_count: int = len(h1_tags)
-    h2_tag_count: int = len(top_tag.find_all('h2'))
-    chapter_number: int = 0
-    tags_to_delete: List[int] = []
-    first_page_number: str = ""
-    for i, tag in enumerate(tags):
-        first_page_number = get_page_number(tag) or first_page_number
-        if is_title(tag):
-            # This tag is used in the title, so we need to delete the tag from the list of tags
-            tags_to_delete.append(i)
-            title_text = enhance_title(tag.text)
-            if chapter_title:
-                chapter_title += ": " + title_text
-            else:
-                chapter_title = title_text
-        elif is_chapter_number(tag):
-            tags_to_delete.append(i)
-            chapter_number = int(tag.text.strip())
-        elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
-            tags_to_delete.append(i)
-            title_text = enhance_title(tag.text)
-            chapter_title = title_text
-        elif tag.name == 'p' and not is_chapter_number(tag):
-            # We allow a couple of paragraphs before the title for quotes and such
-            if chapter_title or i > 2:
-                break
-
-    # Delete the tags that were used in the title
-    for i in sorted(tags_to_delete, reverse=True):
-        del tags[i]
-
-    return chapter_title, chapter_number, first_page_number
 
 
 class DocumentProcessor:
@@ -252,10 +83,6 @@ class DocumentProcessor:
         self._postgres_connection_str: str = (f"postgresql://{postgres_user_name}:{postgres_password}@"
                                               f"{postgres_host}:{postgres_port}/{postgres_db_name}")
 
-        # Sections to skip
-        self._sections_to_skip: Dict[str, Set[str]] = self._load_sections_to_skip()
-        for book_title, sections in self._sections_to_skip.items():
-            self._print_verbose(f"Skipping sections for book '{book_title}': {sections}")
         self._print_verbose("Initializing document store")
 
         self._document_store: Optional[PgvectorDocumentStore] = None
@@ -298,34 +125,6 @@ class DocumentProcessor:
         else:
             return None
 
-    def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
-        sections_to_skip: Dict[str, Set[str]] = {}
-        if self._is_directory:
-            csv_path = Path(self._file_or_folder_path) / "sections_to_skip.csv"
-        else:
-            # Get the directory of the file and then look for the csv file in that directory
-            csv_path = Path(self._file_or_folder_path).parent / "sections_to_skip.csv"
-
-        if csv_path.exists():
-            with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
-                reader: csv.DictReader[str] = csv.DictReader(csvfile)
-                row: dict[str, str]
-                for row in reader:
-                    book_title: str = row['Book Title'].strip()
-                    section_title: str = row['Section Title'].strip()
-                    if book_title and section_title:
-                        if book_title not in sections_to_skip:
-                            sections_to_skip[book_title] = set()
-                        sections_to_skip[book_title].add(section_title)
-
-            # Count total sections to skip across all books
-            skip_count: int = sum(len(sections) for _, sections in sections_to_skip.items())
-            self._print_verbose(f"Loaded {skip_count} sections to skip.")
-        else:
-            self._print_verbose("No sections_to_skip.csv file found. Processing all sections.")
-
-        return sections_to_skip
-
     def _print_verbose(self, *args, **kwargs) -> None:
         if self._verbose:
             print(*args, **kwargs)
@@ -349,62 +148,13 @@ class DocumentProcessor:
         if self._doc_convert_pipeline is not None:
             self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
 
-    def _load_files(self) -> Iterator[Tuple[ByteStream, Dict[str, str]]]:
+    def _load_files(self) -> str:
         if self._is_directory:
             for file_path in Path(self._file_or_folder_path).glob('*.epub'):
-                docs, meta = self._load_epub(str(file_path))
-                yield docs, meta
+                yield str(file_path)
         else:
-            docs, meta = self._load_epub(self._file_or_folder_path)
-            yield docs, meta
-
-    def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        docs_list: List[ByteStream] = []
-        meta_list: List[Dict[str, str]] = []
-        included_sections: List[str] = []
-        book: epub.EpubBook = epub.read_epub(file_path)
-        self._print_verbose()
-        self._print_verbose(f"Book Title: {book.title}")
-        section_num: int = 1
-        book_meta_data: Dict[str, str] = {
-            "book_title": book.title,
-            "file_path": file_path
-        }
-        i: int
-        item: epub.EpubHtml
-        for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
-            if item.id == 'Ch00' and book.title == "Conjectures and Refutations":
-                pass
-            item_meta_data: Dict[str, str] = {
-                "item_num": str(section_num),
-                "item_id": item.id,
-            }
-            book_meta_data.update(item_meta_data)
-            item_html: str = item.get_body_content().decode('utf-8')
-            parser = HTMLParser(item_html, book_meta_data)
-            temp_docs: List[ByteStream]
-            temp_meta: List[Dict[str, str]]
-            temp_docs, temp_meta = parser.parse_metadata()
-
-            if (parser.total_text_length() > self._min_section_size
-                    and item.id not in self._sections_to_skip.get(book.title, set())):
-                self._print_verbose(f"Book: {book.title}; Section {section_num}. "
-                                    f"Section Title: {parser.chapter_title}. "
-                                    f"Length: {parser.total_text_length()}")
-                docs_list.extend(temp_docs)
-                meta_list.extend(temp_meta)
-                included_sections.append(book.title + ", " + item.id)
-                section_num += 1
-            else:
-                self._print_verbose(f"Book: {book.title}; Title: {parser.chapter_title}. "
-                                    f"Length: {parser.total_text_length()}. Skipped.")
-
-        self._print_verbose(f"Sections included:")
-        for item in included_sections:
-            self._print_verbose(item)
-        self._print_verbose()
-
-        return docs_list, meta_list
+            path: Path = Path(self._file_or_folder_path)
+            yield str(path)
 
     def _doc_converter_pipeline(self) -> None:
         self._setup_embedder()
@@ -431,7 +181,12 @@ class DocumentProcessor:
 
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
-        doc_convert_pipe.add_component("converter", HTMLToDocument())
+        doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
+        doc_convert_pipe.add_component("html_parser",
+                                       HTMLParserComponent(min_paragraph_size=self._min_paragraph_size,
+                                                           min_section_size=self._min_section_size,
+                                                           verbose=self._verbose))
+        doc_convert_pipe.add_component("html_converter", HTMLToDocument())
         doc_convert_pipe.add_component("remove_illegal_docs", instance=RemoveIllegalDocs())
         doc_convert_pipe.add_component("cleaner", DocumentCleaner())
         doc_convert_pipe.add_component("splitter", custom_splitter)
@@ -443,7 +198,11 @@ class DocumentProcessor:
                                                       policy=DuplicatePolicy.OVERWRITE))
         doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
-        doc_convert_pipe.connect("converter", "remove_illegal_docs")
+        doc_convert_pipe.connect("epub_loader.html_pages", "html_parser.html_pages")
+        doc_convert_pipe.connect("epub_loader.meta", "html_parser.meta")
+        doc_convert_pipe.connect("html_parser.sources", "html_converter.sources")
+        doc_convert_pipe.connect("html_parser.meta", "html_converter.meta")
+        doc_convert_pipe.connect("html_converter", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
         doc_convert_pipe.connect("splitter", "duplicate_checker")
@@ -486,19 +245,14 @@ class DocumentProcessor:
 
         source: List[ByteStream]
         meta: List[Dict[str, str]]
+        # self._doc_convert_pipeline.run({"epub_loader": {"file_or_folder_path": self._file_or_folder_path}})
 
-        for source, meta in self._load_files():
-            title: str = (meta[0].get('book_title', '') + " " +
-                          meta[0].get('chapter_title', '') + " " +
-                          meta[0].get('section_name', '')).strip()
-            self._print_verbose(f"Processing document: {title} ")
-
-            # If needed, you can batch process here instead of processing one by one
-            # Pass the source and meta to the document conversion pipeline
-            results: Dict[str, Any] = self._doc_convert_pipeline.run({"converter": {"sources": source, "meta": meta}})
+        for file_path in self._load_files():
+            self._print_verbose(f"Processing file: {file_path} ")
+            results: Dict[str, Any] = self._doc_convert_pipeline.run({"epub_loader": {"file_path": file_path}})
             written = results["final_counter"]["documents_written"]
             total_written += written
-            self._print_verbose(f"Wrote {written} documents for {meta[0]['book_title']}.")
+            self._print_verbose(f"Wrote {written} documents for {file_path}.")
 
         self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
 
@@ -509,7 +263,6 @@ def main() -> None:
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     # epub_file_path: str = "documents/Karl Popper - The Open Society and Its Enemies-Princeton University Press (2013).epub"  # noqa: E501
     # epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
-    # epub_file_path: str = "documents/Karl Popper - The Poverty of Historicism-Routledge (2002).epub"
     epub_file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     # noinspection SpellCheckingInspection
@@ -541,4 +294,3 @@ if __name__ == "__main__":
 
 # TODO: Get code to work with upgraded Haystack version
 # TODO: Add PDF support (and maybe other document types)
-
