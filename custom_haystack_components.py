@@ -24,76 +24,55 @@ from pathlib import Path
 
 @component
 class EPubLoader:
-    def __init__(self, min_paragraph_size: int = 300, min_section_size: int = 1000, verbose: bool = False) -> None:
-        self._min_section_size: int = min_section_size
-        self._min_paragraph_size: int = min_paragraph_size
+    def __init__(self, verbose: bool = False, skip_file: str = "sections_to_skip.csv") -> None:
         self._verbose: bool = verbose
         self._is_directory: bool = False
         self._file_path: str = ""
+        self._skip_file: str = skip_file
         self._sections_to_skip: Dict[str, Set[str]] = {}
 
-    @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
+    @component.output_types(html_pages=List[str], meta=List[Dict[str, str]])
     def run(self, file_path: Union[str, Path]) -> Dict[str, Any]:
         if isinstance(file_path, Path):
             file_path = str(file_path)
         self._file_path = file_path
         self._sections_to_skip = self._load_sections_to_skip()
         # Load the EPUB file
-        sources: List[ByteStream]
+        html_pages: List[str]
         meta: List[Dict[str, str]]
-        sources, meta = self._load_file()
-        return {"sources": sources, "meta": meta}
+        html_pages, meta = self._load_file()
+        return {"html_pages": html_pages, "meta": meta}
 
-    def _load_file(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
+    def _load_file(self) -> Tuple[List[str], List[Dict[str, str]]]:
         sources, meta = self._load_epub(self._file_path)
         return sources, meta
 
-    def _load_epub(self, file_path: str) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        docs_list: List[ByteStream] = []
-        meta_list: List[Dict[str, str]] = []
-        included_sections: List[str] = []
+    def _load_epub(self, file_path: str) -> Tuple[List[str], List[Dict[str, str]]]:
         book: epub.EpubBook = epub.read_epub(file_path)
         self._print_verbose()
-        self._print_verbose(f"Book Title: {book.title}")
-        section_num: int = 1
+        self._print_verbose(f"Loaded Book: {book.title}")
         book_meta_data: Dict[str, str] = {
             "book_title": book.title,
             "file_path": file_path
         }
         i: int
         item: epub.EpubHtml
+        html_pages: List[str] = []
+        meta_data: List[Dict[str, str]] = []
         for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
-            item_meta_data: Dict[str, str] = {
-                "item_num": str(section_num),
-                "item_id": item.id,
-            }
-            book_meta_data.update(item_meta_data)
-            item_html: str = item.get_body_content().decode('utf-8')
-            
-            parser = HTMLParser(item_html, book_meta_data, min_paragraph_size=self._min_paragraph_size)
-            temp_docs: List[ByteStream]
-            temp_meta: List[Dict[str, str]]
-            temp_docs, temp_meta = parser.run()
-
-            if (parser.total_text_length() > self._min_section_size
-                    and item.id not in self._sections_to_skip.get(book.title, set())):
-                self._print_verbose(f"Book: {book.title}; Section #{section_num}. "
-                                    f"Chapter: {parser.chapter_title}. "
-                                    f"Length: {parser.total_text_length()}")
-                docs_list.extend(temp_docs)
-                meta_list.extend(temp_meta)
-                included_sections.append(book.title + ", " + item.id)
-                section_num += 1
+            if item.id not in self._sections_to_skip.get(book.title, set()):
+                item_meta_data: Dict[str, str] = {
+                    "item_num": 0,
+                    "item_id": item.id
+                }
+                book_meta_data.update(item_meta_data)
+                item_html: str = item.get_body_content().decode('utf-8')
+                html_pages.append(item_html)
+                meta_data.append(book_meta_data.copy())
             else:
-                self._print_verbose(f"Book: {book.title}; Chapter: {parser.chapter_title}. "
-                                    f"Length: {parser.total_text_length()}. Skipped.")
+                self._print_verbose(f"Book: {book.title}; Section Title: {item.id}. User Skipped.")
 
-        self._print_verbose(f"Sections included:")
-        for item in included_sections:
-            self._print_verbose(item)
-        self._print_verbose()
-
-        return docs_list, meta_list
+        return html_pages, meta_data
 
     def _print_verbose(self, *args, **kwargs) -> None:
         if self._verbose:
@@ -102,10 +81,10 @@ class EPubLoader:
     def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
         sections_to_skip: Dict[str, Set[str]] = {}
         if self._is_directory:
-            csv_path = Path(self._file_path) / "sections_to_skip.csv"
+            csv_path = Path(self._file_path) / self._skip_file
         else:
             # Get the directory of the file and then look for the csv file in that directory
-            csv_path = Path(self._file_path).parent / "sections_to_skip.csv"
+            csv_path = Path(self._file_path).parent / self._skip_file
 
         if csv_path.exists():
             with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
@@ -130,13 +109,51 @@ class EPubLoader:
 
 @component
 class HTMLParserComponent:
-    @component.output_types(documents=List[Document], meta_data=Dict[str, str])
-    def run(self, html_page: str, page_meta_data: Dict[str, str]) -> Dict[str, Any]:
-        parser = HTMLParser(html_page, page_meta_data)
-        documents: List[ByteStream]
-        meta_data: List[Dict[str, str]]
-        documents, meta_data = parser.run()
-        return {"documents": documents, "meta_data": meta_data}
+    def __init__(self, min_paragraph_size: int = 300, min_section_size: int = 1000, verbose: bool = False) -> None:
+        self._min_section_size: int = min_section_size
+        self._min_paragraph_size: int = min_paragraph_size
+        self._verbose: bool = verbose
+        self._sections_to_skip: Dict[str, Set[str]] = {}
+
+    @component.output_types(sources=List[ByteStream], meta=Dict[str, str])
+    def run(self, html_pages: List[str], meta: List[Dict[str, str]]) -> Dict[str, Any]:
+        docs_list: List[ByteStream] = []
+        meta_list: List[Dict[str, str]] = []
+        included_sections: List[str] = []
+        section_num: int = 1
+
+        for i, html_page in enumerate(html_pages):
+            page_meta_data: Dict[str, str] = meta[i]
+            parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
+            temp_docs: List[ByteStream]
+            temp_meta: List[Dict[str, str]]
+            temp_docs, temp_meta = parser.run()
+            item_id: str = page_meta_data.get("item_id", "")
+            book_title: str = page_meta_data.get("book_title", "")
+            if (parser.total_text_length() > self._min_section_size
+                    and item_id not in self._sections_to_skip.get(book_title, set())):
+                self._print_verbose(f"Book: {book_title}; Section {section_num}. "
+                                    f"Section Title: {parser.chapter_title}. "
+                                    f"Length: {parser.total_text_length()}")
+                # Add section number to metadata
+                [meta.update({"item_num": str(section_num)}) for meta in temp_meta]
+                docs_list.extend(temp_docs)
+                meta_list.extend(temp_meta)
+                included_sections.append(book_title + ", " + item_id)
+                section_num += 1
+            else:
+                self._print_verbose(f"Book: {book_title}; Title: {parser.chapter_title}. "
+                                    f"Length: {parser.total_text_length()}. Skipped.")
+
+        self._print_verbose(f"Sections included:")
+        for item in included_sections:
+            self._print_verbose(item)
+        self._print_verbose()
+        return {"sources": docs_list, "meta": meta_list}
+
+    def _print_verbose(self, *args, **kwargs) -> None:
+        if self._verbose:
+            print(*args, **kwargs)
 
 
 def print_documents(documents: List[Document]) -> None:
