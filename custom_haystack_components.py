@@ -514,6 +514,8 @@ class CustomDocumentSplitter:
             split_length -= 1
 
         # If we get here, even single sentences exceed max_seq_length
+        # So let's try splitting by lines (i.e. break on newline characters)
+
         # So just let the splitter truncate the document
         # But give warning that document was truncated
         if self._verbose:
