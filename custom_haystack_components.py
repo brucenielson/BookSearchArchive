@@ -525,7 +525,7 @@ class CustomDocumentSplitter:
                 split_length=split_length,
                 split_overlap=min(1, split_length - 1),
                 split_threshold=min(3, split_length),
-                # splitting_function=split_into_units
+                splitting_function=split_into_units
             )
             split_docs = splitter.run(documents=[document])["documents"]
 
