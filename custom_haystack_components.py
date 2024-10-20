@@ -397,9 +397,12 @@ class CustomDocumentSplitter:
         self._tokenizer = self._model.tokenizer
         self._max_seq_length: int = self._model.get_max_seq_length()
         # Delete verbose txt file
-        self._file_name: str = verbose_file_name
+        self._pre_file_name: str = "pre_" + verbose_file_name
+        self._post_file_name: str = "post_" + verbose_file_name
         if self._verbose:
-            with open(self._file_name, "w", encoding="utf-8") as file:
+            with open(self._pre_file_name, "w", encoding="utf-8") as file:
+                file.write("")
+            with open(self._post_file_name, "w", encoding="utf-8") as file:
                 file.write("")
 
     @component.output_types(documents=List[Document])
@@ -442,7 +445,7 @@ class CustomDocumentSplitter:
                     doc.content = analysis_results["cleaned_content"]
 
                 if self._verbose:
-                    with open(self._file_name, "a", encoding="utf-8") as file:
+                    with open(self._pre_file_name, "a", encoding="utf-8") as file:
                         # Loop through all metadata attributes
                         for key, value in doc.meta.items():
                             if key != 'file_path':  # Skip the 'file_path' attribute
