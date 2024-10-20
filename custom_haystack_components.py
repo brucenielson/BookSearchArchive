@@ -69,7 +69,7 @@ class EPubLoader:
                 html_pages.append(item_html)
                 meta_data.append(book_meta_data.copy())
             else:
-                self._print_verbose(f"Book: {book.title}; Section Title: {item.id}. User Skipped.")
+                self._print_verbose(f"Book: {book.title}; Section Id: {item.id}. User Skipped.")
 
         return html_pages, meta_data
 
@@ -119,6 +119,7 @@ class HTMLParserComponent:
         docs_list: List[ByteStream] = []
         meta_list: List[Dict[str, str]] = []
         included_sections: List[str] = []
+        missing_chapter_titles: List[str] = []
         section_num: int = 1
 
         for i, html_page in enumerate(html_pages):
@@ -132,7 +133,7 @@ class HTMLParserComponent:
             if (parser.total_text_length() > self._min_section_size
                     and item_id not in self._sections_to_skip.get(book_title, set())):
                 self._print_verbose(f"Book: {book_title}; Section {section_num}. "
-                                    f"Section Title: {parser.chapter_title}. "
+                                    f"Chapter Title: {parser.chapter_title}. "
                                     f"Length: {parser.total_text_length()}")
                 # Add section number to metadata
                 [meta.update({"item_num": str(section_num)}) for meta in temp_meta]
@@ -140,13 +141,20 @@ class HTMLParserComponent:
                 meta_list.extend(temp_meta)
                 included_sections.append(book_title + ", " + item_id)
                 section_num += 1
+                if parser.chapter_title is None or parser.chapter_title == "":
+                    missing_chapter_titles.append(book_title + ", " + item_id)
             else:
-                self._print_verbose(f"Book: {book_title}; Title: {parser.chapter_title}. "
+                self._print_verbose(f"Book: {book_title}; Chapter Title: {parser.chapter_title}. "
                                     f"Length: {parser.total_text_length()}. Skipped.")
 
         self._print_verbose(f"Sections included:")
         for item in included_sections:
             self._print_verbose(item)
+        if missing_chapter_titles:
+            self._print_verbose()
+            self._print_verbose(f"Sections missing chapter titles:")
+            for item in missing_chapter_titles:
+                self._print_verbose(item)
         self._print_verbose()
         return {"sources": docs_list, "meta": meta_list}
 
