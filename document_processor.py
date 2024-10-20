@@ -177,7 +177,7 @@ class DocumentProcessor:
                 "output_type": int,
             },
         ]
-        router = ConditionalRouter(routes=routes)
+        router = ConditionalRouter(routes=routes, unsafe=True)
 
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
