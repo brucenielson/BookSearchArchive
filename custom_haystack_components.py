@@ -512,7 +512,7 @@ class CustomDocumentSplitter:
         return split_docs
 
     def find_optimal_split(self, document: Document) -> List[Document]:
-        def split_into_units(text: str) -> List[str]:
+        def split_into_sentences(text: str) -> List[str]:
             # Define a regular expression pattern to split by sentence delimiters:
             # period, newline, question mark, exclamation point
             pattern = r'(\.|\n|\?|!)'
@@ -538,7 +538,7 @@ class CustomDocumentSplitter:
                 split_length=split_length,
                 split_overlap=min(1, split_length - 1),
                 split_threshold=min(3, split_length),
-                splitting_function=split_into_units
+                splitting_function=split_into_sentences
             )
             split_docs = splitter.run(documents=[document])["documents"]
 
