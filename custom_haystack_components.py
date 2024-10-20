@@ -478,7 +478,7 @@ class CustomDocumentSplitter:
 
         if self._verbose:
             print(f"Split {len(documents)} documents into {len(processed_docs)} documents")
-        self.write_verbose_file(documents, file_name=self._post_file_name)
+        self.write_verbose_file(processed_docs, file_name=self._post_file_name)
         return {"documents": processed_docs}
 
     def write_verbose_file(self, documents: Union[Document, List[Document]], file_name: str = "documents.txt") -> None:
