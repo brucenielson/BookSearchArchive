@@ -381,14 +381,14 @@ class CustomDocumentSplitter:
                  embedder: SentenceTransformersDocumentEmbedder,
                  verbose: bool = True,
                  skip_content_func: Optional[callable] = None,
-                 verbose_file_name: str = "first_paragraph_per_section.txt") -> None:
+                 verbose_file_name: str = "documents.txt") -> None:
         self._embedder: SentenceTransformersDocumentEmbedder = embedder
         self._verbose: bool = verbose
         self._skip_content_func: Optional[callable] = skip_content_func
         self._model: SentenceTransformer = embedder.embedding_backend.model
         self._tokenizer = self._model.tokenizer
         self._max_seq_length: int = self._model.get_max_seq_length()
-        # Delete "first_paragraph_section.txt"
+        # Delete verbose txt file
         self._file_name: str = verbose_file_name
         if self._verbose:
             with open(self._file_name, "w", encoding="utf-8") as file:
