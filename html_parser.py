@@ -242,10 +242,9 @@ class HTMLParser:
             if headers:
                 top_header_level = min(headers.keys())
 
-            # If headers are present, adjust the minimum paragraph size for
-            # TODO: Sometimes the name is 'biographical notes' so we should check if it ends with 'notes'?
-            if ((self._chapter_title and self._chapter_title.lower().endswith("notes")) or
-                    (headers and headers[top_header_level].lower().endswith("notes"))):
+            # If headers are present, adjust the minimum paragraph size for notes
+            if ((self._chapter_title and self._chapter_title.lower() == "notes") or
+                    (headers and headers[top_header_level].lower() == "notes")):
                 # If we're in the notes section, we want to combine paragraphs into larger sections
                 # This is because the notes are often very short, and we want to keep them together
                 # And also so that they don't dominate a semantic search
