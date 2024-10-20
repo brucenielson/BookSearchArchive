@@ -62,7 +62,6 @@ class EPubLoader:
         for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
             if item.id not in self._sections_to_skip.get(book.title, set()):
                 item_meta_data: Dict[str, str] = {
-                    "item_num": 0,
                     "item_id": item.id
                 }
                 book_meta_data.update(item_meta_data)
