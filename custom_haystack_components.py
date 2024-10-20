@@ -488,8 +488,14 @@ class CustomDocumentSplitter:
             for doc in documents:
                 with open(file_name, "a", encoding="utf-8") as file:
                     # Loop through all metadata attributes
+                    key: str
+                    value: str
                     for key, value in doc.meta.items():
-                        if key != 'file_path':  # Skip the 'file_path' attribute
+                        if isinstance(key, str):
+                            key = key.strip()
+                        if isinstance(value, str):
+                            value = value.strip()
+                        if key not in ['file_path', '_split_overlap', 'source_id', 'split_id', 'split_idx_start']:
                             file.write(f"{key.replace('_', ' ').title()}: {value}\n")
 
                     # Write content at the end
@@ -507,16 +513,23 @@ class CustomDocumentSplitter:
 
     def find_optimal_split(self, document: Document) -> List[Document]:
         def split_into_units(text: str) -> List[str]:
-            # Define a regular expression pattern to split by sentence delimiters: period, newline, question mark, exclamation point
+            # Define a regular expression pattern to split by sentence delimiters:
+            # period, newline, question mark, exclamation point
             pattern = r'(\.|\n|\?|!)'
 
             # Use re.split to split the text while retaining the delimiters in the result
-            units = re.split(f'({pattern})', text)
+            units = re.split(pattern, text)
 
-            # Rejoin the delimiters with their preceding units
-            units = [''.join([units[i], units[i + 1]]) for i in range(0, len(units) - 1, 2)] + [units[-1]]
+            # Combine text and delimiter into a single unit
+            combined_units = []
+            for i in range(0, len(units) - 1, 2):
+                combined_units.append(units[i] + units[i + 1])
 
-            return units
+            # If there's an unmatched unit (no following delimiter), append it
+            if len(units) % 2 != 0:
+                combined_units.append(units[-1])
+
+            return combined_units
 
         split_length = 10  # Start with 10 sentences
         while split_length > 0:
