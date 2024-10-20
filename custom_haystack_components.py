@@ -444,15 +444,7 @@ class CustomDocumentSplitter:
                 if analysis_results["cleaned_content"] is not None:
                     doc.content = analysis_results["cleaned_content"]
 
-                if self._verbose:
-                    with open(self._pre_file_name, "a", encoding="utf-8") as file:
-                        # Loop through all metadata attributes
-                        for key, value in doc.meta.items():
-                            if key != 'file_path':  # Skip the 'file_path' attribute
-                                file.write(f"{key.replace('_', ' ').title()}: {value}\n")
-
-                        # Write content at the end
-                        file.write(f"Content:\n{doc.content}\n\n")
+                self.write_verbose_file(doc, file_name=self._pre_file_name)
 
                 # For the first paragraph, check for possible section skipping
                 if self._skip_content_func is not None and self._skip_content_func(doc.content):
@@ -486,7 +478,22 @@ class CustomDocumentSplitter:
 
         if self._verbose:
             print(f"Split {len(documents)} documents into {len(processed_docs)} documents")
+        self.write_verbose_file(documents, file_name=self._post_file_name)
         return {"documents": processed_docs}
+
+    def write_verbose_file(self, documents: Union[Document, List[Document]], file_name: str = "documents.txt") -> None:
+        if self._verbose:
+            if isinstance(documents, Document):
+                documents = [documents]
+            for doc in documents:
+                with open(file_name, "a", encoding="utf-8") as file:
+                    # Loop through all metadata attributes
+                    for key, value in doc.meta.items():
+                        if key != 'file_path':  # Skip the 'file_path' attribute
+                            file.write(f"{key.replace('_', ' ').title()}: {value}\n")
+
+                    # Write content at the end
+                    file.write(f"Content:\n{doc.content}\n\n")
 
     def process_document(self, document: Document) -> List[Document]:
         token_count = self.count_tokens(document.content)
