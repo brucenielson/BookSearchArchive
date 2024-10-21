@@ -146,7 +146,7 @@ class HTMLParserComponent:
                                     f"Chapter Title: {parser.chapter_title}. "
                                     f"Length: {parser.total_text_length()}")
                 # Add section number to metadata
-                [meta.update({"item_num": str(section_num)}) for meta in temp_meta]
+                [meta.update({"item_#": str(section_num)}) for meta in temp_meta]
                 docs_list.extend(temp_docs)
                 meta_list.extend(temp_meta)
                 included_sections.append(book_title + ", " + item_id)
@@ -426,8 +426,8 @@ class CustomDocumentSplitter:
 
         for doc in documents:
             # Extract item_num and paragraph_num from the metadata
-            item_num: int = int(doc.meta.get("item_num"))
-            paragraph_num: int = int(doc.meta.get("paragraph_num"))
+            item_num: int = int(doc.meta.get("item_#"))
+            paragraph_num: int = int(doc.meta.get("paragraph_#"))
             book_title: str = doc.meta.get("book_title")
 
             # If this is a section to skip, go to the next document
@@ -507,8 +507,6 @@ class CustomDocumentSplitter:
                             value = value.strip()
                         if key not in ['file_path', '_split_overlap', 'source_id', 'split_id', 'split_idx_start',
                                        'page_number']:
-                            if key == 'page_num':
-                                key = 'page_number'
                             file.write(f"{key.replace('_', ' ').title()}: {value}\n")
 
                     # Write content at the end

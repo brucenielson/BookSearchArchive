@@ -286,16 +286,16 @@ class HTMLParser:
             byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
             paragraph_meta_data: Dict[str, str] = {}
             paragraph_meta_data.update(self._meta_data)
-            paragraph_meta_data["paragraph_num"] = str(para_num)
+            paragraph_meta_data["paragraph_#"] = str(para_num)
             # Page information
             if page_num:
-                paragraph_meta_data["page_num"] = str(page_num)
+                paragraph_meta_data["page_#"] = str(page_num)
 
             # Chapter information
             if self._chapter_title:
                 paragraph_meta_data["chapter_title"] = self._chapter_title
             if chapter_number:
-                paragraph_meta_data["chapter_number"] = str(chapter_number)
+                paragraph_meta_data["chapter_#"] = str(chapter_number)
 
             # Include headers in the metadata
             for level, text in headers.items():
