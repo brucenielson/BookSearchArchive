@@ -311,3 +311,16 @@ Not long later we jump to page 393
 
 
 
+Why did this change from page 394 to page 1?
+
+Book Title: Conjectures and Refutations
+Item Id: Ch011
+Paragraph Num: 166
+Page Number: 394 (old)
+Page Number: 1 (new)
+Chapter Title: 11 The Demarcation between Science and Metaphysics
+Section Name: Notes
+Item Num: 4
+Content:
+54 Or, as Carnap would put it, ‘a is able to make the full sentence “Pos(b, c)” true’; see Carnap’s explanation of his primitive ‘realizable’ (a term of the meta-language, however, in contradistinction to my ‘Put’), in Testability, section 11, p. 455, Explanation 2.
+
