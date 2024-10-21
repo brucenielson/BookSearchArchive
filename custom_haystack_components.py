@@ -505,7 +505,10 @@ class CustomDocumentSplitter:
                             key = key.strip()
                         if isinstance(value, str):
                             value = value.strip()
-                        if key not in ['file_path', '_split_overlap', 'source_id', 'split_id', 'split_idx_start']:
+                        if key not in ['file_path', '_split_overlap', 'source_id', 'split_id', 'split_idx_start',
+                                       'page_number']:
+                            if key == 'page_num':
+                                key = 'page_number'
                             file.write(f"{key.replace('_', ' ').title()}: {value}\n")
 
                     # Write content at the end
@@ -530,7 +533,7 @@ class CustomDocumentSplitter:
                 pass
 
             # Define a pattern to split sentences while preserving spaces and newlines
-            pattern = r'(?:(?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=[A-Z])|((?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=$)|(\n)'
+            pattern = r'(?:(?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=[A-Z])|((?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=$)|(\n)'  # noqa: W605
 
             # Split the text using the pattern, this keeps delimiters (spaces/newlines) in the list
             units = re.split(pattern, text)
@@ -564,16 +567,27 @@ class CustomDocumentSplitter:
             split_docs = splitter.run(documents=[document])["documents"]
 
             # Check if all split documents fit within max_seq_length
-            # TODO: If split_docs still doesn't pass after reducing split_length to 1, then try to save off the
-            # paragraphs that did fit and then run this again with a word split
             if all(self.count_tokens(doc.content) <= self._max_seq_length for doc in split_docs):
                 return split_docs
 
             # If not, reduce split_length and try again
             split_length -= 1
 
-        # If we get here, even single sentences exceed max_seq_length
-        # So let's try splitting by lines (i.e. break on newline characters)
+        # If we get here, at least one sentence exceed max_seq_length so we couldn't find a good split
+        # So return splitter doing a word split
+        chunk_size = 50
+        split_length = self._max_seq_length//2
+        while split_length > 0:
+            splitter = DocumentSplitter(
+                split_by="word",
+                split_length=split_length,
+                split_overlap=min(chunk_size, split_length // 4),
+                split_threshold=min(chunk_size * 2, split_length // 2)
+            )
+            split_docs = splitter.run(documents=[document])["documents"]
+            if all(self.count_tokens(doc.content) <= self._max_seq_length for doc in split_docs):
+                return split_docs
+            split_length -= chunk_size
 
         # So just let the splitter truncate the document
         # But give warning that document was truncated
