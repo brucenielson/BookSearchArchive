@@ -125,12 +125,16 @@ class HTMLParserComponent:
         for i, html_page in enumerate(html_pages):
             page_meta_data: Dict[str, str] = meta[i]
             parser: HTMLParser
-            # if page_meta_data.get("item_id").lower().startswith('notes'):
-            #     parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size * 2)
-            # else:
-            #     parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
+            item_id: str = page_meta_data.get("item_id", "").lower()
+            chapter_title: str = page_meta_data.get("chapter_title", "").lower()
+            section_name: str = page_meta_data.get("section_name", "").lower()
+            if item_id.startswith('notes'):
+                parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size * 2)
+            else:
+                parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
 
-            parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
+            # parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
+
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
             temp_docs, temp_meta = parser.run()

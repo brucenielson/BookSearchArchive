@@ -177,7 +177,7 @@ class HTMLParser:
         self._item_soup: BeautifulSoup = BeautifulSoup(self._item_html, 'html.parser')
         self._total_text: str = ""
         self._chapter_title: str = ""
-        self.meta_data: dict[str, str] = meta_data
+        self._meta_data: dict[str, str] = meta_data
 
     def total_text_length(self) -> int:
         return len(self._total_text)
@@ -242,9 +242,10 @@ class HTMLParser:
             if headers:
                 top_header_level = min(headers.keys())
 
-            # If headers are present, adjust the minimum paragraph size for notes
-            if ((self._chapter_title and self._chapter_title.lower() == "notes") or
-                    (headers and headers[top_header_level].lower() == "notes")):
+            # If headers are present, adjust the minimum paragraph size for notes unless we're in a full notes chapter
+            if (not self._meta_data.get("item_id", "").startswith("notes") and
+                ((self._chapter_title and self._chapter_title.lower() == "notes") or
+                 (headers and headers[top_header_level].lower() == "notes"))):
                 # If we're in the notes section, we want to combine paragraphs into larger sections
                 # This is because the notes are often very short, and we want to keep them together
                 # And also so that they don't dominate a semantic search
@@ -281,7 +282,7 @@ class HTMLParser:
             p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
             byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
             paragraph_meta_data: Dict[str, str] = {}
-            paragraph_meta_data.update(self.meta_data)
+            paragraph_meta_data.update(self._meta_data)
             paragraph_meta_data["paragraph_num"] = str(para_num)
             # Page information
             if page_number:
