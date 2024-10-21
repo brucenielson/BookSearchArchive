@@ -129,11 +129,11 @@ class HTMLParserComponent:
             chapter_title: str = page_meta_data.get("chapter_title", "").lower()
             section_name: str = page_meta_data.get("section_name", "").lower()
             if item_id.startswith('notes'):
-                parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size * 2)
+                parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size * 2,
+                                    double_notes=False)  # If we're already doubling size, don't have parser do it too.
             else:
-                parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
-
-            # parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
+                parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size,
+                                    double_notes=True)
 
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]

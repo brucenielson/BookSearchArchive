@@ -169,7 +169,7 @@ def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
 
 
 class HTMLParser:
-    def __init__(self, html: str, meta_data: dict[str, str], min_paragraph_size: int = 300):
+    def __init__(self, html: str, meta_data: dict[str, str], min_paragraph_size: int = 300, double_notes: bool = False):
         self._item_html = html
         self._min_paragraph_size = min_paragraph_size
         self._docs_list: List[ByteStream] = []
@@ -178,6 +178,9 @@ class HTMLParser:
         self._total_text: str = ""
         self._chapter_title: str = ""
         self._meta_data: dict[str, str] = meta_data
+        # If True, chapters and sections named 'notes' will have double the minimum paragraph size
+        # This is because notes are often very short and we want to keep them together to not dominate a semantic search
+        self._double_notes: bool = double_notes
 
     def total_text_length(self) -> int:
         return len(self._total_text)
@@ -242,10 +245,10 @@ class HTMLParser:
             if headers:
                 top_header_level = min(headers.keys())
 
-            # If headers are present, adjust the minimum paragraph size for notes unless we're in a full notes chapter
-            if (not self._meta_data.get("item_id", "").startswith("notes") and
-                ((self._chapter_title and self._chapter_title.lower() == "notes") or
-                 (headers and headers[top_header_level].lower() == "notes"))):
+            # If headers are present, adjust the minimum paragraph size for notes
+            if (self._double_notes and
+                    (self._chapter_title and self._chapter_title.lower() == "notes") or
+                    (headers and headers[top_header_level].lower() == "notes")):
                 # If we're in the notes section, we want to combine paragraphs into larger sections
                 # This is because the notes are often very short, and we want to keep them together
                 # And also so that they don't dominate a semantic search
