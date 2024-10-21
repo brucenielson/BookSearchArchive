@@ -555,7 +555,7 @@ class CustomDocumentSplitter:
         split_length = 10  # Start with 10 sentences
         while split_length > 0:
             splitter = DocumentSplitter(
-                split_by="sentence",
+                split_by="function",
                 split_length=split_length,
                 split_overlap=min(1, split_length - 1),
                 split_threshold=min(3, split_length),

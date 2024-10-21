@@ -284,3 +284,30 @@ The Open Society and Its Enemies (New One-Volume Edition), notes2a
 
 
 
+
+Why are both of these (in 'post') on page 1? This is in the middle of the chapter near the end!
+
+Book Title: Conjectures and Refutations
+Item Id: Ch011
+Paragraph Num: 145
+Page Number: 1
+Chapter Title: 11 The Demarcation between Science and Metaphysics
+Section Name: 6. Probability and Induction
+Item Num: 4
+Content:
+One might still say, perhaps, that there is no apriorism here since the dependencies mentioned are a consequence of a definition (that of probability or degree of confirmation), which rests on a convention or a ‘decision’, and is therefore analytic. But Carnap gives two reasons for his choice of his confirmation function which do not seem to fit this view. The first of the two reasons I have in mind is that his confirmation function, as he remarks, is the only one (among those which suggest themselves) ‘which is not entirely inadequate’;88 inadequate, that is, for explaining (or ‘explicating’) the undoubted fact that we can learn from experience. Now this fact is empirical; and a theory whose adequacy is judged by its ability to explain or cohere with this fact does not quite look like being analytic. It is interesting to see that Carnap’s argument in favour of his choice of λ (which I am suspecting of apriorism) is the same as Kant’s or Russell’s, or Jeffreys’s; it is what Kant called a ‘transcendental’ argument (‘How is knowledge possible?’), the appeal to the fact that we possess empirical knowledge, i.e. that we can learn from experience. The second of the two reasons is Carnap’s argument that the adoption of an appropriate λ (one which is neither infinite, for an infinite λ is equivalent to independence, nor zero) would be more successful in nearly all universes (except in the two extreme cases in which all individuals are independent or have like properties). All these reasons seem to me to suggest that the choice of λ, i.e. of a confirmation function, is to depend upon its success, or upon the probability of its success, in the world. But then it would not be analytic—in spite of the fact that it is also a ‘decision’ concerning the adoption of a definition. I think that it can be explained how this may be so. We can, if we like, define the word ‘truth’ so that it comprises some of those statements we usually call ‘false’. 
+
+Book Title: Conjectures and Refutations
+Item Id: Ch011
+Paragraph Num: 145
+Page Number: 1
+Chapter Title: 11 The Demarcation between Science and Metaphysics
+Section Name: 6. Probability and Induction
+Item Num: 4
+Content:
+We can, if we like, define the word ‘truth’ so that it comprises some of those statements we usually call ‘false’. Similarly we can define ‘probable’ or ‘confirmed’ so that absurd statements get a ‘high probability’. All this is purely conventional or verbal, as long as we do not take these definitions as ‘adequate explications’. But if we do, then the question is no longer conventional, or analytic. For to say of a contingent or factual statement x that it is true, in an adequate sense of the word ‘true’, is to make a factual statement; and so it is with ‘x is (now) highly probable’. It is the same with ‘x is strongly dependent upon y’ and ‘x is independent of y’—the statements whose fate is decided upon when we choose λ. The choice of λ is therefore indeed equivalent to that of adopting a sweeping though unformulated statement about the general interdependence or uniformity of the world.
+
+Not long later we jump to page 393
+
+
+
