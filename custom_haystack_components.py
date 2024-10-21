@@ -124,7 +124,17 @@ class HTMLParserComponent:
 
         for i, html_page in enumerate(html_pages):
             page_meta_data: Dict[str, str] = meta[i]
-            parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size)
+            parser: HTMLParser
+            item_id: str = page_meta_data.get("item_id", "").lower()
+            chapter_title: str = page_meta_data.get("chapter_title", "").lower()
+            section_name: str = page_meta_data.get("section_name", "").lower()
+            if item_id.startswith('notes'):
+                parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size * 2,
+                                    double_notes=False)  # If we're already doubling size, don't have parser do it too.
+            else:
+                parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size,
+                                    double_notes=True)
+
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
             temp_docs, temp_meta = parser.run()
@@ -136,7 +146,7 @@ class HTMLParserComponent:
                                     f"Chapter Title: {parser.chapter_title}. "
                                     f"Length: {parser.total_text_length()}")
                 # Add section number to metadata
-                [meta.update({"item_num": str(section_num)}) for meta in temp_meta]
+                [meta.update({"item_#": str(section_num)}) for meta in temp_meta]
                 docs_list.extend(temp_docs)
                 meta_list.extend(temp_meta)
                 included_sections.append(book_title + ", " + item_id)
@@ -397,9 +407,12 @@ class CustomDocumentSplitter:
         self._tokenizer = self._model.tokenizer
         self._max_seq_length: int = self._model.get_max_seq_length()
         # Delete verbose txt file
-        self._file_name: str = verbose_file_name
+        self._pre_file_name: str = "pre_" + verbose_file_name
+        self._post_file_name: str = "post_" + verbose_file_name
         if self._verbose:
-            with open(self._file_name, "w", encoding="utf-8") as file:
+            with open(self._pre_file_name, "w", encoding="utf-8") as file:
+                file.write("")
+            with open(self._post_file_name, "w", encoding="utf-8") as file:
                 file.write("")
 
     @component.output_types(documents=List[Document])
@@ -413,8 +426,8 @@ class CustomDocumentSplitter:
 
         for doc in documents:
             # Extract item_num and paragraph_num from the metadata
-            item_num: int = int(doc.meta.get("item_num"))
-            paragraph_num: int = int(doc.meta.get("paragraph_num"))
+            item_num: int = int(doc.meta.get("item_#"))
+            paragraph_num: int = int(doc.meta.get("paragraph_#"))
             book_title: str = doc.meta.get("book_title")
 
             # If this is a section to skip, go to the next document
@@ -441,15 +454,7 @@ class CustomDocumentSplitter:
                 if analysis_results["cleaned_content"] is not None:
                     doc.content = analysis_results["cleaned_content"]
 
-                if self._verbose:
-                    with open(self._file_name, "a", encoding="utf-8") as file:
-                        # Loop through all metadata attributes
-                        for key, value in doc.meta.items():
-                            if key != 'file_path':  # Skip the 'file_path' attribute
-                                file.write(f"{key.replace('_', ' ').title()}: {value}\n")
-
-                        # Write content at the end
-                        file.write(f"Content:\n{doc.content}\n\n")
+                self.write_verbose_file(doc, file_name=self._pre_file_name)
 
                 # For the first paragraph, check for possible section skipping
                 if self._skip_content_func is not None and self._skip_content_func(doc.content):
@@ -483,7 +488,29 @@ class CustomDocumentSplitter:
 
         if self._verbose:
             print(f"Split {len(documents)} documents into {len(processed_docs)} documents")
+        self.write_verbose_file(processed_docs, file_name=self._post_file_name)
         return {"documents": processed_docs}
+
+    def write_verbose_file(self, documents: Union[Document, List[Document]], file_name: str = "documents.txt") -> None:
+        if self._verbose:
+            if isinstance(documents, Document):
+                documents = [documents]
+            for doc in documents:
+                with open(file_name, "a", encoding="utf-8") as file:
+                    # Loop through all metadata attributes
+                    key: str
+                    value: str
+                    for key, value in doc.meta.items():
+                        if isinstance(key, str):
+                            key = key.strip()
+                        if isinstance(value, str):
+                            value = value.strip()
+                        if key not in ['file_path', '_split_overlap', 'source_id', 'split_id', 'split_idx_start',
+                                       'page_number']:
+                            file.write(f"{key.replace('_', ' ').title()}: {value}\n")
+
+                    # Write content at the end
+                    file.write(f"Content:\n{doc.content}\n\n")
 
     def process_document(self, document: Document) -> List[Document]:
         token_count = self.count_tokens(document.content)
@@ -496,13 +523,44 @@ class CustomDocumentSplitter:
         return split_docs
 
     def find_optimal_split(self, document: Document) -> List[Document]:
+        import re
+        from typing import List
+
+        def split_into_sentences(text: str) -> List[str]:
+            if text.startswith('54 Or, as Carnap would put it'):
+                pass
+
+            # Define a pattern to split sentences while preserving spaces and newlines
+            pattern = r'(?:(?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=[A-Z])|((?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=$)|(\n)'  # noqa: W605
+
+            # Split the text using the pattern, this keeps delimiters (spaces/newlines) in the list
+            units = re.split(pattern, text)
+
+            # Filter out any None values that might occur in the result
+            units = [unit for unit in units if unit is not None]
+
+            # Combine text and delimiter into a single unit (pairs of text and spaces/newlines)
+            combined_units = []
+            i = 0
+            while i < len(units):
+                # Combine pairs of text and space/newline where applicable
+                if i + 1 < len(units):
+                    combined_units.append(units[i] + units[i + 1])
+                    i += 2
+                else:
+                    combined_units.append(units[i])
+                    i += 1
+
+            return combined_units
+
         split_length = 10  # Start with 10 sentences
         while split_length > 0:
             splitter = DocumentSplitter(
-                split_by="sentence",
+                split_by="function",
                 split_length=split_length,
                 split_overlap=min(1, split_length - 1),
-                split_threshold=min(3, split_length)
+                split_threshold=min(3, split_length),
+                splitting_function=split_into_sentences
             )
             split_docs = splitter.run(documents=[document])["documents"]
 
@@ -513,7 +571,22 @@ class CustomDocumentSplitter:
             # If not, reduce split_length and try again
             split_length -= 1
 
-        # If we get here, even single sentences exceed max_seq_length
+        # If we get here, at least one sentence exceed max_seq_length so we couldn't find a good split
+        # So return splitter doing a word split
+        chunk_size = 50
+        split_length = self._max_seq_length//2
+        while split_length > 0:
+            splitter = DocumentSplitter(
+                split_by="word",
+                split_length=split_length,
+                split_overlap=min(chunk_size, split_length // 4),
+                split_threshold=min(chunk_size * 2, split_length // 2)
+            )
+            split_docs = splitter.run(documents=[document])["documents"]
+            if all(self.count_tokens(doc.content) <= self._max_seq_length for doc in split_docs):
+                return split_docs
+            split_length -= chunk_size
+
         # So just let the splitter truncate the document
         # But give warning that document was truncated
         if self._verbose:
