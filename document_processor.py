@@ -292,5 +292,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# TODO: Get code to work with upgraded Haystack version
 # TODO: Add PDF support (and maybe other document types)
