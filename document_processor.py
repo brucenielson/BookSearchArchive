@@ -177,7 +177,7 @@ class DocumentProcessor:
                 "output_type": int,
             },
         ]
-        router = ConditionalRouter(routes=routes)
+        router = ConditionalRouter(routes=routes, unsafe=True)  # unsafe must be set to True to allow Document outputs
 
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
@@ -292,5 +292,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# TODO: Get code to work with upgraded Haystack version
 # TODO: Add PDF support (and maybe other document types)

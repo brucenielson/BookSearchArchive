@@ -64,17 +64,17 @@ def is_chapter_number(paragraph: Tag) -> bool:
             paragraph.text.isdigit())
 
 
-def get_page_number(paragraph: Tag) -> str:
+def get_page_num(paragraph: Tag) -> str:
     # Try to get a page number - return it as a string instead of an int to accommodate roman numerals
     # Return None if none found on this paragraph
     page_anchors: List[Tag] = paragraph.find_all('a', id=lambda x: x and x.startswith('page_'))
-    page_number: Optional[str] = None
+    page_num: Optional[str] = None
     if page_anchors:
         # Extract the page number from the anchor tag id
         for anchor in page_anchors:
             page_id = anchor.get('id')
-            page_number = page_id.split('_')[-1]
-    return page_number
+            page_num = page_id.split('_')[-1]
+    return page_num
 
 
 def enhance_title(text: str) -> str:
@@ -138,9 +138,9 @@ def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
     # h2_tag_count: int = len(top_tag.find_all('h2'))
     chapter_number: int = 0
     tags_to_delete: List[int] = []
-    first_page_number: str = ""
+    first_page_num: str = ""
     for i, tag in enumerate(tags):
-        first_page_number = get_page_number(tag) or first_page_number
+        first_page_num = get_page_num(tag) or first_page_num
         if is_title(tag):
             # This tag is used in the title, so we need to delete the tag from the list of tags
             tags_to_delete.append(i)
@@ -165,11 +165,11 @@ def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
     for i in sorted(tags_to_delete, reverse=True):
         del tags[i]
 
-    return chapter_title, chapter_number, first_page_number
+    return chapter_title, chapter_number, first_page_num
 
 
 class HTMLParser:
-    def __init__(self, html: str, meta_data: dict[str, str], min_paragraph_size: int = 300):
+    def __init__(self, html: str, meta_data: dict[str, str], min_paragraph_size: int = 300, double_notes: bool = False):
         self._item_html = html
         self._min_paragraph_size = min_paragraph_size
         self._docs_list: List[ByteStream] = []
@@ -177,7 +177,10 @@ class HTMLParser:
         self._item_soup: BeautifulSoup = BeautifulSoup(self._item_html, 'html.parser')
         self._total_text: str = ""
         self._chapter_title: str = ""
-        self.meta_data: dict[str, str] = meta_data
+        self._meta_data: dict[str, str] = meta_data
+        # If True, chapters and sections named 'notes' will have double the minimum paragraph size
+        # This is because notes are often very short and we want to keep them together to not dominate a semantic search
+        self._double_notes: bool = double_notes
 
     def total_text_length(self) -> int:
         return len(self._total_text)
@@ -192,21 +195,21 @@ class HTMLParser:
         temp_meta: List[Dict[str, str]] = []
         combined_paragraph: str = ""
         para_num: int = 0
-        page_number: str
+        page_num: str
         headers: Dict[int, str] = {}  # Track headers by level
         j: int
         combined_chars: int = 0
         # convert item_soup to a list of tags using recursive_yield_tags
         tags: List[Tag] = list(recursive_yield_tags(self._item_soup))
         h1_tags: List[Tag] = self._item_soup.find_all('h1')
-        self._chapter_title, chapter_number, page_number = get_chapter_info(tags, h1_tags)
+        self._chapter_title, chapter_number, page_num = get_chapter_info(tags, h1_tags)
         # Advance iter2 to be one ahead of iter1
         for j, tag in enumerate(tags):
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
             next_tag: Tag = tags[j + 1] if j < len(tags) - 1 else None
 
             # If paragraph has a page number, update our page number
-            page_number = get_page_number(tag) or page_number
+            page_num = get_page_num(tag) or page_num
 
             # Check for title information
             if is_title(tag) or is_header1_title(tag, h1_tag_count):
@@ -243,7 +246,8 @@ class HTMLParser:
                 top_header_level = min(headers.keys())
 
             # If headers are present, adjust the minimum paragraph size for notes
-            if ((self._chapter_title and self._chapter_title.lower() == "notes") or
+            if (self._double_notes and
+                    (self._chapter_title and self._chapter_title.lower() == "notes") or
                     (headers and headers[top_header_level].lower() == "notes")):
                 # If we're in the notes section, we want to combine paragraphs into larger sections
                 # This is because the notes are often very short, and we want to keep them together
@@ -281,17 +285,17 @@ class HTMLParser:
             p_html: str = f"<html><head><title>Converted Epub</title></head><body>{p_str}</body></html>"
             byte_stream: ByteStream = ByteStream(p_html.encode('utf-8'))
             paragraph_meta_data: Dict[str, str] = {}
-            paragraph_meta_data.update(self.meta_data)
-            paragraph_meta_data["paragraph_num"] = str(para_num)
+            paragraph_meta_data.update(self._meta_data)
+            paragraph_meta_data["paragraph_#"] = str(para_num)
             # Page information
-            if page_number:
-                paragraph_meta_data["page_number"] = str(page_number)
+            if page_num:
+                paragraph_meta_data["page_#"] = str(page_num)
 
             # Chapter information
             if self._chapter_title:
                 paragraph_meta_data["chapter_title"] = self._chapter_title
             if chapter_number:
-                paragraph_meta_data["chapter_number"] = str(chapter_number)
+                paragraph_meta_data["chapter_#"] = str(chapter_number)
 
             # Include headers in the metadata
             for level, text in headers.items():
