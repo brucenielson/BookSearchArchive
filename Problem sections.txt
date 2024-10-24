@@ -1,3 +1,9 @@
+No pages numbers on:
+The Two Fundamental Problems of the Theory of Knowledge
+The Poverty of Historicism
+The Logic of Scientific Discovery
+
+
 No chapter title of "Notes"
 
 Book Title: The Open Society and Its Enemies (New One-Volume Edition)
@@ -27,13 +33,6 @@ Content:
 
 
 Start here and continue working up
-
-
-
-No pages numbers on: 
-The Two Fundamental Problems of the Theory of Knowledge
-The Poverty of Historicism
-The Logic of Scientific Discovery
 
 
 
@@ -116,33 +115,8 @@ It dumps nearly everything into the second paragraph.
 'Von Den Neuesten … Zusammengestohlen Aus Verschiedenem, Diesem Und Jenen*'
 
 
-Should not have II twice:
 
-Item Num: 4
-Item Id: ch11
-Paragraph Num: 2
-Chapter Title: The Pro-Naturalistic Doctrines of Historicism
-Chapter Title: II: The Pro-Naturalistic Doctrines of Historicism
-Section Name: II
-Content:
-By saying that it is a theoretical discipline we mean that sociology has to explain and to predict events, with the help of theories or of universal laws (which it tries to discover). By describing sociology as empirical, we mean to say that it is backed by experience, that the events it explains and predicts are observable facts, and that observation is the basis for the acceptance or rejection of any propounded theory. When we speak of success in physics we have in mind the success of its predictions: and the success of its predictions can be said to be the same as the empirical corroboration of the laws of physics. When we contrast the relative success of sociology with the success of physics, then we are assuming that success in sociology would likewise consist, basically, in the corroboration of predictions. It follows that certain methods—prediction with the help of laws, and the testing of laws by observation—must be common to physics and sociology.
-
-
-
-Should not have Section Name Essay 1 since it is now part of the title:
-
-Item Id: Ch01
-Paragraph Num: 1
-Page Number: 7
-Chapter Title: Back To The Presocratics
-Chapter Title: Essay 1: Back To The Presocratics
-Section Name: Essay 1
-Subsection Name: I
-Content:
-
-
-
-Addendum 1 is not part of the title BUT it needs it's own section:
+Addendum 1 is not part of the title BUT it needs its own section:
 
 Item Id: Ch01
 Paragraph Num: 81
@@ -152,6 +126,21 @@ Chapter Title: Essay 1: Back To The Presocratics
 Section Name: Essay 1
 Subsection Name: A Historical Note On Verisimilitude (1964)
 Content:
+
+I now have:
+Book Title: The World of Parmenides
+Item Id: Ch01
+Paragraph #: 80
+Page #: 29
+Chapter Title: Essay 1: Back To The Presocratics
+Section Name: A Historical Note On Verisimilitude (1964)
+Item #: 3
+Content:
+Some further remarks on the early history of the confusion between verisimilitude and probability (in addition to those in the Introduction) will be given here.
+1. In brief, my thesis is this. The earliest sayings at our disposal unambiguously use the idea of truthlikeness or verisimilitude. In time, ‘like the truth’ becomes ambiguous: it acquires additional meanings such as ‘likely’ or ‘likely to be true’ or ‘probable’ or ‘possible’, so that in some cases it is not clear which meaning is intended.
+
+This should have been Addendum 1: A Historical Note On Verisimilitude (1964)
+So we're losing Addenum 1 for some reason.
 
 
 Same:
@@ -221,20 +210,6 @@ Subsection Name: I
 Content:
 
 
-
-
-Uh oh!
-
-Item Id: ch01
-Paragraph Num: 2
-Page Number: 2
-Chapter Title: 1. Omniscience And Fallibility
-<Lost Chapter Title>
-Content:
-When I was twenty I became apprenticed to an old master cabinetmaker in Vienna whose name was Adalbert Pösch, and I worked with him from 1922 to 1924, not long after the First World War. He looked exactly like Georges Clemenceau, but he was a very mild and kind man. After I had gained his confidence he would often, when we were alone in his workshop, give me the benefit of his inexhaustible store of knowledge. Once he told me that he had worked for many years on various models of a perpetual motion machine, adding musingly: “They say you can’t make it; but once it’s been made they’ll talk different!” (“Da sag’n s’ dass ma’ so was net mach’n kann; aber wann amal eina ein’s g’macht hat, dann wer’n s’ schon anders red’n!”) A favourite practice of his was to ask me a historical question and to answer it himself when it turned out that I did not know the answer (although I, his pupil, was a University student—a fact of which he was very proud). “And do you know”, he would ask, “who invented topboots? You don’t? It was Wallenstein, the Duke of Friedland, during the Thirty Years War.” After one or two even more difficult questions, posed by himself and triumphantly answered by himself, my master would say with modest pride: “There, you can ask me whatever you like: I know everything.” (“Da können S’ mi’ frag’n was Sie woll’n: ich weiss alles.”)
-
-See Unended Quest: 1. OMNISCIENCE AND FALLIBILITY
-It has two regular quotes (paragraphs) ahead of the title!
 
 
 
