@@ -74,6 +74,17 @@ def get_page_num(paragraph: Tag) -> str:
         for anchor in page_anchors:
             page_id = anchor.get('id')
             page_num = page_id.split('_')[-1]
+
+    if not page_num:
+        # Check for a page number embedded in the paragraph's id in
+        # format 'pXXXX-' where XXXX is the page number with leading zeros
+        page_id: str = paragraph.get('id')
+        if page_id and page_id.startswith('p'):
+            page_num = page_id[1:].split('-')[0]
+            try:
+                page_num = str(int(page_num))  # Remove leading zeros
+            except ValueError:
+                page_num = None
     return page_num
 
 

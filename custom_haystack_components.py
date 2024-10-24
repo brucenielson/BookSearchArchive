@@ -128,6 +128,9 @@ class HTMLParserComponent:
             item_id: str = page_meta_data.get("item_id", "").lower()
             chapter_title: str = page_meta_data.get("chapter_title", "").lower()
             section_name: str = page_meta_data.get("section_name", "").lower()
+            if page_meta_data.get("book_title") == 'The Logic of Scientific Discovery':
+                pass
+
             if item_id.startswith('notes'):
                 parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size * 2,
                                     double_notes=False)  # If we're already doubling size, don't have parser do it too.
@@ -527,9 +530,6 @@ class CustomDocumentSplitter:
         from typing import List
 
         def split_into_sentences(text: str) -> List[str]:
-            if text.startswith('54 Or, as Carnap would put it'):
-                pass
-
             # Define a pattern to split sentences while preserving spaces and newlines
             pattern = r'(?:(?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=[A-Z])|((?<=\.)|(?<=\!)|(?<=\?))([\'"”’]?\s*)(?=$)|(\n)'  # noqa: W605
 
