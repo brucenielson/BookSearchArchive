@@ -67,13 +67,17 @@ def is_chapter_number(paragraph: Tag) -> bool:
 def get_page_num(paragraph: Tag) -> str:
     # Try to get a page number - return it as a string instead of an int to accommodate roman numerals
     # Return None if none found on this paragraph
-    page_anchors: List[Tag] = paragraph.find_all('a', id=lambda x: x and x.startswith('page_'))
+    page_anchors: List[Tag] = paragraph.find_all('a', id=lambda x: x and (
+                x.startswith('page_') or (x.startswith('p') and x[1:].isdigit())))
     page_num: Optional[str] = None
     if page_anchors:
         # Extract the page number from the anchor tag id
         for anchor in page_anchors:
             page_id = anchor.get('id')
-            page_num = page_id.split('_')[-1]
+            if page_id.startswith('page_'):
+                page_num = page_id.split('_')[-1]
+            elif page_id.startswith('p') and page_id[1:].isdigit():
+                page_num = page_id[1:]  # Remove the 'p' and get the digits
 
     if not page_num:
         # Check for a page number embedded in the paragraph's id in
