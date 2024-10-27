@@ -120,3 +120,19 @@ Section Name: Notes To Volume Ii: Notes To Chapter Eleven
 
 Is there a way to fix this in enhance_title?
 
+
+
+It added back the footnote!!
+
+Book Title: The Poverty of Historicism
+Item Id: ch11
+@@ -79064,7 +79085,7 @@ Item Id: ch11
+Paragraph #: 4
+Page #: 32
+Chapter Title: II: The Pro-Naturalistic Doctrines of Historicism
+Section Name: 11 Comparison with Astronomy. Long-Term Forecasts and Large-Scale Forecasts
+Section Name: 11 Comparison with Astronomy. Long-Term Forecasts and Large-Scale Forecasts1
+Item #: 4
+Content:
+Modern historicists have been greatly impressed by the success of Newtonian theory, and especially by its power of forecasting the position of the planets a long time ahead. The possibility of such long-term forecasts, they claim, is thereby established, showing that the old dreams of prophesying the distant future do not transcend the limits of what may be attained by the human mind. The social sciences must aim just as high. If it is possible for astronomy to predict eclipses, why should it not be possible for sociology to predict revolutions?
+
