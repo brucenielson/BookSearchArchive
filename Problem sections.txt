@@ -9,20 +9,6 @@ Can I get rid of footnotes?
 
 
 
-Various problems with:
-Book Title: The World of Parmenides
-Section Id: Ch02
-Page Number: 67
-Chapter Title: An Attempt To Establish His Greatness: Addendum 1
-Section Name: The Unknown Xenophanes
-Header 2: A Note To The Quotation From Xenophanes (Dk 21B25) In Section 4 Above
-Content:
-
-Section Name is really name of chapter. Why did it skip "Essay 2"? Chapter Title is subtitle. Then we keep adding 'Addendums' on (happens in previous chapter too)
-
-
-
-
 
 
 Everything in this chapter:
@@ -46,55 +32,6 @@ It dumps nearly everything into the second paragraph.
 
 
 
-Addendum 1 is not part of the title BUT it needs its own section:
-
-Item Id: Ch01
-Paragraph Num: 81
-Page Number: 29
-Chapter Title: Back To The Presocratics: Addendum 1
-Chapter Title: Essay 1: Back To The Presocratics
-Section Name: Essay 1
-Subsection Name: A Historical Note On Verisimilitude (1964)
-Content:
-
-I now have:
-Book Title: The World of Parmenides
-Item Id: Ch01
-Paragraph #: 80
-Page #: 29
-Chapter Title: Essay 1: Back To The Presocratics
-Section Name: A Historical Note On Verisimilitude (1964)
-Item #: 3
-Content:
-Some further remarks on the early history of the confusion between verisimilitude and probability (in addition to those in the Introduction) will be given here.
-1. In brief, my thesis is this. The earliest sayings at our disposal unambiguously use the idea of truthlikeness or verisimilitude. In time, ‘like the truth’ becomes ambiguous: it acquires additional meanings such as ‘likely’ or ‘likely to be true’ or ‘probable’ or ‘possible’, so that in some cases it is not clear which meaning is intended.
-
-This should have been Addendum 1: A Historical Note On Verisimilitude (1964)
-So we're losing Addenum 1 for some reason.
-
-
-Same:
-Item Id: Ch02
-Paragraph Num: 120
-Page Number: 67
-Chapter Title: An attempt to establish his greatness: Addendum 1
-Chapter Title: An attempt to establish his greatness
-Section Name: The Unknown Xenophanes
-Subsection Name: A Note To The Quotation From Xenophanes (Dk 21B25) In Section 4 Above
-Content:
-
-
-This one should have "Addendum 2"
-Item Id: Ch02
-Paragraph Num: 127
-Page Number: 70
-Chapter Title: An attempt to establish his greatness: Addendum 1: Addendum 2
-Chapter Title: An attempt to establish his greatness
-Section Name: The Unknown Xenophanes
-Subsection Name: Some Principles For A New Professional Ethics Based On Xenophanes’ Theory Of Truth
-Content:
-
-I don't think 'An attempt to establish his greatness' should be the chapter title. It should be 'Addendum 2'
 
 
 
@@ -178,16 +115,4 @@ Shouldn't be tacking on so many subsections
 Section Name: Notes To Volume Ii: Notes To Chapter Eleven
 
 Is there a way to fix this in enhance_title?
-
-
-Why are we losing Addenum now that we're combining subsection and section titles that are back to back?
-Book Title: The World of Parmenides
-Item Id: Ch07
-Paragraph #: 301
-Page #: 245
-Chapter Title: Essay 7: Beyond The Search For Invariants
-Section Name: A Note On Opposites And Existence In Presocratic Epistemology: I
-Item #: 9
-Content:
-The idea of opposites or contraries – hot and cold, moist and dry, light and darkness, being and nothingness, generation and destruction, growth and diminution, limited and unlimited – conceived as acting powers fighting one another is a very old one. It can be found in many primitive views of the world. Their confrontation is strife, war. This idea is developed further by Heraclitus, who, I believe, was the first to see the great and fundamental problem of change, discussed in the preceding essay.
 

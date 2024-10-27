@@ -31,7 +31,7 @@ def get_header_level(paragraph: Tag) -> Optional[int]:
 def is_title(tag: Tag) -> bool:
     # # A title isn't a header
     # noinspection SpellCheckingInspection
-    keywords: List[str] = ['title', 'chtitle', 'tochead']
+    keywords: List[str] = ['title', 'chtitle', 'tochead', 'title1', 'h1_label']
     is_a_title: bool = (hasattr(tag, 'attrs') and 'class' in tag.attrs and
                         any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
                             for cls in tag.attrs['class'] for keyword in keywords))
