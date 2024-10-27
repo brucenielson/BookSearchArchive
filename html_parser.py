@@ -124,7 +124,11 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
             br.insert_after(' ')
         # Remove footnotes - but not if the sup tag is at the start of the paragraph
         for fn in tag_copy.find_all('sup'):
-            fn.extract()
+            # Check if the text for this sup tag is at the front of the paragraph
+            if fn.text != tag_copy.text[:len(fn.text)]:
+                # If it is not, then remove the sup tag
+                fn.extract()
+
         yield tag_copy
     else:
         # Recursively go through the children of the current tag
@@ -225,7 +229,6 @@ class HTMLParser:
         return self._chapter_title
 
     def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        h1_tag_count: int = len(self._item_soup.find_all('h1'))
         temp_docs: List[ByteStream] = []
         temp_meta: List[Dict[str, str]] = []
         combined_paragraph: str = ""
@@ -278,7 +281,6 @@ class HTMLParser:
             if not self._chapter_title and headers and 0 in headers:
                 self._chapter_title = headers[0]
 
-            p_str: str = str(tag)  # p.text.strip()
             # Get top level header
             top_header_level: int = 0
             if headers:
@@ -289,12 +291,10 @@ class HTMLParser:
             # If headers are present, adjust the minimum paragraph size for notes
             if ((self._chapter_title and self._chapter_title.lower() == "notes")
                     or (headers and headers[top_header_level].lower() == "notes")):
-                # Strip out footnote tags (i.e. sup) from the paragraph
-                # but only if it is not at the start of the paragraph
-                # p_str = re.sub(r'<sup[^>]*>.*?</sup>', '', p_str)
                 if self._double_notes:
                     min_paragraph_size = self._min_paragraph_size * 2
 
+            p_str: str = str(tag)  # p.text.strip()
             p_str_chars: int = len(tag.text)
 
             # If the combined paragraph is less than the minimum size combine it with the next paragraph
