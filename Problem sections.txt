@@ -1,63 +1,3 @@
-No chapter title of "Notes"
-
-Book Title: The Open Society and Its Enemies (New One-Volume Edition)
-Item Num: 30
-Item Id: notes1
-Paragraph Num: 247
-Page Number: 572
-Section Name: Notes To Chapter Six
-Content:
-(2) For Aristotle’s elaboration of these ideas, cp. esp. his Politics, III, 9, 1, 1280a (see also 1282b–1284b and 1301b29), where he writes: ‘All men cling to justice of some kind, but their conceptions are imperfect, and do not embrace the whole Idea. For example, justice is thought (by democrats) to be equality; and so it is, although it is not equality for all, but only for equals. And justice is thought (by oligarchs) to be inequality; and so it is, although it is not inequality for all, but only for unequals.’ Cp. also Nichom. Eth., 1131b27, 1158b30 ff.
-
-
-
-
-This entry lacks a chapter title which should be either "10" or "The Open Society and Its Enemies" when I look at the EPUB itself
-
-Book Title: The Open Society and Its Enemies (New One-Volume Edition)
-Item Num: 13
-Item Id: chapter10
-Paragraph Num: 150
-Page Number: 212
-Section Name: Addenda
-Subsection Name: IV (1965)
-Content:
-3 It is by no means the only instance, as may be seen from my chapter 8. The passage quoted in the text to note 2, for example (Rep., 389b), is a different instance from the passage (Rep., 460a) which Professor Levinson has in mind. There are several other passages. See Rep., 415d and especially Tim., 18e, which prove that Plato finds his instruction to lie of sufficient importance to be included in the very brief summary of the Republic. (See also Laws, 663d down to 664b.)
-
-
-
-
-Book Title: Unended Quest
-Section Id: footnotes
-Chapter Title: NOTES
-Header 1: NOTES
-Header 3: Scruples Of Conscience
-Page Number: 280
-Content:
-
-Header 1 to Header 3 without a header 2
-
-I think I may want this one to NOT have a section header and instead be treated as text. Perhaps detect that by a jump in header levels?
-
-
-
-
-
-
-Paragraph Num: 2
-Book Title: The Poverty of Historicism
-Section Id: ch10
-Section Name: The Anti-Naturalistic Doctrines Of Historicism
-Chapter Title: The Anti-Naturalistic Doctrines Of Historicism
-Section Name: I
-Content:
-Historicism asserts that the historical relativity of social laws makes most of the methods of physics inapplicable to sociology. Typical historicist arguments on which this view is based concern generalization, experiment, the complexity of social phenomena, the difficulties of exact prediction, and the significance of methodological essentialism. I will treat these arguments in turn.
-
-
-This section grabbed the chapter number (in roman numerals) and made it a section (subsection) name.
-
-
-
 
 Paragraph Num: 6
 Book Title: The Poverty of Historicism
@@ -78,7 +18,7 @@ Section Name: The Unknown Xenophanes
 Header 2: A Note To The Quotation From Xenophanes (Dk 21B25) In Section 4 Above
 Content:
 
-Section Name is really name of chapter. Why did it skip "Essay 2"? Chapter Title is sub title. Then we keep adding 'Addendums' on (happens in previous chapter too)
+Section Name is really name of chapter. Why did it skip "Essay 2"? Chapter Title is subtitle. Then we keep adding 'Addendums' on (happens in previous chapter too)
 
 
 
@@ -154,50 +94,10 @@ Section Name: The Unknown Xenophanes
 Subsection Name: Some Principles For A New Professional Ethics Based On Xenophanes’ Theory Of Truth
 Content:
 
-
-
-Item Id: Ch04
-Paragraph Num: 65
-Page Number: 106
-Chapter Title: How The Moon Might Throw Some Of Her Light Upon The Two Ways Of Parmenides (1989): Addendum
-Chapter Title: Essay 4: How The Moon Might Throw Some Of Her Light Upon The Two Ways Of Parmenides (1989)
-Section Name: Essay 4
-Subsection Name: With A Note On A Possible Emendation Affecting The Relation Between The Two Parts Of Parmenides’ Poem*
-Content:
+I don't think 'An attempt to establish his greatness' should be the chapter title. It should be 'Addendum 2'
 
 
 
-
-Item Id: Ch06
-Paragraph Num: 140
-Page Number: 156
-Chapter Title: Notes on Parmenides’ poem and its origin in early Greek cosmology: Addendum
-Chapter Title: Notes on Parmenides’ poem and its origin in early Greek cosmology
-Section Name: The World Of Parmenides
-Subsection Name: A Historical Conjecture About The Origin Of Parmenides’ Cosmology
-Content:
-
-
-
-Item Id: Ch07
-Paragraph Num: 28
-Page Number: 172
-Chapter Title: Beyond The Search For Invariants
-Chapter Title: Essay 7: Beyond The Search For Invariants
-Section Name: Essay 7
-Subsection Name: 4 A Parmenidean Anticipation Of Critical Rationalism
-Content:
-
-
-
-Item Id: Ch07
-Paragraph Num: 318
-Page Number: 245
-Chapter Title: Beyond The Search For Invariants: Addendum
-Chapter Title: Essay 7: Beyond The Search For Invariants
-Section Name: Essay 7
-Subsection Name: I
-Content:
 
 
 
