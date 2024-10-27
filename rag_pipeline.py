@@ -419,7 +419,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "How are refutation, falsification, and testability related?"
+    query: str = "Should we prefer more empirical theories?"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"

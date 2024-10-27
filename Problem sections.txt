@@ -26,10 +26,6 @@ Content:
 
 
 
-Start here and continue working up
-
-
-
 
 Book Title: Unended Quest
 Section Id: footnotes

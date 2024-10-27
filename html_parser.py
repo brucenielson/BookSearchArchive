@@ -131,7 +131,7 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
                 yield from recursive_yield_tags(child)
 
 
-def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
+def get_chapter_info(tags: List[Tag], h1_tags: List[Tag], h2_tags: List[Tag], h3_tags: List[Tag]) -> Tuple[str, int, str]:
     if not tags:
         return "", 0, ""
     # Get the chapter title from the tag
@@ -152,7 +152,8 @@ def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
     h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
     h1_tag_count: int = len(h1_tags)
     # TODO: Check for titles using an H2 tag if there is only one h2 tag
-    # h2_tag_count: int = len(top_tag.find_all('h2'))
+    h2_tag_count: int = len(h2_tags)
+    h3_tag_count: int = len(h3_tags)
     chapter_number: int = 0
     tags_to_delete: List[int] = []
     first_page_num: str = ""
@@ -169,10 +170,24 @@ def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
         elif is_chapter_number(tag):
             tags_to_delete.append(i)
             chapter_number = int(tag.text.strip())
-        elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
-            tags_to_delete.append(i)
-            title_text = enhance_title(tag.text)
-            chapter_title = title_text
+        elif chapter_title == "" and tag.name != 'p':
+            # Check for a header tag that isn't a title
+            if h1_tag_count == 1 and get_header_level(tag) == 1:
+                # Using an H1 tag as a chapter title
+                tags_to_delete.append(i)
+                title_text = enhance_title(tag.text)
+                chapter_title = title_text
+            elif h1_tag_count == 0:
+                if h2_tag_count == 1 and get_header_level(tag) == 2:
+                    # Using an H2 tag as a chapter title
+                    tags_to_delete.append(i)
+                    title_text = enhance_title(tag.text)
+                    chapter_title = title_text
+                elif h3_tag_count == 1 and get_header_level(tag) == 3:
+                    # I don't think this ever happens, but using an h3 tag as a chapter title
+                    tags_to_delete.append(i)
+                    title_text = enhance_title(tag.text)
+                    chapter_title = title_text
         elif tag.name == 'p' and not is_chapter_number(tag):
             # We allow a couple of paragraphs before the title for quotes and such
             if chapter_title or i > 2:
@@ -219,7 +234,9 @@ class HTMLParser:
         # convert item_soup to a list of tags using recursive_yield_tags
         tags: List[Tag] = list(recursive_yield_tags(self._item_soup))
         h1_tags: List[Tag] = self._item_soup.find_all('h1')
-        self._chapter_title, chapter_number, page_num = get_chapter_info(tags, h1_tags)
+        h2_tags: List[Tag] = self._item_soup.find_all('h2')
+        h3_tags: List[Tag] = self._item_soup.find_all('h3')
+        self._chapter_title, chapter_number, page_num = get_chapter_info(tags, h1_tags, h2_tags, h3_tags)
         # Advance iter2 to be one ahead of iter1
         for j, tag in enumerate(tags):
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
