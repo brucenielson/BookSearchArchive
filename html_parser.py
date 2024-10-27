@@ -238,6 +238,7 @@ class HTMLParser:
         h3_tags: List[Tag] = self._item_soup.find_all('h3')
         self._chapter_title, chapter_number, page_num = get_chapter_info(tags, h1_tags, h2_tags, h3_tags)
         # Advance iter2 to be one ahead of iter1
+        combine_headers: bool = False
         for j, tag in enumerate(tags):
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
             next_tag: Tag = tags[j + 1] if j < len(tags) - 1 else None
@@ -260,12 +261,19 @@ class HTMLParser:
                     tag.name = 'p'
                 else:
                     # Remove any headers that are lower than the current one (change of section)
-                    headers = {level: text for level, text in headers.items() if level < header_level}
+                    headers = {level: text for level, text in headers.items() if level <= header_level}
                     # Save off header info
                     if header_text:
-                        headers[header_level] = header_text
+                        if not combine_headers or header_level not in headers:
+                            headers[header_level] = header_text
+                            combine_headers = False
+                        else:
+                            headers[header_level] = headers[header_level] + ": " + header_text
+                            combine_headers = True
+
                     continue
 
+            combine_headers = False
             # If we have no chapter title, check if there is a 0 level header
             if not self._chapter_title and headers and 0 in headers:
                 self._chapter_title = headers[0]
