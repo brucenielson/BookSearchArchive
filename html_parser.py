@@ -266,7 +266,7 @@ class HTMLParser:
                     if header_text:
                         if not combine_headers or header_level not in headers:
                             headers[header_level] = header_text
-                            combine_headers = False
+                            combine_headers = True
                         else:
                             headers[header_level] = headers[header_level] + ": " + header_text
                             combine_headers = True
