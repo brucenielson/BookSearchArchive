@@ -147,3 +147,34 @@ The Open Society and Its Enemies (New One-Volume Edition), notes1a
 The Open Society and Its Enemies (New One-Volume Edition), notes2
 The Open Society and Its Enemies (New One-Volume Edition), notes2a
 
+
+
+
+Book Title: The Open Society and Its Enemies (New One-Volume Edition)
+Item Id: chapter25
+Paragraph #: 44
+Page #: 485
+Section Name: Addenda
+Subsection Name: I: Facts, Standards, And Truth: A Further Criticism Of Relativism (1961)
+Item #: 27
+Content:
+The main philosophical malady of our time is an intellectual and moral relativism, the latter being at least in part based upon the former. By relativism—or, if you like, scepticism—I mean here, briefly, the theory that the choice between competing theories is arbitrary; since either, there is no such thing as objective truth; or, if there is, no such thing as a theory which is true or at any rate (though perhaps not true) nearer to the truth than another theory; or, if there are two or more theories, no ways or means of deciding whether one of them is better than another.
+
+
+Book Title: The Open Society and Its Enemies (New One-Volume Edition)
+Item Id: chapter25
+Paragraph #: 46
+Page #: 486
+Section Name: Addenda
+Subsection Name: I: Facts, Standards, And Truth: A Further Criticism Of Relativism (1961): 1. Truth
+Item #: 27
+Content:
+Certain arguments in support of relativism arise from the question, asked in the tone of the assured sceptic who knows for certain that there is no answer: ‘What is truth?’ But Pilate’s question can be answered in a simple and reasonable way—though hardly in a way that would have satisfied him—as follows: an assertion, proposition, statement, or belief, is true if, and only if, it corresponds to the facts.
+
+Shouldn't be tacking on so many subsections
+
+
+
+Section Name: Notes To Volume Ii: Notes To Chapter Eleven
+
+Is there a way to fix this in enhance_title?
