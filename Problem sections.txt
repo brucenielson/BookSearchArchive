@@ -1,67 +1,3 @@
-No chapter title of "Notes"
-
-Book Title: The Open Society and Its Enemies (New One-Volume Edition)
-Item Num: 30
-Item Id: notes1
-Paragraph Num: 247
-Page Number: 572
-Section Name: Notes To Chapter Six
-Content:
-(2) For Aristotle’s elaboration of these ideas, cp. esp. his Politics, III, 9, 1, 1280a (see also 1282b–1284b and 1301b29), where he writes: ‘All men cling to justice of some kind, but their conceptions are imperfect, and do not embrace the whole Idea. For example, justice is thought (by democrats) to be equality; and so it is, although it is not equality for all, but only for equals. And justice is thought (by oligarchs) to be inequality; and so it is, although it is not inequality for all, but only for unequals.’ Cp. also Nichom. Eth., 1131b27, 1158b30 ff.
-
-
-
-
-This entry lacks a chapter title which should be either "10" or "The Open Society and Its Enemies" when I look at the EPUB itself
-
-Book Title: The Open Society and Its Enemies (New One-Volume Edition)
-Item Num: 13
-Item Id: chapter10
-Paragraph Num: 150
-Page Number: 212
-Section Name: Addenda
-Subsection Name: IV (1965)
-Content:
-3 It is by no means the only instance, as may be seen from my chapter 8. The passage quoted in the text to note 2, for example (Rep., 389b), is a different instance from the passage (Rep., 460a) which Professor Levinson has in mind. There are several other passages. See Rep., 415d and especially Tim., 18e, which prove that Plato finds his instruction to lie of sufficient importance to be included in the very brief summary of the Republic. (See also Laws, 663d down to 664b.)
-
-
-
-Start here and continue working up
-
-
-
-
-Book Title: Unended Quest
-Section Id: footnotes
-Chapter Title: NOTES
-Header 1: NOTES
-Header 3: Scruples Of Conscience
-Page Number: 280
-Content:
-
-Header 1 to Header 3 without a header 2
-
-I think I may want this one to NOT have a section header and instead be treated as text. Perhaps detect that by a jump in header levels?
-
-
-
-
-
-
-Paragraph Num: 2
-Book Title: The Poverty of Historicism
-Section Id: ch10
-Section Name: The Anti-Naturalistic Doctrines Of Historicism
-Chapter Title: The Anti-Naturalistic Doctrines Of Historicism
-Section Name: I
-Content:
-Historicism asserts that the historical relativity of social laws makes most of the methods of physics inapplicable to sociology. Typical historicist arguments on which this view is based concern generalization, experiment, the complexity of social phenomena, the difficulties of exact prediction, and the significance of methodological essentialism. I will treat these arguments in turn.
-
-
-This section grabbed the chapter number (in roman numerals) and made it a section (subsection) name.
-
-
-
 
 Paragraph Num: 6
 Book Title: The Poverty of Historicism
@@ -72,17 +8,7 @@ Section Name: 11 Comparison With Astronomy. Long-Term Forecasts And Large-Scale 
 Can I get rid of footnotes?
 
 
-
-Various problems with:
-Book Title: The World of Parmenides
-Section Id: Ch02
-Page Number: 67
-Chapter Title: An Attempt To Establish His Greatness: Addendum 1
-Section Name: The Unknown Xenophanes
-Header 2: A Note To The Quotation From Xenophanes (Dk 21B25) In Section 4 Above
-Content:
-
-Section Name is really name of chapter. Why did it skip "Essay 2"? Chapter Title is sub title. Then we keep adding 'Addendums' on (happens in previous chapter too)
+<p class="h1" id="sec2_1">11 Comparison with Astronomy. Long-Term Forecasts and Large-Scale Forecasts<a href="#fn2_1" id="fn2-1"><sup>1</sup></a></p>
 
 
 
@@ -110,98 +36,9 @@ It dumps nearly everything into the second paragraph.
 
 
 
-Addendum 1 is not part of the title BUT it needs its own section:
-
-Item Id: Ch01
-Paragraph Num: 81
-Page Number: 29
-Chapter Title: Back To The Presocratics: Addendum 1
-Chapter Title: Essay 1: Back To The Presocratics
-Section Name: Essay 1
-Subsection Name: A Historical Note On Verisimilitude (1964)
-Content:
-
-I now have:
-Book Title: The World of Parmenides
-Item Id: Ch01
-Paragraph #: 80
-Page #: 29
-Chapter Title: Essay 1: Back To The Presocratics
-Section Name: A Historical Note On Verisimilitude (1964)
-Item #: 3
-Content:
-Some further remarks on the early history of the confusion between verisimilitude and probability (in addition to those in the Introduction) will be given here.
-1. In brief, my thesis is this. The earliest sayings at our disposal unambiguously use the idea of truthlikeness or verisimilitude. In time, ‘like the truth’ becomes ambiguous: it acquires additional meanings such as ‘likely’ or ‘likely to be true’ or ‘probable’ or ‘possible’, so that in some cases it is not clear which meaning is intended.
-
-This should have been Addendum 1: A Historical Note On Verisimilitude (1964)
-So we're losing Addenum 1 for some reason.
-
-
-Same:
-Item Id: Ch02
-Paragraph Num: 120
-Page Number: 67
-Chapter Title: An attempt to establish his greatness: Addendum 1
-Chapter Title: An attempt to establish his greatness
-Section Name: The Unknown Xenophanes
-Subsection Name: A Note To The Quotation From Xenophanes (Dk 21B25) In Section 4 Above
-Content:
-
-
-This one should have "Addendum 2"
-Item Id: Ch02
-Paragraph Num: 127
-Page Number: 70
-Chapter Title: An attempt to establish his greatness: Addendum 1: Addendum 2
-Chapter Title: An attempt to establish his greatness
-Section Name: The Unknown Xenophanes
-Subsection Name: Some Principles For A New Professional Ethics Based On Xenophanes’ Theory Of Truth
-Content:
 
 
 
-Item Id: Ch04
-Paragraph Num: 65
-Page Number: 106
-Chapter Title: How The Moon Might Throw Some Of Her Light Upon The Two Ways Of Parmenides (1989): Addendum
-Chapter Title: Essay 4: How The Moon Might Throw Some Of Her Light Upon The Two Ways Of Parmenides (1989)
-Section Name: Essay 4
-Subsection Name: With A Note On A Possible Emendation Affecting The Relation Between The Two Parts Of Parmenides’ Poem*
-Content:
-
-
-
-
-Item Id: Ch06
-Paragraph Num: 140
-Page Number: 156
-Chapter Title: Notes on Parmenides’ poem and its origin in early Greek cosmology: Addendum
-Chapter Title: Notes on Parmenides’ poem and its origin in early Greek cosmology
-Section Name: The World Of Parmenides
-Subsection Name: A Historical Conjecture About The Origin Of Parmenides’ Cosmology
-Content:
-
-
-
-Item Id: Ch07
-Paragraph Num: 28
-Page Number: 172
-Chapter Title: Beyond The Search For Invariants
-Chapter Title: Essay 7: Beyond The Search For Invariants
-Section Name: Essay 7
-Subsection Name: 4 A Parmenidean Anticipation Of Critical Rationalism
-Content:
-
-
-
-Item Id: Ch07
-Paragraph Num: 318
-Page Number: 245
-Chapter Title: Beyond The Search For Invariants: Addendum
-Chapter Title: Essay 7: Beyond The Search For Invariants
-Section Name: Essay 7
-Subsection Name: I
-Content:
 
 
 
@@ -250,4 +87,36 @@ The Open Society and Its Enemies (New One-Volume Edition), notes1
 The Open Society and Its Enemies (New One-Volume Edition), notes1a
 The Open Society and Its Enemies (New One-Volume Edition), notes2
 The Open Society and Its Enemies (New One-Volume Edition), notes2a
+
+
+
+
+Book Title: The Open Society and Its Enemies (New One-Volume Edition)
+Item Id: chapter25
+Paragraph #: 44
+Page #: 485
+Section Name: Addenda
+Subsection Name: I: Facts, Standards, And Truth: A Further Criticism Of Relativism (1961)
+Item #: 27
+Content:
+The main philosophical malady of our time is an intellectual and moral relativism, the latter being at least in part based upon the former. By relativism—or, if you like, scepticism—I mean here, briefly, the theory that the choice between competing theories is arbitrary; since either, there is no such thing as objective truth; or, if there is, no such thing as a theory which is true or at any rate (though perhaps not true) nearer to the truth than another theory; or, if there are two or more theories, no ways or means of deciding whether one of them is better than another.
+
+
+Book Title: The Open Society and Its Enemies (New One-Volume Edition)
+Item Id: chapter25
+Paragraph #: 46
+Page #: 486
+Section Name: Addenda
+Subsection Name: I: Facts, Standards, And Truth: A Further Criticism Of Relativism (1961): 1. Truth
+Item #: 27
+Content:
+Certain arguments in support of relativism arise from the question, asked in the tone of the assured sceptic who knows for certain that there is no answer: ‘What is truth?’ But Pilate’s question can be answered in a simple and reasonable way—though hardly in a way that would have satisfied him—as follows: an assertion, proposition, statement, or belief, is true if, and only if, it corresponds to the facts.
+
+Shouldn't be tacking on so many subsections
+
+
+
+Section Name: Notes To Volume Ii: Notes To Chapter Eleven
+
+Is there a way to fix this in enhance_title?
 

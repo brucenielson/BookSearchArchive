@@ -31,7 +31,7 @@ def get_header_level(paragraph: Tag) -> Optional[int]:
 def is_title(tag: Tag) -> bool:
     # # A title isn't a header
     # noinspection SpellCheckingInspection
-    keywords: List[str] = ['title', 'chtitle', 'tochead']
+    keywords: List[str] = ['title', 'chtitle', 'tochead', 'title1', 'h1_label']
     is_a_title: bool = (hasattr(tag, 'attrs') and 'class' in tag.attrs and
                         any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
                             for cls in tag.attrs['class'] for keyword in keywords))
@@ -122,6 +122,9 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
         # Clean up of paragraph text
         for br in tag_copy.find_all('br'):
             br.insert_after(' ')
+        # Remove footnotes
+        # for fn in tag_copy.find_all('sup'):
+        #     fn.extract()
         yield tag_copy
     else:
         # Recursively go through the children of the current tag
@@ -131,7 +134,7 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
                 yield from recursive_yield_tags(child)
 
 
-def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
+def get_chapter_info(tags: List[Tag], h1_tags: List[Tag], h2_tags: List[Tag], h3_tags: List[Tag]) -> Tuple[str, int, str]:
     if not tags:
         return "", 0, ""
     # Get the chapter title from the tag
@@ -152,7 +155,8 @@ def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
     h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
     h1_tag_count: int = len(h1_tags)
     # TODO: Check for titles using an H2 tag if there is only one h2 tag
-    # h2_tag_count: int = len(top_tag.find_all('h2'))
+    h2_tag_count: int = len(h2_tags)
+    h3_tag_count: int = len(h3_tags)
     chapter_number: int = 0
     tags_to_delete: List[int] = []
     first_page_num: str = ""
@@ -169,10 +173,24 @@ def get_chapter_info(tags: List[Tag], h1_tags) -> Tuple[str, int, str]:
         elif is_chapter_number(tag):
             tags_to_delete.append(i)
             chapter_number = int(tag.text.strip())
-        elif get_header_level(tag) == 1 and h1_tag_count == 1 and not chapter_title:
-            tags_to_delete.append(i)
-            title_text = enhance_title(tag.text)
-            chapter_title = title_text
+        elif chapter_title == "" and tag.name != 'p':
+            # Check for a header tag that isn't a title
+            if h1_tag_count == 1 and get_header_level(tag) == 1:
+                # Using an H1 tag as a chapter title
+                tags_to_delete.append(i)
+                title_text = enhance_title(tag.text)
+                chapter_title = title_text
+            elif h1_tag_count == 0:
+                if h2_tag_count == 1 and get_header_level(tag) == 2:
+                    # Using an H2 tag as a chapter title
+                    tags_to_delete.append(i)
+                    title_text = enhance_title(tag.text)
+                    chapter_title = title_text
+                elif h3_tag_count == 1 and get_header_level(tag) == 3:
+                    # I don't think this ever happens, but using an h3 tag as a chapter title
+                    tags_to_delete.append(i)
+                    title_text = enhance_title(tag.text)
+                    chapter_title = title_text
         elif tag.name == 'p' and not is_chapter_number(tag):
             # We allow a couple of paragraphs before the title for quotes and such
             if chapter_title or i > 2:
@@ -219,8 +237,11 @@ class HTMLParser:
         # convert item_soup to a list of tags using recursive_yield_tags
         tags: List[Tag] = list(recursive_yield_tags(self._item_soup))
         h1_tags: List[Tag] = self._item_soup.find_all('h1')
-        self._chapter_title, chapter_number, page_num = get_chapter_info(tags, h1_tags)
+        h2_tags: List[Tag] = self._item_soup.find_all('h2')
+        h3_tags: List[Tag] = self._item_soup.find_all('h3')
+        self._chapter_title, chapter_number, page_num = get_chapter_info(tags, h1_tags, h2_tags, h3_tags)
         # Advance iter2 to be one ahead of iter1
+        combine_headers: bool = False
         for j, tag in enumerate(tags):
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
             next_tag: Tag = tags[j + 1] if j < len(tags) - 1 else None
@@ -228,11 +249,8 @@ class HTMLParser:
             # If paragraph has a page number, update our page number
             page_num = get_page_num(tag) or page_num
 
-            # Check for title information
-            if is_title(tag) or is_header1_title(tag, h1_tag_count):
-                continue
             # Is it a chapter number tag?
-            elif is_chapter_number(tag):
+            if is_chapter_number(tag):
                 continue
             elif get_header_level(tag) is not None:  # If it's a header (that isn't a h1 being used as a title)
                 header_level = get_header_level(tag)
@@ -243,12 +261,19 @@ class HTMLParser:
                     tag.name = 'p'
                 else:
                     # Remove any headers that are lower than the current one (change of section)
-                    headers = {level: text for level, text in headers.items() if level < header_level}
+                    headers = {level: text for level, text in headers.items() if level <= header_level}
                     # Save off header info
                     if header_text:
-                        headers[header_level] = header_text
+                        if not combine_headers or header_level not in headers:
+                            headers[header_level] = header_text
+                            combine_headers = True
+                        else:
+                            headers[header_level] = headers[header_level] + ": " + header_text
+                            combine_headers = True
+
                     continue
 
+            combine_headers = False
             # If we have no chapter title, check if there is a 0 level header
             if not self._chapter_title and headers and 0 in headers:
                 self._chapter_title = headers[0]
