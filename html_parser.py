@@ -111,6 +111,23 @@ def enhance_title(text: str) -> str:
     return text
 
 
+# Helper function to check if a <sup> tag is within the first content
+def is_sup_in_first_content(tag, sup_tag):
+    for content in tag.contents:
+        if isinstance(content, str) and content.strip() == '':
+            # Ignore whitespace-only strings
+            continue
+        if content == sup_tag:
+            # The <sup> tag is the first content
+            return True
+        if isinstance(content, Tag) and sup_tag in content.descendants:
+            # The <sup> tag is within the first content and the content is a Tag
+            return True
+        # We only check the first non-whitespace content
+        break
+    return False
+
+
 def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
     invalid_children: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
     # If the tag has no <p> tags or header tags under it and contains text, yield it
@@ -123,10 +140,10 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
         for br in tag_copy.find_all('br'):
             br.insert_after(' ')
         # Remove footnotes - but not if the sup tag is at the start of the paragraph
+        # Iterate over each <sup> tag
         for fn in tag_copy.find_all('sup'):
-            # Check if the text for this sup tag is at the front of the paragraph
-            if fn.text != tag_copy.text[:len(fn.text)]:
-                # If it is not, then remove the sup tag
+            if not is_sup_in_first_content(tag_copy, fn):
+                # Remove the <sup> tag if it's not within the first content
                 fn.extract()
 
         yield tag_copy
