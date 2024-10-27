@@ -122,6 +122,9 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
         # Clean up of paragraph text
         for br in tag_copy.find_all('br'):
             br.insert_after(' ')
+        # Remove footnotes
+        # for fn in tag_copy.find_all('sup'):
+        #     fn.extract()
         yield tag_copy
     else:
         # Recursively go through the children of the current tag

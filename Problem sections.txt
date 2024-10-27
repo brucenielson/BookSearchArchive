@@ -8,6 +8,10 @@ Section Name: 11 Comparison With Astronomy. Long-Term Forecasts And Large-Scale 
 Can I get rid of footnotes?
 
 
+<p class="h1" id="sec2_1">11 Comparison with Astronomy. Long-Term Forecasts and Large-Scale Forecasts<a href="#fn2_1" id="fn2-1"><sup>1</sup></a></p>
+
+
+
 
 
 
