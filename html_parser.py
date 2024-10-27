@@ -122,7 +122,7 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
         # Clean up of paragraph text
         for br in tag_copy.find_all('br'):
             br.insert_after(' ')
-        # Remove footnotes
+        # Remove footnotes - but not if the sup tag is at the start of the paragraph
         for fn in tag_copy.find_all('sup'):
             fn.extract()
         yield tag_copy
