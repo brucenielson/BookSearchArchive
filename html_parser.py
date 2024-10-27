@@ -279,23 +279,23 @@ class HTMLParser:
                 self._chapter_title = headers[0]
 
             p_str: str = str(tag)  # p.text.strip()
-            p_str_chars: int = len(tag.text)
-            min_paragraph_size: int = self._min_paragraph_size
-
             # Get top level header
             top_header_level: int = 0
             if headers:
                 top_header_level = min(headers.keys())
 
+            min_paragraph_size: int = self._min_paragraph_size
+
             # If headers are present, adjust the minimum paragraph size for notes
-            if (self._double_notes and
-                    (self._chapter_title and self._chapter_title.lower() == "notes") or
-                    (headers and headers[top_header_level].lower() == "notes")):
-                # If we're in the notes section, we want to combine paragraphs into larger sections
-                # This is because the notes are often very short, and we want to keep them together
-                # And also so that they don't dominate a semantic search
-                # We could just drop notes, but often they contain useful information
-                min_paragraph_size = self._min_paragraph_size * 2
+            if ((self._chapter_title and self._chapter_title.lower() == "notes")
+                    or (headers and headers[top_header_level].lower() == "notes")):
+                # Strip out footnote tags (i.e. sup) from the paragraph
+                # but only if it is not at the start of the paragraph
+                # p_str = re.sub(r'<sup[^>]*>.*?</sup>', '', p_str)
+                if self._double_notes:
+                    min_paragraph_size = self._min_paragraph_size * 2
+
+            p_str_chars: int = len(tag.text)
 
             # If the combined paragraph is less than the minimum size combine it with the next paragraph
             if combined_chars + p_str_chars < min_paragraph_size:
