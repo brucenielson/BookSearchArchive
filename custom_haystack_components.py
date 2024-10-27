@@ -126,8 +126,8 @@ class HTMLParserComponent:
             page_meta_data: Dict[str, str] = meta[i]
             parser: HTMLParser
             item_id: str = page_meta_data.get("item_id", "").lower()
-            chapter_title: str = page_meta_data.get("chapter_title", "").lower()
-            section_name: str = page_meta_data.get("section_name", "").lower()
+            if item_id == 'ch11' and page_meta_data.get("book_title") == 'The Poverty of Historicism':
+                pass
             if page_meta_data.get("book_title") == 'The Two Fundamental Problems of the Theory of Knowledge':
                 pass
 

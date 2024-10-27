@@ -30,7 +30,6 @@ from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader, HTMLParserComponent)
-import csv
 
 
 class DocumentProcessor:
