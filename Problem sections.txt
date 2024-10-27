@@ -178,3 +178,16 @@ Shouldn't be tacking on so many subsections
 Section Name: Notes To Volume Ii: Notes To Chapter Eleven
 
 Is there a way to fix this in enhance_title?
+
+
+Why are we losing Addenum now that we're combining subsection and section titles that are back to back?
+Book Title: The World of Parmenides
+Item Id: Ch07
+Paragraph #: 301
+Page #: 245
+Chapter Title: Essay 7: Beyond The Search For Invariants
+Section Name: A Note On Opposites And Existence In Presocratic Epistemology: I
+Item #: 9
+Content:
+The idea of opposites or contraries – hot and cold, moist and dry, light and darkness, being and nothingness, generation and destruction, growth and diminution, limited and unlimited – conceived as acting powers fighting one another is a very old one. It can be found in many primitive views of the world. Their confrontation is strife, war. This idea is developed further by Heraclitus, who, I believe, was the first to see the great and fundamental problem of change, discussed in the preceding essay.
+

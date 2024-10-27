@@ -246,11 +246,8 @@ class HTMLParser:
             # If paragraph has a page number, update our page number
             page_num = get_page_num(tag) or page_num
 
-            # Check for title information
-            if is_title(tag) or is_header1_title(tag, h1_tag_count):
-                continue
             # Is it a chapter number tag?
-            elif is_chapter_number(tag):
+            if is_chapter_number(tag):
                 continue
             elif get_header_level(tag) is not None:  # If it's a header (that isn't a h1 being used as a title)
                 header_level = get_header_level(tag)
