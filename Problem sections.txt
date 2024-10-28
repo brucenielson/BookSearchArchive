@@ -1,20 +1,3 @@
-
-Paragraph Num: 6
-Book Title: The Poverty of Historicism
-Section Id: ch11
-Chapter Title: The Pro-Naturalistic Doctrines Of Historicism
-Section Name: 11 Comparison With Astronomy. Long-Term Forecasts And Large-Scale Forecasts1
-
-Can I get rid of footnotes?
-
-
-<p class="h1" id="sec2_1">11 Comparison with Astronomy. Long-Term Forecasts and Large-Scale Forecasts<a href="#fn2_1" id="fn2-1"><sup>1</sup></a></p>
-
-
-
-
-
-
 Everything in this chapter:
 
 Book Title: Conjectures and Refutations
@@ -33,13 +16,6 @@ It dumps nearly everything into the second paragraph.
 
 
 'Von Den Neuesten … Zusammengestohlen Aus Verschiedenem, Diesem Und Jenen*'
-
-
-
-
-
-
-
 
 
 
