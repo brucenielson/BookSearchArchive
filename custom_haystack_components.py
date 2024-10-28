@@ -566,7 +566,7 @@ class CustomDocumentSplitter:
             # If not, reduce split_length and try again
             split_length -= 1
 
-        # If we get here, at least one sentence exceed max_seq_length so we couldn't find a good split
+        # If we get here, at least one sentence exceed max_seq_length, so we couldn't find a good split
         # So return splitter doing a word split
         chunk_size = 50
         split_length = self._max_seq_length//2

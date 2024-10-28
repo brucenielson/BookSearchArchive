@@ -68,8 +68,8 @@ def get_page_num(paragraph: Tag) -> str:
     # Try to get a page number - return it as a string instead of an int to accommodate roman numerals
     # Return None if none found on this paragraph
     tags: List[Tag] = paragraph.find_all(
-        lambda x: (x.name == 'a' or x.name == 'span') and x.get('id') and
-                  (x['id'].startswith('page_') or (x['id'].startswith('p') and x['id'][1:].isdigit()))
+        lambda x: (x.name == 'a' or x.name == 'span') and x.get('id')
+        and (x['id'].startswith('page_') or (x['id'].startswith('p') and x['id'][1:].isdigit()))
     )
     page_num: Optional[str] = None
     if tags:
@@ -151,7 +151,10 @@ def recursive_yield_tags(tag: Tag, remove_footnotes: bool = False) -> Iterator[T
                 yield from recursive_yield_tags(child, remove_footnotes=remove_footnotes)
 
 
-def get_chapter_info(tags: List[Tag], h1_tags: List[Tag], h2_tags: List[Tag], h3_tags: List[Tag]) -> Tuple[str, int, str]:
+def get_chapter_info(tags: List[Tag],
+                     h1_tags: List[Tag],
+                     h2_tags: List[Tag],
+                     h3_tags: List[Tag]) -> Tuple[str, int, str]:
     if not tags:
         return "", 0, ""
     # Get the chapter title from the tag
@@ -203,7 +206,7 @@ def get_chapter_info(tags: List[Tag], h1_tags: List[Tag], h2_tags: List[Tag], h3
                     title_text = enhance_title(tag.text)
                     chapter_title = title_text
                 elif h3_tag_count == 1 and get_header_level(tag) == 3:
-                    # I don't think this ever happens, but using an h3 tag as a chapter title
+                    # I don't think this ever happens, but using a h3 tag as a chapter title
                     tags_to_delete.append(i)
                     title_text = enhance_title(tag.text)
                     chapter_title = title_text
@@ -232,7 +235,8 @@ class HTMLParser:
         self._meta_data: dict[str, str] = meta_data
         self._remove_footnotes: bool = remove_footnotes
         # If True, chapters and sections named 'notes' will have double the minimum paragraph size
-        # This is because notes are often very short and we want to keep them together to not dominate a semantic search
+        # This is because notes are often very short,
+        # and we want to keep them together to not dominate a semantic search
         self._double_notes: bool = double_notes
 
     def total_text_length(self) -> int:
