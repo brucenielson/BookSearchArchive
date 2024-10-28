@@ -118,11 +118,12 @@ def is_sup_first_content(tag, sup_tag):
             continue
         # Check if the content is exactly the <sup> tag or contains it
         in_first_content: bool = content == sup_tag or (isinstance(content, Tag) and sup_tag in content.descendants)
+        # Is sup both in the first content and also literally the text matches (proving it's a footnote)?
         return in_first_content and sup_tag.text.strip() == content.text.strip()
     return False
 
 
-def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
+def recursive_yield_tags(tag: Tag, remove_footnotes: bool = False) -> Iterator[Tag]:
     invalid_children: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
     # If the tag has no <p> tags or header tags under it and contains text, yield it
     # Unless it is a div tag. The Haystack HTML parse doesn't always handle those right, so
@@ -135,10 +136,11 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
             br.insert_after(' ')
         # Remove footnotes - but not if the sup tag is at the start of the paragraph
         # Iterate over each <sup> tag
-        for fn in tag_copy.find_all('sup'):
-            if not is_sup_first_content(tag_copy, fn):
-                # Remove the <sup> tag if it's not within the first content
-                fn.extract()
+        if remove_footnotes:
+            for fn in tag_copy.find_all('sup'):
+                if not is_sup_first_content(tag_copy, fn):
+                    # Remove the <sup> tag if it's not within the first content
+                    fn.extract()
 
         yield tag_copy
     else:
@@ -146,7 +148,7 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
         for child in tag.children:
             if isinstance(child, Tag):
                 # Yield the child tags that meet the criteria
-                yield from recursive_yield_tags(child)
+                yield from recursive_yield_tags(child, remove_footnotes=remove_footnotes)
 
 
 def get_chapter_info(tags: List[Tag], h1_tags: List[Tag], h2_tags: List[Tag], h3_tags: List[Tag]) -> Tuple[str, int, str]:
@@ -169,7 +171,6 @@ def get_chapter_info(tags: List[Tag], h1_tags: List[Tag], h2_tags: List[Tag], h3
     # Remove any h1 tags that have class 'ch_num'
     h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
     h1_tag_count: int = len(h1_tags)
-    # TODO: Check for titles using an H2 tag if there is only one h2 tag
     h2_tag_count: int = len(h2_tags)
     h3_tag_count: int = len(h3_tags)
     chapter_number: int = 0
@@ -219,7 +220,8 @@ def get_chapter_info(tags: List[Tag], h1_tags: List[Tag], h2_tags: List[Tag], h3
 
 
 class HTMLParser:
-    def __init__(self, html: str, meta_data: dict[str, str], min_paragraph_size: int = 300, double_notes: bool = False):
+    def __init__(self, html: str, meta_data: dict[str, str], min_paragraph_size: int = 300,
+                 double_notes: bool = False, remove_footnotes: bool = True):
         self._item_html = html
         self._min_paragraph_size = min_paragraph_size
         self._docs_list: List[ByteStream] = []
@@ -228,6 +230,7 @@ class HTMLParser:
         self._total_text: str = ""
         self._chapter_title: str = ""
         self._meta_data: dict[str, str] = meta_data
+        self._remove_footnotes: bool = remove_footnotes
         # If True, chapters and sections named 'notes' will have double the minimum paragraph size
         # This is because notes are often very short and we want to keep them together to not dominate a semantic search
         self._double_notes: bool = double_notes
@@ -249,7 +252,7 @@ class HTMLParser:
         j: int
         combined_chars: int = 0
         # convert item_soup to a list of tags using recursive_yield_tags
-        tags: List[Tag] = list(recursive_yield_tags(self._item_soup))
+        tags: List[Tag] = list(recursive_yield_tags(self._item_soup, remove_footnotes=self._remove_footnotes))
         h1_tags: List[Tag] = self._item_soup.find_all('h1')
         h2_tags: List[Tag] = self._item_soup.find_all('h2')
         h3_tags: List[Tag] = self._item_soup.find_all('h3')
