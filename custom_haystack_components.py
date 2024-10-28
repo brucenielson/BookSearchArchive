@@ -126,9 +126,6 @@ class HTMLParserComponent:
             page_meta_data: Dict[str, str] = meta[i]
             parser: HTMLParser
             item_id: str = page_meta_data.get("item_id", "").lower()
-            if item_id == 'c_d1e349'.lower() and page_meta_data.get("book_title") == 'The Logic of Scientific Discovery':
-                pass
-
             if item_id.startswith('notes'):
                 parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size * 2,
                                     double_notes=False)  # If we're already doubling size, don't have parser do it too.

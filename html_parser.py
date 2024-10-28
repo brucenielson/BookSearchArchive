@@ -136,8 +136,6 @@ def recursive_yield_tags(tag: Tag) -> Iterator[Tag]:
         # Remove footnotes - but not if the sup tag is at the start of the paragraph
         # Iterate over each <sup> tag
         for fn in tag_copy.find_all('sup'):
-            if tag_copy.text.strip().startswith("1 H. Reichenbach"):
-                pass
             if not is_sup_first_content(tag_copy, fn):
                 # Remove the <sup> tag if it's not within the first content
                 fn.extract()
