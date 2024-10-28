@@ -126,7 +126,7 @@ class HTMLParserComponent:
             page_meta_data: Dict[str, str] = meta[i]
             parser: HTMLParser
             item_id: str = page_meta_data.get("item_id", "").lower()
-            if item_id == 'ch11' and page_meta_data.get("book_title") == 'The Poverty of Historicism':
+            if item_id == 'c_d1e349'.lower() and page_meta_data.get("book_title") == 'The Logic of Scientific Discovery':
                 pass
 
             if item_id.startswith('notes'):
