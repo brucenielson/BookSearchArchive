@@ -25,7 +25,6 @@ from haystack.utils.auth import Secret
 # Other imports
 from typing import List, Optional, Dict, Any
 from pathlib import Path
-from typing_extensions import Set
 from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
