@@ -391,8 +391,8 @@ def main() -> None:
     hf_secret: str = gen.get_secret(r'D:\Documents\Secrets\huggingface_secret.txt')  # Put your path here
     google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')  # Put your path here # noqa: F841
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
-    # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
-    model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
+    model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
+    # model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
     # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder",
     # "joiner", "llm", "prompt_builder", "doc_query_collector"
     include_outputs_from: Optional[set[str]] = None
@@ -419,7 +419,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "Should we prefer more empirical theories?"
+    query: str = "Is induction a myth?"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"
@@ -438,4 +438,3 @@ if __name__ == "__main__":
 # TODO: Add a reranker component to rerank the documents before passing them to the LLM
 # TODO: Add a way to chat with the model
 # TODO: Add graph rag pipeline
-# TODO: Upgrade Google Gemini
