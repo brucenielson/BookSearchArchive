@@ -227,7 +227,6 @@ class DocumentProcessor:
         doc_convert_pipe.connect("router.no_documents", "final_counter.no_documents")
 
         self._doc_convert_pipeline = doc_convert_pipe
-        self.draw_pipeline()
 
     def _initialize_document_store(self) -> None:
         def init_doc_store(force_recreate: bool = False) -> PgvectorDocumentStore:
