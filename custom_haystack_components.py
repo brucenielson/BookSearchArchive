@@ -60,6 +60,18 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 
 
 @component
+class EPubPdfMerger:
+    @component.output_types(documents=List[Document])
+    def run(self, epub_docs: List[Document], pdf_docs: List[Document]) -> Dict[str, List[Document]]:
+        documents: List[Document] = []
+        for doc in epub_docs:
+            documents.append(doc)
+        for doc in pdf_docs:
+            documents.append(doc)
+        return {"documents": documents}
+
+
+@component
 class EpubVsPdfSplitter:
     @component.output_types(epub_paths=List[str], pdf_paths=List[str])
     def run(self, file_paths: List[str]) -> Dict[str, List[str]]:

@@ -28,7 +28,8 @@ from pathlib import Path
 from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
-                                        EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter)
+                                        EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
+                                        EPubPdfMerger)
 
 
 class DocumentProcessor:
@@ -188,12 +189,14 @@ class DocumentProcessor:
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
+        doc_convert_pipe.add_component("pdf_loader", PyPDFToDocument())
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
         doc_convert_pipe.add_component("html_parser",
                                        HTMLParserComponent(min_paragraph_size=self._min_paragraph_size,
                                                            min_section_size=self._min_section_size,
                                                            verbose=self._verbose))
         doc_convert_pipe.add_component("html_converter", HTMLToDocument())
+        doc_convert_pipe.add_component("epub_pdf_merger", EPubPdfMerger())
         doc_convert_pipe.add_component("remove_illegal_docs", instance=RemoveIllegalDocs())
         doc_convert_pipe.add_component("cleaner", DocumentCleaner())
         doc_convert_pipe.add_component("splitter", custom_splitter)
@@ -206,11 +209,14 @@ class DocumentProcessor:
         doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
         doc_convert_pipe.connect("epub_vs_pdf_splitter.epub_paths", "epub_loader.file_paths")
+        doc_convert_pipe.connect("epub_vs_pdf_splitter.pdf_paths", "pdf_loader.sources")
         doc_convert_pipe.connect("epub_loader.html_pages", "html_parser.html_pages")
         doc_convert_pipe.connect("epub_loader.meta", "html_parser.meta")
         doc_convert_pipe.connect("html_parser.sources", "html_converter.sources")
         doc_convert_pipe.connect("html_parser.meta", "html_converter.meta")
-        doc_convert_pipe.connect("html_converter", "remove_illegal_docs")
+        doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.epub_docs")
+        doc_convert_pipe.connect("html_converter.documents", "epub_pdf_merger.pdf_docs")
+        doc_convert_pipe.connect("epub_pdf_merger.documents", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
         doc_convert_pipe.connect("splitter", "duplicate_checker")
