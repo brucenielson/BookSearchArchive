@@ -28,7 +28,7 @@ from pathlib import Path
 from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
-                                        EPubLoader, HTMLParserComponent, print_debug_results)
+                                        EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter)
 
 
 class DocumentProcessor:
@@ -187,6 +187,7 @@ class DocumentProcessor:
 
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
+        doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
         doc_convert_pipe.add_component("html_parser",
                                        HTMLParserComponent(min_paragraph_size=self._min_paragraph_size,
@@ -204,6 +205,7 @@ class DocumentProcessor:
                                                       policy=DuplicatePolicy.OVERWRITE))
         doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
+        doc_convert_pipe.connect("epub_vs_pdf_splitter.epub_paths", "epub_loader.file_paths")
         doc_convert_pipe.connect("epub_loader.html_pages", "html_parser.html_pages")
         doc_convert_pipe.connect("epub_loader.meta", "html_parser.meta")
         doc_convert_pipe.connect("html_parser.sources", "html_converter.sources")
@@ -259,7 +261,7 @@ class DocumentProcessor:
             file_path_list: List[str] = [file_path]
             self._print_verbose(f"Processing file: {file_path} ")
             results: Dict[str, Any] = self._doc_convert_pipeline.run(
-                {"epub_loader": {"file_path_list": file_path_list}},
+                {"epub_vs_pdf_splitter": {"file_paths": file_path_list}},
                 include_outputs_from=self._include_outputs_from)
             print_debug_results(results, include_outputs_from=self._include_outputs_from, verbose=self._verbose)
             written = results["final_counter"]["documents_written"]
