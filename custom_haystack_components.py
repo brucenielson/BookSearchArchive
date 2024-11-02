@@ -98,12 +98,15 @@ class EPubLoader:
 
     @component.output_types(html_pages=List[str], meta=List[Dict[str, str]])
     def run(self, file_paths: Union[List[str], List[Path], str]) -> Dict[str, Any]:
-        if isinstance(file_paths, str):
-            file_path_list = [file_paths]
+        # Handle not documents passed in
         if len(file_paths) == 0:
-            raise ValueError("No file paths provided.")
+            return {"html_pages": [], "meta": []}
+        # Handle passing in a string with a path instead of a list of paths
+        if isinstance(file_paths, str):
+            file_paths = [file_paths]
+        # Handle passing in a list of Path objects instead of a list of strings
         if isinstance(file_paths, list) and isinstance(file_paths[0], Path):
-            file_path_list = [str(file_path) for file_path in file_paths]
+            file_paths = [str(file_path) for file_path in file_paths]
         # Verify that every single file path ends with .epub
         if not all(file_path.lower().endswith('.epub') for file_path in file_paths):
             raise ValueError("EpubLoader only accepts .epub files.")
@@ -251,6 +254,7 @@ class HTMLParserComponent:
 
 
 def print_documents(documents: List[Document]) -> None:
+    ignore_keys: set = {'file_path', 'source_id'}
     for i, doc in enumerate(documents, 1):
         print(f"\nDocument {i}:")
         print(f"Score: {doc.score}")
@@ -258,7 +262,7 @@ def print_documents(documents: List[Document]) -> None:
         # Dynamically iterate over all keys in doc.meta, excluding 'file_path'
         if hasattr(doc, 'meta') and doc.meta:
             for key, value in doc.meta.items():
-                if key == 'file_path':  # Skip 'file_path'
+                if key.lower() in ignore_keys or key.startswith('_') or key.startswith('split'):
                     continue
                 # Print the key-value pair, wrapped at 80 characters
                 print(textwrap.fill(f"{key.replace('_', ' ').title()}: {value}", width=80))
@@ -503,8 +507,9 @@ class CustomDocumentSplitter:
 
         for doc in documents:
             # Extract item_num and paragraph_num from the metadata
-            item_num: int = int(doc.meta.get("item_#"))
-            paragraph_num: int = int(doc.meta.get("paragraph_#"))
+            item_num: Optional[int] = int(doc.meta.get("item_#")) if doc.meta.get("item_#") is not None else None
+            paragraph_num: Optional[int] = int(doc.meta.get("paragraph_#")) \
+                if doc.meta.get("paragraph_#") is not None else None
             book_title: str = doc.meta.get("book_title")
 
             # If this is a section to skip, go to the next document
