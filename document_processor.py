@@ -148,7 +148,7 @@ class DocumentProcessor:
         if self._doc_convert_pipeline is not None:
             self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
 
-    def _load_files(self) -> str:
+    def _create_file_list(self) -> str:
         if self._is_directory:
             for file_path in Path(self._file_or_folder_path).glob('*'):
                 if file_path.suffix.lower() in {'.epub', '.pdf'}:
@@ -254,10 +254,13 @@ class DocumentProcessor:
         meta: List[Dict[str, str]]
         # self._doc_convert_pipeline.run({"epub_loader": {"file_or_folder_path": self._file_or_folder_path}})
 
-        for file_path in self._load_files():
+        # file_path_list: List[str] = list(self._create_file_list())
+        for file_path in self._create_file_list():
+            file_path_list: List[str] = [file_path]
             self._print_verbose(f"Processing file: {file_path} ")
-            results: Dict[str, Any] = self._doc_convert_pipeline.run({"epub_loader": {"file_path": file_path}},
-                                                                     include_outputs_from=self._include_outputs_from)
+            results: Dict[str, Any] = self._doc_convert_pipeline.run(
+                {"epub_loader": {"file_path_list": file_path_list}},
+                include_outputs_from=self._include_outputs_from)
             print_debug_results(results, include_outputs_from=self._include_outputs_from, verbose=self._verbose)
             written = results["final_counter"]["documents_written"]
             total_written += written
