@@ -60,26 +60,42 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 
 
 @component
+class EpubVsPdfSplitter:
+    @component.output_types(epub_paths=List[str], pdf_paths=List[str])
+    def run(self, file_paths: List[str]) -> Dict[str, List[str]]:
+        epub_paths: List[str] = []
+        pdf_paths: List[str] = []
+        for file_path in file_paths:
+            if file_path.lower().endswith('.epub'):
+                epub_paths.append(file_path)
+            elif file_path.lower().endswith('.pdf'):
+                pdf_paths.append(file_path)
+            else:
+                raise ValueError(f"File type not supported: {file_path}")
+        return {"epub_paths": epub_paths, "pdf_paths": pdf_paths}
+
+
+@component
 class EPubLoader:
     def __init__(self, verbose: bool = False, skip_file: str = "sections_to_skip.csv") -> None:
         self._verbose: bool = verbose
         self._is_directory: bool = False
-        self._file_path_list: List[str] = []
+        self._file_paths: List[str] = []
         self._skip_file: str = skip_file
         self._sections_to_skip: Dict[str, Set[str]] = {}
 
     @component.output_types(html_pages=List[str], meta=List[Dict[str, str]])
-    def run(self, file_path_list: Union[List[str], List[Path], str]) -> Dict[str, Any]:
-        if isinstance(file_path_list, str):
-            file_path_list = [file_path_list]
-        if len(file_path_list) == 0:
+    def run(self, file_paths: Union[List[str], List[Path], str]) -> Dict[str, Any]:
+        if isinstance(file_paths, str):
+            file_path_list = [file_paths]
+        if len(file_paths) == 0:
             raise ValueError("No file paths provided.")
-        if isinstance(file_path_list, list) and isinstance(file_path_list[0], Path):
-            file_path_list = [str(file_path) for file_path in file_path_list]
+        if isinstance(file_paths, list) and isinstance(file_paths[0], Path):
+            file_path_list = [str(file_path) for file_path in file_paths]
         # Verify that every single file path ends with .epub
-        if not all(file_path.lower().endswith('.epub') for file_path in file_path_list):
+        if not all(file_path.lower().endswith('.epub') for file_path in file_paths):
             raise ValueError("EpubLoader only accepts .epub files.")
-        self._file_path_list = file_path_list
+        self._file_paths = file_paths
         self._sections_to_skip = self._load_sections_to_skip()
         # Load the EPUB file
         html_pages: List[str]
@@ -90,7 +106,7 @@ class EPubLoader:
     def _load_file(self) -> Tuple[List[str], List[Dict[str, str]]]:
         sources: List[str] = []
         meta: List[Dict[str, str]] = []
-        for file_path in self._file_path_list:
+        for file_path in self._file_paths:
             sources_temp: List[str]
             meta_temp: List[Dict[str, str]]
             sources_temp, meta_temp = self._load_epub(file_path)
@@ -131,10 +147,10 @@ class EPubLoader:
     def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
         sections_to_skip: Dict[str, Set[str]] = {}
         if self._is_directory:
-            csv_path = Path(self._file_path_list[0]) / self._skip_file
+            csv_path = Path(self._file_paths[0]) / self._skip_file
         else:
             # Get the directory of the file and then look for the csv file in that directory
-            csv_path = Path(self._file_path_list[0]).parent / self._skip_file
+            csv_path = Path(self._file_paths[0]).parent / self._skip_file
 
         if csv_path.exists():
             with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
