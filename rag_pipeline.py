@@ -25,50 +25,13 @@ import generator_model as gen
 from enum import Enum
 import textwrap
 from custom_haystack_components import (MergeResults, DocumentQueryCollector, RetrieverWrapper, print_documents,
-                                        QueryComponent)
+                                        QueryComponent, print_debug_results)
 
 
 class SearchMode(Enum):
     LEXICAL = 1
     SEMANTIC = 2
     HYBRID = 3
-
-
-def print_debug_results(results: Dict[str, Any],
-                        include_outputs_from: Optional[set[str]] = None,
-                        verbose: bool = True) -> None:
-    level: int = 1
-    if verbose and include_outputs_from is not None:
-        # Exclude excess outputs
-        results_filtered = {k: v for k, v in results.items() if k in include_outputs_from}
-        if results_filtered:
-            print()
-            print("Debug Results:")
-            # Call the recursive function to print the results hierarchically
-            _print_hierarchy(results_filtered, level)
-
-
-def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
-    for key, value in data.items():
-        # Print the key with the corresponding level
-        if level == 1:
-            print()
-        print(f"Level {level}: {key}")
-
-        # Check if the value is a dictionary
-        if isinstance(value, dict):
-            _print_hierarchy(value, level + 1)
-        # Check if the value is a list
-        elif isinstance(value, list):
-            for index, item in enumerate(value):
-                print(f"Level {level + 1}: Item {index + 1}")  # Indicating it's an item in a list
-                if isinstance(item, dict):
-                    _print_hierarchy(item, level + 2)
-                else:
-                    print(item)  # Print the item directly
-        else:
-            # If the value is neither a dict nor a list, print it directly
-            print(value)
 
 
 class RagPipeline:
