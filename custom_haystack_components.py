@@ -22,20 +22,95 @@ from haystack.dataclasses import ByteStream
 from pathlib import Path
 
 
+def print_debug_results(results: Dict[str, Any],
+                        include_outputs_from: Optional[set[str]] = None,
+                        verbose: bool = True) -> None:
+    level: int = 1
+    if verbose and include_outputs_from is not None:
+        # Exclude excess outputs
+        results_filtered = {k: v for k, v in results.items() if k in include_outputs_from}
+        if results_filtered:
+            print()
+            print("Debug Results:")
+            # Call the recursive function to print the results hierarchically
+            _print_hierarchy(results_filtered, level)
+
+
+def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
+    for key, value in data.items():
+        # Print the key with the corresponding level
+        if level == 1:
+            print()
+        print(f"Level {level}: {key}")
+
+        # Check if the value is a dictionary
+        if isinstance(value, dict):
+            _print_hierarchy(value, level + 1)
+        # Check if the value is a list
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                print(f"Level {level + 1}: Item {index + 1}")  # Indicating it's an item in a list
+                if isinstance(item, dict):
+                    _print_hierarchy(item, level + 2)
+                else:
+                    print(item)  # Print the item directly
+        else:
+            # If the value is neither a dict nor a list, print it directly
+            print(value)
+
+
+@component
+class EPubPdfMerger:
+    @component.output_types(documents=List[Document])
+    def run(self, epub_docs: List[Document], pdf_docs: List[Document]) -> Dict[str, List[Document]]:
+        documents: List[Document] = []
+        for doc in epub_docs:
+            documents.append(doc)
+        for doc in pdf_docs:
+            documents.append(doc)
+        return {"documents": documents}
+
+
+@component
+class EpubVsPdfSplitter:
+    @component.output_types(epub_paths=List[str], pdf_paths=List[str])
+    def run(self, file_paths: List[str]) -> Dict[str, List[str]]:
+        epub_paths: List[str] = []
+        pdf_paths: List[str] = []
+        for file_path in file_paths:
+            if file_path.lower().endswith('.epub'):
+                epub_paths.append(file_path)
+            elif file_path.lower().endswith('.pdf'):
+                pdf_paths.append(file_path)
+            else:
+                raise ValueError(f"File type not supported: {file_path}")
+        return {"epub_paths": epub_paths, "pdf_paths": pdf_paths}
+
+
 @component
 class EPubLoader:
     def __init__(self, verbose: bool = False, skip_file: str = "sections_to_skip.csv") -> None:
         self._verbose: bool = verbose
         self._is_directory: bool = False
-        self._file_path: str = ""
+        self._file_paths: List[str] = []
         self._skip_file: str = skip_file
         self._sections_to_skip: Dict[str, Set[str]] = {}
 
     @component.output_types(html_pages=List[str], meta=List[Dict[str, str]])
-    def run(self, file_path: Union[str, Path]) -> Dict[str, Any]:
-        if isinstance(file_path, Path):
-            file_path = str(file_path)
-        self._file_path = file_path
+    def run(self, file_paths: Union[List[str], List[Path], str]) -> Dict[str, Any]:
+        # Handle not documents passed in
+        if len(file_paths) == 0:
+            return {"html_pages": [], "meta": []}
+        # Handle passing in a string with a path instead of a list of paths
+        if isinstance(file_paths, str):
+            file_paths = [file_paths]
+        # Handle passing in a list of Path objects instead of a list of strings
+        if isinstance(file_paths, list) and isinstance(file_paths[0], Path):
+            file_paths = [str(file_path) for file_path in file_paths]
+        # Verify that every single file path ends with .epub
+        if not all(file_path.lower().endswith('.epub') for file_path in file_paths):
+            raise ValueError("EpubLoader only accepts .epub files.")
+        self._file_paths = file_paths
         self._sections_to_skip = self._load_sections_to_skip()
         # Load the EPUB file
         html_pages: List[str]
@@ -44,7 +119,14 @@ class EPubLoader:
         return {"html_pages": html_pages, "meta": meta}
 
     def _load_file(self) -> Tuple[List[str], List[Dict[str, str]]]:
-        sources, meta = self._load_epub(self._file_path)
+        sources: List[str] = []
+        meta: List[Dict[str, str]] = []
+        for file_path in self._file_paths:
+            sources_temp: List[str]
+            meta_temp: List[Dict[str, str]]
+            sources_temp, meta_temp = self._load_epub(file_path)
+            sources.extend(sources_temp)
+            meta.extend(meta_temp)
         return sources, meta
 
     def _load_epub(self, file_path: str) -> Tuple[List[str], List[Dict[str, str]]]:
@@ -80,10 +162,10 @@ class EPubLoader:
     def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
         sections_to_skip: Dict[str, Set[str]] = {}
         if self._is_directory:
-            csv_path = Path(self._file_path) / self._skip_file
+            csv_path = Path(self._file_paths[0]) / self._skip_file
         else:
             # Get the directory of the file and then look for the csv file in that directory
-            csv_path = Path(self._file_path).parent / self._skip_file
+            csv_path = Path(self._file_paths[0]).parent / self._skip_file
 
         if csv_path.exists():
             with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
@@ -172,6 +254,7 @@ class HTMLParserComponent:
 
 
 def print_documents(documents: List[Document]) -> None:
+    ignore_keys: set = {'file_path', 'source_id'}
     for i, doc in enumerate(documents, 1):
         print(f"\nDocument {i}:")
         print(f"Score: {doc.score}")
@@ -179,7 +262,7 @@ def print_documents(documents: List[Document]) -> None:
         # Dynamically iterate over all keys in doc.meta, excluding 'file_path'
         if hasattr(doc, 'meta') and doc.meta:
             for key, value in doc.meta.items():
-                if key == 'file_path':  # Skip 'file_path'
+                if key.lower() in ignore_keys or key.startswith('_') or key.startswith('split'):
                     continue
                 # Print the key-value pair, wrapped at 80 characters
                 print(textwrap.fill(f"{key.replace('_', ' ').title()}: {value}", width=80))
@@ -424,8 +507,9 @@ class CustomDocumentSplitter:
 
         for doc in documents:
             # Extract item_num and paragraph_num from the metadata
-            item_num: int = int(doc.meta.get("item_#"))
-            paragraph_num: int = int(doc.meta.get("paragraph_#"))
+            item_num: Optional[int] = int(doc.meta.get("item_#")) if doc.meta.get("item_#") is not None else None
+            paragraph_num: Optional[int] = int(doc.meta.get("paragraph_#")) \
+                if doc.meta.get("paragraph_#") is not None else None
             book_title: str = doc.meta.get("book_title")
 
             # If this is a section to skip, go to the next document
