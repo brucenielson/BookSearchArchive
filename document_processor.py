@@ -12,7 +12,7 @@ from haystack.components.preprocessors import DocumentCleaner
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 # noinspection PyPackageRequirements
-from haystack.components.converters import HTMLToDocument
+from haystack.components.converters import HTMLToDocument, PyPDFToDocument  # TODO: PDFMinerToDocument?
 # noinspection PyPackageRequirements
 from haystack.components.writers import DocumentWriter
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
@@ -28,7 +28,8 @@ from pathlib import Path
 from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
-                                        EPubLoader, HTMLParserComponent)
+                                        EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
+                                        EPubPdfMerger)
 
 
 class DocumentProcessor:
@@ -45,6 +46,7 @@ class DocumentProcessor:
                  min_section_size: int = 1000,
                  min_paragraph_size: int = 500,
                  embedder_model_name: Optional[str] = None,
+                 include_outputs_from: Optional[set[str]] = None,
                  verbose: bool = False
                  ) -> None:
 
@@ -57,6 +59,7 @@ class DocumentProcessor:
         self._min_paragraph_size: int = min_paragraph_size
         self._skip_content: Optional[callable] = skip_content_func
         self._verbose: bool = verbose
+        self._include_outputs_from: Optional[set[str]] = include_outputs_from
 
         # File paths
         self._file_or_folder_path: str = file_or_folder_path  # New instance variable
@@ -146,13 +149,17 @@ class DocumentProcessor:
         if self._doc_convert_pipeline is not None:
             self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
 
-    def _load_files(self) -> str:
+    def _create_file_list(self) -> str:
         if self._is_directory:
-            for file_path in Path(self._file_or_folder_path).glob('*.epub'):
-                yield str(file_path)
+            for file_path in Path(self._file_or_folder_path).glob('*'):
+                if file_path.suffix.lower() in {'.epub', '.pdf'}:
+                    yield str(file_path)
         else:
             path: Path = Path(self._file_or_folder_path)
-            yield str(path)
+            if path.suffix.lower() in {'.epub', '.pdf'}:
+                yield str(path)
+            else:
+                raise ValueError("The provided file must be an .epub or .pdf")
 
     def _doc_converter_pipeline(self) -> None:
         self._setup_embedder()
@@ -161,7 +168,7 @@ class DocumentProcessor:
                                                                          verbose=self._verbose,
                                                                          skip_content_func=self._skip_content)
 
-        routes = [
+        embedding_routes: List[Dict] = [
             {
                 "condition": "{{documents|length > 0}}",
                 "output": "{{documents}}",
@@ -175,32 +182,41 @@ class DocumentProcessor:
                 "output_type": int,
             },
         ]
-        router = ConditionalRouter(routes=routes, unsafe=True)  # unsafe must be set to True to allow Document outputs
+        # Embedding router is used to bypass the embedder if all documents were marked as duplicates
+        # unsafe must be set to True to allow Document outputs
+        embedding_router = ConditionalRouter(routes=embedding_routes, unsafe=True)
 
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
+        doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
+        doc_convert_pipe.add_component("pdf_loader", PyPDFToDocument())
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
         doc_convert_pipe.add_component("html_parser",
                                        HTMLParserComponent(min_paragraph_size=self._min_paragraph_size,
                                                            min_section_size=self._min_section_size,
                                                            verbose=self._verbose))
         doc_convert_pipe.add_component("html_converter", HTMLToDocument())
+        doc_convert_pipe.add_component("epub_pdf_merger", EPubPdfMerger())
         doc_convert_pipe.add_component("remove_illegal_docs", instance=RemoveIllegalDocs())
         doc_convert_pipe.add_component("cleaner", DocumentCleaner())
         doc_convert_pipe.add_component("splitter", custom_splitter)
         doc_convert_pipe.add_component("duplicate_checker", DuplicateChecker(document_store=self._document_store))
         doc_convert_pipe.add_component("embedder", self._sentence_embedder)
-        doc_convert_pipe.add_component("router", router)
+        doc_convert_pipe.add_component("router", embedding_router)
         doc_convert_pipe.add_component("writer",
                                        DocumentWriter(document_store=self._document_store,
                                                       policy=DuplicatePolicy.OVERWRITE))
         doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
+        doc_convert_pipe.connect("epub_vs_pdf_splitter.epub_paths", "epub_loader.file_paths")
+        doc_convert_pipe.connect("epub_vs_pdf_splitter.pdf_paths", "pdf_loader.sources")
         doc_convert_pipe.connect("epub_loader.html_pages", "html_parser.html_pages")
         doc_convert_pipe.connect("epub_loader.meta", "html_parser.meta")
         doc_convert_pipe.connect("html_parser.sources", "html_converter.sources")
         doc_convert_pipe.connect("html_parser.meta", "html_converter.meta")
-        doc_convert_pipe.connect("html_converter", "remove_illegal_docs")
+        doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.epub_docs")
+        doc_convert_pipe.connect("html_converter.documents", "epub_pdf_merger.pdf_docs")
+        doc_convert_pipe.connect("epub_pdf_merger.documents", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
         doc_convert_pipe.connect("splitter", "duplicate_checker")
@@ -245,9 +261,14 @@ class DocumentProcessor:
         meta: List[Dict[str, str]]
         # self._doc_convert_pipeline.run({"epub_loader": {"file_or_folder_path": self._file_or_folder_path}})
 
-        for file_path in self._load_files():
+        # file_path_list: List[str] = list(self._create_file_list())
+        for file_path in self._create_file_list():
+            file_path_list: List[str] = [file_path]
             self._print_verbose(f"Processing file: {file_path} ")
-            results: Dict[str, Any] = self._doc_convert_pipeline.run({"epub_loader": {"file_path": file_path}})
+            results: Dict[str, Any] = self._doc_convert_pipeline.run(
+                {"epub_vs_pdf_splitter": {"file_paths": file_path_list}},
+                include_outputs_from=self._include_outputs_from)
+            print_debug_results(results, include_outputs_from=self._include_outputs_from, verbose=self._verbose)
             written = results["final_counter"]["documents_written"]
             total_written += written
             self._print_verbose(f"Wrote {written} documents for {file_path}.")
@@ -261,14 +282,15 @@ def main() -> None:
     # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
     # epub_file_path: str = "documents/Karl Popper - The Open Society and Its Enemies-Princeton University Press (2013).epub"  # noqa: E501
     # epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
-    epub_file_path: str = "documents"
+    file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
+    include_outputs_from: Optional[set[str]] = None  # {"final_counter"}
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
         table_name="book_archive",
         recreate_table=False,
         embedder_model_name="BAAI/llm-embedder",
-        file_or_folder_path=epub_file_path,
+        file_or_folder_path=file_path,
         postgres_user_name='postgres',
         postgres_password=postgres_password,
         postgres_host='localhost',
@@ -277,6 +299,7 @@ def main() -> None:
         skip_content_func=skip_content,
         min_section_size=3000,
         min_paragraph_size=300,
+        include_outputs_from=include_outputs_from,
         verbose=True
     )
 
