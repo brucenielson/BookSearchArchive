@@ -1,5 +1,4 @@
 import csv
-
 from ebooklib import ITEM_DOCUMENT, epub
 # noinspection PyPackageRequirements
 from haystack import Document, component
@@ -20,6 +19,7 @@ from html_parser import HTMLParser
 # noinspection PyPackageRequirements
 from haystack.dataclasses import ByteStream
 from pathlib import Path
+from pypdf import PdfReader, DocumentInformation
 
 
 def print_debug_results(results: Dict[str, Any],
@@ -57,6 +57,43 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
         else:
             # If the value is neither a dict nor a list, print it directly
             print(value)
+
+
+@component
+class PDFReader:
+    def __init__(self, min_page_size: int = 1000):
+        self._min_page_size = min_page_size
+
+    @component.output_types(documents=List[Document])
+    def run(self, sources: List[str]) -> Dict[str, List[Document]]:
+        # result = PyPDFToDocument().run(sources)
+        documents: List[Document] = []
+        for source in sources:
+            pdf_reader = PdfReader(source)
+            for page_num, page in enumerate(pdf_reader.pages):
+                page_text = page.extract_text()
+                if len(page_text) < self._min_page_size:
+                    continue
+                meta_properties: List[str] = ["author", "title", "subject"]
+                meta: Dict[str, Any] = PDFReader._create_meta_data(pdf_reader.metadata, meta_properties)
+                meta["page_#"] = page_num + 1
+                if not meta.get("title"):
+                    # Use file name for title if none found in metadata
+                    source_title: str = Path(source).stem
+                    meta["title"] = source_title
+
+                documents.append(Document(content=page_text, meta=meta))
+
+        return {"documents": documents}
+
+    @staticmethod
+    def _create_meta_data(pdf_meta_data: DocumentInformation, meta_data_titles: List[str]) -> Dict[str, str]:
+        meta_data: Dict[str, str] = {}
+        for title in meta_data_titles:
+            value: str = getattr(pdf_meta_data, title, "")
+            if hasattr(pdf_meta_data, title) and value is not None and value != "":
+                meta_data[title] = getattr(pdf_meta_data, title, "")
+        return meta_data
 
 
 @component
@@ -237,15 +274,16 @@ class HTMLParserComponent:
                 self._print_verbose(f"Book: {book_title}; Chapter Title: {parser.chapter_title}. "
                                     f"Length: {parser.total_text_length()}. Skipped.")
 
-        self._print_verbose(f"Sections included:")
-        for item in included_sections:
-            self._print_verbose(item)
-        if missing_chapter_titles:
-            self._print_verbose()
-            self._print_verbose(f"Sections missing chapter titles:")
-            for item in missing_chapter_titles:
+        if len(docs_list) > 0:
+            self._print_verbose(f"Sections included:")
+            for item in included_sections:
                 self._print_verbose(item)
-        self._print_verbose()
+            if missing_chapter_titles:
+                self._print_verbose()
+                self._print_verbose(f"Sections missing chapter titles:")
+                for item in missing_chapter_titles:
+                    self._print_verbose(item)
+            self._print_verbose()
         return {"sources": docs_list, "meta": meta_list}
 
     def _print_verbose(self, *args, **kwargs) -> None:
