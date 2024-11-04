@@ -29,7 +29,7 @@ from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
-                                        EPubPdfMerger)
+                                        EPubPdfMerger, PDFReader)
 
 
 class DocumentProcessor:
@@ -189,7 +189,7 @@ class DocumentProcessor:
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
-        doc_convert_pipe.add_component("pdf_loader", PyPDFToDocument())
+        doc_convert_pipe.add_component("pdf_loader", PDFReader())
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
         doc_convert_pipe.add_component("html_parser",
                                        HTMLParserComponent(min_paragraph_size=self._min_paragraph_size,
