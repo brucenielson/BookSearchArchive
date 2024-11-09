@@ -20,6 +20,7 @@ from html_parser import HTMLParser
 from haystack.dataclasses import ByteStream
 from pathlib import Path
 from pypdf import PdfReader, DocumentInformation
+import pymupdf4llm
 
 
 def print_debug_results(results: Dict[str, Any],
@@ -60,13 +61,27 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 
 
 @component
+class PDFtoMarkdown:
+    def __init__(self, min_page_size: int = 1000):
+        self._min_page_size = min_page_size
+
+    @component.output_types(sources=List[ByteStream])
+    def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
+        markdown_docs: List[ByteStream] = []
+        for source in sources:
+            markdown_doc: str = pymupdf4llm.to_markdown(source)
+            byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
+            markdown_docs.append(byte_stream)
+        return {"sources": markdown_docs}
+
+
+@component
 class PDFReader:
     def __init__(self, min_page_size: int = 1000):
         self._min_page_size = min_page_size
 
     @component.output_types(documents=List[Document])
     def run(self, sources: List[str]) -> Dict[str, List[Document]]:
-        # result = PyPDFToDocument().run(sources)
         documents: List[Document] = []
         for source in sources:
             pdf_reader = PdfReader(source)
