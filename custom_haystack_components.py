@@ -105,6 +105,7 @@ class PDFtoMarkdown:
 
 # https://github.com/tesseract-ocr/tesseract
 
+
 @component
 class PDFReader:
     def __init__(self, min_page_size: int = 1000):
