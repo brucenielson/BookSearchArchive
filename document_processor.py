@@ -286,7 +286,7 @@ def main() -> None:
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
         table_name="book_archive",
-        recreate_table=False,
+        recreate_table=True,
         embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=file_path,
         postgres_user_name='postgres',
