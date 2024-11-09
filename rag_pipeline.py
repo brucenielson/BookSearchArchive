@@ -371,7 +371,7 @@ def main() -> None:
                                              llm_top_k=5,
                                              retriever_top_k_docs=None,
                                              include_outputs_from=include_outputs_from,
-                                             search_mode=SearchMode.LEXICAL,
+                                             search_mode=SearchMode.HYBRID,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
@@ -382,7 +382,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "I vividly remember, in spite of my bad memory, some of my conversations in Prague with Alfred Tarski and Janina Hosiasson"
+    query: str = "Is Induction a myth?"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"
