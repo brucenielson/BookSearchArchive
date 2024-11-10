@@ -27,7 +27,7 @@ from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
-                                        EPubPdfMerger, PDFtoMarkdown)
+                                        EPubPdfMerger, PDFtoMarkdown, PDFReader)
 
 
 class DocumentProcessor:
@@ -187,9 +187,9 @@ class DocumentProcessor:
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
-        # doc_convert_pipe.add_component("pdf_loader", PDFReader())
-        doc_convert_pipe.add_component("pdf_loader", PDFtoMarkdown())
-        doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
+        doc_convert_pipe.add_component("pdf_loader", PDFReader())
+        # doc_convert_pipe.add_component("pdf_loader", PDFtoMarkdown())
+        # doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
         doc_convert_pipe.add_component("html_parser",
                                        HTMLParserComponent(min_paragraph_size=self._min_paragraph_size,
@@ -214,9 +214,9 @@ class DocumentProcessor:
         doc_convert_pipe.connect("epub_loader.meta", "html_parser.meta")
         doc_convert_pipe.connect("html_parser.sources", "html_converter.sources")
         doc_convert_pipe.connect("html_parser.meta", "html_converter.meta")
-        doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
-        # doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.epub_docs")
-        doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
+        # doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
+        doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
+        # doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
         doc_convert_pipe.connect("html_converter.documents", "epub_pdf_merger.epub_docs")
         doc_convert_pipe.connect("epub_pdf_merger.documents", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
