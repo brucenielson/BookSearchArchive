@@ -6,13 +6,11 @@ from haystack import Pipeline, Document
 # noinspection PyPackageRequirements
 from haystack.components.routers import ConditionalRouter
 # noinspection PyPackageRequirements
-from haystack.dataclasses import ByteStream
-# noinspection PyPackageRequirements
 from haystack.components.preprocessors import DocumentCleaner
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 # noinspection PyPackageRequirements
-from haystack.components.converters import HTMLToDocument, PyPDFToDocument  # TODO: PDFMinerToDocument?
+from haystack.components.converters import HTMLToDocument, MarkdownToDocument
 # noinspection PyPackageRequirements
 from haystack.components.writers import DocumentWriter
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
@@ -29,7 +27,7 @@ from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
-                                        EPubPdfMerger, PDFReader)
+                                        EPubPdfMerger, PDFtoMarkdown, PDFReader)
 
 
 class DocumentProcessor:
@@ -190,6 +188,8 @@ class DocumentProcessor:
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
         doc_convert_pipe.add_component("pdf_loader", PDFReader())
+        # doc_convert_pipe.add_component("pdf_loader", PDFtoMarkdown())
+        # doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
         doc_convert_pipe.add_component("html_parser",
                                        HTMLParserComponent(min_paragraph_size=self._min_paragraph_size,
@@ -214,8 +214,10 @@ class DocumentProcessor:
         doc_convert_pipe.connect("epub_loader.meta", "html_parser.meta")
         doc_convert_pipe.connect("html_parser.sources", "html_converter.sources")
         doc_convert_pipe.connect("html_parser.meta", "html_converter.meta")
-        doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.epub_docs")
-        doc_convert_pipe.connect("html_converter.documents", "epub_pdf_merger.pdf_docs")
+        # doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
+        doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
+        # doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
+        doc_convert_pipe.connect("html_converter.documents", "epub_pdf_merger.epub_docs")
         doc_convert_pipe.connect("epub_pdf_merger.documents", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
@@ -227,6 +229,7 @@ class DocumentProcessor:
         doc_convert_pipe.connect("router.no_documents", "final_counter.no_documents")
 
         self._doc_convert_pipeline = doc_convert_pipe
+        self.draw_pipeline()
 
     def _initialize_document_store(self) -> None:
         def init_doc_store(force_recreate: bool = False) -> PgvectorDocumentStore:
@@ -257,11 +260,6 @@ class DocumentProcessor:
         total_written: int = 0
         self._doc_converter_pipeline()
 
-        source: List[ByteStream]
-        meta: List[Dict[str, str]]
-        # self._doc_convert_pipeline.run({"epub_loader": {"file_or_folder_path": self._file_or_folder_path}})
-
-        # file_path_list: List[str] = list(self._create_file_list())
         for file_path in self._create_file_list():
             file_path_list: List[str] = [file_path]
             self._print_verbose(f"Processing file: {file_path} ")
@@ -288,7 +286,7 @@ def main() -> None:
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
         table_name="book_archive",
-        recreate_table=False,
+        recreate_table=True,
         embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=file_path,
         postgres_user_name='postgres',
