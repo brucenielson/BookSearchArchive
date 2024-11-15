@@ -72,7 +72,7 @@ class PDFtoMarkdown:
         markdown_docs: List[ByteStream] = []
         for source in sources:
             # markdown_doc: str = pymupdf4llm.to_markdown(source)
-            markdown_pages: str = pymupdf4llm.to_markdown(
+            markdown_pages = pymupdf4llm.to_markdown(
                 doc=source,
                 page_chunks=True,
                 # write_images=True,
