@@ -27,7 +27,15 @@ from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
-                                        EPubPdfMerger, PDFtoMarkdown, PDFReader)
+                                        EPubPdfMerger, PDFToMarkdown, PDFReader)
+
+
+# Create an enum for PDF reading stragegy: PyPDFToDocument, PDFReader, PDFToMarkdown, PyMuPDFReader
+class PDFReadingStrategy:
+    PyPDFToDocument = 1
+    PDFReader = 2
+    PDFToMarkdown = 3
+    PyMuPDFReader = 4
 
 
 class DocumentProcessor:
@@ -45,7 +53,8 @@ class DocumentProcessor:
                  min_paragraph_size: int = 500,
                  embedder_model_name: Optional[str] = None,
                  include_outputs_from: Optional[set[str]] = None,
-                 verbose: bool = False
+                 verbose: bool = False,
+                 write_to_file: bool = False
                  ) -> None:
 
         # Instance variables
@@ -57,6 +66,7 @@ class DocumentProcessor:
         self._min_paragraph_size: int = min_paragraph_size
         self._skip_content: Optional[callable] = skip_content_func
         self._verbose: bool = verbose
+        self._write_to_file: bool = write_to_file
         self._include_outputs_from: Optional[set[str]] = include_outputs_from
 
         # File paths
@@ -159,11 +169,11 @@ class DocumentProcessor:
             else:
                 raise ValueError("The provided file must be an .epub or .pdf")
 
-    def _doc_converter_pipeline(self) -> None:
+    def _doc_converter_pipeline(self, pdf_reading_strategy: PDFReadingStrategy = PDFReader) -> None:
         self._setup_embedder()
         # Create the custom splitter
         custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder,
-                                                                         verbose=self._verbose,
+                                                                         verbose=self._write_to_file,
                                                                          skip_content_func=self._skip_content)
 
         embedding_routes: List[Dict] = [
@@ -188,7 +198,7 @@ class DocumentProcessor:
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
         # doc_convert_pipe.add_component("pdf_loader", PDFReader())
-        doc_convert_pipe.add_component("pdf_loader", PDFtoMarkdown())
+        doc_convert_pipe.add_component("pdf_loader", PDFToMarkdown())
         doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
         doc_convert_pipe.add_component("html_parser",
@@ -286,7 +296,7 @@ def main() -> None:
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
         table_name="book_archive",
-        recreate_table=True,
+        recreate_table=False,
         embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=file_path,
         postgres_user_name='postgres',
@@ -298,7 +308,8 @@ def main() -> None:
         min_section_size=3000,
         min_paragraph_size=300,
         include_outputs_from=include_outputs_from,
-        verbose=True
+        verbose=True,
+        write_to_file=False
     )
 
     # Draw images of the pipelines
