@@ -63,7 +63,25 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 
 
 @component
-class PDFtoMarkdown:
+class PyMuPDFReader:
+    def __init__(self, min_page_size: int = 1000):
+        self._min_page_size = min_page_size
+
+    @component.output_types(sources=List[Document])
+    def run(self, sources: List[str]) -> Dict[str, List[Document]]:
+        documents: List[Document] = []
+        for source in sources:
+            doc = pymupdf.open(source)
+            for page_num in range(len(doc)):
+                page_text = doc.load_page(page_num)
+                if len(page_text) < self._min_page_size:
+                    continue
+                documents.append(Document(content=page_text))
+        return {"documents": documents}
+
+
+@component
+class PDFToMarkdown:
     def __init__(self, min_page_size: int = 1000):
         self._min_page_size = min_page_size
 
@@ -71,19 +89,9 @@ class PDFtoMarkdown:
     def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
         markdown_docs: List[ByteStream] = []
         for source in sources:
-            # markdown_doc: str = pymupdf4llm.to_markdown(source)
-            markdown_pages = pymupdf4llm.to_markdown(
-                doc=source,
-                page_chunks=True,
-                # write_images=True,
-                # image_path="images",
-                # image_format="png",
-                # dpi=300,
-                # extract_words=True
-            )
-            for page in markdown_pages:
-                byte_stream: ByteStream = ByteStream(page['text'].encode('utf-8'))
-                markdown_docs.append(byte_stream)
+            markdown_doc: str = pymupdf4llm.to_markdown(source)
+            byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
+            markdown_docs.append(byte_stream)
         return {"sources": markdown_docs}
 
 
