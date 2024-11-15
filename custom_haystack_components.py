@@ -71,42 +71,20 @@ class PDFtoMarkdown:
     def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
         markdown_docs: List[ByteStream] = []
         for source in sources:
-            # https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/
-            # https://python.plainenglish.io/why-pymupdf4llm-is-the-best-tool-for-extracting-data-from-pdfs-even-if-you-didnt-know-you-needed-7bff75313691
             # markdown_doc: str = pymupdf4llm.to_markdown(source)
-            doc = pymupdf.open(source)
-            markdown_doc = pymupdf4llm.to_markdown(doc)
-            # markdown_doc: str = pymupdf4llm.to_markdown(
-            #     doc=source,
-            #     page_chunks=True,
-            #     # write_images=True,
-            #     # image_path="images",
-            #     # image_format="png",
-            #     # dpi=300,
-            #     # extract_words=True
-            # )
-            # https://pypi.org/project/Markdown/
-            # https://python-markdown.github.io/reference/
-            # https://www.digitalocean.com/community/tutorials/how-to-use-python-markdown-to-convert-markdown-text-to-html
-            # html: str = markdown.markdown(markdown_doc)
-            byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
-            markdown_docs.append(byte_stream)
+            markdown_pages: str = pymupdf4llm.to_markdown(
+                doc=source,
+                page_chunks=True,
+                # write_images=True,
+                # image_path="images",
+                # image_format="png",
+                # dpi=300,
+                # extract_words=True
+            )
+            for page in markdown_pages:
+                byte_stream: ByteStream = ByteStream(page['text'].encode('utf-8'))
+                markdown_docs.append(byte_stream)
         return {"sources": markdown_docs}
-
-# PDF to Markdown - doesn't work well enough IMO
-# pip install pymupdf4llm
-# Needed for Haystack component
-# pip install markdown-it-py mdit_plain
-# Convert to HTML
-# pip install markdown
-
-# https://github.com/markdown-it/markdown-it
-
-# https://sumansourabh.in/convert-pdf-to-markdown/
-# https://github.com/VikParuchuri/marker
-# https://pypi.org/project/marker-pdf/
-
-# https://github.com/tesseract-ocr/tesseract
 
 
 @component

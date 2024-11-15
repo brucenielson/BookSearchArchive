@@ -13,7 +13,10 @@ nor is this question, I admit, of any importance. But I wish to
 convey to my readers that I have worked hard to make them
 the best, since I myself have, in writing them, been able to
 learn things of great importance to myself. ISBN 1 85506 000 0
-£5 99 U KARLR. POPPER A WORLD Of PROPENSITIES Published in 1995 by Thoemmes Press
+£5 99 U KARLR. POPPER A WORLD Of PROPENSITIES
+
+Content:
+Published in 1995 by Thoemmes Press
 11 Great George Street
 Bristol BSl 5RR
 England © 1990 by Karl R. Popper First published in 1990
@@ -24,7 +27,10 @@ transmitted in any way or by any means, electronic,
 mechanical, photocopying, recording or otherwise,
 without the written permission of the copyright
 holder, application for which should be addressed
-to the publisher. Printed in England by Hobbs the Printers Ltd., Southampton SO40 3YS Dedicated to the memory of my dear wife, Hennie Preface I am of course not certain whether the two lectures which
+to the publisher. Printed in England by Hobbs the Printers Ltd., Southampton SO40 3YS Dedicated to the memory of my dear wife, Hennie
+
+Content:
+Preface I am of course not certain whether the two lectures which
 I here submit to the patient perusal or the possible refusal of
 my readers are, as I hope, the best I have produced so far;
 nor is this question, I admit, of any importance. But I wish
@@ -38,9 +44,18 @@ Hare. A shorter version of the second lecture was given on
 June 9th, 1989 before the Alumni of the School at the
 London School of Economics, under the chairmanship of its
 Director, Dr I.G. Patel. I never should have been able to write either of these
-lectures without the help of my Assistant, Melitta Mew. Contents Preface ...................................... vu A World of Propensities:
+lectures without the help of my Assistant, Melitta Mew.
+
+Content:
+Contents Preface ...................................... vu A World of Propensities:
 Two New Views of Causality .................... 1 Towards an Evolutionary
-Theory of Knowledge . . . . . . . . . . . . . . . . . . . . . . . . . . 2 7 A World of Propensities: Two New Views of Causality Ladies and Gentlemen, I shall begin with some personal memories and a personal
+Theory of Knowledge . . . . . . . . . . . . . . . . . . . . . . . . . . 2 7
+
+Content:
+A World of Propensities: Two New Views of Causality
+
+Content:
+Ladies and Gentlemen, I shall begin with some personal memories and a personal
 confession of faith, and only then turn to the topic of my
 lecture. It
 was 54 years ago, in Prague in August 1934, that I first
@@ -72,7 +87,10 @@ objective truth - truth as the correspondence of a statement
 with the facts - and of absolute truth: if an unambiguously
 formulated statement is true in one language, then any correct
 translation of it into any other language is also true. This
-theory is the great bulwark against relativism and all fashions. And it allows us to speak of f[a]lsity and its
+theory is the great bulwark against relativism and
+
+Content:
+all fashions. And it allows us to speak of f[a]lsity and its
 elimination; of our f[a]llibility; and of the fact that we can learn
 from our errors, from our mistakes; and of science as the search
 for truth. Moreover, it allows us - indeed, it requires us - to
@@ -136,7 +154,10 @@ days. However, I still could comfort myself with the consideration
 that Carnap had not given up truth in its objective and absolute
 sense, as defended by Tarski. Indeed, he never did. It is this view of truth that gives Godel's important results
 their non-relativistic sense. It also gives my results their non­
-relativistic sense; despite what many people say. Ladies and Gentlemen, please take these remarks as an
+relativistic sense; despite what many people say.
+
+Content:
+Ladies and Gentlemen, please take these remarks as an
 expression of my gratitude to Alfred Tarski and as a confession
 of faith: of my opposition to relativism and of my 54-year­
 long adherence to the Aristotelian theory of truth, rehabilitated
@@ -202,7 +223,10 @@ attracted and repelled each other with absolute precision. There
 was, in this world, no room for human decisions. Our feelings
 that we are acting, planning, and understanding each other
 were illusory. Few philosophers, with the great exception of
-Peirce, dared to dispute this deterministic view. But starting with Werner Heisenberg in 1927, a great change processes made the clockwork imprecise: there were objective
+Peirce, dared to dispute this deterministic view. But starting with Werner Heisenberg in 1927, a great change
+
+Content:
+processes made the clockwork imprecise: there were objective
 indeterminacies. Physical theory had to bring in probabilities. It was here that I had some severe disagreement with
 Heisenberg and other physicists, even with my hero, Einstein.
 For most of them adopted the view that the probabilities had
@@ -262,7 +286,10 @@ say that the six possibilities of the die, or the two possibilities
 of the coin, are equal possibilities. Accordingly, since there are
 no equal possibilities in such a case, we simply cannot speak
 here of probabilities in the classical numerical sense. Of course, Pascal knew that loaded dice had been invented
-for cheating at gambling. In fact, everybody knew that if you insert in a wooden die a small piece of lead near, say, the face
+for cheating at gambling. In fact, everybody knew that if you
+
+Content:
+insert in a wooden die a small piece of lead near, say, the face
 bearing the number 6, then this number will turn up less
 frequently than it does in throws with a fair die, and so the
 number on the opposite face will turn up more frequently.
@@ -323,7 +350,10 @@ occurs.
 (2) So, instead of speaking of the possibility of an event
 occurring, we might speak, more precisely, of an
 inherent propensity to produce, upon repetition, a
-certain statistical average. (3) Now this implies that, upon further repetition-upon
+certain statistical average.
+
+Content:
+(3) Now this implies that, upon further repetition-upon
 repetition of the repetitions -that the statistics, in their
 turn, do show a tendency towards stability, provided
 all relevant conditions remain stable.
@@ -389,7 +419,10 @@ into nature. And he was followed in this especially by Ernst
 Mach and Heinrich Hertz. But Newton's theory of
 forces -especially of attractive forces -had tremendous
 explanatory power. And it was further developed and
-extended, especially by 0rsted, Faraday and Maxwell, and then by Einstein, who tried to explain the Newtonian forces
+extended, especially by 0rsted, Faraday and Maxwell, and
+
+Content:
+then by Einstein, who tried to explain the Newtonian forces
 in their turn by his theory of curved spacetime. The introduction of propensities amounts to generalizing and
 extending the idea of forces again. Just as the idea of forces
 was opposed by the positivist successors of Berkeley, of Mach,
@@ -448,7 +481,10 @@ atoms. Here the change of the voltage - of an external
 condition - is the decisive independent variable; and the
 changing propensities of the electrons and the atoms to interact
 with each other are recorded, as they depend upon the changing
-voltage. For this kind of experiment - and many atomic experiments
+voltage.
+
+Content:
+For this kind of experiment - and many atomic experiments
 a calculus of relative or conditional
 are of this kind - we need
 probabilities a c��culus of a�solute probabilities
@@ -514,7 +550,10 @@ or determined by earlier motives, etc., seems, indeed, to be
 motivated - motivated by the wish to establish the ideology
 of determinism in human concerns. But with the introduction
 of propensities, the ideology of determinism evaporates. Past
-situations, whether physical or psychological or mixed, do not determine the future situation. Rather, they determine changing
+situations, whether physical or psychological or mixed, do not
+
+Content:
+determine the future situation. Rather, they determine changing
 propensities that influence future situations without
 determining them in a unique way.
 And all our
@@ -581,7 +620,10 @@ possibilities) is growing. (Incidentally, all spaces are possibility spaces.) An
 like a natural law that can be stated as follows: All non-zero
 possibilities, even those to which only � t�ny non-�ero
 propensity is attached, will re�lize themselv�s m ttme, pro��ded
-they have time to do so; that is to say, provided the condmons repeat t h emse ve I S sufficiently ohen or remain constant over
+they have time to do so; that is to say, provided the condmons
+
+Content:
+repeat t h emse ve I S sufficiently ohen or remain constant over
 a su cien Y ffi · cl long period of time. This aw amounts to statmg. . 1 h there is a kind of horror vacut . • m t e vanous possi 1 1ty· - ·1·
 h
 :p:�es {perh[aps a kind of horror of empty de Broglie waves,]
@@ -643,7 +685,10 @@ hidden, the invariant structural properties of the physical
 world. Cause became that state of affairs which, relative to
 an accepted theory, was described by the initial conditions.
 Effect was that event or that state of affairs which the theory,
-in the presence of the initial conditions, would predict. Owing to this deductive relationship, it is trivial that, in the
+in the presence of the initial conditions, would predict.
+
+Content:
+Owing to this deductive relationship, it is trivial that, in the
 presence of the theory, the probability of the effect given the
 cause equals 1: p (effect, cause) = l This, I say, is trivial. But it leads in our world of propensities
 to the following view. What may happen in the future - say,
@@ -697,7 +742,10 @@ Newton's theory that he invented an approximation method
 of solving them. He tamed, up to a point, the disturbing
 propensities of the planets for interfering with each other. In most laboratory experiments we have to exclude many
 disturbing extraneous influences such as changes of temperature
-or the normal moisture of the air. Or we may have to create an artificial environment of extreme temperatures - say, near
+or the normal moisture of the air. Or we may have to create
+
+Content:
+an artificial environment of extreme temperatures - say, near
 to absolute zero. In this we are led entirely by our hypothetical
 insight into the theoretical structure of our world. And we have
 to learn from our experimental mistakes that lead to
@@ -764,7 +812,10 @@ conditions are never quite constant may, indeed, explain why
 certain very low propensities seem never to realize themselves.
 Shaking the beaker in dicing is intended to make the throws
 independent of each other. But it may indeed do more: it may
-disturb that constancy of the physical conditions which is a mathematical condition for very low propensities to realize
+disturb that constancy of the physical conditions which is a
+
+Content:
+mathematical condition for very low propensities to realize
 themselves. This may perhaps explain the claim of some
 experimenters that a priori extremely improbable runs occur
 in fact even less often than they should according to theory.
@@ -797,7 +848,10 @@ indeed, you should obtain a solution. But even if you do
 obtain a solution, you may then discover, to your delight,
 the existence of a whole family of enchanting, though
 perhaps difficult, problem children, for whose welfare you
-may work, with a purpose, to the end of your days. Towards an Evolutionary Theory of Knowledge My dear Director, Ladies and Gentlemen, In 1944 I was travelling with my wife in a bitterly cold
+may work, with a purpose, to the end of your days. Towards an Evolutionary Theory of Knowledge
+
+Content:
+My dear Director, Ladies and Gentlemen, In 1944 I was travelling with my wife in a bitterly cold
 bus, returning from a skiing holiday on Mount Cook. The
 bus stopped in the middle of nowhere, at a snowed-in rural
 New Zealand post office. To my surprise, I heard my name
@@ -826,7 +880,10 @@ is my aim, and my problem, at this Inaugural to interest
 you in work done and, even more, in work yet to be done
 in the theory of knowledge, by placing it in the wide and
 exciting context of biological evolution, and to show you
-that we can learn something new from such an exercise. I do not start by asking a question such as 'What is
+that we can learn something new from such an exercise.
+
+Content:
+I do not start by asking a question such as 'What is
 knowledge?' and, even less, 'What does "knowledge"
 mean?'. Instead, my starting point is a very simple proposi­
 tion - indeed, an almost trivial one - the proposition that
@@ -886,7 +943,10 @@ of unconscious expectations, and sometimes we may become
 conscious of having had an expectation of this kind when it
 turns out to have been mistaken. An example of this is an experience that I had several
 times in my long career: in going down some stairs and
-reaching the last step, I almost fell, and became aware of the fact that I had unconsciously expected that there was one
+reaching the last step, I almost fell, and became aware of the
+
+Content:
+fact that I had unconsciously expected that there was one
 more step, or one less step, than actually existed. This led me to the following formulation: when we are
 surprised by some happening, the surprise is usually due to
 an unconscious expectation that something else would
@@ -939,7 +999,10 @@ merely discerning readers returned timetables to the shelves
 headed 'Fiction'.) 4. In spite of its uncertainty, of its hypothetical
 character, much of our knowledge will be objectively true:
 it will correspond to the objective facts. Otherwise we could
-hardly have survived as a species. expected them to be. (Admittedly, a breakthrough is not a
+hardly have survived as a species.
+
+Content:
+expected them to be. (Admittedly, a breakthrough is not a
 frequent event.) I do not know of any creative scientist who has made no
 mis�akes; and here I am thinking of the very greatest -
 Galileo, Kepler, Newton, Einstein, Darwin, Mendel,
@@ -1000,7 +1063,10 @@ term or even momentary events or changes in the environ­
 ment is closely analogous to the ability of an antmal to
 respond to short-term perceptions, to sense experiences. 12. The distinction between adaptation to, or
 (unconscious) knowledge of, law-like and long-term
-environmental conditions, such as gravity and the cycle of the changing seasons, on the one side, and adaptation to, or
+environmental conditions, such as gravity and the cycle of
+
+Content:
+the changing seasons, on the one side, and adaptation to, or
 knowledge of, environmental short-term changes and
 events, on the other side, is of the greatest interest. While
 short-term events occur in the life of the individual
@@ -1069,7 +1135,10 @@ observation, but from adaptation to the environment and to
 such situations as constitute the problems to be solved in the
 task of living; situations that make our organs, among them
 our sense organs, significant instruments in the moment-by­
-moment task of living. 16. I hope I have been able to give you some idea of the
+moment task of living.
+
+Content:
+16. I hope I have been able to give you some idea of the
 importance of the distinction between long-term and short­
 term adaptation, long-term and short-term knowledge, and
 of the fundamental character of the long-term knowledge: of
@@ -1129,7 +1198,10 @@ evolution of life. Unicellular bacterial life quickly spread all
 over the earth. But those originally so very favourable local
 conditions could hardly have prevailed over many different
 geographical regions; so it seems th at life must have had a
-struggle. Yet, in a comparatively short time, many different bacterial forms evolved that were adapted to very different
+struggle. Yet, in a comparatively short time, many different
+
+Content:
+bacterial forms evolved that were adapted to very different
 environmental conditions. Such, it appears, are the facts. Of course, they are far
 from certain: they are hypothetical interpretations of some
 geological findings. But if they are even approximately
@@ -1189,7 +1261,10 @@ discussing here. He has produced a biochemical theory of
 the origin of the first light-sensitive organ; that is, of the
 earliest evolutionary predecessor of our eyes. Since our eyes
 are our most important sense organs, this result is of great
-interest to our discussion. The main result is this. It is known that some early uni­
+interest to our discussion.
+
+Content:
+The main result is this. It is known that some early uni­
 cellular micro-organism, presumably a bacterium, invented
 a revolutionary electro-chemical method of transforming
 sunlight into chemical energy: a method of using sunlight
@@ -1251,7 +1326,10 @@ retains, as part of this net, the archaic pathways of some
 billion years ago that made the later graftings possible. This,
 as Florkin pointed out, is analogous to the way in which
 anatomic pathways of the anatomic construction of the
-developing embryo may still retain those of its archaic ancestors of, say, some hundred million years ago. Thus the
+developing embryo may still retain those of its archaic
+
+Content:
+ancestors of, say, some hundred million years ago. Thus the
 extant pathways of the metabolism may reveal some of its
 evolutionary history; a situation analogous to the so-called
 'biogenetic law' of Fritz Muller and Ernst Haeckel. It is within this setting of Florkin's ideas that Wachters­
@@ -1313,7 +1391,10 @@ himself uses his term [a ] priori to mean, in addition,
 knowledge that is not [mer]ely prior to observation but also
 'a priori valid'; by which he means necessarily or certainly
 true. Of course, I shall not follow him in this since I am
-stressing the uncertain and conjectural character of our knowledge.) So I shall use the term 'a priori' to characterize
+stressing the uncertain and conjectural character of our
+
+Content:
+knowledge.) So I shall use the term 'a priori' to characterize
 that kind of knowledge - of fallible or conjectural knowl­
 edge - which an organism has prior to sense experience;
 roughly speaking, it is inborn knowledge. And I shall use the
@@ -1370,7 +1451,10 @@ too hot or too cold, and it may be too much or too little
 acid.' Clearly, such evaluations can evolve only if the
 organism is able to take action; for example, by moving
 away if it anticipates danger from these environmental
-states. Problems, values, and activity all evolve together. I have said something about the origin of the archaic eye;
+states. Problems, values, and activity all evolve together.
+
+Content:
+I have said something about the origin of the archaic eye;
 and we can now say that its invention incorporates new
 discoveries, new theories, new knowledge about the
 environment and also the possibility of new values. For the
@@ -1435,7 +1519,10 @@ forgotten the knowledge that sunlight is edible, an� how t�
 eat it. And to this day we have not fully regamed this knowledge. Ladies and Gentlemen, I am one of those who love science
 and who think that science is enlightened common sense. I
 even think it is not much more than enlightened bacterial
-common sense! This is a view that, admittedly, clashes with common sense; but I hope that I have shown in this lecture
+common sense! This is a view that, admittedly, clashes with
+
+Content:
+common sense; but I hope that I have shown in this lecture
 that it need not clash with enlightened common sense. I
 have, I believe, refuted classical empiricism - the bucket
 theory of the mind that says that we obtain knowledge just
