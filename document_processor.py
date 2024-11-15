@@ -10,7 +10,7 @@ from haystack.components.preprocessors import DocumentCleaner
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 # noinspection PyPackageRequirements
-from haystack.components.converters import HTMLToDocument, MarkdownToDocument
+from haystack.components.converters import HTMLToDocument, MarkdownToDocument, PyPDFToDocument
 # noinspection PyPackageRequirements
 from haystack.components.writers import DocumentWriter
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
@@ -27,7 +27,7 @@ from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
-                                        EPubPdfMerger, PDFToMarkdown, PDFReader)
+                                        EPubPdfMerger, PDFToMarkdown, PDFReader, PyMuPDFReader)
 
 
 # Create an enum for PDF reading stragegy: PyPDFToDocument, PDFReader, PDFToMarkdown, PyMuPDFReader
@@ -169,7 +169,7 @@ class DocumentProcessor:
             else:
                 raise ValueError("The provided file must be an .epub or .pdf")
 
-    def _doc_converter_pipeline(self, pdf_reading_strategy: PDFReadingStrategy = PDFReader) -> None:
+    def _doc_converter_pipeline(self, pdf_reading_strategy: PDFReadingStrategy = PDFToMarkdown) -> None:
         self._setup_embedder()
         # Create the custom splitter
         custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder,
@@ -197,9 +197,16 @@ class DocumentProcessor:
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
-        # doc_convert_pipe.add_component("pdf_loader", PDFReader())
-        doc_convert_pipe.add_component("pdf_loader", PDFToMarkdown())
-        doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
+        if pdf_reading_strategy == PyPDFToDocument:
+            doc_convert_pipe.add_component("pdf_loader", PyPDFToDocument())
+        elif pdf_reading_strategy == PDFReader:
+            doc_convert_pipe.add_component("pdf_loader", PDFReader())
+        elif pdf_reading_strategy == PDFToMarkdown:
+            doc_convert_pipe.add_component("pdf_loader", PDFToMarkdown())
+            doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
+        elif pdf_reading_strategy == PyMuPDFReader:
+            doc_convert_pipe.add_component("py_mu_pdf_reader", PyMuPDFReader())
+
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
         doc_convert_pipe.add_component("html_parser",
                                        HTMLParserComponent(min_paragraph_size=self._min_paragraph_size,
@@ -218,16 +225,31 @@ class DocumentProcessor:
                                                       policy=DuplicatePolicy.OVERWRITE))
         doc_convert_pipe.add_component("final_counter", FinalDocCounter())
 
+        # Connect the components in the pipeline
+        # Start at epub_vs_pdf_splitter which routes to either the epub or pdf pipeline
         doc_convert_pipe.connect("epub_vs_pdf_splitter.epub_paths", "epub_loader.file_paths")
         doc_convert_pipe.connect("epub_vs_pdf_splitter.pdf_paths", "pdf_loader.sources")
+        # EPUB pipeline
         doc_convert_pipe.connect("epub_loader.html_pages", "html_parser.html_pages")
         doc_convert_pipe.connect("epub_loader.meta", "html_parser.meta")
         doc_convert_pipe.connect("html_parser.sources", "html_converter.sources")
         doc_convert_pipe.connect("html_parser.meta", "html_converter.meta")
-        doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
-        # doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
-        doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
         doc_convert_pipe.connect("html_converter.documents", "epub_pdf_merger.epub_docs")
+        # PDF pipeline
+        if pdf_reading_strategy == PyPDFToDocument:
+            doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
+        elif pdf_reading_strategy == PDFReader:
+            doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
+        elif pdf_reading_strategy == PDFToMarkdown:
+            doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
+            doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
+        elif pdf_reading_strategy == PyMuPDFReader:
+            doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
+
+        # doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
+        # doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
+
+        # Remaining pipeline to final counter
         doc_convert_pipe.connect("epub_pdf_merger.documents", "remove_illegal_docs")
         doc_convert_pipe.connect("remove_illegal_docs", "cleaner")
         doc_convert_pipe.connect("cleaner", "splitter")
