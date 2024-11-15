@@ -81,3 +81,18 @@ path.write_text(md)  # , encoding="utf-8")
 # https://www.digitalocean.com/community/tutorials/how-to-use-python-markdown-to-convert-markdown-text-to-html
 # https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/
 # https://python.plainenglish.io/why-pymupdf4llm-is-the-best-tool-for-extracting-data-from-pdfs-even-if-you-didnt-know-you-needed-7bff75313691
+
+# PDF to Markdown - doesn't work well enough IMO
+# pip install pymupdf4llm
+# Needed for Haystack component
+# pip install markdown-it-py mdit_plain
+# Convert to HTML
+# pip install markdown
+
+# https://github.com/markdown-it/markdown-it
+
+# https://sumansourabh.in/convert-pdf-to-markdown/
+# https://github.com/VikParuchuri/marker
+# https://pypi.org/project/marker-pdf/
+
+# https://github.com/tesseract-ocr/tesseract
