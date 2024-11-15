@@ -21,6 +21,7 @@ from haystack.dataclasses import ByteStream
 from pathlib import Path
 from pypdf import PdfReader, DocumentInformation
 import pymupdf4llm
+import pymupdf
 import markdown
 
 
@@ -73,19 +74,21 @@ class PDFtoMarkdown:
             # https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/
             # https://python.plainenglish.io/why-pymupdf4llm-is-the-best-tool-for-extracting-data-from-pdfs-even-if-you-didnt-know-you-needed-7bff75313691
             # markdown_doc: str = pymupdf4llm.to_markdown(source)
-            markdown_doc: str = pymupdf4llm.to_markdown(
-                doc=source,
-                page_chunks=True,
-                # write_images=True,
-                # image_path="images",
-                # image_format="png",
-                # dpi=300,
-                # extract_words=True
-            )
+            doc = pymupdf.open(source)
+            markdown_doc = pymupdf4llm.to_markdown(doc)
+            # markdown_doc: str = pymupdf4llm.to_markdown(
+            #     doc=source,
+            #     page_chunks=True,
+            #     # write_images=True,
+            #     # image_path="images",
+            #     # image_format="png",
+            #     # dpi=300,
+            #     # extract_words=True
+            # )
             # https://pypi.org/project/Markdown/
             # https://python-markdown.github.io/reference/
             # https://www.digitalocean.com/community/tutorials/how-to-use-python-markdown-to-convert-markdown-text-to-html
-            html: str = markdown.markdown(markdown_doc)
+            # html: str = markdown.markdown(markdown_doc)
             byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
             markdown_docs.append(byte_stream)
         return {"sources": markdown_docs}
