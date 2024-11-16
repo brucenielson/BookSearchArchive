@@ -359,7 +359,7 @@ def main() -> None:
     # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder",
     # "joiner", "llm", "prompt_builder", "doc_query_collector"
     include_outputs_from: Optional[set[str]] = None
-    rag_processor: RagPipeline = RagPipeline(table_name="book_archive",
+    rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
                                              generator_model=model,
                                              postgres_user_name='postgres',
                                              postgres_password=postgres_password,
@@ -382,7 +382,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "Induction"
+    query: str = "Cycle starting with a problem"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"
