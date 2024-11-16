@@ -67,13 +67,14 @@ class PyMuPDFReader:
     def __init__(self, min_page_size: int = 1000):
         self._min_page_size = min_page_size
 
-    @component.output_types(sources=List[Document])
+    @component.output_types(documents=List[Document])
     def run(self, sources: List[str]) -> Dict[str, List[Document]]:
         documents: List[Document] = []
         for source in sources:
             doc = pymupdf.open(source)
             for page_num in range(len(doc)):
-                page_text = doc.load_page(page_num)
+                page = doc.load_page(page_num)
+                page_text = page.get_text("text")
                 if len(page_text) < self._min_page_size:
                     continue
                 documents.append(Document(content=page_text))

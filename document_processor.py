@@ -169,7 +169,7 @@ class DocumentProcessor:
             else:
                 raise ValueError("The provided file must be an .epub or .pdf")
 
-    def _doc_converter_pipeline(self, pdf_reading_strategy: PDFReadingStrategy = PDFToMarkdown) -> None:
+    def _doc_converter_pipeline(self, pdf_reading_strategy: PDFReadingStrategy = PyMuPDFReader) -> None:
         self._setup_embedder()
         # Create the custom splitter
         custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder,
@@ -205,7 +205,7 @@ class DocumentProcessor:
             doc_convert_pipe.add_component("pdf_loader", PDFToMarkdown())
             doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
         elif pdf_reading_strategy == PyMuPDFReader:
-            doc_convert_pipe.add_component("py_mu_pdf_reader", PyMuPDFReader())
+            doc_convert_pipe.add_component("pdf_loader", PyMuPDFReader())
 
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
         doc_convert_pipe.add_component("html_parser",
@@ -331,7 +331,7 @@ def main() -> None:
         min_paragraph_size=300,
         include_outputs_from=include_outputs_from,
         verbose=True,
-        write_to_file=False
+        write_to_file=True
     )
 
     # Draw images of the pipelines
