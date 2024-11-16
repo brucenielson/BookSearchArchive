@@ -163,3 +163,5 @@ cython_debug/
 
 *.epub
 *.pdf
+/post_documents.txt
+/pre_documents.txt
