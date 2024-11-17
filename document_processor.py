@@ -23,6 +23,7 @@ from haystack.utils.auth import Secret
 # Other imports
 from typing import List, Optional, Dict, Any
 from pathlib import Path
+from enum import Enum
 from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
@@ -30,8 +31,8 @@ from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDoc
                                         EPubPdfMerger, PDFToMarkdown, PDFReader, PyMuPDFReader)
 
 
-# Create an enum for PDF reading stragegy: PyPDFToDocument, PDFReader, PDFToMarkdown, PyMuPDFReader
-class PDFReadingStrategy:
+# Create an enum for PDF reading strategy: PyPDFToDocument, PDFReader, PDFToMarkdown, PyMuPDFReader
+class PDFReadingStrategy(Enum):
     PyPDFToDocument = 1
     PDFReader = 2
     PDFToMarkdown = 3
@@ -54,7 +55,8 @@ class DocumentProcessor:
                  embedder_model_name: Optional[str] = None,
                  include_outputs_from: Optional[set[str]] = None,
                  verbose: bool = False,
-                 write_to_file: bool = False
+                 write_to_file: bool = False,
+                 pdf_reading_strategy: PDFReadingStrategy = PDFReadingStrategy.PDFReader
                  ) -> None:
 
         # Instance variables
@@ -68,6 +70,7 @@ class DocumentProcessor:
         self._verbose: bool = verbose
         self._write_to_file: bool = write_to_file
         self._include_outputs_from: Optional[set[str]] = include_outputs_from
+        self._pdf_reading_strategy: PDFReadingStrategy = pdf_reading_strategy
 
         # File paths
         self._file_or_folder_path: str = file_or_folder_path  # New instance variable
@@ -169,7 +172,8 @@ class DocumentProcessor:
             else:
                 raise ValueError("The provided file must be an .epub or .pdf")
 
-    def _doc_converter_pipeline(self, pdf_reading_strategy: PDFReadingStrategy = PyMuPDFReader) -> None:
+    def _doc_converter_pipeline(self,
+                                pdf_reading_strategy: PDFReadingStrategy = PDFReadingStrategy.PyMuPDFReader) -> None:
         self._setup_embedder()
         # Create the custom splitter
         custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder,
@@ -197,14 +201,14 @@ class DocumentProcessor:
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
-        if pdf_reading_strategy == PyPDFToDocument:
+        if pdf_reading_strategy == PDFReadingStrategy.PyPDFToDocument:
             doc_convert_pipe.add_component("pdf_loader", PyPDFToDocument())
-        elif pdf_reading_strategy == PDFReader:
+        elif pdf_reading_strategy == PDFReadingStrategy.PDFReader:
             doc_convert_pipe.add_component("pdf_loader", PDFReader())
-        elif pdf_reading_strategy == PDFToMarkdown:
+        elif pdf_reading_strategy == PDFReadingStrategy.PDFToMarkdown:
             doc_convert_pipe.add_component("pdf_loader", PDFToMarkdown())
             doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
-        elif pdf_reading_strategy == PyMuPDFReader:
+        elif pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
             doc_convert_pipe.add_component("pdf_loader", PyMuPDFReader())
 
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
@@ -236,18 +240,15 @@ class DocumentProcessor:
         doc_convert_pipe.connect("html_parser.meta", "html_converter.meta")
         doc_convert_pipe.connect("html_converter.documents", "epub_pdf_merger.epub_docs")
         # PDF pipeline
-        if pdf_reading_strategy == PyPDFToDocument:
+        if pdf_reading_strategy == PDFReadingStrategy.PyPDFToDocument:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
-        elif pdf_reading_strategy == PDFReader:
+        elif pdf_reading_strategy == PDFReadingStrategy.PDFReader:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
-        elif pdf_reading_strategy == PDFToMarkdown:
+        elif pdf_reading_strategy == PDFReadingStrategy.PDFToMarkdown:
             doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
             doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
-        elif pdf_reading_strategy == PyMuPDFReader:
+        elif pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
-
-        # doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
-        # doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
 
         # Remaining pipeline to final counter
         doc_convert_pipe.connect("epub_pdf_merger.documents", "remove_illegal_docs")
@@ -290,7 +291,7 @@ class DocumentProcessor:
 
         # Iterate over the document and metadata pairs as they are loaded
         total_written: int = 0
-        self._doc_converter_pipeline()
+        self._doc_converter_pipeline(pdf_reading_strategy=self._pdf_reading_strategy)
 
         for file_path in self._create_file_list():
             file_path_list: List[str] = [file_path]
@@ -326,7 +327,8 @@ def main() -> None:
         min_paragraph_size=300,
         include_outputs_from=include_outputs_from,
         verbose=True,
-        write_to_file=True
+        pdf_reading_strategy=PDFReadingStrategy.PDFReader,
+        write_to_file=True,
     )
 
     # Draw images of the pipelines
