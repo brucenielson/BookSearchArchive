@@ -22,7 +22,7 @@ from pathlib import Path
 from pypdf import PdfReader, DocumentInformation
 import pymupdf4llm
 import pymupdf
-import markdown
+# import markdown
 
 
 def print_debug_results(results: Dict[str, Any],
@@ -498,9 +498,6 @@ class DuplicateChecker:
 def analyze_content(doc: Document, paragraph_num: int, title_line_max: int = 100) -> Dict[str, Optional[str]]:
     result: Dict[str, Optional[Union[str, int]]] = {"chapter_number": None, "chapter_title": None,
                                                     "cleaned_content": None}
-    # Temporarily disable this function
-    return result
-
     # Split the content into lines
     meta: Dict[str, str] = doc.meta
     content: str = doc.content
@@ -573,17 +570,17 @@ class CustomDocumentSplitter:
     @component.output_types(documents=List[Document])
     def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
         processed_docs: List[Document] = []
-        last_item_num: Optional[int] = None  # Track the last section number
+        # last_item_num: Optional[int] = None  # Track the last section number
         sections_to_skip: set = set()  # Sections to skip
 
-        current_chapter_number: Optional[int] = None  # Store chapter number for the section
-        current_chapter_title: Optional[str] = None  # Store chapter title for the section
+        # current_chapter_number: Optional[int] = None  # Store chapter number for the section
+        # current_chapter_title: Optional[str] = None  # Store chapter title for the section
 
         for doc in documents:
             # Extract item_num and paragraph_num from the metadata
             item_num: Optional[int] = int(doc.meta.get("item_#")) if doc.meta.get("item_#") is not None else None
-            paragraph_num: Optional[int] = int(doc.meta.get("paragraph_#")) \
-                if doc.meta.get("paragraph_#") is not None else None
+            # paragraph_num: Optional[int] = int(doc.meta.get("paragraph_#")) \
+            #     if doc.meta.get("paragraph_#") is not None else None
             book_title: str = doc.meta.get("book_title")
 
             # If this is a section to skip, go to the next document
@@ -592,52 +589,52 @@ class CustomDocumentSplitter:
 
             # If verbose is True, print the content when item_num changes and paragraph_num == 1
             # Otherwise, just save chapter info off
-            if True or item_num != last_item_num and paragraph_num == 1:
-                # Analyze the first two lines using the helper function
-                analysis_results: Dict[str, Optional[str]] = analyze_content(doc, paragraph_num)
+            # if True or item_num != last_item_num and paragraph_num == 1:
+            #     # Analyze the first two lines using the helper function
+            #     analysis_results: Dict[str, Optional[str]] = analyze_content(doc, paragraph_num)
+            #
+            #     # Update metadata with chapter number and chapter title if available
+            #     current_chapter_number = analysis_results["chapter_number"]
+            #     current_chapter_title = analysis_results["chapter_title"]
+            #
+            #     if current_chapter_number is not None:
+            #         doc.meta["chapter_number"] = current_chapter_number
+            #
+            #     if current_chapter_title is not None:
+            #         doc.meta["chapter_title"] = current_chapter_title
+            #
+            #     # Update document content with cleaned content
+            #     if analysis_results["cleaned_content"] is not None:
+            #         doc.content = analysis_results["cleaned_content"]
+            #
+            #     self.write_verbose_file(doc, file_name=self._pre_file_name)
+            #
+            #     # For the first paragraph, check for possible section skipping
+            #     if self._skip_content_func is not None and self._skip_content_func(doc.content):
+            #         if self._verbose:
+            #             # Skip this section
+            #             print(f"Skipping section {doc.meta.get('book_title')} / {doc.meta.get('section_title')} "
+            #                   f"due to content check")
+            #         sections_to_skip.add((doc.meta.get("book_title"), item_num))
+            #         continue
+            #
+            # elif item_num == last_item_num:
+            #     # Apply stored chapter number and chapter title to all paragraphs in the same section
+            #     if current_chapter_number is not None:
+            #         doc.meta["chapter_number"] = current_chapter_number
+            #
+            #     if current_chapter_title is not None:
+            #         doc.meta["chapter_title"] = current_chapter_title
+            #
+            #     if paragraph_num > 1:
+            #         analysis_results: Dict[str, Optional[str]] = analyze_content(doc, paragraph_num)
+            #         if analysis_results.get("subsection_num") is not None:
+            #             doc.meta["subsection_num"] = analysis_results["subsection_num"]
+            #         if analysis_results.get("subsection_title") is not None:
+            #             doc.meta["subsection_title"] = analysis_results["subsection_title"]
 
-                # Update metadata with chapter number and chapter title if available
-                current_chapter_number = analysis_results["chapter_number"]
-                current_chapter_title = analysis_results["chapter_title"]
-
-                if current_chapter_number is not None:
-                    doc.meta["chapter_number"] = current_chapter_number
-
-                if current_chapter_title is not None:
-                    doc.meta["chapter_title"] = current_chapter_title
-
-                # Update document content with cleaned content
-                if analysis_results["cleaned_content"] is not None:
-                    doc.content = analysis_results["cleaned_content"]
-
-                self.write_verbose_file(doc, file_name=self._pre_file_name)
-
-                # For the first paragraph, check for possible section skipping
-                if self._skip_content_func is not None and self._skip_content_func(doc.content):
-                    if self._verbose:
-                        # Skip this section
-                        print(f"Skipping section {doc.meta.get('book_title')} / {doc.meta.get('section_title')} "
-                              f"due to content check")
-                    sections_to_skip.add((doc.meta.get("book_title"), item_num))
-                    continue
-
-            elif item_num == last_item_num:
-                # Apply stored chapter number and chapter title to all paragraphs in the same section
-                if current_chapter_number is not None:
-                    doc.meta["chapter_number"] = current_chapter_number
-
-                if current_chapter_title is not None:
-                    doc.meta["chapter_title"] = current_chapter_title
-
-                if paragraph_num > 1:
-                    analysis_results: Dict[str, Optional[str]] = analyze_content(doc, paragraph_num)
-                    if analysis_results.get("subsection_num") is not None:
-                        doc.meta["subsection_num"] = analysis_results["subsection_num"]
-                    if analysis_results.get("subsection_title") is not None:
-                        doc.meta["subsection_title"] = analysis_results["subsection_title"]
-
-            # Update the last_item_num
-            last_item_num = item_num
+            # # Update the last_item_num
+            # last_item_num = item_num
 
             # Process and extend documents
             processed_docs.extend(self.process_document(doc))
