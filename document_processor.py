@@ -307,11 +307,6 @@ class DocumentProcessor:
 
 
 def main() -> None:
-    # epub_file_path: str = "documents/Karl Popper - All Life is Problem Solving-Taylor and Francis.epub"
-    # epub_file_path: str = "documents/Karl Popper - The Myth of the Framework-Taylor and Francis.epub"
-    # epub_file_path: str = "documents/Karl Popper - Conjectures and Refutations-Taylor and Francis (2018).epub"
-    # epub_file_path: str = "documents/Karl Popper - The Open Society and Its Enemies-Princeton University Press (2013).epub"  # noqa: E501
-    # epub_file_path: str = "documents/Karl Popper - The World of Parmenides-Taylor & Francis (2012).epub"
     file_path: str = "documents"
     postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     include_outputs_from: Optional[set[str]] = None  # {"final_counter"}
