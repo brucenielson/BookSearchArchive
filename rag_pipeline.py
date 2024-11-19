@@ -27,7 +27,7 @@ import generator_model as gen
 from enum import Enum
 import textwrap
 from custom_haystack_components import (MergeResults, DocumentQueryCollector, RetrieverWrapper, print_documents,
-                                        QueryComponent, print_debug_results)
+                                        QueryComponent, print_debug_results, DocumentStreamer)
 
 
 class SearchMode(Enum):
@@ -101,11 +101,13 @@ class RagPipeline:
         self._document_store: Optional[PgvectorDocumentStore] = None
         self._initialize_document_store()
 
-        # Warmup Reranker model
-        # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
-        ranker = TransformersSimilarityRanker()
-        ranker.warm_up()
-        self._ranker = ranker
+        if self._use_reranker:
+            # Warmup Reranker model
+            # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
+            ranker = TransformersSimilarityRanker()
+            ranker.warm_up()
+            self._ranker = ranker
+            # TODO: Fix this with annotations
 
         if generator_model is None:
             raise ValueError("Generator model must be provided")
@@ -338,14 +340,21 @@ class RagPipeline:
             rag_pipeline.connect("doc_query_collector.documents", "reranker.documents")
             rag_pipeline.connect("doc_query_collector.query", "reranker.query")
             rag_pipeline.connect("doc_query_collector.llm_top_k", "reranker.top_k")
+            # Stream the reranked documents
+            rag_pipeline.add_component("reranker_streamer", DocumentStreamer(do_stream=self._can_stream()))
+            rag_pipeline.connect("reranker.documents", "reranker_streamer.documents")
 
         # Add the prompt builder component
         prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
         rag_pipeline.add_component("prompt_builder", prompt_builder)
-        # Connect the query input to the prompt builder
         rag_pipeline.connect("doc_query_collector.query", "prompt_builder.query")
         rag_pipeline.connect("doc_query_collector.llm_top_k", "prompt_builder.llm_top_k")
-        rag_pipeline.connect("doc_query_collector.documents", "prompt_builder.documents")
+        if self._use_reranker:
+            # Connect the reranker documents to the prompt builder
+            rag_pipeline.connect("reranker_streamer.documents", "prompt_builder.documents")
+        else:
+            # Connect the doc collector documents to the prompt builder
+            rag_pipeline.connect("doc_query_collector.documents", "prompt_builder.documents")
 
         # Add the LLM component
         if isinstance(self._generator_model, gen.GeneratorModel):
@@ -389,7 +398,7 @@ def main() -> None:
                                              retriever_top_k_docs=None,
                                              include_outputs_from=include_outputs_from,
                                              search_mode=SearchMode.HYBRID,
-                                             use_reranker=False,
+                                             use_reranker=True,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
