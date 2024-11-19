@@ -104,6 +104,7 @@ class RagPipeline:
         if self._use_reranker:
             # Warmup Reranker model
             # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
+            # https://medium.com/towards-data-science/reranking-using-huggingface-transformers-for-optimizing-retrieval-in-rag-pipelines-fbfc6288c91f
             ranker = TransformersSimilarityRanker(device=self._component_device, top_k=self._llm_top_k,
                                                   score_threshold=0.20)
             ranker.warm_up()
