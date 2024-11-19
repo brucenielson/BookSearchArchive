@@ -10,6 +10,8 @@ from haystack.components.builders import PromptBuilder
 # noinspection PyPackageRequirements
 from haystack.components.generators import HuggingFaceLocalGenerator
 # noinspection PyPackageRequirements
+from haystack.components.rankers import TransformersSimilarityRanker
+# noinspection PyPackageRequirements
 from haystack.dataclasses import StreamingChunk
 from haystack_integrations.components.generators.google_ai import GoogleAIGeminiGenerator
 from haystack_integrations.components.retrievers.pgvector import PgvectorEmbeddingRetriever, PgvectorKeywordRetriever
@@ -52,6 +54,7 @@ class RagPipeline:
                  llm_top_k: int = 5,
                  retriever_top_k_docs: int = None,
                  search_mode: SearchMode = SearchMode.HYBRID,
+                 use_reranker: bool = False,
                  include_outputs_from: Optional[set[str]] = None
                  ) -> None:
 
@@ -80,6 +83,7 @@ class RagPipeline:
         self._include_outputs_from: Optional[set[str]] = include_outputs_from
         self._search_mode: SearchMode = search_mode
         self._allow_streaming_callback: bool = False
+        self._use_reranker: bool = use_reranker
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -96,6 +100,12 @@ class RagPipeline:
         self._print_verbose("Initializing document store")
         self._document_store: Optional[PgvectorDocumentStore] = None
         self._initialize_document_store()
+
+        # Warmup Reranker model
+        # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
+        ranker = TransformersSimilarityRanker()
+        ranker.warm_up()
+        self._ranker = ranker
 
         if generator_model is None:
             raise ValueError("Generator model must be provided")
@@ -298,14 +308,11 @@ class RagPipeline:
             rag_pipeline.add_component("query_embedder", self._sentence_embedder)
             rag_pipeline.connect("query_input.query", "query_embedder.text")
 
-        # # Add the prompt builder component
-        prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
-        rag_pipeline.add_component("prompt_builder", prompt_builder)
-
         # Add the document query collector component with an inline callback function to specify when completed
         # This is an extra way to be sure the LLM doesn't prematurely start calling the streaming callback
         doc_checker: DocumentQueryCollector = DocumentQueryCollector(do_stream=self._can_stream(),
                                                                      callback_func=lambda: doc_collector_completed())
+
         rag_pipeline.add_component("doc_query_collector", doc_checker)
         rag_pipeline.connect("query_input.query", "doc_query_collector.query")
         rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
@@ -325,6 +332,16 @@ class RagPipeline:
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
             rag_pipeline.connect("semantic_retriever.documents", "doc_query_collector.semantic_documents")
 
+        if self._use_reranker:
+            # Reranker
+            rag_pipeline.add_component("reranker", self._ranker)
+            rag_pipeline.connect("doc_query_collector.documents", "reranker.documents")
+            rag_pipeline.connect("doc_query_collector.query", "reranker.query")
+            rag_pipeline.connect("doc_query_collector.llm_top_k", "reranker.top_k")
+
+        # Add the prompt builder component
+        prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
+        rag_pipeline.add_component("prompt_builder", prompt_builder)
         # Connect the query input to the prompt builder
         rag_pipeline.connect("doc_query_collector.query", "prompt_builder.query")
         rag_pipeline.connect("doc_query_collector.llm_top_k", "prompt_builder.llm_top_k")
@@ -367,11 +384,12 @@ def main() -> None:
                                              postgres_port=5432,
                                              postgres_db_name='postgres',
                                              use_streaming=True,
-                                             verbose=False,
+                                             verbose=True,
                                              llm_top_k=5,
                                              retriever_top_k_docs=None,
                                              include_outputs_from=include_outputs_from,
                                              search_mode=SearchMode.HYBRID,
+                                             use_reranker=False,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
