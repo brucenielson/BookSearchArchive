@@ -104,7 +104,8 @@ class RagPipeline:
         if self._use_reranker:
             # Warmup Reranker model
             # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
-            ranker = TransformersSimilarityRanker()
+            ranker = TransformersSimilarityRanker(device=self._component_device, top_k=self._llm_top_k,
+                                                  score_threshold=0.20)
             ranker.warm_up()
             self._ranker = ranker
             # TODO: Fix this with annotations
@@ -312,10 +313,9 @@ class RagPipeline:
 
         # Add the document query collector component with an inline callback function to specify when completed
         # This is an extra way to be sure the LLM doesn't prematurely start calling the streaming callback
-        doc_checker: DocumentQueryCollector = DocumentQueryCollector(do_stream=self._can_stream(),
-                                                                     callback_func=lambda: doc_collector_completed())
-
-        rag_pipeline.add_component("doc_query_collector", doc_checker)
+        doc_collector: DocumentQueryCollector = DocumentQueryCollector(do_stream=self._can_stream(),
+                                                                       callback_func=lambda: doc_collector_completed())
+        rag_pipeline.add_component("doc_query_collector", doc_collector)
         rag_pipeline.connect("query_input.query", "doc_query_collector.query")
         rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
 
@@ -395,7 +395,7 @@ def main() -> None:
                                              use_streaming=True,
                                              verbose=True,
                                              llm_top_k=5,
-                                             retriever_top_k_docs=None,
+                                             retriever_top_k_docs=50,
                                              include_outputs_from=include_outputs_from,
                                              search_mode=SearchMode.HYBRID,
                                              use_reranker=True,
