@@ -341,4 +341,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# TODO: Add PDF support (and maybe other document types)
+# TODO: Add other document types

@@ -347,10 +347,24 @@ def print_documents(documents: List[Document]) -> None:
 
 
 @component
+class DocumentStreamer:
+    def __init__(self, do_stream: bool = False) -> None:
+        self._do_stream: bool = do_stream
+
+    @component.output_types(documents=List[Document])
+    def run(self, documents: List[Document]) -> Dict[str, List[Document]]:
+        if self._do_stream:
+            print()
+            print("Reranked Documents:")
+            print_documents(documents)
+        return {"documents": documents}
+
+
+@component
 class DocumentQueryCollector:
     def __init__(self, do_stream: bool = False, callback_func: Callable = None) -> None:
         self._do_stream: bool = do_stream
-        self._callback_func: Callable = callback_func
+        self._callback_func: Callable = callback_func  # TODO: Get rid of this callback
     """
     A simple component that takes a List of Documents from the DocumentJoiner
     as well as the query and llm_top_k from the QueryComponent and returns them in a dictionary
