@@ -12,6 +12,6 @@ The current stack is all open-source and includes:
 
 
 This code is related to my Artificial Intelligence blog posts. 
-* [The Book Search Archive Intro Post] (https://www.mindfiretechnology.com/blog/archive/our-open-source-ai-stack-the-book-search-archive/)
-* [How to Setup your environment] (https://www.mindfiretechnology.com/blog/archive/environment-setup-for-rag-using-python-haystack-postgresql-pgvector-and-hugging-face/)
-* [List of all Artificial Intelligence blog posts] (https://www.mindfiretechnology.com/blog/categories/Artificial%20Intelligence?p=2)
+* [The Book Search Archive Intro Post](https://www.mindfiretechnology.com/blog/archive/our-open-source-ai-stack-the-book-search-archive/)
+* [How to Setup your environment](https://www.mindfiretechnology.com/blog/archive/environment-setup-for-rag-using-python-haystack-postgresql-pgvector-and-hugging-face/)
+* [List of all Artificial Intelligence blog posts](https://www.mindfiretechnology.com/blog/categories/Artificial%20Intelligence?p=2)
