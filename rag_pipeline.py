@@ -426,6 +426,5 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# TODO: Add a reranker component to rerank the documents before passing them to the LLM
 # TODO: Add a way to chat with the model
 # TODO: Add graph rag pipeline
