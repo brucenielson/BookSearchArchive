@@ -20,7 +20,7 @@ if audio_data.ndim != 1:
     raise ValueError(f"Invalid audio data shape: {audio_data.shape}. It should be a 1D array.")
 
 # Normalize the audio data to be in the int16 range (-32768 to 32767)
-audio_data = np.int16(audio_data * 32767)  # Scale to 16-bit PCM range
+# audio_data = np.int16(audio_data * 32767)  # Scale to 16-bit PCM range
 
 # Check if the sampling rate is valid
 sampling_rate = speech["sampling_rate"]
