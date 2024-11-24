@@ -22,6 +22,7 @@ from pathlib import Path
 from pypdf import PdfReader, DocumentInformation
 import pymupdf4llm
 import pymupdf
+from transformers import pipeline
 # import markdown
 
 
@@ -60,6 +61,18 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
         else:
             # If the value is neither a dict nor a list, print it directly
             print(value)
+
+
+@component
+class TextToSpeech:
+    def __init__(self, model_name_or_path: str = "suno/bark"):
+        self.tts_pipeline = pipeline("text-to-speech", model=model_name_or_path)
+
+    @component.output_types(audio=ByteStream, text=str)
+    def run(self, text: str) -> Dict[str, Any]:
+        audio_output = self.tts_pipeline(text)
+        audio_bytes = audio_output[0]['audio'].numpy()
+        return {"audio": audio_bytes, "text": text}
 
 
 @component

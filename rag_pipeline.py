@@ -27,7 +27,7 @@ import generator_model as gen
 from enum import Enum
 import textwrap
 from custom_haystack_components import (MergeResults, DocumentQueryCollector, RetrieverWrapper, print_documents,
-                                        QueryComponent, print_debug_results, DocumentStreamer)
+                                        QueryComponent, print_debug_results, DocumentStreamer, TextToSpeech)
 
 
 class SearchMode(Enum):
@@ -372,6 +372,10 @@ class RagPipeline:
         # Connect prompt builder to the llm
         rag_pipeline.connect("prompt_builder", "llm")
 
+        tts_node = TextToSpeech()
+        rag_pipeline.add_component("tts", tts_node)
+        rag_pipeline.connect("llm.replies", "tts.text")
+
         # Set the pipeline instance
         self._rag_pipeline = rag_pipeline
 
@@ -393,7 +397,7 @@ def main() -> None:
                                              postgres_host='localhost',
                                              postgres_port=5432,
                                              postgres_db_name='postgres',
-                                             use_streaming=True,
+                                             use_streaming=False,
                                              verbose=True,
                                              llm_top_k=5,
                                              retriever_top_k_docs=50,
