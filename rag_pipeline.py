@@ -55,6 +55,7 @@ class RagPipeline:
                  retriever_top_k_docs: int = None,
                  search_mode: SearchMode = SearchMode.HYBRID,
                  use_reranker: bool = False,
+                 use_voice: bool = False,
                  include_outputs_from: Optional[set[str]] = None
                  ) -> None:
 
@@ -84,6 +85,8 @@ class RagPipeline:
         self._search_mode: SearchMode = search_mode
         self._allow_streaming_callback: bool = False
         self._use_reranker: bool = use_reranker
+        # Use voice is only used if you are NOT streaming. Otherwise it is ignored.
+        self._use_voice: bool = use_voice
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -372,9 +375,11 @@ class RagPipeline:
         # Connect prompt builder to the llm
         rag_pipeline.connect("prompt_builder", "llm")
 
-        tts_node = TextToSpeech()
-        rag_pipeline.add_component("tts", tts_node)
-        rag_pipeline.connect("llm.replies", "tts.text")
+        if self._use_voice and not self._can_stream():
+            # Add the text to speech component
+            tts_node = TextToSpeech()
+            rag_pipeline.add_component("tts", tts_node)
+            rag_pipeline.connect("llm.replies", "tts.replies")
 
         # Set the pipeline instance
         self._rag_pipeline = rag_pipeline
@@ -404,6 +409,7 @@ def main() -> None:
                                              include_outputs_from=include_outputs_from,
                                              search_mode=SearchMode.HYBRID,
                                              use_reranker=True,
+                                             use_voice=True,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
@@ -414,7 +420,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "Should we strive to make our theories as severely testable as possible?"
+    query: str = "How do we test mathematical theories?"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"

@@ -13,6 +13,8 @@ from haystack.components.preprocessors import DocumentSplitter
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
+# noinspection PyPackageRequirements
+from haystack.components.generators import HuggingFaceAPIGenerator
 from sentence_transformers import SentenceTransformer
 import re
 from html_parser import HTMLParser
@@ -22,7 +24,10 @@ from pathlib import Path
 from pypdf import PdfReader, DocumentInformation
 import pymupdf4llm
 import pymupdf
-from transformers import pipeline
+from transformers import pipeline, AutoProcessor, BarkModel
+import sounddevice as sd
+import numpy as np
+import torch
 # import markdown
 
 
@@ -65,14 +70,69 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 
 @component
 class TextToSpeech:
-    def __init__(self, model_name_or_path: str = "suno/bark"):
-        self.tts_pipeline = pipeline("text-to-speech", model=model_name_or_path)
+    def __init__(self, model_name_or_path: str = "suno/bark-small"):
+        # Initialize the processor
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.processor = AutoProcessor.from_pretrained(model_name_or_path, torch_dtype=torch.float16)
+        self.model = BarkModel.from_pretrained(model_name_or_path, torch_dtype=torch.float16).to(self.device)
 
-    @component.output_types(audio=ByteStream, text=str)
-    def run(self, text: str) -> Dict[str, Any]:
-        audio_output = self.tts_pipeline(text)
-        audio_bytes = audio_output[0]['audio'].numpy()
-        return {"audio": audio_bytes, "text": text}
+    @component.output_types(text=str)
+    def run(self, replies: List[str]) -> Dict[str, Any]:
+        reply: str = replies[0]
+        # Split the input text into sentences using regular expression
+        sentences: List[str] = re.split(r'(?<=[.!?])\s+', reply.strip())
+
+        # Initialize an empty list to collect audio chunks
+        audio_chunks = []
+
+        # Process each sentence
+        sentence: str
+        for sentence in sentences:
+            # Use the v2/de_speaker_0 voice preset
+            voice_preset: str = "v2/de_speaker_0"
+
+            # Prepare the inputs for the model
+            inputs: dict = self.processor(sentence,
+                                          voice_preset=voice_preset,
+                                          return_tensors="pt",
+                                          return_attention_mask=True)
+
+            # Ensure inputs are moved to the correct device
+            inputs = {key: value.to(self.device) for key, value in inputs.items()}
+
+            audio_array = self.model.generate(**inputs).to(self.device)
+            audio_array = audio_array.cpu().numpy().squeeze()
+
+            # Play the generated audio immediately
+            self._play_audio(audio_array)
+
+        # After all sentences are processed, return the last audio chunk and the full text
+        return {"text": reply}
+
+    @staticmethod
+    def _play_audio(audio_data: np.ndarray, sample_rate: int = 24000) -> None:
+        """
+        Play audio data locally.
+
+        Args:
+            audio_data (np.ndarray): The audio data as a NumPy array.
+            sample_rate (int): The sample rate for playback.
+        """
+        audio_data = audio_data.astype("float32")
+        sd.play(audio_data, samplerate=sample_rate)
+        sd.wait()  # Wait until the audio finishes playing
+
+
+# @component
+# class TextToSpeech:
+#     def __init__(self, model_name_or_path: str = "suno/bark"):
+#         self.tts_pipeline = pipeline("text-to-speech", model=model_name_or_path)
+#
+#     @component.output_types(audio=ByteStream, text=str)
+#     def run(self, text: str) -> Dict[str, Any]:
+#         audio_output = self.tts_pipeline(text)
+#         audio_bytes = audio_output[0]['audio'].numpy()
+#         return {"audio": audio_bytes, "text": text}
 
 
 @component
