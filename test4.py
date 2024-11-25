@@ -9,9 +9,6 @@ model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16).
 # model.enable_cpu_offload()
 # model = model.to_bettertransformer()
 
-# Set the pad_token_id explicitly in the model config
-model.config.pad_token_id = model.config.eos_token_id
-
 # Loop from v2/de_speaker_0 to v2/de_speaker_9
 for i in range(0, 2):
     voice_preset = f"v2/de_speaker_{i}"
@@ -21,15 +18,10 @@ for i in range(0, 2):
                        return_tensors="pt",
                        return_attention_mask=True)
 
-    # Create attention mask if it's not present
-    if 'attention_mask' not in inputs:
-        inputs['attention_mask'] = torch.ones_like(inputs['input_ids'])
-
     # Ensure inputs are moved to the correct device
     inputs = {key: value.to(device) for key, value in inputs.items()}
 
     audio_array = model.generate(**inputs,
-                                 pad_token_id=model.config.pad_token_id,
                                  ).to(device)
     audio_array = audio_array.cpu().numpy().squeeze()
 
