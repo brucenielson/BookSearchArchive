@@ -284,7 +284,7 @@ class RagPipeline:
             print()
             print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
-            merged_results = results["merger"]["merged_results"]
+            merged_results = results["merger"]
 
             # Print retrieved documents
             print()
@@ -379,7 +379,7 @@ class RagPipeline:
             # Add the text to speech component
             tts_node = TextToSpeech()
             rag_pipeline.add_component("tts", tts_node)
-            rag_pipeline.connect("llm.replies", "tts.replies")
+            rag_pipeline.connect("merger.reply", "tts.reply")
 
         # Set the pipeline instance
         self._rag_pipeline = rag_pipeline

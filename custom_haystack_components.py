@@ -77,8 +77,7 @@ class TextToSpeech:
         self.model = BarkModel.from_pretrained(model_name_or_path, torch_dtype=torch.float16).to(self.device)
 
     @component.output_types(text=str)
-    def run(self, replies: List[str]) -> Dict[str, Any]:
-        reply: str = replies[0]
+    def run(self, reply: str) -> Dict[str, Any]:
         # Split the input text into sentences using regular expression
         sentences: List[str] = re.split(r'(?<=[.!?])\s+', reply.strip())
 
@@ -501,15 +500,10 @@ class QueryComponent:
 
 @component
 class MergeResults:
-    @component.output_types(merged_results=Dict[str, Any])
+    @component.output_types(documents=List[Document], replies=List[Union[str, Dict[str, str]]], reply=str)
     def run(self, documents: List[Document],
-            replies: List[Union[str, Dict[str, str]]]) -> Dict[str, Dict[str, Any]]:
-        return {
-            "merged_results": {
-                "documents": documents,
-                "replies": replies
-            }
-        }
+            replies: List[Union[str, Dict[str, str]]]) -> Dict[str, Any]:
+        return {"documents": documents, "replies": replies, "reply": replies[0]}
 
 
 @component
