@@ -1,6 +1,6 @@
 from transformers import pipeline
 import scipy.io.wavfile as wavfile
-import numpy as np
+import sounddevice as sd
 
 # Initialize the pipeline
 synthesiser = pipeline("text-to-speech", model="suno/bark", device=0)
@@ -27,10 +27,11 @@ sampling_rate = speech["sampling_rate"]
 if not isinstance(sampling_rate, int):
     raise ValueError(f"Invalid sampling rate: {sampling_rate}. It must be an integer.")
 
-# Write the audio data to a WAV file
 wavfile.write("bark_out.wav", rate=sampling_rate, data=audio_data)
+sd.play(audio_data, samplerate=sampling_rate)
+sd.wait()  # Wait until audio playback is finished
 
-# Try HireSpeech
+# Try HierSpeech
 # https://huggingface.co/spaces/LeeSangHoon/HierSpeech_TTS/tree/main
 # https://huggingface.co/spaces/LeeSangHoon/HierSpeech_TTS
 # https://www.youtube.com/watch?v=4-2Jk8muo7c
