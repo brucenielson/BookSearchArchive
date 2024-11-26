@@ -1,7 +1,7 @@
 from huggingface_hub import InferenceClient
-import sounddevice as sd
 import numpy as np
 import generator_model as gen
+import sounddevice as sd
 import requests
 
 hf_secret: str = gen.get_secret(r'D:\Documents\Secrets\huggingface_secret.txt')  # Put your path here
@@ -31,28 +31,26 @@ def check_model_health(model_id: str):
 # Check the model health before making inference requests
 check_model_health(model_id)
 
-# Loop through voice presets
-for i in range(2):
-    voice_preset = f"v2/de_speaker_{i}"
-    print(f"Sending request with payload: {{'text': 'My name is Karl Popper. The philosopher of epistemology.'}}")
+# Simplified test: Send a basic TTS request to the model
+payload = {"text": "My name is Karl Popper. The philosopher of epistemology."}
 
-    # Payload for inference (ensure this is correctly formatted)
-    payload = {"text": "My name is Karl Popper. The philosopher of epistemology."}
+try:
+    # Send inference request to Hugging Face API with model_id
+    response = client.post(json=payload, model=model_id)  # Provide model ID in the request
 
-    try:
-        # Send inference request to Hugging Face API
-        response = client.post(json=payload)  # Only send the payload as JSON
+    # Log the full response for debugging
+    print("Response:", response)
 
-        # If the response is raw audio data (bytes)
-        if isinstance(response, bytes):
-            print(f"Received audio data for voice preset {voice_preset}.")
-            audio_data = response  # Raw audio data (in bytes)
-            # Convert bytes to numpy array and play using sounddevice
-            audio_array = np.frombuffer(audio_data, dtype=np.float32)  # Convert byte data to numpy array
-            sample_rate = 24000  # Adjust the sample rate if necessary
-            sd.play(audio_array, samplerate=sample_rate)
-            sd.wait()
-        else:
-            print(f"Error: Unexpected response format for voice preset {voice_preset}.")
-    except Exception as e:
-        print(f"Error while processing preset {voice_preset}: {str(e)}")
+    # If the response is raw audio data (bytes)
+    if isinstance(response, bytes):
+        print("Received audio data.")
+
+        # Convert bytes to numpy array and play using sounddevice
+        audio_array = np.frombuffer(response, dtype=np.float32)  # Convert byte data to numpy array
+        sample_rate = 24000  # Adjust the sample rate if necessary
+        sd.play(audio_array, samplerate=sample_rate)
+        sd.wait()
+    else:
+        print("Error: Unexpected response format.")
+except Exception as e:
+    print(f"Error during inference: {str(e)}")
