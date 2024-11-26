@@ -24,10 +24,12 @@ from pathlib import Path
 from pypdf import PdfReader, DocumentInformation
 import pymupdf4llm
 import pymupdf
-from transformers import pipeline, AutoProcessor, BarkModel
+from transformers import AutoProcessor, BarkModel
 import sounddevice as sd
 import numpy as np
 import torch
+import requests
+import generator_model as gen
 # import markdown
 
 
@@ -71,6 +73,46 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 @component
 class TextToSpeech:
     def __init__(self, model_name_or_path: str = "suno/bark-small"):
+        # Initialize with Hugging Face API token and model name
+        self.api_url = f"https://api-inference.huggingface.co/models/{model_name_or_path}"
+        hf_secret: str = gen.get_secret(r'D:\Documents\Secrets\huggingface_secret.txt')  # Put your path here
+        self.headers = {"Authorization": f"Bearer {hf_secret}"}
+
+    @component.output_types(text=str)
+    def run(self, reply: str) -> Dict[str, Any]:
+        # Split the input text into sentences
+        sentences: List[str] = re.split(r'(?<=[.!?])\s+', reply.strip())
+
+        # Process each sentence and request audio generation via API
+        for sentence in sentences:
+            payload = {
+                "inputs": {
+                    "text": sentence,
+                    "voice_preset": "v2/de_speaker_0"
+                }
+            }
+
+            # Send request to Hugging Face Inference API
+            response = requests.post(self.api_url, headers=self.headers, json=payload)
+            response.raise_for_status()  # Raise an error if the request fails
+
+            # Extract and process the audio output
+            audio_array = np.frombuffer(response.content, dtype=np.float32)
+            self._play_audio(audio_array)
+
+        # Return the original text
+        return {"text": reply}
+
+    @staticmethod
+    def _play_audio(audio_data: np.ndarray, sample_rate: int = 24000) -> None:
+        audio_data = audio_data.astype("float32")
+        sd.play(audio_data, samplerate=sample_rate)
+        sd.wait()  # Wait until the audio finishes playing
+
+
+@component
+class TextToSpeechLocal:
+    def __init__(self, model_name_or_path: str = "suno/bark-small"):
         # Initialize the processor
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.processor = AutoProcessor.from_pretrained(model_name_or_path, torch_dtype=torch.float16)
@@ -110,13 +152,6 @@ class TextToSpeech:
 
     @staticmethod
     def _play_audio(audio_data: np.ndarray, sample_rate: int = 24000) -> None:
-        """
-        Play audio data locally.
-
-        Args:
-            audio_data (np.ndarray): The audio data as a NumPy array.
-            sample_rate (int): The sample rate for playback.
-        """
         audio_data = audio_data.astype("float32")
         sd.play(audio_data, samplerate=sample_rate)
         sd.wait()  # Wait until the audio finishes playing

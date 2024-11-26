@@ -27,7 +27,8 @@ import generator_model as gen
 from enum import Enum
 import textwrap
 from custom_haystack_components import (MergeResults, DocumentQueryCollector, RetrieverWrapper, print_documents,
-                                        QueryComponent, print_debug_results, DocumentStreamer, TextToSpeech)
+                                        QueryComponent, print_debug_results, DocumentStreamer, TextToSpeechLocal,
+                                        TextToSpeech)
 
 
 class SearchMode(Enum):
@@ -377,7 +378,7 @@ class RagPipeline:
 
         if self._use_voice and not self._can_stream():
             # Add the text to speech component
-            tts_node = TextToSpeech()
+            tts_node = TextToSpeechLocal()
             rag_pipeline.add_component("tts", tts_node)
             rag_pipeline.connect("merger.reply", "tts.reply")
 
