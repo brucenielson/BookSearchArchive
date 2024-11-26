@@ -44,3 +44,11 @@ def try_tts_models(models, text):
 
 # Run the function to test TTS models
 try_tts_models(models, text)
+
+# https://discuss.huggingface.co/t/undefined-error-on-inference-api-serverless-for-several-hf-text-to-speech-tasks/79230/3
+# https://huggingface.co/playground?modelId=google/gemma-1.1-2b-it
+# Use Spaces
+# https://huggingface.co/spaces/suno/bark
+# Others found here:
+# https://huggingface.co/tasks/text-to-speech
+# https://huggingface.co/spaces/mrfakename/E2-F5-TTS (Your own voice!)
