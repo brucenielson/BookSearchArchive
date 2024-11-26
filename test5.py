@@ -4,114 +4,202 @@ import sounddevice as sd
 import generator_model as gen
 import requests
 import json
+import traceback
 
 # Load secret
 hf_secret: str = gen.get_secret(r'D:\Documents\Secrets\huggingface_secret.txt')
 
 
-# Function to check model health
-def check_model_health(model_id: str, token: str):
-    url = f"https://api-inference.huggingface.co/models/{model_id}"
-    headers = {"Authorization": f"Bearer {token}"}
-
+def advanced_model_diagnostics(model_id: str, token: str):
+    """Perform comprehensive model diagnostics"""
     try:
-        response = requests.get(url, headers=headers)
-        print(f"Model Health Check:")
-        print(f"Status Code: {response.status_code}")
-        print(f"Response Headers: {json.dumps(dict(response.headers), indent=2)}")
+        # Detailed model information request
+        url = f"https://huggingface.co/api/models/{model_id}"
+        headers = {"Authorization": f"Bearer {token}"}
 
-        if response.status_code == 200:
-            print(f"Model {model_id} is available!")
-            return True
-        else:
-            print(f"Model {model_id} returned status code {response.status_code}")
-            print(f"Response Content: {response.text}")
-            return False
-    except requests.exceptions.RequestException as e:
-        print(f"Error checking model health: {e}")
-        return False
+        print("\n--- Detailed Model Diagnostics ---")
 
+        # Model details
+        model_details_response = requests.get(url, headers=headers)
+        print("Model Details Response:")
+        print(f"Status Code: {model_details_response.status_code}")
 
-# Initialize the Inference Client
-def create_inference_client(model: str, token: str):
-    try:
-        client = InferenceClient(
-            model=model,
-            token=token
-        )
-        return client
+        if model_details_response.status_code == 200:
+            model_info = model_details_response.json()
+            print("Model Information:")
+            print(json.dumps({
+                "id": model_info.get("id"),
+                "modelType": model_info.get("modelType"),
+                "pipeline_tag": model_info.get("pipeline_tag"),
+                "library_name": model_info.get("library_name")
+            }, indent=2))
+
+        # Inference API diagnostic
+        inference_url = f"https://api-inference.huggingface.co/models/{model_id}"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+
+        print("\n--- Inference API Diagnostic ---")
+
+        # Try multiple payload approaches
+        payloads = [
+            {"inputs": "Test input for diagnostics"},
+            {
+                "inputs": "Test input for diagnostics",
+                "parameters": {
+                    "text_temp": 0.7,
+                    "waveform_temp": 0.7
+                }
+            }
+        ]
+
+        for payload in payloads:
+            print(f"\nTesting payload: {json.dumps(payload, indent=2)}")
+            try:
+                inference_response = requests.post(inference_url, headers=headers, json=payload)
+                print(f"Inference API Response:")
+                print(f"Status Code: {inference_response.status_code}")
+                print(f"Response Headers: {dict(inference_response.headers)}")
+                print(f"Response Content: {inference_response.text}")
+            except Exception as payload_error:
+                print(f"Payload test error: {payload_error}")
+
     except Exception as e:
-        print(f"Error creating InferenceClient: {e}")
+        print(f"Diagnostics Error: {e}")
+        traceback.print_exc()
+
+
+def text_to_speech_with_diagnostics(model_id: str, token: str, text: str):
+    """Comprehensive text-to-speech generation with extensive error handling"""
+    try:
+        # Create client with verbose error tracking
+        print("\n--- Text-to-Speech Attempt ---")
+        print(f"Attempting to generate speech for: {text}")
+
+        # Try multiple inference approaches
+        inference_methods = [
+            # Method 1: Direct InferenceClient
+            lambda: _try_inference_client(model_id, token, text),
+
+            # Method 2: Direct API Call
+            lambda: _try_direct_api_call(model_id, token, text)
+        ]
+
+        for method in inference_methods:
+            try:
+                audio_data = method()
+                if audio_data:
+                    return audio_data
+            except Exception as method_error:
+                print(f"Method failed: {method_error}")
+                traceback.print_exc()
+
+        print("All inference methods failed.")
         return None
 
+    except Exception as main_error:
+        print(f"Comprehensive Error in text-to-speech generation:")
+        print(f"  - Error Type: {type(main_error)}")
+        print(f"  - Error Message: {main_error}")
+        traceback.print_exc()
 
-def text_to_speech(client: InferenceClient, text: str):
+    return None
+
+
+def _try_inference_client(model_id: str, token: str, text: str):
+    """Attempt text-to-speech using InferenceClient"""
+    print("\nAttempting Method: InferenceClient")
+    client = InferenceClient(model=model_id, token=token)
+
     try:
-        # Detailed input logging
-        print(f"Generating speech for text: {text}")
-        print(f"Using model: {client.model}")
-
-        # Generate audio using the InferenceClient
+        # Try different parameters
         audio_response = client.text_to_speech(text)
 
-        # Verify the response
         if not isinstance(audio_response, bytes):
             print("Unexpected response type")
             return None
 
-        # Convert bytes to numpy array for playback
-        audio_array = np.frombuffer(audio_response, dtype=np.float32)
-
-        print(f"Received audio data:")
-        print(f"  - Length: {len(audio_array)} samples")
-        print(f"  - Data type: {audio_array.dtype}")
-        print(f"  - Min value: {audio_array.min()}")
-        print(f"  - Max value: {audio_array.max()}")
-
-        # Play the audio
-        try:
-            sd.play(audio_array, samplerate=24000)
-            sd.wait()
-        except Exception as play_error:
-            print(f"Audio playback error: {play_error}")
-
-        # Save the audio file
-        try:
-            with open("output_speech.wav", "wb") as audio_file:
-                audio_file.write(audio_response)
-            print("Audio saved to output_speech.wav")
-        except Exception as save_error:
-            print(f"Audio saving error: {save_error}")
-
+        print("Successful audio generation via InferenceClient!")
         return audio_response
 
     except Exception as e:
-        print(f"Detailed Error during text-to-speech generation:")
-        print(f"  - Error Type: {type(e)}")
-        print(f"  - Error Message: {e}")
+        print(f"InferenceClient method failed: {e}")
+        traceback.print_exc()
         return None
 
 
-# Main execution
+def _try_direct_api_call(model_id: str, token: str, text: str):
+    """Attempt text-to-speech using direct API call"""
+    print("\nAttempting Method: Direct API Call")
+    url = f"https://api-inference.huggingface.co/models/{model_id}"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+
+    # Try multiple payload configurations
+    payloads = [
+        {"inputs": text},
+        {
+            "inputs": text,
+            "parameters": {
+                "text_temp": 0.7,
+                "waveform_temp": 0.7
+            }
+        }
+    ]
+
+    for payload in payloads:
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+
+            print(f"Direct API Response:")
+            print(f"Status Code: {response.status_code}")
+            print(f"Response Headers: {dict(response.headers)}")
+            print(f"Response Content Length: {len(response.content)} bytes")
+
+            if response.status_code == 200:
+                print("Successful audio generation via Direct API!")
+                return response.content
+            else:
+                print(f"API call failed: {response.text}")
+
+        except Exception as call_error:
+            print(f"Direct API call error: {call_error}")
+            traceback.print_exc()
+
+    return None
+
+
 def main():
     model_id = "suno/bark-small"
 
-    # Check model health first
-    model_available = check_model_health(model_id, hf_secret)
-    if not model_available:
-        print("Model is not available. Exiting.")
-        return
+    # Perform advanced diagnostics
+    advanced_model_diagnostics(model_id, hf_secret)
 
-    # Create client
-    client = create_inference_client(model_id, hf_secret)
-    if not client:
-        print("Failed to create InferenceClient. Exiting.")
-        return
+    # Attempt text-to-speech with full diagnostics
+    audio_data = text_to_speech_with_diagnostics(
+        model_id,
+        hf_secret,
+        "My name is Karl Popper. The philosopher of epistemology."
+    )
 
-    # Perform text to speech
-    text_to_speech(client, "My name is Karl Popper. The philosopher of epistemology.")
+    # Optional: Save and play audio if generated
+    if audio_data:
+        try:
+            with open("diagnostic_output.wav", "wb") as f:
+                f.write(audio_data)
+            print("\nAudio saved to diagnostic_output.wav")
+
+            # Optional audio playback
+            audio_array = np.frombuffer(audio_data, dtype=np.float32)
+            sd.play(audio_array, samplerate=24000)
+            sd.wait()
+        except Exception as save_error:
+            print(f"Error saving/playing audio: {save_error}")
 
 
-# Run the main function
 if __name__ == "__main__":
     main()
