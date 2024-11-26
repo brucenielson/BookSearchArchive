@@ -11,67 +11,56 @@ hf_secret: str = gen.get_secret(r'D:\Documents\Secrets\huggingface_secret.txt')
 model_id = "suno/bark-small"
 api_url = f"https://api-inference.huggingface.co/models/{model_id}"
 
-# Comprehensive headers
+# Simplified headers
 headers = {
     "Authorization": f"Bearer {hf_secret}",
-    "Content-Type": "application/json",
-    "Accept": "*/*",
-    "Connection": "keep-alive"
+    "Content-Type": "application/json"
 }
 
-# Detailed payload
+# Simplified payload
 payload = {
-    "inputs": "My name is Karl Popper. The philosopher of epistemology.",
-    "parameters": {
-        "text_temp": 0.7,  # Text generation temperature
-        "waveform_temp": 0.7,  # Audio generation temperature
-        "max_new_tokens": 256  # Limit on new tokens
-    }
+    "inputs": "My name is Karl Popper. The philosopher of epistemology."
 }
 
 
-def detailed_error_handling():
+def inference_request():
     try:
-        # Verbose request with full details
+        # Make the request
         print("Sending request to:", api_url)
-        print("Headers:", json.dumps(headers, indent=2))
         print("Payload:", json.dumps(payload, indent=2))
 
-        # Make the request
         response = requests.post(
             api_url,
             headers=headers,
             data=json.dumps(payload)
         )
 
-        # Detailed response logging
+        # Detailed logging
         print("\nResponse Status Code:", response.status_code)
-        print("Response Headers:", response.headers)
 
-        # Handle different possible response scenarios
         if response.status_code == 200:
-            # Successfully received audio
-            audio_data = response.content
-            audio_array = np.frombuffer(audio_data, dtype=np.float32)
+            # Save audio to file for troubleshooting
+            with open("output_audio.wav", "wb") as audio_file:
+                audio_file.write(response.content)
 
-            print(f"Received audio data. Length: {len(audio_array)} samples")
+            print("Audio saved to output_audio.wav")
 
-            # Play audio
-            sd.play(audio_array, samplerate=24000)
-            sd.wait()
+            # Attempt to play audio
+            try:
+                audio_array = np.frombuffer(response.content, dtype=np.float32)
+                print(f"Received audio data. Length: {len(audio_array)} samples")
 
-        elif response.status_code == 503:
-            print("Model is loading. This can take a few minutes for the first request.")
-            print("Suggested actions:")
-            print("1. Wait a few minutes and retry")
-            print("2. Check Hugging Face model page for any known issues")
+                sd.play(audio_array, samplerate=24000)
+                sd.wait()
+            except Exception as play_error:
+                print(f"Audio playback error: {play_error}")
 
         else:
             # Detailed error information
             print("\nFull Error Details:")
             print("Status Code:", response.status_code)
-            print("Response Content:", response.text)
             print("Response Headers:", response.headers)
+            print("Response Content:", response.text)
 
     except requests.exceptions.RequestException as req_error:
         print(f"Request Error: {req_error}")
@@ -79,5 +68,5 @@ def detailed_error_handling():
         print(f"Unexpected Error: {e}")
 
 
-# Run the detailed error handling
-detailed_error_handling()
+# Run the inference request
+inference_request()
