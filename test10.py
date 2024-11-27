@@ -2,6 +2,7 @@ import torch
 from parler_tts import ParlerTTSForConditionalGeneration
 from transformers import AutoTokenizer
 import soundfile as sf
+import sounddevice as sd
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
@@ -16,6 +17,10 @@ prompt_input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
 
 generation = model.generate(input_ids=input_ids, prompt_input_ids=prompt_input_ids)
 audio_arr = generation.cpu().numpy().squeeze()
-sf.write("parler_tts_out.wav", audio_arr, model.config.sampling_rate)
+# sf.write("parler_tts_out.wav", audio_arr, model.config.sampling_rate)
+
+# audio_data = audio_arr.astype("float32")
+sd.play(audio_arr, samplerate=model.config.sampling_rate)
+sd.wait()  # Wait until the audio finishes playing
 
 # pip install git+https://github.com/huggingface/parler-tts.git
