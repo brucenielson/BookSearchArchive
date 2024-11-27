@@ -70,6 +70,8 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
             print(value)
 
 
+# pip install git+https://github.com/huggingface/parler-tts.git
+# pip install sounddevice
 @component
 class TextToSpeech:
     def __init__(self, model_name_or_path: str = "suno/bark-small"):

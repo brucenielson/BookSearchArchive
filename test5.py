@@ -15,6 +15,7 @@ def advanced_model_diagnostics(model_id: str, token: str):
     try:
         # Detailed model information request
         url = f"https://huggingface.co/api/models/{model_id}"
+        # url = f"https://huggingface.co/spaces/suno/bark"
         headers = {"Authorization": f"Bearer {token}"}
 
         print("\n--- Detailed Model Diagnostics ---")

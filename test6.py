@@ -51,4 +51,12 @@ try_tts_models(models, text)
 # https://huggingface.co/spaces/suno/bark
 # Others found here:
 # https://huggingface.co/tasks/text-to-speech
+# https://huggingface.co/docs/transformers/tasks/text-to-speech
 # https://huggingface.co/spaces/mrfakename/E2-F5-TTS (Your own voice!)
+# https://huggingface.co/spaces/bnielson/testspace
+# https://www.gradio.app/guides/quickstart
+# https://huggingface.co/docs/hub/spaces-sdks-gradio
+# https://www.gradio.app/main/guides/the-interface-class
+# https://www.gradio.app/guides/blocks-and-event-listeners
+# https://www.gradio.app/guides/streaming-ai-generated-audio
+# https://github.com/huggingface/parler-tts
