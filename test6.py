@@ -13,6 +13,7 @@ text = "Hello, welcome to the world of text to speech!"
 # List of models to try for TTS
 models = [
     None,
+    "suno/bark",
     "suno/bark-small",
     "microsoft/speecht5_tts",
 ]
