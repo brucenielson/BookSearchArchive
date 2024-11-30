@@ -3,6 +3,7 @@ import requests
 from pathlib import Path
 import sounddevice as sd
 import numpy as np
+from transformers import AutoConfig
 
 # Load Hugging Face API secret - Put the secret in a text file and read it
 hf_secret = open(r'D:\Documents\Secrets\huggingface_secret.txt', 'r').read().strip()
@@ -43,6 +44,7 @@ def generate_audio(model_id: str, token: str, text: str):
         print(f"\n>>> Generating audio with model: {model_id}")
         audio_data = client.text_to_speech(text, model=model_id)
         model_details = get_model_details(model_id, token)  # Fetch model details
+        config = AutoConfig.from_pretrained(model_id)
         # sampling_rate = model_details.get("sampling_rate", 16000)
         # if isinstance(audio_data, bytes):
         #     # Convert the byte data to a numpy array
