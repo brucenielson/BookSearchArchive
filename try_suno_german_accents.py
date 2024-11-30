@@ -10,7 +10,7 @@ model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16).
 # model = model.to_bettertransformer()
 
 # Loop from v2/de_speaker_0 to v2/de_speaker_9
-for i in range(0, 2):
+for i in range(0, 10):
     voice_preset = f"v2/de_speaker_{i}"
     print(f"Playing voice preset: {voice_preset}")
     inputs = processor("My name is Karl Popper. The philosopher of epistemology.",

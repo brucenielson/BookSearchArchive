@@ -410,7 +410,7 @@ def main() -> None:
                                              include_outputs_from=include_outputs_from,
                                              search_mode=SearchMode.HYBRID,
                                              use_reranker=True,
-                                             use_voice=True,
+                                             use_voice=False,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
