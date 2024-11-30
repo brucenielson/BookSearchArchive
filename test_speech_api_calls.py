@@ -56,7 +56,7 @@ def generate_audio(model_id: str, token: str, text: str):
         #     return True
         if isinstance(audio_data, bytes):
             file_name = model_id.replace("/", "_")
-            audio_file = Path(f"{file_name}_test_sentence.wav")
+            audio_file = Path(f"{file_name}_test_sentence.flac")
             audio_file.write_bytes(audio_data)
             print(f"Audio saved to {audio_file}")
             return True
