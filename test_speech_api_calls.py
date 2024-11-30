@@ -43,12 +43,12 @@ def generate_audio(model_id: str, token: str, text: str):
         print(f"\n>>> Generating audio with model: {model_id}")
         audio_data = client.text_to_speech(text, model=model_id)
         model_details = get_model_details(model_id, token)  # Fetch model details
-        sample_rate = model_details.get("sampling_rate", 16000)
+        # sampling_rate = model_details.get("sampling_rate", 16000)
         # if isinstance(audio_data, bytes):
         #     # Convert the byte data to a numpy array
         #     audio_array = np.frombuffer(audio_data, dtype=np.float32)
         #     # Play the audio using sounddevice
-        #     sd.play(audio_array, samplerate=sample_rate)
+        #     sd.play(audio_array, samplerate=sampling_rate)
         #     sd.wait()  # Wait until audio is finished playing
         #     print(f"Audio played for model {model_id}")
         #     return True
