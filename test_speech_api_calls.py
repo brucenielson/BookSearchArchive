@@ -1,14 +1,15 @@
 from huggingface_hub import InferenceClient
 import requests
 from pathlib import Path
-
+import sounddevice as sd
+import numpy as np
 
 # Load Hugging Face API secret - Put the secret in a text file and read it
 hf_secret = open(r'D:\Documents\Secrets\huggingface_secret.txt', 'r').read().strip()
 
 
 def get_model_details(model_id: str, token: str):
-    """Fetch model details using the Hugging Face API."""
+    """Fetch model details, including sample rate, using the Hugging Face API."""
     url = f"https://huggingface.co/api/models/{model_id}"
     headers = {"Authorization": f"Bearer {token}"}
     try:
@@ -17,11 +18,15 @@ def get_model_details(model_id: str, token: str):
         print(f"Status Code: {response.status_code}")
         if response.status_code == 200:
             model_info = response.json()
+            # Try to extract the sample rate from the metadata
+            # sample_rate = model_info.get("config", {}).get("sample_rate", None)
+            # print(f"Sample Rate: {sample_rate}")
             return {
                 "id": model_info.get("id"),
                 "modelType": model_info.get("modelType"),
                 "pipeline_tag": model_info.get("pipeline_tag"),
                 "library_name": model_info.get("library_name"),
+                # "sample_rate": model_info.get("config", {}).get("sampling_rate", 16000),
             }
         else:
             print(f"Failed to retrieve details for {model_id}.")
@@ -37,9 +42,19 @@ def generate_audio(model_id: str, token: str, text: str):
     try:
         print(f"\n>>> Generating audio with model: {model_id}")
         audio_data = client.text_to_speech(text, model=model_id)
+        model_details = get_model_details(model_id, token)  # Fetch model details
+        sample_rate = model_details.get("sampling_rate", 16000)
+        # if isinstance(audio_data, bytes):
+        #     # Convert the byte data to a numpy array
+        #     audio_array = np.frombuffer(audio_data, dtype=np.float32)
+        #     # Play the audio using sounddevice
+        #     sd.play(audio_array, samplerate=sample_rate)
+        #     sd.wait()  # Wait until audio is finished playing
+        #     print(f"Audio played for model {model_id}")
+        #     return True
         if isinstance(audio_data, bytes):
             file_name = model_id.replace("/", "_")
-            audio_file = Path(f"{file_name}_test_sentence.flac")
+            audio_file = Path(f"{file_name}_test_sentence.wav")
             audio_file.write_bytes(audio_data)
             print(f"Audio saved to {audio_file}")
             return True
