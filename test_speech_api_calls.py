@@ -1,13 +1,11 @@
 from pathlib import Path
 from huggingface_hub import InferenceClient
-import numpy as np
-import sounddevice as sd
 import requests
 import json
 import traceback
 
 
-# Load Hugging Face API secret
+# Load Hugging Face API secret - Put your secret in a text file and provide the path here
 hf_secret: str = open(r'D:\Documents\Secrets\huggingface_secret.txt', 'r').read().strip()
 
 
