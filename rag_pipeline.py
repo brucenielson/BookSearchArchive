@@ -27,7 +27,8 @@ import generator_model as gen
 from enum import Enum
 import textwrap
 from custom_haystack_components import (MergeResults, DocumentQueryCollector, RetrieverWrapper, print_documents,
-                                        QueryComponent, print_debug_results, DocumentStreamer)
+                                        QueryComponent, print_debug_results, DocumentStreamer, TextToSpeechLocal,
+                                        )
 
 
 class SearchMode(Enum):
@@ -55,6 +56,7 @@ class RagPipeline:
                  retriever_top_k_docs: int = None,
                  search_mode: SearchMode = SearchMode.HYBRID,
                  use_reranker: bool = False,
+                 use_voice: bool = False,
                  include_outputs_from: Optional[set[str]] = None
                  ) -> None:
 
@@ -84,6 +86,8 @@ class RagPipeline:
         self._search_mode: SearchMode = search_mode
         self._allow_streaming_callback: bool = False
         self._use_reranker: bool = use_reranker
+        # Use voice is only used if you are NOT streaming. Otherwise, it is ignored.
+        self._use_voice: bool = use_voice
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -281,7 +285,7 @@ class RagPipeline:
             print()
             print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
-            merged_results = results["merger"]["merged_results"]
+            merged_results = results["merger"]
 
             # Print retrieved documents
             print()
@@ -372,6 +376,12 @@ class RagPipeline:
         # Connect prompt builder to the llm
         rag_pipeline.connect("prompt_builder", "llm")
 
+        if self._use_voice and not self._can_stream():
+            # Add the text to speech component
+            tts_node = TextToSpeechLocal()
+            rag_pipeline.add_component("tts", tts_node)
+            rag_pipeline.connect("merger.reply", "tts.reply")
+
         # Set the pipeline instance
         self._rag_pipeline = rag_pipeline
 
@@ -393,13 +403,14 @@ def main() -> None:
                                              postgres_host='localhost',
                                              postgres_port=5432,
                                              postgres_db_name='postgres',
-                                             use_streaming=True,
+                                             use_streaming=False,
                                              verbose=True,
                                              llm_top_k=5,
                                              retriever_top_k_docs=50,
                                              include_outputs_from=include_outputs_from,
                                              search_mode=SearchMode.HYBRID,
                                              use_reranker=True,
+                                             use_voice=True,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
@@ -410,7 +421,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "Should we strive to make our theories as severely testable as possible?"
+    query: str = "How do we test mathematical theories?"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"

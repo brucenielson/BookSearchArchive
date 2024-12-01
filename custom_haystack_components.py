@@ -22,6 +22,12 @@ from pathlib import Path
 from pypdf import PdfReader, DocumentInformation
 import pymupdf4llm
 import pymupdf
+from transformers import AutoProcessor, BarkModel
+import sounddevice as sd
+import numpy as np
+import torch
+import requests
+import generator_model as gen
 # import markdown
 
 
@@ -60,6 +66,104 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
         else:
             # If the value is neither a dict nor a list, print it directly
             print(value)
+
+
+# pip install git+https://github.com/huggingface/parler-tts.git
+# pip install sounddevice
+@component
+class TextToSpeech:
+    def __init__(self, model_name_or_path: str = "suno/bark-small"):
+        # Initialize with Hugging Face API token and model name
+        self.api_url = f"https://api-inference.huggingface.co/models/{model_name_or_path}"
+        hf_secret: str = gen.get_secret(r'D:\Documents\Secrets\huggingface_secret.txt')  # Put your path here
+        self.headers = {"Authorization": f"Bearer {hf_secret}"}
+
+    @component.output_types(text=str)
+    def run(self, reply: str) -> Dict[str, Any]:
+        # Split the input text into sentences
+        sentences: List[str] = re.split(r'(?<=[.!?])\s+', reply.strip())
+
+        # Process each sentence and request audio generation via API
+        for sentence in sentences:
+            payload = {
+                "inputs": {
+                    "text": sentence,
+                    "voice_preset": "v2/de_speaker_0"
+                }
+            }
+
+            # Send request to Hugging Face Inference API
+            response = requests.post(self.api_url, headers=self.headers, json=payload)
+            response.raise_for_status()  # Raise an error if the request fails
+
+            # Extract and process the audio output
+            audio_array = np.frombuffer(response.content, dtype=np.float32)
+            self._play_audio(audio_array)
+
+        # Return the original text
+        return {"text": reply}
+
+    @staticmethod
+    def _play_audio(audio_data: np.ndarray, sample_rate: int = 24000) -> None:
+        audio_data = audio_data.astype("float32")
+        sd.play(audio_data, samplerate=sample_rate)
+        sd.wait()  # Wait until the audio finishes playing
+
+
+@component
+class TextToSpeechLocal:
+    def __init__(self, model_name_or_path: str = "suno/bark-small"):
+        # Initialize the processor
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.processor = AutoProcessor.from_pretrained(model_name_or_path, torch_dtype=torch.float16)
+        self.model = BarkModel.from_pretrained(model_name_or_path, torch_dtype=torch.float16).to(self.device)
+
+    @component.output_types(text=str)
+    def run(self, reply: str) -> Dict[str, Any]:
+        # Split the input text into sentences using regular expression
+        sentences: List[str] = re.split(r'(?<=[.!?])\s+', reply.strip())
+
+        # Process each sentence
+        sentence: str
+        for sentence in sentences:
+            # Use the v2/de_speaker_0 voice preset
+            voice_preset: str = "v2/de_speaker_0"
+
+            # Prepare the inputs for the model
+            inputs: dict = self.processor(sentence,
+                                          voice_preset=voice_preset,
+                                          return_tensors="pt",
+                                          return_attention_mask=True)
+
+            # Ensure inputs are moved to the correct device
+            inputs = {key: value.to(self.device) for key, value in inputs.items()}
+
+            audio_array = self.model.generate(**inputs).to(self.device)
+            audio_array = audio_array.cpu().numpy().squeeze()
+
+            # Play the generated audio immediately
+            self._play_audio(audio_array)
+
+        # After all sentences are processed, return the last audio chunk and the full text
+        return {"text": reply}
+
+    @staticmethod
+    def _play_audio(audio_data: np.ndarray, sample_rate: int = 24000) -> None:
+        audio_data = audio_data.astype("float32")
+        sd.play(audio_data, samplerate=sample_rate)
+        sd.wait()  # Wait until the audio finishes playing
+
+
+# @component
+# class TextToSpeech:
+#     def __init__(self, model_name_or_path: str = "suno/bark"):
+#         self.tts_pipeline = pipeline("text-to-speech", model=model_name_or_path)
+#
+#     @component.output_types(audio=ByteStream, text=str)
+#     def run(self, text: str) -> Dict[str, Any]:
+#         audio_output = self.tts_pipeline(text)
+#         audio_bytes = audio_output[0]['audio'].numpy()
+#         return {"audio": audio_bytes, "text": text}
 
 
 @component
@@ -428,15 +532,10 @@ class QueryComponent:
 
 @component
 class MergeResults:
-    @component.output_types(merged_results=Dict[str, Any])
+    @component.output_types(documents=List[Document], replies=List[Union[str, Dict[str, str]]], reply=str)
     def run(self, documents: List[Document],
-            replies: List[Union[str, Dict[str, str]]]) -> Dict[str, Dict[str, Any]]:
-        return {
-            "merged_results": {
-                "documents": documents,
-                "replies": replies
-            }
-        }
+            replies: List[Union[str, Dict[str, str]]]) -> Dict[str, Any]:
+        return {"documents": documents, "replies": replies, "reply": replies[0]}
 
 
 @component
