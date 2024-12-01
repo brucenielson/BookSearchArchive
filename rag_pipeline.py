@@ -28,7 +28,7 @@ from enum import Enum
 import textwrap
 from custom_haystack_components import (MergeResults, DocumentQueryCollector, RetrieverWrapper, print_documents,
                                         QueryComponent, print_debug_results, DocumentStreamer, TextToSpeechLocal,
-                                        TextToSpeech)
+                                        )
 
 
 class SearchMode(Enum):
@@ -86,7 +86,7 @@ class RagPipeline:
         self._search_mode: SearchMode = search_mode
         self._allow_streaming_callback: bool = False
         self._use_reranker: bool = use_reranker
-        # Use voice is only used if you are NOT streaming. Otherwise it is ignored.
+        # Use voice is only used if you are NOT streaming. Otherwise, it is ignored.
         self._use_voice: bool = use_voice
 
         # GPU or CPU
@@ -410,7 +410,7 @@ def main() -> None:
                                              include_outputs_from=include_outputs_from,
                                              search_mode=SearchMode.HYBRID,
                                              use_reranker=True,
-                                             use_voice=False,
+                                             use_voice=True,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:

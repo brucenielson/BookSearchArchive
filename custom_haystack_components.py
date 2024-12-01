@@ -13,8 +13,6 @@ from haystack.components.preprocessors import DocumentSplitter
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
-# noinspection PyPackageRequirements
-from haystack.components.generators import HuggingFaceAPIGenerator
 from sentence_transformers import SentenceTransformer
 import re
 from html_parser import HTMLParser
@@ -124,9 +122,6 @@ class TextToSpeechLocal:
     def run(self, reply: str) -> Dict[str, Any]:
         # Split the input text into sentences using regular expression
         sentences: List[str] = re.split(r'(?<=[.!?])\s+', reply.strip())
-
-        # Initialize an empty list to collect audio chunks
-        audio_chunks = []
 
         # Process each sentence
         sentence: str
