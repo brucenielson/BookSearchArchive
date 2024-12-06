@@ -195,6 +195,7 @@ class PDFToMarkdown:
         markdown_docs: List[ByteStream] = []
         for source in sources:
             markdown_doc: str = pymupdf4llm.to_markdown(source)
+            # https://github.com/pymupdf/RAG/issues/187/
             byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
             markdown_docs.append(byte_stream)
         return {"sources": markdown_docs}
