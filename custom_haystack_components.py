@@ -193,6 +193,7 @@ class PDFToMarkdown:
     @component.output_types(sources=List[ByteStream])
     def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
         markdown_docs: List[ByteStream] = []
+        # https://github.com/pymupdf/RAG/issues/187/
         for source in sources:
             markdown_doc: str = pymupdf4llm.to_markdown(source)
             byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
