@@ -294,6 +294,7 @@ class DocumentProcessor:
                 )
                 return doc_store
             elif self._document_store_type == DocumentStoreType.Neo4j:
+                # https://haystack.deepset.ai/integrations/neo4j-document-store
                 doc_store: Neo4jDocumentStore = Neo4jDocumentStore(
                     url=self._neo4j_url,
                     username=self._db_user_name,
