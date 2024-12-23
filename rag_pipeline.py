@@ -20,7 +20,8 @@ from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 from haystack.utils import ComponentDevice, Device
 # noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
-from neo4j_haystack import Neo4jDocumentStore
+# Neo4j imports
+from neo4j_haystack import Neo4jDocumentStore, Neo4jEmbeddingRetriever
 # Other imports
 from typing import Optional, Dict, Any, Union
 from pathlib import Path
@@ -111,7 +112,7 @@ class RagPipeline:
                                               f"{postgres_host}:{postgres_port}/{db_name}")
 
         self._print_verbose("Initializing document store")
-        self._document_store: Optional[PgvectorDocumentStore] = None
+        self._document_store: Optional[Union[PgvectorDocumentStore, Neo4jDocumentStore]] = None
         self._initialize_document_store()
 
         if self._use_reranker:
@@ -351,7 +352,8 @@ class RagPipeline:
         rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
 
         # Add the retriever component(s) depending on search mode
-        if self._search_mode == SearchMode.LEXICAL or self._search_mode == SearchMode.HYBRID:
+        if self._search_mode == SearchMode.LEXICAL or self._search_mode == SearchMode.HYBRID \
+                and self._document_store_type == DocumentStoreType.Pgvector:
             lex_retriever: RetrieverWrapper = RetrieverWrapper(
                 PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
             rag_pipeline.add_component("lex_retriever", lex_retriever)
@@ -359,8 +361,13 @@ class RagPipeline:
             rag_pipeline.connect("lex_retriever.documents", "doc_query_collector.lexical_documents")
 
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
-            semantic_retriever: RetrieverWrapper = RetrieverWrapper(
-                PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
+            semantic_retriever: RetrieverWrapper
+            if self._document_store_type == DocumentStoreType.Neo4j:
+                semantic_retriever = RetrieverWrapper(
+                    Neo4jEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
+            else:
+                semantic_retriever = RetrieverWrapper(
+                    PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
             rag_pipeline.connect("semantic_retriever.documents", "doc_query_collector.semantic_documents")
@@ -413,7 +420,20 @@ class RagPipeline:
 
 
 def main() -> None:
-    postgres_password = gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt')
+    file_path: str = "documents"
+    doc_store_type: DocumentStoreType = DocumentStoreType.Neo4j
+    password: str = ""
+    user_name: str = ""
+    db_name: str = ""
+    if doc_store_type == DocumentStoreType.Pgvector:
+        password = gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt')
+        user_name = "postgres"
+        db_name = "postgres"
+    elif doc_store_type == DocumentStoreType.Neo4j:
+        password = gen.get_secret(r'D:\Documents\Secrets\neo4j_password.txt')
+        user_name = "neo4j"
+        db_name = "neo4j"
+
     hf_secret: str = gen.get_secret(r'D:\Documents\Secrets\huggingface_secret.txt')  # Put your path here
     google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')  # Put your path here # noqa: F841
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
@@ -421,18 +441,19 @@ def main() -> None:
     model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
     # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder",
     # "joiner", "llm", "prompt_builder", "doc_query_collector"
-    include_outputs_from: Optional[set[str]] = None
-    rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
+    include_outputs_from: Optional[set[str]] = {"prompt_builder", "reranker_streamer"}
+    rag_processor: RagPipeline = RagPipeline(table_name="book_archive",
                                              generator_model=model,
-                                             db_user_name='postgres',
-                                             db_password=postgres_password,
+                                             db_user_name=user_name,
+                                             db_password=password,
                                              postgres_host='localhost',
                                              postgres_port=5432,
-                                             db_name='postgres',
+                                             db_name=db_name,
+                                             document_store_type=doc_store_type,
                                              use_streaming=False,
                                              verbose=True,
                                              llm_top_k=5,
-                                             retriever_top_k_docs=50,
+                                             retriever_top_k_docs=5,
                                              include_outputs_from=include_outputs_from,
                                              search_mode=SearchMode.HYBRID,
                                              use_reranker=True,

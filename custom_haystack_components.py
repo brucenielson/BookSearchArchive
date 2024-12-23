@@ -13,6 +13,7 @@ from haystack.components.preprocessors import DocumentSplitter
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
+from neo4j_haystack import Neo4jEmbeddingRetriever
 from sentence_transformers import SentenceTransformer
 import re
 from html_parser import HTMLParser
@@ -541,7 +542,7 @@ class MergeResults:
 
 @component
 class RetrieverWrapper:
-    def __init__(self, retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever],
+    def __init__(self, retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever, Neo4jEmbeddingRetriever],
                  do_stream: bool = False) -> None:
         self._retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever] = retriever
         self._do_stream: bool = do_stream
