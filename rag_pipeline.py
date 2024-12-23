@@ -20,12 +20,14 @@ from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 from haystack.utils import ComponentDevice, Device
 # noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
+from neo4j_haystack import Neo4jDocumentStore
 # Other imports
 from typing import Optional, Dict, Any, Union
 from pathlib import Path
 import generator_model as gen
 from enum import Enum
 import textwrap
+from document_processor import DocumentStoreType
 from custom_haystack_components import (MergeResults, DocumentQueryCollector, RetrieverWrapper, print_documents,
                                         QueryComponent, print_debug_results, DocumentStreamer, TextToSpeechLocal,
                                         )
@@ -43,11 +45,12 @@ class RagPipeline:
 
     def __init__(self,
                  table_name: str = 'haystack_pgvector_docs',
-                 postgres_user_name: str = 'postgres',
-                 postgres_password: str = None,
+                 db_user_name: str = 'postgres',
+                 db_password: str = None,
                  postgres_host: str = 'localhost',
                  postgres_port: int = 5432,
-                 postgres_db_name: str = 'postgres',
+                 db_name: str = 'postgres',
+                 neo4j_url: str = 'bolt://localhost:7687',
                  generator_model: Union[gen.GeneratorModel, HuggingFaceLocalGenerator, GoogleAIGeminiGenerator] = None,
                  embedder_model_name: Optional[str] = None,
                  use_streaming: bool = False,
@@ -57,7 +60,8 @@ class RagPipeline:
                  search_mode: SearchMode = SearchMode.HYBRID,
                  use_reranker: bool = False,
                  use_voice: bool = False,
-                 include_outputs_from: Optional[set[str]] = None
+                 include_outputs_from: Optional[set[str]] = None,
+                 document_store_type: DocumentStoreType = DocumentStoreType.Pgvector,
                  ) -> None:
 
         # streaming_callback function to print to screen
@@ -88,6 +92,11 @@ class RagPipeline:
         self._use_reranker: bool = use_reranker
         # Use voice is only used if you are NOT streaming. Otherwise, it is ignored.
         self._use_voice: bool = use_voice
+        self._document_store_type = document_store_type
+        self._neo4j_url: str = neo4j_url
+        self._db_user_name: str = db_user_name
+        self._db_password: str = db_password
+        self._db_name: str = db_name
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -95,11 +104,11 @@ class RagPipeline:
         self._component_device: ComponentDevice = ComponentDevice(Device.gpu() if self._has_cuda else Device.cpu())
 
         # Passwords and connection strings
-        if postgres_password is None:
+        if db_password is None:
             raise ValueError("Postgres password must be provided")
         # PG_CONN_STR="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME
-        self._postgres_connection_str: str = (f"postgresql://{postgres_user_name}:{postgres_password}@"
-                                              f"{postgres_host}:{postgres_port}/{postgres_db_name}")
+        self._postgres_connection_str: str = (f"postgresql://{db_user_name}:{db_password}@"
+                                              f"{postgres_host}:{postgres_port}/{db_name}")
 
         self._print_verbose("Initializing document store")
         self._document_store: Optional[PgvectorDocumentStore] = None
@@ -237,21 +246,38 @@ class RagPipeline:
             self._rag_pipeline.draw(Path("RAG Pipeline.png"))
 
     def _initialize_document_store(self) -> None:
-        connection_token: Secret = Secret.from_token(self._postgres_connection_str)
-        document_store: PgvectorDocumentStore = PgvectorDocumentStore(
-            connection_string=connection_token,
-            table_name=self._table_name,
-            embedding_dimension=self.sentence_embed_dims,
-            vector_function="cosine_similarity",
-            recreate_table=False,
-            search_strategy="hnsw",
-            hnsw_recreate_index_if_exists=True,
-            hnsw_index_name=self._table_name + "_hnsw_index",
-            keyword_index_name=self._table_name + "_keyword_index",
-        )
+        def init_doc_store() -> Union[PgvectorDocumentStore, Neo4jDocumentStore]:
+            if self._document_store_type == DocumentStoreType.Pgvector:
+                connection_token: Secret = Secret.from_token(self._postgres_connection_str)
+                doc_store: PgvectorDocumentStore = PgvectorDocumentStore(
+                    connection_string=connection_token,
+                    table_name=self._table_name,
+                    embedding_dimension=self.sentence_embed_dims,
+                    vector_function="cosine_similarity",
+                    recreate_table=False,
+                    search_strategy="hnsw",
+                    hnsw_recreate_index_if_exists=True,
+                    hnsw_index_name=self._table_name + "_hnsw_index",
+                    keyword_index_name=self._table_name + "_keyword_index",
+                )
+                return doc_store
+            elif self._document_store_type == DocumentStoreType.Neo4j:
+                # https://haystack.deepset.ai/integrations/neo4j-document-store
+                doc_store: Neo4jDocumentStore = Neo4jDocumentStore(
+                    url=self._neo4j_url,
+                    username=self._db_user_name,
+                    password=self._db_password,
+                    database=self._db_name,
+                    embedding_dim=self.sentence_embed_dims,
+                    embedding_field="embedding",
+                    index="document-embeddings",  # The name of the Vector Index in Neo4j
+                    node_label="Document",  # Providing a label to Neo4j nodes which store Documents
+                    recreate_index=False,
+                )
+                return doc_store
 
-        self._document_store = document_store
-        self._print_verbose("Document Count: " + str(document_store.count_documents()))
+        self._document_store = init_doc_store()
+        self._print_verbose("Document Count: " + str(self._document_store.count_documents()))
 
     def _can_stream(self) -> bool:
         return (self._use_streaming
@@ -398,11 +424,11 @@ def main() -> None:
     include_outputs_from: Optional[set[str]] = None
     rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
                                              generator_model=model,
-                                             postgres_user_name='postgres',
-                                             postgres_password=postgres_password,
+                                             db_user_name='postgres',
+                                             db_password=postgres_password,
                                              postgres_host='localhost',
                                              postgres_port=5432,
-                                             postgres_db_name='postgres',
+                                             db_name='postgres',
                                              use_streaming=False,
                                              verbose=True,
                                              llm_top_k=5,
@@ -410,7 +436,7 @@ def main() -> None:
                                              include_outputs_from=include_outputs_from,
                                              search_mode=SearchMode.HYBRID,
                                              use_reranker=True,
-                                             use_voice=True,
+                                             use_voice=False,
                                              embedder_model_name="BAAI/llm-embedder")
 
     if rag_processor.verbose:
