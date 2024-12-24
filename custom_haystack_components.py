@@ -13,6 +13,7 @@ from haystack.components.preprocessors import DocumentSplitter
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
+from neo4j_haystack import Neo4jEmbeddingRetriever
 from sentence_transformers import SentenceTransformer
 import re
 from html_parser import HTMLParser
@@ -193,6 +194,7 @@ class PDFToMarkdown:
     @component.output_types(sources=List[ByteStream])
     def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
         markdown_docs: List[ByteStream] = []
+        # https://github.com/pymupdf/RAG/issues/187/
         for source in sources:
             markdown_doc: str = pymupdf4llm.to_markdown(source)
             byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
@@ -540,7 +542,7 @@ class MergeResults:
 
 @component
 class RetrieverWrapper:
-    def __init__(self, retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever],
+    def __init__(self, retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever, Neo4jEmbeddingRetriever],
                  do_stream: bool = False) -> None:
         self._retriever: Union[PgvectorEmbeddingRetriever, PgvectorKeywordRetriever] = retriever
         self._do_stream: bool = do_stream

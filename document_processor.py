@@ -20,8 +20,9 @@ from haystack.utils import ComponentDevice, Device
 from haystack.document_stores.types import DuplicatePolicy
 # noinspection PyPackageRequirements
 from haystack.utils.auth import Secret
+from neo4j_haystack import Neo4jDocumentStore
 # Other imports
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from pathlib import Path
 from enum import Enum
 from generator_model import get_secret
@@ -39,16 +40,22 @@ class PDFReadingStrategy(Enum):
     PyMuPDFReader = 4
 
 
+class DocumentStoreType(Enum):
+    Pgvector = 1
+    Neo4j = 2
+
+
 class DocumentProcessor:
     def __init__(self,
                  file_or_folder_path: str,
                  table_name: str = 'haystack_pgvector_docs',
                  recreate_table: bool = False,
-                 postgres_user_name: str = 'postgres',
-                 postgres_password: str = None,
+                 db_user_name: str = 'postgres',
+                 db_password: str = None,
+                 db_name: str = 'postgres',
                  postgres_host: str = 'localhost',
                  postgres_port: int = 5432,
-                 postgres_db_name: str = 'postgres',
+                 neo4j_url: str = 'bolt://localhost:7687',
                  skip_content_func: Optional[callable] = None,
                  min_section_size: int = 1000,
                  min_paragraph_size: int = 500,
@@ -56,7 +63,8 @@ class DocumentProcessor:
                  include_outputs_from: Optional[set[str]] = None,
                  verbose: bool = False,
                  write_to_file: bool = False,
-                 pdf_reading_strategy: PDFReadingStrategy = PDFReadingStrategy.PDFReader
+                 pdf_reading_strategy: PDFReadingStrategy = PDFReadingStrategy.PDFReader,
+                 document_store_type: DocumentStoreType = DocumentStoreType.Pgvector,
                  ) -> None:
 
         # Instance variables
@@ -71,6 +79,11 @@ class DocumentProcessor:
         self._write_to_file: bool = write_to_file
         self._include_outputs_from: Optional[set[str]] = include_outputs_from
         self._pdf_reading_strategy: PDFReadingStrategy = pdf_reading_strategy
+        self._document_store_type: DocumentStoreType = document_store_type
+        self._neo4j_url: str = neo4j_url
+        self._db_user_name: str = db_user_name
+        self._db_password: str = db_password
+        self._db_name: str = db_name
 
         # File paths
         self._file_or_folder_path: str = file_or_folder_path  # New instance variable
@@ -89,11 +102,11 @@ class DocumentProcessor:
         self._component_device: ComponentDevice = ComponentDevice(Device.gpu() if self._has_cuda else Device.cpu())
 
         # Passwords and connection strings
-        if postgres_password is None:
+        if db_password is None:
             raise ValueError("Postgres password must be provided")
         # PG_CONN_STR="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME
-        self._postgres_connection_str: str = (f"postgresql://{postgres_user_name}:{postgres_password}@"
-                                              f"{postgres_host}:{postgres_port}/{postgres_db_name}")
+        self._postgres_connection_str: str = (f"postgresql://{db_user_name}:{db_password}@"
+                                              f"{postgres_host}:{postgres_port}/{db_name}")
 
         self._print_verbose("Initializing document store")
 
@@ -265,23 +278,37 @@ class DocumentProcessor:
         self.draw_pipeline()
 
     def _initialize_document_store(self) -> None:
-        def init_doc_store(force_recreate: bool = False) -> PgvectorDocumentStore:
-            connection_token: Secret = Secret.from_token(self._postgres_connection_str)
-            doc_store: PgvectorDocumentStore = PgvectorDocumentStore(
-                connection_string=connection_token,
-                table_name=self._table_name,
-                embedding_dimension=self.embed_dims,
-                vector_function="cosine_similarity",
-                recreate_table=self._recreate_table or force_recreate,
-                search_strategy="hnsw",
-                hnsw_recreate_index_if_exists=True,
-                hnsw_index_name=self._table_name + "_hnsw_index",
-                keyword_index_name=self._table_name + "_keyword_index",
-            )
+        def init_doc_store(force_recreate: bool = False) -> Union[PgvectorDocumentStore, Neo4jDocumentStore]:
+            if self._document_store_type == DocumentStoreType.Pgvector:
+                connection_token: Secret = Secret.from_token(self._postgres_connection_str)
+                doc_store: PgvectorDocumentStore = PgvectorDocumentStore(
+                    connection_string=connection_token,
+                    table_name=self._table_name,
+                    embedding_dimension=self.embed_dims,
+                    vector_function="cosine_similarity",
+                    recreate_table=self._recreate_table or force_recreate,
+                    search_strategy="hnsw",
+                    hnsw_recreate_index_if_exists=True,
+                    hnsw_index_name=self._table_name + "_hnsw_index",
+                    keyword_index_name=self._table_name + "_keyword_index",
+                )
+                return doc_store
+            elif self._document_store_type == DocumentStoreType.Neo4j:
+                # https://haystack.deepset.ai/integrations/neo4j-document-store
+                doc_store: Neo4jDocumentStore = Neo4jDocumentStore(
+                    url=self._neo4j_url,
+                    username=self._db_user_name,
+                    password=self._db_password,
+                    database=self._db_name,
+                    embedding_dim=self.embed_dims,
+                    embedding_field="embedding",
+                    index="document-embeddings",  # The name of the Vector Index in Neo4j
+                    node_label="Document",  # Providing a label to Neo4j nodes which store Documents
+                    recreate_index=self._recreate_table or force_recreate,
+                )
+                return doc_store
 
-            return doc_store
-
-        document_store: PgvectorDocumentStore
+        document_store: Union[PgvectorDocumentStore, Neo4jDocumentStore]
         document_store = init_doc_store()
         self._document_store = document_store
 
@@ -309,7 +336,18 @@ class DocumentProcessor:
 
 def main() -> None:
     file_path: str = "documents"
-    postgres_password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
+    doc_store_type: DocumentStoreType = DocumentStoreType.Neo4j
+    password: str = ""
+    user_name: str = ""
+    db_name: str = ""
+    if doc_store_type == DocumentStoreType.Pgvector:
+        password = get_secret(r'D:\Documents\Secrets\postgres_password.txt')
+        user_name = "postgres"
+        db_name = "postgres"
+    elif doc_store_type == DocumentStoreType.Neo4j:
+        password = get_secret(r'D:\Documents\Secrets\neo4j_password.txt')
+        user_name = "neo4j"
+        db_name = "neo4j"
     include_outputs_from: Optional[set[str]] = None  # {"final_counter"}
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
@@ -317,11 +355,11 @@ def main() -> None:
         recreate_table=False,
         embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=file_path,
-        postgres_user_name='postgres',
-        postgres_password=postgres_password,
+        db_user_name=user_name,
+        db_password=password,
         postgres_host='localhost',
         postgres_port=5432,
-        postgres_db_name='postgres',
+        db_name=db_name,
         skip_content_func=skip_content,
         min_section_size=3000,
         min_paragraph_size=300,
@@ -329,6 +367,7 @@ def main() -> None:
         verbose=True,
         pdf_reading_strategy=PDFReadingStrategy.PDFReader,
         write_to_file=True,
+        document_store_type=doc_store_type,
     )
 
     # Draw images of the pipelines
