@@ -18,6 +18,7 @@ from haystack.utils.auth import Secret
 from typing import Optional, Union, Callable
 from abc import ABC, abstractmethod
 from haystack_integrations.components.generators.ollama import OllamaGenerator
+import time
 
 
 def get_secret(secret_file: str) -> str:
@@ -235,6 +236,11 @@ class HuggingFaceModel(StreamingGeneratorModel, ABC):
         return embedding_dims
 
     def generate(self, prompt: str) -> str:
+        # start_time = time.time()
+        # result = self._model.run(prompt)
+        # end_time = time.time()
+        # if self._verbose:
+        #     print(f"Generation took {end_time - start_time} seconds")
         return self._model.run(prompt)
 
 
@@ -358,11 +364,11 @@ class OllamaModel(StreamingGeneratorModel):
             streaming_callback=self._default_streaming_callback_func,
             generation_kwargs={
                 "temperature": temperature,
-                "num_gpu": 1,  # Number of GPUs to use
-                "num_ctx": 2048,  # Reduce context window
-                "num_batch": 512,  # Reduce batch size
-                "mirostat": 0,  # Disable mirostat sampling
-                "seed": 42,  # Set a fixed seed for reproducibility
+                # "num_gpu": 1,  # Number of GPUs to use
+                # "num_ctx": 2048,  # Reduce context window
+                # "num_batch": 512,  # Reduce batch size
+                # "mirostat": 0,  # Disable mirostat sampling
+                # "seed": 42,  # Set a fixed seed for reproducibility
             },
         )
 
