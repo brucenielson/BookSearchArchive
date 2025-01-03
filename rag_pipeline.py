@@ -451,7 +451,7 @@ def main() -> None:
                                              postgres_port=5432,
                                              db_name=db_name,
                                              document_store_type=doc_store_type,
-                                             use_streaming=False,
+                                             use_streaming=True,
                                              verbose=True,
                                              llm_top_k=5,
                                              retriever_top_k_docs=5,
