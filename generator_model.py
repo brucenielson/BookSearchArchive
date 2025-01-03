@@ -17,6 +17,7 @@ from haystack.utils.auth import Secret
 # Other imports
 from typing import Optional, Union, Callable
 from abc import ABC, abstractmethod
+from haystack_integrations.components.generators.ollama import OllamaGenerator
 
 
 def get_secret(secret_file: str) -> str:
@@ -143,7 +144,33 @@ class GeneratorModel(ABC):
         return self._model_name
 
 
-class HuggingFaceModel(GeneratorModel, ABC):
+class StreamingGeneratorModel(GeneratorModel, ABC):
+    def __init__(self, verbose: bool = False,
+                 streaming_callback: Optional[Callable[[StreamingChunk], None]] = None,
+                 ) -> None:
+        super().__init__(verbose)
+        self._streaming_callback: Optional[Callable[[StreamingChunk], None]] = streaming_callback
+
+    @abstractmethod
+    def generate(self, prompt: str) -> str:
+        pass
+
+    @property
+    def streaming_callback(self) -> Optional[Callable[[StreamingChunk], None]]:
+        return self._streaming_callback
+
+    @streaming_callback.setter
+    def streaming_callback(self, value: callable(StreamingChunk)) -> None:
+        self._streaming_callback = value
+
+    def _default_streaming_callback_func(self, chunk: StreamingChunk):
+        # This is a callback function that is used to stream the output of the generator.
+        # If you are not using a streaming generator, you can ignore this method.
+        if self._streaming_callback is not None:
+            self._streaming_callback(chunk)
+
+
+class HuggingFaceModel(StreamingGeneratorModel, ABC):
     def __init__(self,
                  model_name: str = 'google/gemma-1.1-2b-it',
                  max_new_tokens: int = 500,
@@ -161,12 +188,14 @@ class HuggingFaceModel(GeneratorModel, ABC):
             password (Optional[str], optional): Password for Hugging Face authentication. Defaults to None.
             verbose (bool, optional): Whether to print verbose output. Defaults to False.
         """
-        super().__init__(verbose)
+        super().__init__(verbose, streaming_callback)
+
+        if self._verbose:
+            print("Warming up Hugging Face Large Language Model: " + model_name)
 
         self._max_new_tokens: int = max_new_tokens
         self._temperature: float = temperature
         self._model_name: str = model_name
-        self._streaming_callback: Optional[Callable[[StreamingChunk], None]] = streaming_callback
 
         if password is not None:
             hf_hub.login(password, add_to_git_credential=False)
@@ -205,22 +234,8 @@ class HuggingFaceModel(GeneratorModel, ABC):
         embedding_dims: Optional[int] = getattr(config, 'hidden_size', None)
         return embedding_dims
 
-    @property
-    def streaming_callback(self) -> Optional[Callable[[StreamingChunk], None]]:
-        return self._streaming_callback
-
-    @streaming_callback.setter
-    def streaming_callback(self, value: callable(StreamingChunk)) -> None:
-        self._streaming_callback = value
-
     def generate(self, prompt: str) -> str:
         return self._model.run(prompt)
-
-    def _default_streaming_callback_func(self, chunk: StreamingChunk):
-        # This is a callback function that is used to stream the output of the generator.
-        # If you are not using a streaming generator, you can ignore this method.
-        if self._streaming_callback is not None:
-            self._streaming_callback(chunk)
 
 
 class HuggingFaceLocalModel(HuggingFaceModel):
@@ -324,22 +339,65 @@ class HuggingFaceAPIModel(HuggingFaceModel):
         return None
 
 
+class OllamaModel(StreamingGeneratorModel):
+    def __init__(self,
+                 model_name: str = 'gemma2',
+                 url="http://localhost:11434",
+                 temperature: float = 0.6,
+                 streaming_callback: Optional[Callable[[StreamingChunk], None]] = None,
+                 verbose: bool = True) -> None:
+
+        super().__init__(verbose=verbose, streaming_callback=streaming_callback)
+
+        if self._verbose:
+            print("Warming up Ollama Large Language Model: " + model_name)
+
+        self._model: OllamaGenerator = OllamaGenerator(
+            model=model_name,
+            url=url,
+            streaming_callback=self._default_streaming_callback_func,
+            generation_kwargs={
+                "temperature": temperature,
+                "num_gpu": 1,  # Number of GPUs to use
+                "num_ctx": 2048,  # Reduce context window
+                "num_batch": 512,  # Reduce batch size
+                "mirostat": 0,  # Disable mirostat sampling
+                "seed": 42,  # Set a fixed seed for reproducibility
+            },
+        )
+
+    def generate(self, prompt: str) -> str:
+        return self._model.run(prompt)
+
+    @property
+    def context_length(self) -> Optional[int]:
+        return None
+
+    @property
+    def embedding_dimensions(self) -> Optional[int]:
+        return None
+
+    @property
+    def language_model(self) -> None:
+        return None
+
+
 class GoogleGeminiModel(GeneratorModel):
     """
     A class that represents a Google AI Large Language Model (LLM) generator.
 
     """
 
-    def __init__(self, password: Optional[str] = None) -> None:
+    def __init__(self, password: Optional[str] = None, verbose: bool = False) -> None:
         """
         Initialize the GoogleGeminiModel instance.
 
         Args:
             password (Optional[str], optional): Password for Google AI authentication. Defaults to None.
         """
-        super().__init__()
+        super().__init__(verbose=verbose)
         if self._verbose:
-            print("Warming up Large Language Model")
+            print("Warming up Gemini Large Language Model")
 
         self._model: GoogleAIGeminiGenerator = GoogleAIGeminiGenerator(
             model="gemini-pro",
