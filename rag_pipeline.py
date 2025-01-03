@@ -421,7 +421,7 @@ class RagPipeline:
 
 def main() -> None:
     file_path: str = "documents"
-    doc_store_type: DocumentStoreType = DocumentStoreType.Neo4j
+    doc_store_type: DocumentStoreType = DocumentStoreType.Pgvector
     password: str = ""
     user_name: str = ""
     db_name: str = ""
@@ -439,9 +439,10 @@ def main() -> None:
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
     # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
     model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
+    # model: gen.GeneratorModel = gen.OllamaModel(model_name="gemma2")
     # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder",
     # "joiner", "llm", "prompt_builder", "doc_query_collector"
-    include_outputs_from: Optional[set[str]] = {"prompt_builder", "reranker_streamer"}
+    include_outputs_from: Optional[set[str]] = None # {"prompt_builder", "reranker_streamer"}
     rag_processor: RagPipeline = RagPipeline(table_name="book_archive",
                                              generator_model=model,
                                              db_user_name=user_name,
@@ -450,7 +451,7 @@ def main() -> None:
                                              postgres_port=5432,
                                              db_name=db_name,
                                              document_store_type=doc_store_type,
-                                             use_streaming=False,
+                                             use_streaming=True,
                                              verbose=True,
                                              llm_top_k=5,
                                              retriever_top_k_docs=5,
