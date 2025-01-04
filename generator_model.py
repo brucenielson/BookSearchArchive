@@ -18,7 +18,10 @@ from haystack.utils.auth import Secret
 from typing import Optional, Union, Callable
 from abc import ABC, abstractmethod
 from haystack_integrations.components.generators.ollama import OllamaGenerator
-import time
+from haystack_integrations.components.generators.llama_cpp import LlamaCppGenerator
+import os
+import urllib.request
+# import time
 
 
 def get_secret(secret_file: str) -> str:
@@ -386,6 +389,65 @@ class OllamaModel(StreamingGeneratorModel):
     @property
     def language_model(self) -> None:
         return None
+
+
+class LlamaCppModel(GeneratorModel):
+    def __init__(self,
+                 model_link: str = 'https://huggingface.co/TheBloke/openchat-3.5-1210-GGUF/resolve/main/openchat-3.5-1210.Q3_K_S.gguf',  # noqa: E501
+                 context_length: int = 2048,
+                 max_tokens: int = 512,
+                 temperature: float = 0.6,
+                 verbose: bool = True) -> None:
+
+        super().__init__(verbose=verbose)
+        self._warmed_up: bool = False
+        self._model_link = model_link
+        # Take name of the model from the link. Everything after the last /
+        self._model_name = model_link.split("/")[-1]
+        self._context_length = context_length
+        self._max_tokens = max_tokens
+        self._temperature = temperature
+
+        if self._verbose:
+            print("Warming up LlamaCPP Large Language Model: " + self._model_name)
+
+        # Check if model is already downloaded and download if necessary
+        self._download_model()
+        self._model: LlamaCppGenerator = LlamaCppGenerator(
+            model=self._model_name,
+            n_ctx=self._context_length,
+            n_batch=512,
+            model_kwargs={"n_gpu_layers": -1},
+            generation_kwargs={"max_tokens": self._max_tokens, "temperature": self._temperature},
+        )
+
+    def generate(self, prompt: str) -> str:
+        return self._model.run(prompt)
+
+    @property
+    def context_length(self) -> Optional[int]:
+        return self._context_length
+
+    @property
+    def embedding_dimensions(self) -> Optional[int]:
+        return None
+
+    @property
+    def language_model(self) -> None:
+        return None
+
+    def warm_up(self) -> None:
+        if not self._warmed_up:
+            self._model.warm_up()
+            self._warmed_up = True
+
+    def _download_model(self):
+        # Checks if the file already exists before downloading
+        if not os.path.isfile(self._model_name):
+            urllib.request.urlretrieve(self._model_link, self._model_name)
+            print("Model file downloaded successfully: " + self._model_name)
+        else:
+            print("Model file already exists: " + self._model_name)
 
 
 class GoogleGeminiModel(GeneratorModel):
