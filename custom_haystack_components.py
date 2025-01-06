@@ -29,6 +29,7 @@ import numpy as np
 import torch
 import requests
 import generator_model as gen
+from docling.document_converter import DocumentConverter
 # import markdown
 
 
@@ -187,7 +188,7 @@ class PyMuPDFReader:
 
 
 @component
-class PDFToMarkdown:
+class PyMuPdf4LLM:
     def __init__(self, min_page_size: int = 1000):
         self._min_page_size = min_page_size
 
@@ -197,6 +198,23 @@ class PDFToMarkdown:
         # https://github.com/pymupdf/RAG/issues/187/
         for source in sources:
             markdown_doc: str = pymupdf4llm.to_markdown(source)
+            byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
+            markdown_docs.append(byte_stream)
+        return {"sources": markdown_docs}
+
+
+@component
+class DoclingToMarkdown:
+    def __init__(self, min_page_size: int = 1000):
+        self._min_page_size = min_page_size
+        self._converter = DocumentConverter()
+
+    @component.output_types(sources=List[ByteStream])
+    def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
+        markdown_docs: List[ByteStream] = []
+        # https://github.com/pymupdf/RAG/issues/187/
+        for source in sources:
+            markdown_doc: str = self._converter.convert(source).document.export_to_markdown()
             byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
             markdown_docs.append(byte_stream)
         return {"sources": markdown_docs}

@@ -29,15 +29,17 @@ from generator_model import get_secret
 from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
-                                        EPubPdfMerger, PDFToMarkdown, PDFReader, PyMuPDFReader)
+                                        EPubPdfMerger, PyMuPdf4LLM, PDFReader, PyMuPDFReader,
+                                        DoclingToMarkdown)
 
 
-# Create an enum for PDF reading strategy: PyPDFToDocument, PDFReader, PDFToMarkdown, PyMuPDFReader
+# Create an enum for PDF reading strategy: PyPDFToDocument, PDFReader, PyMuPdf4LLM, PyMuPDFReader
 class PDFReadingStrategy(Enum):
     PyPDFToDocument = 1
     PDFReader = 2
-    PDFToMarkdown = 3
+    PyMuPdf4LLM = 3
     PyMuPDFReader = 4
+    Docling = 5
 
 
 class DocumentStoreType(Enum):
@@ -218,8 +220,11 @@ class DocumentProcessor:
             doc_convert_pipe.add_component("pdf_loader", PyPDFToDocument())
         elif pdf_reading_strategy == PDFReadingStrategy.PDFReader:
             doc_convert_pipe.add_component("pdf_loader", PDFReader())
-        elif pdf_reading_strategy == PDFReadingStrategy.PDFToMarkdown:
-            doc_convert_pipe.add_component("pdf_loader", PDFToMarkdown())
+        elif pdf_reading_strategy == PDFReadingStrategy.PyMuPdf4LLM:
+            doc_convert_pipe.add_component("pdf_loader", PyMuPdf4LLM())
+            doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
+        elif pdf_reading_strategy == PDFReadingStrategy.Docling:
+            doc_convert_pipe.add_component("pdf_loader", DoclingToMarkdown())
             doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
         elif pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
             doc_convert_pipe.add_component("pdf_loader", PyMuPDFReader())
@@ -257,7 +262,10 @@ class DocumentProcessor:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
         elif pdf_reading_strategy == PDFReadingStrategy.PDFReader:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
-        elif pdf_reading_strategy == PDFReadingStrategy.PDFToMarkdown:
+        elif pdf_reading_strategy == PDFReadingStrategy.PyMuPdf4LLM:
+            doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
+            doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
+        elif pdf_reading_strategy == PDFReadingStrategy.Docling:
             doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
             doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
         elif pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
@@ -336,7 +344,7 @@ class DocumentProcessor:
 
 def main() -> None:
     file_path: str = "documents"
-    doc_store_type: DocumentStoreType = DocumentStoreType.Neo4j
+    doc_store_type: DocumentStoreType = DocumentStoreType.Pgvector
     password: str = ""
     user_name: str = ""
     db_name: str = ""
@@ -365,7 +373,7 @@ def main() -> None:
         min_paragraph_size=300,
         include_outputs_from=include_outputs_from,
         verbose=True,
-        pdf_reading_strategy=PDFReadingStrategy.PDFReader,
+        pdf_reading_strategy=PDFReadingStrategy.PyMuPdf4LLM,
         write_to_file=True,
         document_store_type=doc_store_type,
     )
