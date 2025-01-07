@@ -212,7 +212,6 @@ class DoclingToMarkdown:
     @component.output_types(sources=List[ByteStream])
     def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
         markdown_docs: List[ByteStream] = []
-        # https://github.com/pymupdf/RAG/issues/187/
         for source in sources:
             markdown_doc: str = self._converter.convert(source).document.export_to_markdown()
             byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
