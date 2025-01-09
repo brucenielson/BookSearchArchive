@@ -194,13 +194,37 @@ class PyMuPdf4LLM:
 
     @component.output_types(sources=List[ByteStream])
     def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
-        markdown_docs: List[ByteStream] = []
+        byte_stream_sources: List[ByteStream] = []
+        metas: List[Dict[str, str]] = []
         # https://github.com/pymupdf/RAG/issues/187/
         for source in sources:
-            markdown_doc: str = pymupdf4llm.to_markdown(source)
-            byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
-            markdown_docs.append(byte_stream)
-        return {"sources": markdown_docs}
+            markdown_doc = pymupdf4llm.to_markdown(source, page_chunks=True)
+            for page_num, page in enumerate(markdown_doc):
+                page_text = page['text']
+                if len(page_text) < self._min_page_size:
+                    continue
+                meta_properties: List[str] = ["author", "title", "subject"]
+                meta: Dict[str, Any] = PyMuPdf4LLM._create_meta_data(page['metadata'], meta_properties)
+                meta["page_#"] = page_num + 1
+                if not meta.get("title"):
+                    # Use file name for title if none found in metadata
+                    source_title: str = Path(source).stem
+                    meta["title"] = source_title
+
+                byte_stream: ByteStream = ByteStream(page_text.encode('utf-8'))
+                byte_stream_sources.append(byte_stream)
+                metas.append(meta)
+
+        return {"sources": byte_stream_sources, "meta": metas}
+
+    @staticmethod
+    def _create_meta_data(pdf_meta_data: dict, meta_data_titles: List[str]) -> Dict[str, str]:
+        meta_data: Dict[str, str] = {}
+        for title in meta_data_titles:
+            value: str = pdf_meta_data.get(title, "")
+            if title in pdf_meta_data and value is not None and value != "":
+                meta_data[title] = pdf_meta_data[title]
+        return meta_data
 
 
 @component
