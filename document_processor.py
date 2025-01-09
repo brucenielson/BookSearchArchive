@@ -264,6 +264,7 @@ class DocumentProcessor:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
         elif pdf_reading_strategy == PDFReadingStrategy.PyMuPdf4LLM:
             doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
+            doc_convert_pipe.connect("pdf_loader.meta", "markdown_converter.meta")
             doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
         elif pdf_reading_strategy == PDFReadingStrategy.Docling:
             doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")

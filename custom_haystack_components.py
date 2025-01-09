@@ -192,7 +192,7 @@ class PyMuPdf4LLM:
     def __init__(self, min_page_size: int = 1000):
         self._min_page_size = min_page_size
 
-    @component.output_types(sources=List[ByteStream])
+    @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
     def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
         byte_stream_sources: List[ByteStream] = []
         metas: List[Dict[str, str]] = []
