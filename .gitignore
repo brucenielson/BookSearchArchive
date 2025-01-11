@@ -166,3 +166,5 @@ cython_debug/
 /post_documents.txt
 /pre_documents.txt
 *.gguf
+test_docling.md
+test_pymupdf4llm.md
