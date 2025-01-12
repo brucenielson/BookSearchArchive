@@ -168,3 +168,4 @@ cython_debug/
 *.gguf
 test_docling.md
 test_pymupdf4llm.md
+test_docling.json
