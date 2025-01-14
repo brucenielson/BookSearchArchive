@@ -20,9 +20,10 @@ def docling_load_json(source: str):
     return doc
 
 
-def docling_to_markdown(doc: DoclingDocument, path: str):
+def docling_to_markdown(doc: DoclingDocument, output_path: str):
     markdown = doc.export_to_markdown()
-    output_path.write_text(markdown, encoding="utf-8")
+    path = pathlib.Path(output_path)
+    path.write_text(markdown, encoding="utf-8")
     return markdown
 
 # Loop over text in the document
@@ -41,7 +42,7 @@ def main():
     # doc = docling_convert_pdf(source)
     doc = docling_load_json("test_docling.json")
     for text in doc.texts:
-        print(text.text)
+        print(text.label, text.text)
         print("\n")
 
 

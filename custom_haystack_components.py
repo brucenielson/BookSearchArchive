@@ -29,7 +29,9 @@ import numpy as np
 import torch
 import requests
 import generator_model as gen
-from docling.document_converter import DocumentConverter
+from docling.document_converter import DocumentConverter, ConversionResult
+from docling_core.types import DoclingDocument
+from docling_parser import DoclingParser
 # import markdown
 
 
@@ -335,10 +337,10 @@ class EPubLoader:
         # Load the EPUB file
         html_pages: List[str]
         meta: List[Dict[str, str]]
-        html_pages, meta = self._load_file()
+        html_pages, meta = self._load_files()
         return {"html_pages": html_pages, "meta": meta}
 
-    def _load_file(self) -> Tuple[List[str], List[Dict[str, str]]]:
+    def _load_files(self) -> Tuple[List[str], List[Dict[str, str]]]:
         sources: List[str] = []
         meta: List[Dict[str, str]] = []
         for file_path in self._file_paths:
@@ -409,6 +411,112 @@ class EPubLoader:
 
 
 @component
+class PdfLoader:
+    def __init__(self, verbose: bool = False, skip_file: str = "sections_to_skip.csv") -> None:
+        self._verbose: bool = verbose
+        self._is_directory: bool = False
+        self._file_paths: List[str] = []
+        self._skip_file: str = skip_file
+        self._sections_to_skip: Dict[str, Set[str]] = {}
+        self._converter: DocumentConverter = DocumentConverter()
+
+    @component.output_types(docling_docs=List[DoclingDocument], meta=List[Dict[str, str]])
+    def run(self, sources: Union[List[str], List[Path], str]) -> Dict[str, Any]:
+        file_paths: List[str] = sources
+        # Handle no documents passed in
+        if len(file_paths) == 0:
+            return {"docling_docs": [], "meta": []}
+        # Handle passing in a string with a path instead of a list of paths
+        if isinstance(file_paths, str):
+            file_paths = [file_paths]
+        # Handle passing in a list of Path objects instead of a list of strings
+        if isinstance(file_paths, list) and isinstance(file_paths[0], Path):
+            file_paths = [str(file_path) for file_path in file_paths]
+        # Verify that every single file path ends with .pdf
+        if not all(file_path.lower().endswith('.pdf') for file_path in file_paths):
+            raise ValueError("PdfLoader only accepts .pdf files.")
+        self._file_paths = file_paths
+        self._sections_to_skip = self._load_sections_to_skip()
+        # Load the PDF file
+        docs: List[DoclingDocument]
+        meta: List[Dict[str, str]]
+        docs, meta = self._load_files()
+        return {"docling_docs": docs, "meta": meta}
+
+    def _load_files(self) -> Tuple[List[DoclingDocument], List[Dict[str, str]]]:
+        sources: List[DoclingDocument] = []
+        meta: List[Dict[str, str]] = []
+        for file_path in self._file_paths:
+            sources_temp: DoclingDocument
+            meta_temp: Dict[str, str]
+            sources_temp, meta_temp = self._load_pdf(file_path)
+            sources.append(sources_temp)
+            meta.append(meta_temp)
+        return sources, meta
+
+    def _load_pdf(self, file_path: str) -> Tuple[DoclingDocument, Dict[str, str]]:
+        result: ConversionResult = self._converter.convert(file_path)
+        book: DoclingDocument = result.document
+
+        self._print_verbose()
+        self._print_verbose(f"Loaded Book: {book.name}")
+        book_meta_data: Dict[str, str] = {
+            "book_title": book.name,
+            "file_path": file_path
+        }
+        # i: int
+        # item: epub.EpubHtml
+        # html_pages: List[str] = []
+        # meta_data: List[Dict[str, str]] = []
+        # for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
+        #     if item.id not in self._sections_to_skip.get(book.title, set()):
+        #         item_meta_data: Dict[str, str] = {
+        #             "item_id": item.id
+        #         }
+        #         book_meta_data.update(item_meta_data)
+        #         item_html: str = item.get_body_content().decode('utf-8')
+        #         html_pages.append(item_html)
+        #         meta_data.append(book_meta_data.copy())
+        #     else:
+        #         self._print_verbose(f"Book: {book.title}; Section Id: {item.id}. User Skipped.")
+
+        # return html_pages, meta_data
+        return book, book_meta_data
+
+    def _print_verbose(self, *args, **kwargs) -> None:
+        if self._verbose:
+            print(*args, **kwargs)
+
+    def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
+        sections_to_skip: Dict[str, Set[str]] = {}
+        if self._is_directory:
+            csv_path = Path(self._file_paths[0]) / self._skip_file
+        else:
+            # Get the directory of the file and then look for the csv file in that directory
+            csv_path = Path(self._file_paths[0]).parent / self._skip_file
+
+        if csv_path.exists():
+            with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
+                reader: csv.DictReader[str] = csv.DictReader(csvfile)
+                row: dict[str, str]
+                for row in reader:
+                    book_title: str = row['Book Title'].strip()
+                    section_title: str = row['Section Title'].strip()
+                    if book_title and section_title:
+                        if book_title not in sections_to_skip:
+                            sections_to_skip[book_title] = set()
+                        sections_to_skip[book_title].add(section_title)
+
+            # Count total sections to skip across all books
+            skip_count: int = sum(len(sections) for _, sections in sections_to_skip.items())
+            self._print_verbose(f"Loaded {skip_count} sections to skip.")
+        else:
+            self._print_verbose("No sections_to_skip.csv file found. Processing all sections.")
+
+        return sections_to_skip
+
+
+@component
 class HTMLParserComponent:
     def __init__(self, min_paragraph_size: int = 300, min_section_size: int = 1000, verbose: bool = False) -> None:
         self._min_section_size: int = min_section_size
@@ -435,6 +543,66 @@ class HTMLParserComponent:
                 parser = HTMLParser(html_page, page_meta_data, min_paragraph_size=self._min_paragraph_size,
                                     double_notes=True)
 
+            temp_docs: List[ByteStream]
+            temp_meta: List[Dict[str, str]]
+            temp_docs, temp_meta = parser.run()
+            item_id: str = page_meta_data.get("item_id", "")
+            book_title: str = page_meta_data.get("book_title", "")
+            if (parser.total_text_length() > self._min_section_size
+                    and item_id not in self._sections_to_skip.get(book_title, set())):
+                self._print_verbose(f"Book: {book_title}; Section {section_num}. "
+                                    f"Chapter Title: {parser.chapter_title}. "
+                                    f"Length: {parser.total_text_length()}")
+                # Add section number to metadata
+                [meta.update({"item_#": str(section_num)}) for meta in temp_meta]
+                docs_list.extend(temp_docs)
+                meta_list.extend(temp_meta)
+                included_sections.append(book_title + ", " + item_id)
+                section_num += 1
+                if parser.chapter_title is None or parser.chapter_title == "":
+                    missing_chapter_titles.append(book_title + ", " + item_id)
+            else:
+                self._print_verbose(f"Book: {book_title}; Chapter Title: {parser.chapter_title}. "
+                                    f"Length: {parser.total_text_length()}. Skipped.")
+
+        if len(docs_list) > 0:
+            self._print_verbose(f"Sections included:")
+            for item in included_sections:
+                self._print_verbose(item)
+            if missing_chapter_titles:
+                self._print_verbose()
+                self._print_verbose(f"Sections missing chapter titles:")
+                for item in missing_chapter_titles:
+                    self._print_verbose(item)
+            self._print_verbose()
+        return {"sources": docs_list, "meta": meta_list}
+
+    def _print_verbose(self, *args, **kwargs) -> None:
+        if self._verbose:
+            print(*args, **kwargs)
+
+
+@component
+class DoclingParserComponent:
+    def __init__(self, min_paragraph_size: int = 300, min_section_size: int = 1000, verbose: bool = False) -> None:
+        self._min_section_size: int = min_section_size
+        self._min_paragraph_size: int = min_paragraph_size
+        self._verbose: bool = verbose
+        self._sections_to_skip: Dict[str, Set[str]] = {}
+
+    @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
+    def run(self, sources: List[DoclingDocument], meta: List[Dict[str, str]]) -> Dict[str, Any]:
+        docs_list: List[ByteStream] = []
+        meta_list: List[Dict[str, str]] = []
+        included_sections: List[str] = []
+        missing_chapter_titles: List[str] = []
+        section_num: int = 1
+
+        for i, doc in enumerate(sources):
+            page_meta_data: Dict[str, str] = meta[i]
+            parser: DoclingParser
+            parser = DoclingParser(doc, page_meta_data, min_paragraph_size=self._min_paragraph_size)
+            # Start here
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
             temp_docs, temp_meta = parser.run()
