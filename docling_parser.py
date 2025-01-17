@@ -6,7 +6,7 @@ from haystack.dataclasses import ByteStream
 from parse_utils import enhance_title
 from docling.document_converter import DocumentConverter, ConversionResult
 from docling_core.types import DoclingDocument
-from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem
+from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, PageItem
 
 
 # def get_header_level(paragraph: Tag) -> Optional[int]:
@@ -215,6 +215,36 @@ def is_page_header(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
     return text.label == "page_header"
 
 
+def is_footnote(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+    return text.label == "footnote"
+
+
+def is_text_break(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+    return is_page_header(text) or is_section_header(text) or is_footnote(text)
+
+
+def is_page_not_text(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+    return text.label not in ["text", "list_item", "formula"]
+
+
+def is_page_text(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+    return not is_page_not_text(text)
+
+
+def is_ends_with_punctuation(text: str) -> bool:
+    return text.endswith(".") or text.endswith("?") or text.endswith("!")
+
+
+def is_sentence_end(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+    # Get second to last character
+    return (is_ends_with_punctuation(text.text) or
+            # Check for closing brackets, quotes, etc.
+            ((text.text.endswith(")")
+             or text.text.endswith("]")
+             or text.text.endswith("}")
+             or text.text.endswith("\"")) and is_ends_with_punctuation(text.text[0:-1])))
+
+
 class DoclingParser:
     def __init__(self, doc: DoclingDocument, meta_data: dict[str, str], min_paragraph_size: int = 300):
         self._doc: DoclingDocument = doc
@@ -253,7 +283,6 @@ class DoclingParser:
         temp_meta: List[Dict[str, str]] = []
         combined_paragraph: str = ""
         para_num: int = 0
-        page_num: str = ""
         headers: Dict[int, str] = {}  # Track headers by level
         j: int
         combined_chars: int = 0
@@ -266,12 +295,41 @@ class DoclingParser:
         # Advance iter2 to be one ahead of iter1
         texts: List[Union[SectionHeaderItem, ListItem, TextItem]] = list(self._doc.texts)
         combine_headers: bool = False
+        section_name: str = ""
+        page_header: str = ""
         for j, text in enumerate(texts):
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
             next_text = texts[j + 1] if j < len(texts) - 1 else None
 
-            if is_page_header(text) or is_page_footer(text):
+            # Check if text starts with...
+            if text.text.startswith("With this I conclude the metaphysical discussion"):
+                pass
+
+            if text.text.startswith("( 4) Purely existential statements are not falsifiable"):
+                pass
+
+            if text.text.startswith("As these examples show, falsifiability in the sense of the"):
+                pass
+
+            if text.text.startswith("In this Introduction to the first volume of the Postscript"):
+                pass
+
+            if is_page_footer(text):
                 continue
+
+            if is_page_header(text):
+                # page_header = text.text
+                continue
+
+            if is_section_header(text):
+                section_name = text.text
+                continue
+
+            if is_footnote(text):
+                continue
+
+            if is_page_not_text(text):
+                pass
 
             # If paragraph has a page number, update our page number
             # page_num = get_page_num(text) or page_num
@@ -321,12 +379,24 @@ class DoclingParser:
             p_str: str = str(text.text)  # p.text.strip()
             p_str_chars: int = len(p_str)
 
+            # If the paragraph ends without final punctuation, combine it with the next paragraph
+            if not is_sentence_end(text):
+                # If paragraph ends with a dash, combine it with the next paragraph
+                if p_str.endswith("-"):
+                    p_str = p_str[0:-1]
+                # Combine this paragraph with the previous ones
+                combined_paragraph += p_str
+                combined_chars += p_str_chars
+                continue
             # If the combined paragraph is less than the minimum size combine it with the next paragraph
-            if combined_chars + p_str_chars < min_paragraph_size:
+            elif combined_chars + p_str_chars < min_paragraph_size:
                 # However, if the next pargraph is a header, we want to start a new paragraph
                 # Unless the header came just after another header, in which case we want to combine them
-                if is_section_header(next_text) and not is_section_header(text):
-                    # Next paragraph is a header (and the current isn't), so break the paragraph here
+                # If next paragraph is not regular text and the current is we might have a section break,
+                # or we might just be at the end of a page and the real paragraph is on the next page
+                if not is_page_text(next_text) and is_page_text(text) and is_sentence_end(text):
+                    # We hit the end of a section and the current text terminates the sentence
+                    # So we need to break here.
                     p_str = combined_paragraph + "\n" + p_str
                     p_str_chars += combined_chars
                     combined_paragraph = ""
@@ -342,19 +412,27 @@ class DoclingParser:
                     combined_chars += p_str_chars
                     continue
             else:
-                p_str = combined_paragraph + "\n" + p_str
-                p_str_chars += combined_chars
-                combined_paragraph = ""
-                combined_chars = 0
+                if is_sentence_end(text):
+                    p_str = combined_paragraph + "\n" + p_str
+                    p_str_chars += combined_chars
+                    combined_paragraph = ""
+                    combined_chars = 0
+                else:
+                    # Combine this paragraph with the previous ones
+                    combined_paragraph += p_str
+                    combined_chars += p_str_chars
+                    continue
             para_num += 1
             self._total_text += p_str
             byte_stream: ByteStream = ByteStream(p_str.encode('utf-8'))
             paragraph_meta_data: Dict[str, str] = {}
             paragraph_meta_data.update(self._meta_data)
             paragraph_meta_data["paragraph_#"] = str(para_num)
+            # paragraph_meta_data["page_header"] = page_header
+            paragraph_meta_data["section_name"] = section_name
             # Page information
-            if page_num:
-                paragraph_meta_data["page_#"] = str(page_num)
+            # if page_num:
+            #     paragraph_meta_data["page_#"] = str(page_num)
 
             # Chapter information
             # if self._chapter_title:

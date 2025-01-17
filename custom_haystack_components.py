@@ -436,7 +436,7 @@ class PdfLoader:
         if not all(file_path.lower().endswith('.pdf') for file_path in file_paths):
             raise ValueError("PdfLoader only accepts .pdf files.")
         self._file_paths = file_paths
-        self._sections_to_skip = self._load_sections_to_skip()
+        # self._sections_to_skip = self._load_sections_to_skip()
         # Load the PDF file
         docs: List[DoclingDocument]
         meta: List[Dict[str, str]]
@@ -455,9 +455,16 @@ class PdfLoader:
         return sources, meta
 
     def _load_pdf(self, file_path: str) -> Tuple[DoclingDocument, Dict[str, str]]:
-        result: ConversionResult = self._converter.convert(file_path)
-        book: DoclingDocument = result.document
-
+        # Check if already cached as a json
+        path = Path(file_path).with_suffix('.json')
+        book: DoclingDocument
+        if path.exists():
+            book = DoclingDocument.load_from_json(path)
+        else:
+            result: ConversionResult = self._converter.convert(file_path)
+            book = result.document
+            # Cache the book as a json
+            book.save_as_json(path)
         self._print_verbose()
         self._print_verbose(f"Loaded Book: {book.name}")
         book_meta_data: Dict[str, str] = {
@@ -486,34 +493,6 @@ class PdfLoader:
     def _print_verbose(self, *args, **kwargs) -> None:
         if self._verbose:
             print(*args, **kwargs)
-
-    def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
-        sections_to_skip: Dict[str, Set[str]] = {}
-        if self._is_directory:
-            csv_path = Path(self._file_paths[0]) / self._skip_file
-        else:
-            # Get the directory of the file and then look for the csv file in that directory
-            csv_path = Path(self._file_paths[0]).parent / self._skip_file
-
-        if csv_path.exists():
-            with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
-                reader: csv.DictReader[str] = csv.DictReader(csvfile)
-                row: dict[str, str]
-                for row in reader:
-                    book_title: str = row['Book Title'].strip()
-                    section_title: str = row['Section Title'].strip()
-                    if book_title and section_title:
-                        if book_title not in sections_to_skip:
-                            sections_to_skip[book_title] = set()
-                        sections_to_skip[book_title].add(section_title)
-
-            # Count total sections to skip across all books
-            skip_count: int = sum(len(sections) for _, sections in sections_to_skip.items())
-            self._print_verbose(f"Loaded {skip_count} sections to skip.")
-        else:
-            self._print_verbose("No sections_to_skip.csv file found. Processing all sections.")
-
-        return sections_to_skip
 
 
 @component
@@ -596,31 +575,30 @@ class DoclingParserComponent:
         meta_list: List[Dict[str, str]] = []
         included_sections: List[str] = []
         missing_chapter_titles: List[str] = []
-        section_num: int = 1
 
         for i, doc in enumerate(sources):
-            page_meta_data: Dict[str, str] = meta[i]
+            meta_data: Dict[str, str] = meta[i]
             parser: DoclingParser
-            parser = DoclingParser(doc, page_meta_data, min_paragraph_size=self._min_paragraph_size)
+            parser = DoclingParser(doc, meta_data, min_paragraph_size=self._min_paragraph_size)
             # Start here
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
             temp_docs, temp_meta = parser.run()
-            item_id: str = page_meta_data.get("item_id", "")
-            book_title: str = page_meta_data.get("book_title", "")
-            if (parser.total_text_length() > self._min_section_size
-                    and item_id not in self._sections_to_skip.get(book_title, set())):
-                self._print_verbose(f"Book: {book_title}; Section {section_num}. "
+            # item_id: str = meta_data.get("item_id", "")
+            book_title: str = meta_data.get("book_title", "")
+            if parser.total_text_length() > self._min_section_size:
+                # and item_id not in self._sections_to_skip.get(book_title, set())):
+                self._print_verbose(f"Book: {book_title}; "
                                     f"Chapter Title: {parser.chapter_title}. "
                                     f"Length: {parser.total_text_length()}")
                 # Add section number to metadata
-                [meta.update({"item_#": str(section_num)}) for meta in temp_meta]
+                # [meta.update({"item_#": str(section_num)}) for meta in temp_meta]
                 docs_list.extend(temp_docs)
                 meta_list.extend(temp_meta)
-                included_sections.append(book_title + ", " + item_id)
-                section_num += 1
+                included_sections.append(book_title)  # + ", " + item_id)
+                # section_num += 1
                 if parser.chapter_title is None or parser.chapter_title == "":
-                    missing_chapter_titles.append(book_title + ", " + item_id)
+                    missing_chapter_titles.append(book_title)  # + ", " + item_id)
             else:
                 self._print_verbose(f"Book: {book_title}; Chapter Title: {parser.chapter_title}. "
                                     f"Length: {parser.total_text_length()}. Skipped.")
