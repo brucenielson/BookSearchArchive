@@ -279,6 +279,13 @@ class DoclingParser:
         return self._chapter_title
 
     def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
+        def combine_paragraphs(p1_str, p2_str):
+            # If the paragraph ends without final punctuation, combine it with the next paragraph
+            if is_sentence_end(p1_str):
+                return p1_str + "\n" + p2_str
+            else:
+                return p1_str + " " + p2_str
+
         temp_docs: List[ByteStream] = []
         temp_meta: List[Dict[str, str]] = []
         combined_paragraph: str = ""
@@ -292,22 +299,7 @@ class DoclingParser:
             next_text = texts[i + 1] if i < len(texts) - 1 else None
 
             # Check if text starts with...
-            if text.text.startswith("With this I conclude the metaphysical discussion"):
-                pass
-
-            if text.text.startswith("( 4) Purely existential statements are not falsifiable"):
-                pass
-
-            if text.text.startswith("As these examples show, falsifiability in the sense of the"):
-                pass
-
-            if text.text.startswith("In this Introduction to the first volume of the Postscript"):
-                pass
-
-            if text.text.startswith("Had  the Postscript been  published in the  1950s"):
-                pass
-
-            if text.text.startswith("The first has to do with the technical"):
+            if text.text.startswith("almost as incredible as if you fired"):
                 pass
 
             if text.text.startswith("As these examples show, falsifiability in the sense of the demarca"):
@@ -338,12 +330,12 @@ class DoclingParser:
             # If the paragraph ends without final punctuation, combine it with the next paragraph
             if not is_sentence_end(p_str):
                 # Combine this paragraph with the previous ones
-                combined_paragraph += p_str
+                combined_paragraph = combine_paragraphs(combined_paragraph, p_str)
                 combined_chars += p_str_chars
                 continue
             # If next paragraph is a new section, and we're at the end of a sentence, process this paragraph
             elif is_section_header(next_text) and is_sentence_end(p_str):
-                p_str = combined_paragraph + " " + p_str
+                p_str = combine_paragraphs(combined_paragraph, p_str)
                 p_str_chars += combined_chars
                 combined_paragraph = ""
                 combined_chars = 0
@@ -354,22 +346,22 @@ class DoclingParser:
                 # across pages.
                 if next_text is None:
                     # If it's the last paragraph, then process this paragraph
-                    combined_paragraph += "\n" + p_str
+                    combined_paragraph = combine_paragraphs(combined_paragraph, p_str)
                     combined_chars += p_str_chars
                     p_str = combined_paragraph
                 elif not is_page_text(next_text) and is_sentence_end(p_str):
                     # If it's the last paragraph on the page, then break the paragraph here
-                    p_str = combined_paragraph + "\n" + p_str
+                    p_str = combine_paragraphs(combined_paragraph, p_str)
                     p_str_chars += combined_chars
                     combined_paragraph = ""
                     combined_chars = 0
                 else:
                     # Combine this paragraph with the previous ones
-                    combined_paragraph += "\n" + p_str
+                    combined_paragraph = combine_paragraphs(combined_paragraph, p_str)
                     combined_chars += p_str_chars
                     continue
             else:
-                p_str = combined_paragraph + "\n" + p_str
+                p_str = combine_paragraphs(combined_paragraph, p_str)
                 p_str_chars += combined_chars
                 combined_paragraph = ""
                 combined_chars = 0
