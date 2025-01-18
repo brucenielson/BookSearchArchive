@@ -239,7 +239,8 @@ def is_ends_with_punctuation(text: str) -> bool:
 
 
 def is_bottom_note(text: str) -> bool:
-    return text[0].isdigit() and text[1:].startswith("[") and text.endswith("]")
+    return bool(re.match(r"^\d+[^\s].*", text))
+
 
 
 def is_sentence_end(text: str) -> bool:
@@ -317,6 +318,10 @@ class DoclingParser:
 
             if remove_extra_whitespace(text.text).startswith("The misunderstood logical"):
                 pass
+
+            # ·Cp. my Conjectures and Refutations, Chapter 2, sections VI and vu. [See also Volume III of the Postscript, 'Metaphysical Epilogue'. Ed.]
+            # (3) Torricelli(andpredecessors): therefutationof'natureabhors a vacuum'. This prepares for a mechanistic world view.
+            # (4) Kepler's refutation of the hypothesis of circular motion upheld till then (even by Tycho and Galileo), leads to Kepler's laws and so to Newton's theory.
 
             if is_page_footer(text):
                 continue
