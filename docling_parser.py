@@ -1,6 +1,7 @@
 from copy import deepcopy
 from bs4 import BeautifulSoup, Tag
 from typing import List, Dict, Tuple, Iterator, Optional, Union
+import re
 # noinspection PyPackageRequirements
 from haystack.dataclasses import ByteStream
 from parse_utils import enhance_title
@@ -237,12 +238,38 @@ def is_ends_with_punctuation(text: str) -> bool:
     return text.endswith(".") or text.endswith("?") or text.endswith("!")
 
 
+def is_bottom_note(text: str) -> bool:
+    return text[0].isdigit() and text[1:].startswith("[") and text.endswith("]")
+
+
 def is_sentence_end(text: str) -> bool:
     has_end_punctuation: bool = is_ends_with_punctuation(text)
     # Does it end with a closing bracket, quote, etc.?
-    ends_with_bracket: bool = text.endswith(")") or text.endswith("]") or text.endswith("}") or text.endswith("\"")
+    ends_with_bracket: bool = (text.endswith(")")
+                               or text.endswith("]")
+                               or text.endswith("}")
+                               or text.endswith("\"")
+                               or text.endswith("\'"))
     return (has_end_punctuation or
             (ends_with_bracket and is_ends_with_punctuation(text[0:-1])))
+
+
+def remove_extra_whitespace(text: str) -> str:
+    # Remove extra whitespace in the middle of the text
+    return ' '.join(text.split())
+
+
+def combine_paragraphs(p1_str, p2_str):
+    # If the paragraph ends without final punctuation, combine it with the next paragraph
+    if is_sentence_end(p1_str):
+        return p1_str + "\n" + p2_str
+    else:
+        return p1_str + " " + p2_str
+
+
+def is_roman_numeral(s: str) -> bool:
+    roman_numeral_pattern = r'(?i)^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
+    return bool(re.match(roman_numeral_pattern, s.strip()))
 
 
 class DoclingParser:
@@ -255,22 +282,6 @@ class DoclingParser:
         self._chapter_title: str = ""
         self._meta_data: dict[str, str] = meta_data
 
-        # Convert the list of sources to a list of DoclingDocuments
-        # converter: DocumentConverter = DocumentConverter()
-        # docling_docs: List[DoclingDocument] = []
-        # for source in sources:
-        #     result: ConversionResult = converter.convert(source)
-        #     doc: DoclingDocument = result.document
-        #     docling_docs.append(doc)
-
-        # self._docling_docs: List[DoclingDocument] = docling_docs
-        # self._meta_data: dict[str, str] = meta_data
-        # self._remove_footnotes: bool = remove_footnotes
-        # If True, chapters and sections named 'notes' will have double the minimum paragraph size
-        # This is because notes are often very short,
-        # and we want to keep them together to not dominate a semantic search
-        # self._double_notes: bool = double_notes
-
     def total_text_length(self) -> int:
         return len(self._total_text)
 
@@ -279,13 +290,6 @@ class DoclingParser:
         return self._chapter_title
 
     def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
-        def combine_paragraphs(p1_str, p2_str):
-            # If the paragraph ends without final punctuation, combine it with the next paragraph
-            if is_sentence_end(p1_str):
-                return p1_str + "\n" + p2_str
-            else:
-                return p1_str + " " + p2_str
-
         temp_docs: List[ByteStream] = []
         temp_meta: List[Dict[str, str]] = []
         combined_paragraph: str = ""
@@ -305,6 +309,15 @@ class DoclingParser:
             if text.text.startswith("As these examples show, falsifiability in the sense of the demarca"):
                 pass
 
+            if text.text.startswith("It  should  be  stressed  that"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("Rutherford's formulation is excellent"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("The misunderstood logical"):
+                pass
+
             if is_page_footer(text):
                 continue
 
@@ -322,10 +335,23 @@ class DoclingParser:
             if is_page_not_text(text):
                 pass
 
+            if is_bottom_note(text.text):
+                continue
+
+            if is_roman_numeral(text.text):
+                continue
+
             min_paragraph_size: int = self._min_paragraph_size
 
             p_str: str = str(text.text).strip()
             p_str_chars: int = len(p_str)
+            # Get rid of weird spaces in front of quotes
+            p_str = re.sub(r"([.!?]) '", r"\1'", p_str)
+            p_str = re.sub(r'([.!?]) "', r'\1"', p_str)
+            # Remove footnote numbers at end of a sentence. Check for a digit at the end and drop it
+            # until there are no more digits or the sentence is now a valid end of a sentence.
+            while p_str and p_str[-1].isdigit() and not is_sentence_end(p_str):
+                p_str = p_str[:-1].strip()
 
             # If the paragraph ends without final punctuation, combine it with the next paragraph
             if not is_sentence_end(p_str):
