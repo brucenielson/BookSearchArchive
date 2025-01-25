@@ -9,212 +9,54 @@ from docling.document_converter import DocumentConverter, ConversionResult
 from docling_core.types import DoclingDocument
 from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, PageItem
 import nltk
-from nltk.stem import PorterStemmer
+from nltk.stem import WordNetLemmatizer, PorterStemmer
 # Download the words corpus if needed
 nltk.download('words')
 nltk.download('wordnet')
 nltk.download('omw-1.4')
-words_list: dict = nltk.corpus.words.words()
-# Initialize stemmer
+words_list: set = set(nltk.corpus.words.words())
+# Initialize lemmatizer
+lemmatizer = WordNetLemmatizer()
 stemmer = PorterStemmer()
 
 
-# def get_header_level(paragraph: Tag) -> Optional[int]:
-#     """Return the level of the header (1 for h1, 2 for h2, etc.), or 0 if not a header."""
-#     # Check for direct header tag
-#     if paragraph.name.startswith('h') and paragraph.name[1:].isdigit():
-#         return int(paragraph.name[1:])  # Extract the level from 'hX' or 'hXY'
-#
-#     # Check for class name equivalent to header tags
-#     if hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs:
-#         section_headers: List[str] = ['pre-title1', 'h']
-#         for cls in paragraph.attrs['class']:
-#             if cls.lower() in section_headers:
-#                 return 0  # Equivalent to h0 effectively
-#             elif cls.lower().startswith('h') and cls[1:].isdigit():
-#                 return int(cls[1:])  # Extract level from class name 'hX' or 'hXY'
-#     return None
-#
-#
-# def is_title(tag: Tag) -> bool:
-#     # # A title isn't a header
-#     # noinspection SpellCheckingInspection
-#     keywords: List[str] = ['title', 'chtitle', 'tochead', 'title1', 'h1_label']
-#     is_a_title: bool = (hasattr(tag, 'attrs') and 'class' in tag.attrs and
-#                         any(cls.lower().startswith(keyword) or cls.lower().endswith(keyword)
-#                             for cls in tag.attrs['class'] for keyword in keywords))
-#     return is_a_title
-#
-#
-# def is_header1_title(paragraph: Tag, h1_count: int) -> bool:
-#     header_level: int = get_header_level(paragraph)
-#     if header_level == 1 and h1_count == 1:
-#         return True
-#     return False
-#
-#
-# def is_section_title(tag: Tag) -> bool:
-#     """Check if the tag is a title, heading, or chapter number."""
-#     if tag is None:
-#         return False
-#
-#     header_lvl: int = get_header_level(tag)
-#     return is_title(tag) or header_lvl is not None or is_chapter_number(tag)
-#
-#
-# def is_chapter_number(paragraph: Tag) -> bool:
-#     # List of class names to check for chapter numbers
-#     # noinspection SpellCheckingInspection
-#     chapter_classes = ['chno', 'ch-num']
-#     # noinspection SpellCheckingInspection
-#     return (hasattr(paragraph, 'attrs') and 'class' in paragraph.attrs and
-#             any(cls in paragraph.attrs['class'] for cls in chapter_classes) and
-#             paragraph.text.isdigit())
-#
-#
-# def get_page_num(paragraph: Tag) -> str:
-#     # Try to get a page number - return it as a string instead of an int to accommodate roman numerals
-#     # Return None if none found on this paragraph
-#     tags: List[Tag] = paragraph.find_all(
-#         lambda x: (x.name == 'a' or x.name == 'span') and x.get('id')
-#         and (x['id'].startswith('page_') or (x['id'].startswith('p') and x['id'][1:].isdigit()))
-#     )
-#     page_num: Optional[str] = None
-#     if tags:
-#         # Extract the page number from the anchor or span tag id
-#         for tag in tags:
-#             page_id = tag.get('id')
-#             if page_id.startswith('page_'):
-#                 page_num = page_id.split('_')[-1]
-#             elif page_id.startswith('p') and page_id[1:].isdigit():
-#                 page_num = page_id[1:]  # Extract the digits after 'p'
-#
-#     if not page_num:
-#         # Check for a page number embedded in the paragraph's id in
-#         # format 'pXXXX-' where XXXX is the page number with leading zeros
-#         page_id: str = paragraph.get('id')
-#         if page_id and page_id.startswith('p'):
-#             page_num = page_id[1:].split('-')[0]
-#             try:
-#                 page_num = str(int(page_num))  # Remove leading zeros
-#             except ValueError:
-#                 page_num = None
-#     return page_num
-#
-#
-# def is_sup_first_content(tag, sup_tag):
-#     for content in tag.contents:
-#         if isinstance(content, str) and not content.strip():
-#             # Skip empty or whitespace-only strings
-#             continue
-#         # Check if the content is exactly the <sup> tag or contains it
-#         in_first_content: bool = content == sup_tag or (isinstance(content, Tag) and sup_tag in content.descendants)
-#         # Is sup both in the first content and also literally the text matches (proving it's a footnote)?
-#         return in_first_content and sup_tag.text.strip() == content.text.strip()
-#     return False
-#
-#
-# def recursive_yield_tags(tag: Tag, remove_footnotes: bool = False) -> Iterator[Tag]:
-#     invalid_children: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
-#     # If the tag has no <p> tags or header tags under it and contains text, yield it
-#     # Unless it is a div tag. The Haystack HTML parse doesn't always handle those right, so
-#     # Dig one level deeper.
-#     if not tag.name == 'div' and tag.get_text(strip=True) and not tag.find(invalid_children):
-#         # Make a deep copy of the tag to avoid modifying the original
-#         tag_copy: Tag = deepcopy(tag)
-#         # Clean up of paragraph text
-#         for br in tag_copy.find_all('br'):
-#             br.insert_after(' ')
-#         # Remove footnotes - but not if the sup tag is at the start of the paragraph
-#         # Iterate over each <sup> tag
-#         if remove_footnotes:
-#             for fn in tag_copy.find_all('sup'):
-#                 if not is_sup_first_content(tag_copy, fn):
-#                     # Remove the <sup> tag if it's not within the first content
-#                     fn.extract()
-#
-#         yield tag_copy
-#     else:
-#         # Recursively go through the children of the current tag
-#         for child in tag.children:
-#             if isinstance(child, Tag):
-#                 # Yield the child tags that meet the criteria
-#                 yield from recursive_yield_tags(child, remove_footnotes=remove_footnotes)
-#
-#
-# def get_chapter_info(tags: List[Tag],
-#                      h1_tags: List[Tag],
-#                      h2_tags: List[Tag],
-#                      h3_tags: List[Tag]) -> Tuple[str, int, str]:
-#     if not tags:
-#         return "", 0, ""
-#     # Get the chapter title from the tag
-#     chapter_title: str = ""
-#     # Search for the chapter title within the tags that come before the first paragraph tag (that isn't
-#     # stylized to look like a header tag)
-#     # Use is_title to check for a specific title tag
-#     # If that fails you can use get_header_level to look for either a h1 or h2 tag but ONLY if that is the sole
-#     # h1 or h2 tag in the whole section.
-#     # There may be more than one title (like a subtitle) and you'll want to combine them via ": " separators.
-#     # Use enhance_title to clean up the title text.
-#     # Once you find your first paragraph that isn't a title or header, you can assume you've got the full title.
-#
-#     # Create iterator using recursive_yield_tags
-#     # Count h1 tags
-#     # h1_tags: List[Tag] = top_tag.find_all('h1')
-#     # Remove any h1 tags that have class 'ch_num'
-#     h1_tags = [tag for tag in h1_tags if not is_chapter_number(tag) and not is_title(tag)]
-#     h1_tag_count: int = len(h1_tags)
-#     h2_tag_count: int = len(h2_tags)
-#     h3_tag_count: int = len(h3_tags)
-#     chapter_number: int = 0
-#     tags_to_delete: List[int] = []
-#     first_page_num: str = ""
-#     for i, tag in enumerate(tags):
-#         first_page_num = get_page_num(tag) or first_page_num
-#         if is_title(tag):
-#             # This tag is used in the title, so we need to delete the tag from the list of tags
-#             tags_to_delete.append(i)
-#             title_text = enhance_title(tag.text)
-#             if chapter_title:
-#                 chapter_title += ": " + title_text
-#             else:
-#                 chapter_title = title_text
-#         elif is_chapter_number(tag):
-#             tags_to_delete.append(i)
-#             chapter_number = int(tag.text.strip())
-#         elif chapter_title == "" and tag.name != 'p':
-#             # Check for a header tag that isn't a title
-#             if h1_tag_count == 1 and get_header_level(tag) == 1:
-#                 # Using an H1 tag as a chapter title
-#                 tags_to_delete.append(i)
-#                 title_text = enhance_title(tag.text)
-#                 chapter_title = title_text
-#             elif h1_tag_count == 0:
-#                 if h2_tag_count == 1 and get_header_level(tag) == 2:
-#                     # Using an H2 tag as a chapter title
-#                     tags_to_delete.append(i)
-#                     title_text = enhance_title(tag.text)
-#                     chapter_title = title_text
-#                 elif h3_tag_count == 1 and get_header_level(tag) == 3:
-#                     # I don't think this ever happens, but using a h3 tag as a chapter title
-#                     tags_to_delete.append(i)
-#                     title_text = enhance_title(tag.text)
-#                     chapter_title = title_text
-#         elif tag.name == 'p' and not is_chapter_number(tag):
-#             # We allow a couple of paragraphs before the title for quotes and such
-#             if chapter_title or i > 2:
-#                 break
-#
-#     # Delete the tags that were used in the title
-#     for i in sorted(tags_to_delete, reverse=True):
-#         del tags[i]
-#
-#     return chapter_title, chapter_number, first_page_num
-
-
 def is_valid_word(word):
-    return word.lower() in words_list or word in words_list
+    """Check if a word is valid by comparing it directly and via stemming."""
+    stem = stemmer.stem(word)
+    if (word.lower() in words_list
+            or word in words_list):
+        return True
+    elif (stem in words_list
+          or stem.lower() in words_list):
+        return True
+    # Check all lemmatizations of the word
+    options = ['n', 'v', 'a', 'r', 's']
+    for option in options:
+        lemma = lemmatizer.lemmatize(word, pos=option)
+        if lemma in words_list:
+            return True
+    # Check for custom lemmatizations
+    suffixes = {
+        "ability": "able",  # testability -> testable
+        "ibility": "ible",  # possibility -> possible
+        "iness": "y",         # happiness -> happy
+        "ity": "e",          # creativity -> create
+        "tion": "e",         # creation -> create
+        "able": "",         # testable -> test
+        "ible": "",         # possible -> poss
+        "ing": "",          # running -> run
+        "ed": "",           # tested -> test
+        "s": ""             # tests -> test
+    }
+    for suffix, replacement in suffixes.items():
+        if word.endswith(suffix):
+            if suffix != 's':
+                pass
+            stripped_word = word[: -len(suffix)] + replacement
+            if is_valid_word(stripped_word):
+                return stripped_word
+
+    return False
 
 
 def clean_text(p_str):
@@ -223,9 +65,16 @@ def clean_text(p_str):
     def replace_dash(match):
         word1, word2 = match.group(1), match.group(2)
         combined = word1.strip() + word2.strip()
+        first_word = p_str.strip().split(' ')[0]
+
+        if combined == 'Rei7':
+            pass
+
+        if combined == 'Marsden':
+            pass
 
         # does word 1 contain a space after the hyphen?
-        if word1.endswith("- ") and is_valid_word(combined):
+        if word2.startswith(" ") and is_valid_word(combined):
             # When there is a space after the hyphen, it is likely that the hyphen is separating two parts
             # of a single word
             return combined
@@ -236,7 +85,7 @@ def clean_text(p_str):
         elif is_valid_word(combined):
             return combined  # Combine the parts if they form a valid word
         # if the combined word starts with a capital letter, then it is likely a proper noun. Combine the parts.
-        elif combined[0].isupper():
+        elif combined[0].isupper() and not word2.strip()[0].isupper() and not is_valid_word(word2.strip()):
             return combined
 
         # Default - assume the hyphen is separating two words
@@ -350,11 +199,15 @@ class DoclingParser:
         texts: List[Union[SectionHeaderItem, ListItem, TextItem]] = list(self._doc.texts)
         section_name: str = ""
         for i, text in enumerate(texts):
+            text.text = text.text.encode('utf-8').decode('utf-8')
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
             next_text = texts[i + 1] if i < len(texts) - 1 else None
 
             # Check if text starts with...
             if text.text.startswith("almost as incredible as if you fired"):
+                pass
+
+            if text.text.startswith("This passage i s really astonishing"):
                 pass
 
             if text.text.startswith("As these examples show, falsifiability in the sense of the demarca"):
@@ -385,7 +238,7 @@ class DoclingParser:
                 pass
 
             # ·Cp. my Conjectures and Refutations, Chapter 2, sections VI and vu. [See also Volume III of the Postscript, 'Metaphysical Epilogue'. Ed.]
-            # (3) Torricelli(andpredecessors): therefutationof'natureabhors a vacuum'. This prepares for a mechanistic world view.
+            # (7) Oersted's experiment is interpreted by Faraday as a refutation of the universal theory of Newtonian central forces and thus leads to the Faraday-Maxwell .field theory.
             # (4) Kepler's refutation of the hypothesis of circular motion upheld till then (even by Tycho and Galileo), leads to Kepler's laws and so to Newton's theory.
 
             if is_page_footer(text):
@@ -414,6 +267,9 @@ class DoclingParser:
             min_paragraph_size: int = self._min_paragraph_size
 
             p_str: str = str(text.text).strip()
+            p_str = re.sub(r'\s+', ' ', p_str).strip()
+            if len(text.text) != len(p_str):
+                pass
             p_str_chars: int = len(p_str)
             # Get rid of weird spaces in front of quotes
             p_str = re.sub(r"([.!?]) '", r"\1'", p_str)
