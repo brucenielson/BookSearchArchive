@@ -8,6 +8,15 @@ from parse_utils import enhance_title
 from docling.document_converter import DocumentConverter, ConversionResult
 from docling_core.types import DoclingDocument
 from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, PageItem
+import nltk
+from nltk.stem import PorterStemmer
+# Download the words corpus if needed
+nltk.download('words')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+words_list: dict = nltk.corpus.words.words()
+# Initialize stemmer
+stemmer = PorterStemmer()
 
 
 # def get_header_level(paragraph: Tag) -> Optional[int]:
@@ -204,6 +213,45 @@ from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextIte
 #     return chapter_title, chapter_number, first_page_num
 
 
+def is_valid_word(word):
+    return word.lower() in words_list or word in words_list
+
+
+def clean_text(p_str):
+    # This regular expression looks for cases where a dash separates two parts of a word
+    # The idea is to combine the two parts and check if they form a valid word.
+    def replace_dash(match):
+        word1, word2 = match.group(1), match.group(2)
+        combined = word1.strip() + word2.strip()
+
+        # does word 1 contain a space after the hyphen?
+        if word1.endswith("- ") and is_valid_word(combined):
+            # When there is a space after the hyphen, it is likely that the hyphen is separating two parts
+            # of a single word
+            return combined
+        # else check for each part individually being a word. If so, this is probably a compound word
+        elif is_valid_word(word1.strip()) and is_valid_word(word2.strip()):
+            return word1.strip() + '-' + word2.strip()
+        # else if the combined word is a valid word, then we probably had one word broken in two
+        elif is_valid_word(combined):
+            return combined  # Combine the parts if they form a valid word
+        # if the combined word starts with a capital letter, then it is likely a proper noun. Combine the parts.
+        elif combined[0].isupper():
+            return combined
+
+        # Default - assume the hyphen is separating two words
+        return word1.strip() + '-' + word2.strip()
+
+    # Replace soft hyphen characters (­) with a regular dash
+    p_str = p_str.replace("­", "-")
+    # p_str = p_str.replace("- ", "-")
+
+    # Look for dashes separating word parts (no spaces involved)
+    p_str = re.sub(r'(\w+)-(\s?\w+)', replace_dash, p_str)
+
+    return p_str
+
+
 def is_section_header(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
     if text is None:
         return False
@@ -239,8 +287,10 @@ def is_ends_with_punctuation(text: str) -> bool:
 
 
 def is_bottom_note(text: str) -> bool:
+    # Check for · at the beginning of the line. This is often how OCR represents footnote number.
+    if text.startswith("·") and not text.startswith("· "):
+        return True
     return bool(re.match(r"^\d+[^\s].*", text))
-
 
 
 def is_sentence_end(text: str) -> bool:
@@ -313,10 +363,25 @@ class DoclingParser:
             if text.text.startswith("It  should  be  stressed  that"):
                 pass
 
+            if text.text.startswith("·Cp. my Conjectures and Refutations, Chapter 2"):
+                pass
+
             if remove_extra_whitespace(text.text).startswith("Rutherford's formulation is excellent"):
                 pass
 
             if remove_extra_whitespace(text.text).startswith("The misunderstood logical"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("(7) Oersted's experiment is interpreted by Faraday"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("(8) Atomic theory: the atomicity"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("(10) The 'chance-discoveries' of Roentgen"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("This does not mean that there are not great differences"):
                 pass
 
             # ·Cp. my Conjectures and Refutations, Chapter 2, sections VI and vu. [See also Volume III of the Postscript, 'Metaphysical Epilogue'. Ed.]
@@ -398,8 +463,9 @@ class DoclingParser:
                 combined_chars = 0
 
             # Remove any extra dashes in the middle of a paragraph if it is breaking up a word
-            p_str = p_str.replace("­", "-")
-            p_str = p_str.replace("- ", "")
+            # p_str = p_str.replace("­", "-")
+            # p_str = p_str.replace("- ", "")
+            p_str = clean_text(p_str)
             para_num += 1
             self._total_text += p_str
             byte_stream: ByteStream = ByteStream(p_str.encode('utf-8'))
