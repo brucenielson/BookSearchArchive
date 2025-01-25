@@ -204,34 +204,7 @@ class DoclingParser:
             next_text = texts[i + 1] if i < len(texts) - 1 else None
 
             # Check if text starts with...
-            if text.text.startswith("almost as incredible as if you fired"):
-                pass
-
-            if text.text.startswith("This passage i s really astonishing"):
-                pass
-
-            if text.text.startswith("As these examples show, falsifiability in the sense of the demarca"):
-                pass
-
-            if text.text.startswith("It  should  be  stressed  that"):
-                pass
-
-            if text.text.startswith("·Cp. my Conjectures and Refutations, Chapter 2"):
-                pass
-
-            if remove_extra_whitespace(text.text).startswith("Rutherford's formulation is excellent"):
-                pass
-
-            if remove_extra_whitespace(text.text).startswith("The misunderstood logical"):
-                pass
-
-            if remove_extra_whitespace(text.text).startswith("(7) Oersted's experiment is interpreted by Faraday"):
-                pass
-
             if remove_extra_whitespace(text.text).startswith("(8) Atomic theory: the atomicity"):
-                pass
-
-            if remove_extra_whitespace(text.text).startswith("(10) The 'chance-discoveries' of Roentgen"):
                 pass
 
             if remove_extra_whitespace(text.text).startswith("This does not mean that there are not great differences"):
@@ -239,7 +212,6 @@ class DoclingParser:
 
             # ·Cp. my Conjectures and Refutations, Chapter 2, sections VI and vu. [See also Volume III of the Postscript, 'Metaphysical Epilogue'. Ed.]
             # (7) Oersted's experiment is interpreted by Faraday as a refutation of the universal theory of Newtonian central forces and thus leads to the Faraday-Maxwell .field theory.
-            # (4) Kepler's refutation of the hypothesis of circular motion upheld till then (even by Tycho and Galileo), leads to Kepler's laws and so to Newton's theory.
 
             if is_page_footer(text):
                 continue
