@@ -85,6 +85,7 @@ def clean_text(p_str):
         elif is_valid_word(combined):
             return combined  # Combine the parts if they form a valid word
         # if the combined word starts with a capital letter, then it is likely a proper noun. Combine the parts.
+        # TODO: I can make this work better if I be sure this is a capital that isn't the first word of a sentence.
         elif combined[0].isupper() and not word2.strip()[0].isupper() and not is_valid_word(word2.strip()):
             return combined
 
