@@ -573,8 +573,6 @@ class DoclingParserComponent:
     def run(self, sources: List[DoclingDocument], meta: List[Dict[str, str]]) -> Dict[str, Any]:
         docs_list: List[ByteStream] = []
         meta_list: List[Dict[str, str]] = []
-        included_sections: List[str] = []
-        missing_chapter_titles: List[str] = []
 
         for i, doc in enumerate(sources):
             meta_data: Dict[str, str] = meta[i]
@@ -586,33 +584,13 @@ class DoclingParserComponent:
             temp_docs, temp_meta = parser.run()
             # item_id: str = meta_data.get("item_id", "")
             book_title: str = meta_data.get("book_title", "")
-            if parser.total_text_length() > self._min_section_size:
-                # and item_id not in self._sections_to_skip.get(book_title, set())):
-                self._print_verbose(f"Book: {book_title}; "
-                                    f"Chapter Title: {parser.chapter_title}. "
-                                    f"Length: {parser.total_text_length()}")
-                # Add section number to metadata
-                # [meta.update({"item_#": str(section_num)}) for meta in temp_meta]
-                docs_list.extend(temp_docs)
-                meta_list.extend(temp_meta)
-                included_sections.append(book_title)  # + ", " + item_id)
-                # section_num += 1
-                if parser.chapter_title is None or parser.chapter_title == "":
-                    missing_chapter_titles.append(book_title)  # + ", " + item_id)
-            else:
-                self._print_verbose(f"Book: {book_title}; Chapter Title: {parser.chapter_title}. "
-                                    f"Length: {parser.total_text_length()}. Skipped.")
+            # Unlike EPUB we don't have sections or chapters. So we don't need a total length.
+            # TODO: Add a way to skip pages instead.
 
-        if len(docs_list) > 0:
-            self._print_verbose(f"Sections included:")
-            for item in included_sections:
-                self._print_verbose(item)
-            if missing_chapter_titles:
-                self._print_verbose()
-                self._print_verbose(f"Sections missing chapter titles:")
-                for item in missing_chapter_titles:
-                    self._print_verbose(item)
-            self._print_verbose()
+            self._print_verbose(f"Book: {book_title};")
+            docs_list.extend(temp_docs)
+            meta_list.extend(temp_meta)
+
         return {"sources": docs_list, "meta": meta_list}
 
     def _print_verbose(self, *args, **kwargs) -> None:
@@ -969,6 +947,8 @@ class CustomDocumentSplitter:
 
     def process_document(self, document: Document) -> List[Document]:
         token_count = self.count_tokens(document.content)
+        # TODO: Check if PDF splitter is intelligently splitting the document or if token_count sometimes starts
+        # off too high. Say more than _max_seq_length * 1.2
         if token_count <= self._max_seq_length:
             # Document fits within max sequence length, no need to split
             return [document]

@@ -179,16 +179,7 @@ class DoclingParser:
         self._min_paragraph_size: int = min_paragraph_size
         self._docs_list: List[ByteStream] = []
         self._meta_list: List[Dict[str, str]] = []
-        self._total_text: str = ""
-        self._chapter_title: str = ""
         self._meta_data: dict[str, str] = meta_data
-
-    def total_text_length(self) -> int:
-        return len(self._total_text)
-
-    @property
-    def chapter_title(self):
-        return self._chapter_title
 
     def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         temp_docs: List[ByteStream] = []
@@ -197,8 +188,18 @@ class DoclingParser:
         para_num: int = 0
         i: int
         combined_chars: int = 0
-        texts: List[Union[SectionHeaderItem, ListItem, TextItem]] = list(self._doc.texts)
         section_name: str = ""
+
+        # Before we begin, we need to find all footnotes and move them to the end of the texts list
+        # This is because footnotes are often interspersed with the text and we want to process them all at once
+        # Do this as a single list comprehension
+        texts: List[Union[SectionHeaderItem, ListItem, TextItem]] = list(self._doc.texts)
+        footnotes: List[Union[SectionHeaderItem, ListItem, TextItem]] = [text for text in texts if is_footnote(text)]
+        bottom_notes: List[Union[SectionHeaderItem, ListItem, TextItem]] = [text for text in texts if is_bottom_note(text.text)]
+        temp_texts = [text for text in texts if not is_footnote(text) and not is_bottom_note(text.text)]
+        # texts.extend(footnotes)
+        # texts.extend(bottom_notes)
+
         for i, text in enumerate(texts):
             text.text = text.text.encode('utf-8').decode('utf-8')
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
@@ -209,6 +210,9 @@ class DoclingParser:
                 pass
 
             if remove_extra_whitespace(text.text).startswith("This does not mean that there are not great differences"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("On the contrary, I believe"):
                 pass
 
             # ·Cp. my Conjectures and Refutations, Chapter 2, sections VI and vu. [See also Volume III of the Postscript, 'Metaphysical Epilogue'. Ed.]
@@ -237,16 +241,14 @@ class DoclingParser:
             if is_roman_numeral(text.text):
                 continue
 
-            min_paragraph_size: int = self._min_paragraph_size
-
             p_str: str = str(text.text).strip()
             p_str = re.sub(r'\s+', ' ', p_str).strip()
-            if len(text.text) != len(p_str):
-                pass
             p_str_chars: int = len(p_str)
+
             # Get rid of weird spaces in front of quotes
             p_str = re.sub(r"([.!?]) '", r"\1'", p_str)
             p_str = re.sub(r'([.!?]) "', r'\1"', p_str)
+
             # Remove footnote numbers at end of a sentence. Check for a digit at the end and drop it
             # until there are no more digits or the sentence is now a valid end of a sentence.
             while p_str and p_str[-1].isdigit() and not is_sentence_end(p_str):
@@ -265,7 +267,7 @@ class DoclingParser:
                 combined_paragraph = ""
                 combined_chars = 0
             # If the combined paragraph is less than the minimum size combine it with the next paragraph
-            elif combined_chars + p_str_chars < min_paragraph_size:
+            elif combined_chars + p_str_chars < self._min_paragraph_size:
                 # If the paragraph is too short, combine it with the next one
                 # Unless this is the final paragraph on the page. That is unless that final paragraph is split up
                 # across pages.
@@ -291,12 +293,8 @@ class DoclingParser:
                 combined_paragraph = ""
                 combined_chars = 0
 
-            # Remove any extra dashes in the middle of a paragraph if it is breaking up a word
-            # p_str = p_str.replace("­", "-")
-            # p_str = p_str.replace("- ", "")
             p_str = clean_text(p_str)
             para_num += 1
-            self._total_text += p_str
             byte_stream: ByteStream = ByteStream(p_str.encode('utf-8'))
             paragraph_meta_data: Dict[str, str] = {}
             paragraph_meta_data.update(self._meta_data)
