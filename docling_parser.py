@@ -293,6 +293,8 @@ class DoclingParser:
             p_str = re.sub(r'\[\s+', '[', p_str)
             # Get rid of spaces after opening curly brackets
             p_str = re.sub(r'\{\s+', '{', p_str)
+            # Get rid of periods that are followed by a letter. Remove the period.
+            p_str = re.sub(r'(?<=\s)\.([a-zA-Z])', r'\1', p_str)
             # Get rid of spaces before periods
             p_str = re.sub(r'\s+\.', '.', p_str)
 
