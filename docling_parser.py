@@ -155,6 +155,24 @@ def is_sentence_end(text: str) -> bool:
             (ends_with_bracket and is_ends_with_punctuation(text[0:-1])))
 
 
+def is_text_item(item: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+    return not (is_section_header(item)
+                or is_page_footer(item)
+                or is_page_header(item)
+                or is_footnote(item)
+                or is_bottom_note(item.text))
+
+
+def get_next_text(texts: List[Union[SectionHeaderItem, ListItem, TextItem]], i: int) \
+        -> Optional[Union[ListItem, TextItem]]:
+    # Seek through the list of texts to find the next text item using is_text_item
+    # Should return None if no more text items are found
+    for j in range(i + 1, len(texts)):
+        if j < len(texts) and is_text_item(texts[j]):
+            return texts[j]
+    return None
+
+
 def remove_extra_whitespace(text: str) -> str:
     # Remove extra whitespace in the middle of the text
     return ' '.join(text.split())
@@ -203,7 +221,7 @@ class DoclingParser:
         for i, text in enumerate(texts):
             text.text = text.text.encode('utf-8').decode('utf-8')
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
-            next_text = texts[i + 1] if i < len(texts) - 1 else None
+            next_text = get_next_text(texts, i)
 
             # Check if text starts with...
             if remove_extra_whitespace(text.text).startswith("(8) Atomic theory: the atomicity"):
@@ -213,6 +231,19 @@ class DoclingParser:
                 pass
 
             if remove_extra_whitespace(text.text).startswith("On the contrary, I believe"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("I do not believe in the current theory"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("Metaphysical realism is nowhere"):
+                pass
+
+            if remove_extra_whitespace(text.text).startswith("1 At least not metaphysics of the"):
+                pass
+
+            # Extra return in the middle of sentence
+            if remove_extra_whitespace(text.text).startswith("But this means that all the more important"):
                 pass
 
             # ·Cp. my Conjectures and Refutations, Chapter 2, sections VI and vu. [See also Volume III of the Postscript, 'Metaphysical Epilogue'. Ed.]
@@ -248,6 +279,14 @@ class DoclingParser:
             # Get rid of weird spaces in front of quotes
             p_str = re.sub(r"([.!?]) '", r"\1'", p_str)
             p_str = re.sub(r'([.!?]) "', r'\1"', p_str)
+            # Get rid of spaces in front of end parenthesis
+            p_str = re.sub(r'\s+\)', ')', p_str)
+            # Get rid of spaces in front of end brackets
+            p_str = re.sub(r'\s+\]', ']', p_str)
+            # Get rid of spaces in front of end curly brackets
+            p_str = re.sub(r'\s+\}', '}', p_str)
+            # Get rid of spaces in front of commas
+            p_str = re.sub(r'\s+,', ',', p_str)
 
             # Remove footnote numbers at end of a sentence. Check for a digit at the end and drop it
             # until there are no more digits or the sentence is now a valid end of a sentence.
@@ -268,7 +307,8 @@ class DoclingParser:
                 combined_chars = 0
             # If the combined paragraph is less than the minimum size combine it with the next paragraph
             elif combined_chars + p_str_chars < self._min_paragraph_size:
-                # If the paragraph is too short, combine it with the next one
+                # If the paragraph is too short, combine it with the next one.
+
                 # Unless this is the final paragraph on the page. That is unless that final paragraph is split up
                 # across pages.
                 if next_text is None:
