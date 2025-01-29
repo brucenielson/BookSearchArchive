@@ -287,6 +287,14 @@ class DoclingParser:
             p_str = re.sub(r'\s+\}', '}', p_str)
             # Get rid of spaces in front of commas
             p_str = re.sub(r'\s+,', ',', p_str)
+            # Get rid of spaces after opening parenthesis
+            p_str = re.sub(r'\(\s+', '(', p_str)
+            # Get rid of spaces after opening brackets
+            p_str = re.sub(r'\[\s+', '[', p_str)
+            # Get rid of spaces after opening curly brackets
+            p_str = re.sub(r'\{\s+', '{', p_str)
+            # Get rid of spaces before periods
+            p_str = re.sub(r'\s+\.', '.', p_str)
 
             # Remove footnote numbers at end of a sentence. Check for a digit at the end and drop it
             # until there are no more digits or the sentence is now a valid end of a sentence.
