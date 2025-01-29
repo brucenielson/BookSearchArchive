@@ -209,7 +209,6 @@ class DoclingParser:
         section_name: str = ""
 
         # Before we begin, we need to find all footnotes and move them to the end of the texts list
-        # This is because footnotes are often interspersed with the text and we want to process them all at once
         # This is because footnotes are often interspersed with the text, and we want to process them all at once
         # Do this as a single list comprehension
         texts = list(self._doc.texts)
