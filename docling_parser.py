@@ -210,92 +210,45 @@ class DoclingParser:
 
         # Before we begin, we need to find all footnotes and move them to the end of the texts list
         # This is because footnotes are often interspersed with the text and we want to process them all at once
+        # This is because footnotes are often interspersed with the text, and we want to process them all at once
         # Do this as a single list comprehension
-        texts: List[Union[SectionHeaderItem, ListItem, TextItem]] = list(self._doc.texts)
-        footnotes: List[Union[SectionHeaderItem, ListItem, TextItem]] = [text for text in texts if is_footnote(text)]
-        bottom_notes: List[Union[SectionHeaderItem, ListItem, TextItem]] = [text for text in texts if is_bottom_note(text.text)]
-        temp_texts = [text for text in texts if not is_footnote(text) and not is_bottom_note(text.text)]
-        # texts.extend(footnotes)
-        # texts.extend(bottom_notes)
+        texts = list(self._doc.texts)
+        footnotes = [text for text in texts if is_footnote(text)]
+        bottom_notes = [text for text in texts if is_bottom_note(text.text)]
+        filtered_texts = [text for text in texts if not is_footnote(text) and not is_bottom_note(text.text)]
 
         for i, text in enumerate(texts):
             text.text = text.text.encode('utf-8').decode('utf-8')
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
             next_text = get_next_text(texts, i)
 
-            # Check if text starts with...
-            if remove_extra_whitespace(text.text).startswith("(8) Atomic theory: the atomicity"):
-                pass
-
-            if remove_extra_whitespace(text.text).startswith("This does not mean that there are not great differences"):
-                pass
-
-            if remove_extra_whitespace(text.text).startswith("On the contrary, I believe"):
-                pass
-
-            if remove_extra_whitespace(text.text).startswith("I do not believe in the current theory"):
-                pass
-
-            if remove_extra_whitespace(text.text).startswith("Metaphysical realism is nowhere"):
-                pass
-
-            if remove_extra_whitespace(text.text).startswith("1 At least not metaphysics of the"):
-                pass
-
-            # Extra return in the middle of sentence
-            if remove_extra_whitespace(text.text).startswith("But this means that all the more important"):
-                pass
-
-            # ·Cp. my Conjectures and Refutations, Chapter 2, sections VI and vu. [See also Volume III of the Postscript, 'Metaphysical Epilogue'. Ed.]
-            # (7) Oersted's experiment is interpreted by Faraday as a refutation of the universal theory of Newtonian central forces and thus leads to the Faraday-Maxwell .field theory.
-
-            if is_page_footer(text):
-                continue
-
-            if is_page_header(text):
-                # page_header = text.text
-                continue
-
+            # Update the section header
             if is_section_header(text):
                 section_name = text.text
                 continue
 
-            if is_footnote(text):
-                continue
+            # Skip conditions
+            if is_page_footer(text): continue
+            if is_page_header(text): continue
+            if is_footnote(text): continue
+            if is_page_not_text(text): pass
+            if is_bottom_note(text.text): continue
+            if is_roman_numeral(text.text): continue
 
-            if is_page_not_text(text):
-                pass
-
-            if is_bottom_note(text.text):
-                continue
-
-            if is_roman_numeral(text.text):
-                continue
-
-            p_str: str = str(text.text).strip()
+            p_str = str(text.text).strip()
             p_str = re.sub(r'\s+', ' ', p_str).strip()
-            p_str_chars: int = len(p_str)
+            p_str_chars = len(p_str)
 
-            # Get rid of weird spaces in front of quotes
             p_str = re.sub(r"([.!?]) '", r"\1'", p_str)
             p_str = re.sub(r'([.!?]) "', r'\1"', p_str)
-            # Get rid of spaces in front of end parenthesis
             p_str = re.sub(r'\s+\)', ')', p_str)
-            # Get rid of spaces in front of end brackets
             p_str = re.sub(r'\s+\]', ']', p_str)
-            # Get rid of spaces in front of end curly brackets
             p_str = re.sub(r'\s+\}', '}', p_str)
-            # Get rid of spaces in front of commas
             p_str = re.sub(r'\s+,', ',', p_str)
-            # Get rid of spaces after opening parenthesis
             p_str = re.sub(r'\(\s+', '(', p_str)
-            # Get rid of spaces after opening brackets
             p_str = re.sub(r'\[\s+', '[', p_str)
-            # Get rid of spaces after opening curly brackets
             p_str = re.sub(r'\{\s+', '{', p_str)
-            # Get rid of periods that are followed by a letter. Remove the period.
             p_str = re.sub(r'(?<=\s)\.([a-zA-Z])', r'\1', p_str)
-            # Get rid of spaces before periods
             p_str = re.sub(r'\s+\.', '.', p_str)
 
             # Remove footnote numbers at end of a sentence. Check for a digit at the end and drop it
@@ -310,17 +263,15 @@ class DoclingParser:
                 combined_chars += p_str_chars
                 continue
             # If next paragraph is a new section, and we're at the end of a sentence, process this paragraph
+
             elif is_section_header(next_text) and is_sentence_end(p_str):
                 p_str = combine_paragraphs(combined_paragraph, p_str)
                 p_str_chars += combined_chars
                 combined_paragraph = ""
                 combined_chars = 0
             # If the combined paragraph is less than the minimum size combine it with the next paragraph
-            elif combined_chars + p_str_chars < self._min_paragraph_size:
-                # If the paragraph is too short, combine it with the next one.
 
-                # Unless this is the final paragraph on the page. That is unless that final paragraph is split up
-                # across pages.
+            elif combined_chars + p_str_chars < self._min_paragraph_size:
                 if next_text is None:
                     # If it's the last paragraph, then process this paragraph
                     combined_paragraph = combine_paragraphs(combined_paragraph, p_str)
@@ -333,7 +284,6 @@ class DoclingParser:
                     combined_paragraph = ""
                     combined_chars = 0
                 else:
-                    # Combine this paragraph with the previous ones
                     combined_paragraph = combine_paragraphs(combined_paragraph, p_str)
                     combined_chars += p_str_chars
                     continue
@@ -344,15 +294,14 @@ class DoclingParser:
                 combined_chars = 0
 
             p_str = clean_text(p_str)
-            para_num += 1
-            byte_stream: ByteStream = ByteStream(p_str.encode('utf-8'))
-            paragraph_meta_data: Dict[str, str] = {}
-            paragraph_meta_data.update(self._meta_data)
-            paragraph_meta_data["paragraph_#"] = str(para_num)
-            # paragraph_meta_data["page_header"] = page_header
-            paragraph_meta_data["section_name"] = section_name
-
-            temp_docs.append(byte_stream)
-            temp_meta.append(paragraph_meta_data)
+            if p_str:  # Only create entry if we have content
+                para_num += 1
+                byte_stream = ByteStream(p_str.encode('utf-8'))
+                meta_data = {}
+                meta_data.update(self._meta_data)
+                meta_data["paragraph_#"] = str(para_num)
+                meta_data["section_name"] = section_name
+                temp_docs.append(byte_stream)
+                temp_meta.append(meta_data)
 
         return temp_docs, temp_meta
