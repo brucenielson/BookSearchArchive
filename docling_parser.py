@@ -261,15 +261,15 @@ class DoclingParser:
                 combined_paragraph = combine_paragraphs(combined_paragraph, p_str)
                 combined_chars += p_str_chars
                 continue
-            # If next paragraph is a new section, and we're at the end of a sentence, process this paragraph
 
+            # If next paragraph is a new section, and we're at the end of a sentence, process this paragraph
             elif is_section_header(next_text) and is_sentence_end(p_str):
                 p_str = combine_paragraphs(combined_paragraph, p_str)
                 p_str_chars += combined_chars
                 combined_paragraph = ""
                 combined_chars = 0
-            # If the combined paragraph is less than the minimum size combine it with the next paragraph
 
+            # If the combined paragraph is less than the minimum size combine it with the next paragraph
             elif combined_chars + p_str_chars < self._min_paragraph_size:
                 if next_text is None:
                     # If it's the last paragraph, then process this paragraph
