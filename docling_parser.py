@@ -257,9 +257,8 @@ class DoclingParser:
                 continue
 
             # Skip conditions
-            if is_page_footer(text): continue
-            if is_page_header(text): continue
-            if is_roman_numeral(text.text): continue
+            if is_page_footer(text) or is_page_header(text) or is_roman_numeral(text.text):
+                continue
 
             p_str = str(text.text).strip()
             p_str = re.sub(r'\s+', ' ', p_str).strip()
