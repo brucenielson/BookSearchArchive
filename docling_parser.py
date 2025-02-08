@@ -233,9 +233,6 @@ class DoclingParser:
         texts = regular_texts + notes
 
         for i, text in enumerate(texts):
-            if para_num >= 1298:
-                pass
-
             # Deal with page number
             if page_no is None or combined_paragraph == "":
                 page_no = text.prov[0].page_no
