@@ -1,13 +1,9 @@
-from copy import deepcopy
-from bs4 import BeautifulSoup, Tag
-from typing import List, Dict, Tuple, Iterator, Optional, Union
+from typing import List, Dict, Tuple, Optional, Union
 import re
 # noinspection PyPackageRequirements
 from haystack.dataclasses import ByteStream
-from parse_utils import enhance_title
-from docling.document_converter import DocumentConverter, ConversionResult
 from docling_core.types import DoclingDocument
-from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, PageItem
+from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem
 import nltk
 from nltk.stem import WordNetLemmatizer, PorterStemmer
 # Download the words corpus if needed
@@ -142,7 +138,7 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
     # Check for · at the beginning of the line. This is often how OCR represents footnote number.
     if text.text.startswith("·") and not text.text.startswith("· "):
         return True
-    return bool(re.match(r"^\d+[^\s].*", text.text))
+    return bool(re.match(r"^\d+\S.*", text.text))
 
 
 def is_sentence_end(text: str) -> bool:
@@ -336,15 +332,8 @@ class DoclingParser:
             p_str = clean_text(p_str)
             if p_str:  # Only create entry if we have content
                 para_num += 1
-                byte_stream = ByteStream(p_str.encode('utf-8'))
-                meta_data = {}
-                meta_data.update(self._meta_data)
-                meta_data["paragraph_#"] = str(para_num)
-                meta_data["section_name"] = section_name
-                meta_data["page_#"] = str(page_no)
+                self._add_paragraph(p_str, para_num, section_name, page_no, temp_docs, temp_meta)
                 page_no = None
-                temp_docs.append(byte_stream)
-                temp_meta.append(meta_data)
 
         return temp_docs, temp_meta
 
@@ -354,11 +343,11 @@ class DoclingParser:
         return regular + notes
 
     def _add_paragraph(self, text: str, para_num: int, section: str,
-                       page: int, docs: List[ByteStream], meta: List[Dict]):
+                       page: Optional[int], docs: List[ByteStream], meta: List[Dict]):
         docs.append(ByteStream(text.encode('utf-8')))
         meta.append({
             **self._meta_data,
-            "paragraph_#": str(para_num + 1),
+            "paragraph_#": str(para_num),
             "section_name": section,
             "page_#": str(page)
         })
