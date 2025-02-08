@@ -228,24 +228,10 @@ class DoclingParser:
         page_no: Optional[int] = None
         first_note: bool = False
 
-        # Before we begin, we need to find all footnotes and move them to the end of the texts list
-        # This is because footnotes are often interspersed with the text, and we want to process them all at once
-        # Split texts into regular content and notes (footnotes + bottom notes)
-        regular_texts = []
-        notes = []
-        for text in self._doc.texts:
-            if is_footnote(text) or is_bottom_note(text):
-                notes.append(text)
-            else:
-                regular_texts.append(text)
-
-        # Combine regular content first, then notes at the end
-        texts = regular_texts + notes
+        texts = self._get_processed_texts()
 
         for i, text in enumerate(texts):
-            # Deal with page number
-            if page_no is None or combined_paragraph == "":
-                page_no = text.prov[0].page_no
+            page_no = get_current_page(text, combined_paragraph, page_no)
 
             # Check if paragraph is in valid range
             if self._start_page is not None and page_no is not None and page_no < self._start_page:
@@ -267,7 +253,7 @@ class DoclingParser:
                 continue
 
             # Skip conditions
-            if is_page_footer(text) or is_page_header(text) or is_roman_numeral(text.text):
+            if should_skip_element(text):
                 continue
 
             p_str = str(text.text).strip()  # Convert text to a string and remove leading/trailing whitespace
@@ -338,6 +324,9 @@ class DoclingParser:
         return temp_docs, temp_meta
 
     def _get_processed_texts(self) -> List:
+        # Before we begin, we need to find all footnotes and move them to the end of the texts list
+        # This is because footnotes are often interspersed with the text, and we want to process them all at once
+        # Split texts into regular content and notes (footnotes + bottom notes)
         regular = [t for t in self._doc.texts if not (is_footnote(t) or is_bottom_note(t))]
         notes = [t for t in self._doc.texts if is_footnote(t) or is_bottom_note(t)]
         return regular + notes
