@@ -244,9 +244,9 @@ class DoclingParser:
         temp_docs: List[ByteStream] = []
         temp_meta: List[Dict[str, str]] = []
         combined_paragraph: str = ""
-        para_num: int = 0
         i: int
         combined_chars: int = 0
+        para_num: int = 0
         section_name: str = ""
         page_no: Optional[int] = None
         first_note: bool = False
@@ -254,12 +254,10 @@ class DoclingParser:
         texts = self._get_processed_texts()
 
         for i, text in enumerate(texts):
-            # prev_tag: Tag = tags[j - 1] if j > 0 else None
             next_text = get_next_text(texts, i)
-
             page_no = get_current_page(text, combined_paragraph, page_no)
 
-            # Check if paragraph is in valid range
+            # Check if the current page is within the valid range
             if self._start_page is not None and page_no is not None and page_no < self._start_page:
                 page_no = None
                 continue
@@ -269,57 +267,48 @@ class DoclingParser:
                     first_note = True
                 continue
 
-            # Update the section header
+            # Update section header if the element is a section header
             if is_section_header(text):
                 section_name = text.text
                 continue
 
-            # Skip conditions
             if should_skip_element(text):
                 continue
 
             p_str = clean_text(text.text)
-            p_str_chars = len(p_str)  # Get the number of characters in the processed string
+            p_str_chars = len(p_str)
 
-            # If the paragraph ends without final punctuation, combine it with the next paragraph
+            # If the paragraph does not end with final punctuation, accumulate it
             if not is_sentence_end(p_str):
-                # Combine this paragraph with the previous ones
                 combined_paragraph = combine_paragraphs(combined_paragraph, p_str)
                 combined_chars += p_str_chars
                 continue
 
-            # If next paragraph is a new section, and we're at the end of a sentence, process this paragraph
-            elif is_section_header(next_text) and is_sentence_end(p_str):
+            # p_str ends with a sentence end; decide whether to process or accumulate it
+            total_chars = combined_chars + p_str_chars
+            if is_section_header(next_text):
+                # Immediately process if the next text is a section header
                 p_str = combine_paragraphs(combined_paragraph, p_str)
-                p_str_chars += combined_chars
-                combined_paragraph = ""
-                combined_chars = 0
-
-            # If the combined paragraph is less than the minimum size combine it with the next paragraph
-            elif combined_chars + p_str_chars < self._min_paragraph_size:
-                if next_text is None:
-                    # If it's the last paragraph, then process this paragraph
-                    combined_paragraph = combine_paragraphs(combined_paragraph, p_str)
-                    combined_chars += p_str_chars
-                    p_str = combined_paragraph
-                elif not is_page_text(next_text) and is_sentence_end(p_str):
-                    # If it's the last paragraph on the page, then break the paragraph here
+                combined_paragraph, combined_chars = "", 0
+            elif total_chars < self._min_paragraph_size:
+                # Not enough characters accumulated yet; decide based on next_text
+                if next_text is None or (not is_page_text(next_text) and is_sentence_end(p_str)):
+                    # End of document or next text item is not a text item and current paragraph ends with punctuation
+                    # Process the paragraph and reset the accumulator even though this is a short paragraph
                     p_str = combine_paragraphs(combined_paragraph, p_str)
-                    p_str_chars += combined_chars
-                    combined_paragraph = ""
-                    combined_chars = 0
+                    combined_paragraph, combined_chars = "", 0
                 else:
+                    # Combine with next paragraph
                     combined_paragraph = combine_paragraphs(combined_paragraph, p_str)
-                    combined_chars += p_str_chars
+                    combined_chars = total_chars
                     continue
             else:
+                # Sufficient characters: process the paragraph and reset the accumulator
                 p_str = combine_paragraphs(combined_paragraph, p_str)
-                p_str_chars += combined_chars
-                combined_paragraph = ""
-                combined_chars = 0
+                combined_paragraph, combined_chars = "", 0
 
             p_str = combine_hyphenated_words(p_str)
-            if p_str:  # Only create entry if we have content
+            if p_str:  # Only add non-empty content
                 para_num += 1
                 self._add_paragraph(p_str, para_num, section_name, page_no, temp_docs, temp_meta)
                 page_no = None
