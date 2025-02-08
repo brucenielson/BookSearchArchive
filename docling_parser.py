@@ -221,7 +221,7 @@ class DoclingParser:
         texts = list(self._doc.texts)
         footnotes = [text for text in texts if is_footnote(text)]
         bottom_notes = [text for text in texts if is_bottom_note(text.text)]
-        filtered_texts = [text for text in texts if not is_footnote(text) and not is_bottom_note(text.text)]
+        # filtered_texts = [text for text in texts if not is_footnote(text) and not is_bottom_note(text.text)]
 
         for i, text in enumerate(texts):
             # Deal with page number
@@ -247,10 +247,10 @@ class DoclingParser:
             # Skip conditions
             if is_page_footer(text): continue
             if is_page_header(text): continue
-            if is_footnote(text): continue
             if is_page_not_text(text): pass
-            if is_bottom_note(text.text): continue
             if is_roman_numeral(text.text): continue
+            if is_bottom_note(text.text): continue
+            if is_footnote(text): continue
 
             p_str = str(text.text).strip()
             p_str = re.sub(r'\s+', ' ', p_str).strip()
