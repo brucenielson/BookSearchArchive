@@ -202,6 +202,7 @@ def should_skip_element(text: Union[SectionHeaderItem, ListItem, TextItem]) -> b
 
 
 def clean_text(p_str: str) -> str:
+    p_str = str(p_str).strip()  # Convert text to a string and remove leading/trailing whitespace
     p_str = p_str.encode('utf-8').decode('utf-8')
     p_str = re.sub(r'\s+', ' ', p_str).strip()  # Replace multiple whitespace with single space
     p_str = re.sub(r"([.!?]) '", r"\1'", p_str)  # Remove the space between punctuation (.!?) and '
@@ -277,9 +278,7 @@ class DoclingParser:
             if should_skip_element(text):
                 continue
 
-            p_str = str(text.text).strip()  # Convert text to a string and remove leading/trailing whitespace
-            p_str = clean_text(p_str)
-
+            p_str = clean_text(text.text)
             p_str_chars = len(p_str)  # Get the number of characters in the processed string
 
             # If the paragraph ends without final punctuation, combine it with the next paragraph
