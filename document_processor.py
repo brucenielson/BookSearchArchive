@@ -10,7 +10,7 @@ from haystack.components.preprocessors import DocumentCleaner
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 # noinspection PyPackageRequirements
-from haystack.components.converters import HTMLToDocument, MarkdownToDocument, PyPDFToDocument
+from haystack.components.converters import HTMLToDocument, MarkdownToDocument, PyPDFToDocument, TextFileToDocument
 # noinspection PyPackageRequirements
 from haystack.components.writers import DocumentWriter
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
@@ -30,7 +30,7 @@ from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
                                         EPubPdfMerger, PyMuPdf4LLM, PDFReader, PyMuPDFReader,
-                                        DoclingToMarkdown)
+                                        DoclingToMarkdown, PdfLoader, DoclingParserComponent)
 
 
 # Create an enum for PDF reading strategy: PyPDFToDocument, PDFReader, PyMuPdf4LLM, PyMuPDFReader
@@ -224,8 +224,12 @@ class DocumentProcessor:
             doc_convert_pipe.add_component("pdf_loader", PyMuPdf4LLM())
             doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
         elif pdf_reading_strategy == PDFReadingStrategy.Docling:
-            doc_convert_pipe.add_component("pdf_loader", DoclingToMarkdown())
-            doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
+            doc_convert_pipe.add_component("pdf_loader", PdfLoader(verbose=self._verbose))
+            doc_convert_pipe.add_component("docling_parser",
+                                           DoclingParserComponent(min_paragraph_size=self._min_paragraph_size,
+                                                                  min_section_size=self._min_section_size,
+                                                                  verbose=self._verbose))
+            doc_convert_pipe.add_component("text_converter", TextFileToDocument())
         elif pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
             doc_convert_pipe.add_component("pdf_loader", PyMuPDFReader())
 
@@ -264,10 +268,14 @@ class DocumentProcessor:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
         elif pdf_reading_strategy == PDFReadingStrategy.PyMuPdf4LLM:
             doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
+            doc_convert_pipe.connect("pdf_loader.meta", "markdown_converter.meta")
             doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
         elif pdf_reading_strategy == PDFReadingStrategy.Docling:
-            doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
-            doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
+            doc_convert_pipe.connect("pdf_loader.docling_docs", "docling_parser.sources")
+            doc_convert_pipe.connect("pdf_loader.meta", "docling_parser.meta")
+            doc_convert_pipe.connect("docling_parser.sources", "text_converter.sources")
+            doc_convert_pipe.connect("docling_parser.meta", "text_converter.meta")
+            doc_convert_pipe.connect("text_converter.documents", "epub_pdf_merger.pdf_docs")
         elif pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
 
@@ -373,7 +381,7 @@ def main() -> None:
         min_paragraph_size=300,
         include_outputs_from=include_outputs_from,
         verbose=True,
-        pdf_reading_strategy=PDFReadingStrategy.PyMuPdf4LLM,
+        pdf_reading_strategy=PDFReadingStrategy.Docling,
         write_to_file=True,
         document_store_type=doc_store_type,
     )

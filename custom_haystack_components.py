@@ -29,7 +29,9 @@ import numpy as np
 import torch
 import requests
 import generator_model as gen
-from docling.document_converter import DocumentConverter
+from docling.document_converter import DocumentConverter, ConversionResult
+from docling_core.types import DoclingDocument
+from docling_parser import DoclingParser
 # import markdown
 
 
@@ -68,6 +70,24 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
         else:
             # If the value is neither a dict nor a list, print it directly
             print(value)
+
+
+def load_valid_pages(skip_file: str) -> Dict[str, Tuple[int, int]]:
+    book_paragraphs: Dict[str, Tuple[int, int]] = {}
+    skip_file_path = Path(skip_file)
+
+    if skip_file_path.exists():
+        with open(skip_file_path, 'r', newline='', encoding='utf-8') as csvfile:
+            reader: csv.DictReader[str] = csv.DictReader(csvfile)
+            row: dict[str, str]
+            for row in reader:
+                book_title: str = row['Book Title'].strip()
+                start: str = row['Start'].strip()
+                end: str = row['End'].strip()
+                if book_title and start and end:
+                    book_paragraphs[book_title] = (int(start), int(end))
+
+    return book_paragraphs
 
 
 # pip install git+https://github.com/huggingface/parler-tts.git
@@ -192,15 +212,39 @@ class PyMuPdf4LLM:
     def __init__(self, min_page_size: int = 1000):
         self._min_page_size = min_page_size
 
-    @component.output_types(sources=List[ByteStream])
+    @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
     def run(self, sources: List[str]) -> Dict[str, List[ByteStream]]:
-        markdown_docs: List[ByteStream] = []
+        byte_stream_sources: List[ByteStream] = []
+        metas: List[Dict[str, str]] = []
         # https://github.com/pymupdf/RAG/issues/187/
         for source in sources:
-            markdown_doc: str = pymupdf4llm.to_markdown(source)
-            byte_stream: ByteStream = ByteStream(markdown_doc.encode('utf-8'))
-            markdown_docs.append(byte_stream)
-        return {"sources": markdown_docs}
+            markdown_doc = pymupdf4llm.to_markdown(source, page_chunks=True)
+            for page_num, page in enumerate(markdown_doc):
+                page_text = page['text']
+                if len(page_text) < self._min_page_size:
+                    continue
+                meta_properties: List[str] = ["author", "title", "subject"]
+                meta: Dict[str, Any] = PyMuPdf4LLM._create_meta_data(page['metadata'], meta_properties)
+                meta["page_#"] = page_num + 1
+                if not meta.get("title"):
+                    # Use file name for title if none found in metadata
+                    source_title: str = Path(source).stem
+                    meta["title"] = source_title
+
+                byte_stream: ByteStream = ByteStream(page_text.encode('utf-8'))
+                byte_stream_sources.append(byte_stream)
+                metas.append(meta)
+
+        return {"sources": byte_stream_sources, "meta": metas}
+
+    @staticmethod
+    def _create_meta_data(pdf_meta_data: dict, meta_data_titles: List[str]) -> Dict[str, str]:
+        meta_data: Dict[str, str] = {}
+        for title in meta_data_titles:
+            value: str = pdf_meta_data.get(title, "")
+            if title in pdf_meta_data and value is not None and value != "":
+                meta_data[title] = pdf_meta_data[title]
+        return meta_data
 
 
 @component
@@ -311,10 +355,10 @@ class EPubLoader:
         # Load the EPUB file
         html_pages: List[str]
         meta: List[Dict[str, str]]
-        html_pages, meta = self._load_file()
+        html_pages, meta = self._load_files()
         return {"html_pages": html_pages, "meta": meta}
 
-    def _load_file(self) -> Tuple[List[str], List[Dict[str, str]]]:
+    def _load_files(self) -> Tuple[List[str], List[Dict[str, str]]]:
         sources: List[str] = []
         meta: List[Dict[str, str]] = []
         for file_path in self._file_paths:
@@ -385,6 +429,91 @@ class EPubLoader:
 
 
 @component
+class PdfLoader:
+    def __init__(self, verbose: bool = False, skip_file: str = "sections_to_skip.csv") -> None:
+        self._verbose: bool = verbose
+        self._is_directory: bool = False
+        self._file_paths: List[str] = []
+        self._skip_file: str = skip_file
+        self._sections_to_skip: Dict[str, Set[str]] = {}
+        self._converter: DocumentConverter = DocumentConverter()
+
+    @component.output_types(docling_docs=List[DoclingDocument], meta=List[Dict[str, str]])
+    def run(self, sources: Union[List[str], List[Path], str]) -> Dict[str, Any]:
+        file_paths: List[str] = sources
+        # Handle no documents passed in
+        if len(file_paths) == 0:
+            return {"docling_docs": [], "meta": []}
+        # Handle passing in a string with a path instead of a list of paths
+        if isinstance(file_paths, str):
+            file_paths = [file_paths]
+        # Handle passing in a list of Path objects instead of a list of strings
+        if isinstance(file_paths, list) and isinstance(file_paths[0], Path):
+            file_paths = [str(file_path) for file_path in file_paths]
+        # Verify that every single file path ends with .pdf
+        if not all(file_path.lower().endswith('.pdf') for file_path in file_paths):
+            raise ValueError("PdfLoader only accepts .pdf files.")
+        self._file_paths = file_paths
+        # self._sections_to_skip = self._load_sections_to_skip()
+        # Load the PDF file
+        docs: List[DoclingDocument]
+        meta: List[Dict[str, str]]
+        docs, meta = self._load_files()
+        return {"docling_docs": docs, "meta": meta}
+
+    def _load_files(self) -> Tuple[List[DoclingDocument], List[Dict[str, str]]]:
+        sources: List[DoclingDocument] = []
+        meta: List[Dict[str, str]] = []
+        for file_path in self._file_paths:
+            sources_temp: DoclingDocument
+            meta_temp: Dict[str, str]
+            sources_temp, meta_temp = self._load_pdf(file_path)
+            sources.append(sources_temp)
+            meta.append(meta_temp)
+        return sources, meta
+
+    def _load_pdf(self, file_path: str) -> Tuple[DoclingDocument, Dict[str, str]]:
+        # Check if already cached as a json
+        path = Path(file_path).with_suffix('.json')
+        book: DoclingDocument
+        if path.exists():
+            book = DoclingDocument.load_from_json(path)
+        else:
+            result: ConversionResult = self._converter.convert(file_path)
+            book = result.document
+            # Cache the book as a json
+            book.save_as_json(path)
+        self._print_verbose()
+        self._print_verbose(f"Loaded Book: {book.name}")
+        book_meta_data: Dict[str, str] = {
+            "book_title": book.name,
+            "file_path": file_path
+        }
+        # i: int
+        # item: epub.EpubHtml
+        # html_pages: List[str] = []
+        # meta_data: List[Dict[str, str]] = []
+        # for i, item in enumerate(book.get_items_of_type(ITEM_DOCUMENT)):
+        #     if item.id not in self._sections_to_skip.get(book.title, set()):
+        #         item_meta_data: Dict[str, str] = {
+        #             "item_id": item.id
+        #         }
+        #         book_meta_data.update(item_meta_data)
+        #         item_html: str = item.get_body_content().decode('utf-8')
+        #         html_pages.append(item_html)
+        #         meta_data.append(book_meta_data.copy())
+        #     else:
+        #         self._print_verbose(f"Book: {book.title}; Section Id: {item.id}. User Skipped.")
+
+        # return html_pages, meta_data
+        return book, book_meta_data
+
+    def _print_verbose(self, *args, **kwargs) -> None:
+        if self._verbose:
+            print(*args, **kwargs)
+
+
+@component
 class HTMLParserComponent:
     def __init__(self, min_paragraph_size: int = 300, min_section_size: int = 1000, verbose: bool = False) -> None:
         self._min_section_size: int = min_section_size
@@ -443,6 +572,56 @@ class HTMLParserComponent:
                 for item in missing_chapter_titles:
                     self._print_verbose(item)
             self._print_verbose()
+        return {"sources": docs_list, "meta": meta_list}
+
+    def _print_verbose(self, *args, **kwargs) -> None:
+        if self._verbose:
+            print(*args, **kwargs)
+
+
+@component
+class DoclingParserComponent:
+    def __init__(self, min_paragraph_size: int = 300,
+                 min_section_size: int = 1000,
+                 skip_file: str = "documents/pdf_valid_pages.csv",
+                 verbose: bool = False) -> None:
+        self._min_section_size: int = min_section_size
+        self._min_paragraph_size: int = min_paragraph_size
+        self._verbose: bool = verbose
+        self._valid_pages: Dict[str, Tuple[int, int]] = {}
+        # Load pages to skip
+        self._valid_pages = load_valid_pages(skip_file)
+
+    @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
+    def run(self, sources: List[DoclingDocument], meta: List[Dict[str, str]]) -> Dict[str, Any]:
+        docs_list: List[ByteStream] = []
+        meta_list: List[Dict[str, str]] = []
+
+        for i, doc in enumerate(sources):
+            meta_data: Dict[str, str] = meta[i]
+            parser: DoclingParser
+            start_page: Optional[int] = None
+            end_page: Optional[int] = None
+            if doc.name in self._valid_pages:
+                start_page, end_page = self._valid_pages[doc.name]
+            parser = DoclingParser(doc, meta_data,
+                                   min_paragraph_size=self._min_paragraph_size,
+                                   start_page=start_page,
+                                   end_page=end_page,
+                                   double_notes=True)
+            # Start here
+            temp_docs: List[ByteStream]
+            temp_meta: List[Dict[str, str]]
+            temp_docs, temp_meta = parser.run()
+            # item_id: str = meta_data.get("item_id", "")
+            book_title: str = meta_data.get("book_title", "")
+            # Unlike EPUB we don't have sections or chapters. So we don't need a total length.
+            # TODO: Add a way to skip pages instead.
+
+            self._print_verbose(f"Book: {book_title};")
+            docs_list.extend(temp_docs)
+            meta_list.extend(temp_meta)
+
         return {"sources": docs_list, "meta": meta_list}
 
     def _print_verbose(self, *args, **kwargs) -> None:
@@ -799,6 +978,8 @@ class CustomDocumentSplitter:
 
     def process_document(self, document: Document) -> List[Document]:
         token_count = self.count_tokens(document.content)
+        # TODO: Check if PDF splitter is intelligently splitting the document or if token_count sometimes starts
+        # off too high. Say more than _max_seq_length * 1.2
         if token_count <= self._max_seq_length:
             # Document fits within max sequence length, no need to split
             return [document]
