@@ -178,7 +178,7 @@ def remove_extra_whitespace(text: str) -> str:
     return ' '.join(text.split())
 
 
-def combine_paragraphs(p1_str, p2_str):
+def combine_paragraphs(p1_str: str, p2_str: str):
     # If the paragraph ends without final punctuation, combine it with the next paragraph
     if is_sentence_end(p1_str):
         return p1_str + "\n" + p2_str
@@ -189,6 +189,20 @@ def combine_paragraphs(p1_str, p2_str):
 def is_roman_numeral(s: str) -> bool:
     roman_numeral_pattern = r'(?i)^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
     return bool(re.match(roman_numeral_pattern, s.strip()))
+
+
+def get_current_page(text: Union[SectionHeaderItem, ListItem, TextItem],
+                     combined_paragraph: str,
+                     current_page: Optional[int]) -> Optional[int]:
+    return text.prov[0].page_no if current_page is None or combined_paragraph == "" else current_page
+
+
+def should_skip_element(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+    return any([
+        is_page_footer(text),
+        is_page_header(text),
+        is_roman_numeral(text.text)
+    ])
 
 
 class DoclingParser:
@@ -260,21 +274,22 @@ class DoclingParser:
             if is_page_footer(text) or is_page_header(text) or is_roman_numeral(text.text):
                 continue
 
-            p_str = str(text.text).strip()
-            p_str = re.sub(r'\s+', ' ', p_str).strip()
-            p_str_chars = len(p_str)
+            p_str = str(text.text).strip()  # Convert text to a string and remove leading/trailing whitespace
+            p_str = re.sub(r'\s+', ' ', p_str).strip()  # Replace multiple whitespace with single space
+            p_str_chars = len(p_str)  # Get the number of characters in the processed string
 
-            p_str = re.sub(r"([.!?]) '", r"\1'", p_str)
-            p_str = re.sub(r'([.!?]) "', r'\1"', p_str)
-            p_str = re.sub(r'\s+\)', ')', p_str)
-            p_str = re.sub(r'\s+\]', ']', p_str)
-            p_str = re.sub(r'\s+\}', '}', p_str)
-            p_str = re.sub(r'\s+,', ',', p_str)
-            p_str = re.sub(r'\(\s+', '(', p_str)
-            p_str = re.sub(r'\[\s+', '[', p_str)
-            p_str = re.sub(r'\{\s+', '{', p_str)
-            p_str = re.sub(r'(?<=\s)\.([a-zA-Z])', r'\1', p_str)
-            p_str = re.sub(r'\s+\.', '.', p_str)
+            p_str = re.sub(r"([.!?]) '", r"\1'", p_str)  # Remove the space between punctuation (.!?) and '
+            p_str = re.sub(r'([.!?]) "', r'\1"', p_str)  # Remove the space between punctuation (.!?) and "
+            p_str = re.sub(r'\s+\)', ')', p_str)  # Remove whitespace before a closing parenthesis
+            p_str = re.sub(r'\s+]', ']', p_str)  # Remove whitespace before a closing square bracket
+            p_str = re.sub(r'\s+}', '}', p_str)  # Remove whitespace before a closing curly brace
+            p_str = re.sub(r'\s+,', ',', p_str)  # Remove whitespace before a comma
+            p_str = re.sub(r'\(\s+', '(', p_str)  # Remove whitespace after an opening parenthesis
+            p_str = re.sub(r'\[\s+', '[', p_str)  # Remove whitespace after an opening square bracket
+            p_str = re.sub(r'\{\s+', '{', p_str)  # Remove whitespace after an opening curly brace
+            p_str = re.sub(r'(?<=\s)\.([a-zA-Z])', r'\1',
+                           p_str)  # Remove a period that follows a whitespace and comes before a letter
+            p_str = re.sub(r'\s+\.', '.', p_str)  # Remove any whitespace before a period
 
             # Remove footnote numbers at end of a sentence. Check for a digit at the end and drop it
             # until there are no more digits or the sentence is now a valid end of a sentence.
@@ -332,3 +347,18 @@ class DoclingParser:
                 temp_meta.append(meta_data)
 
         return temp_docs, temp_meta
+
+    def _get_processed_texts(self) -> List:
+        regular = [t for t in self._doc.texts if not (is_footnote(t) or is_bottom_note(t))]
+        notes = [t for t in self._doc.texts if is_footnote(t) or is_bottom_note(t)]
+        return regular + notes
+
+    def _add_paragraph(self, text: str, para_num: int, section: str,
+                       page: int, docs: List[ByteStream], meta: List[Dict]):
+        docs.append(ByteStream(text.encode('utf-8')))
+        meta.append({
+            **self._meta_data,
+            "paragraph_#": str(para_num + 1),
+            "section_name": section,
+            "page_#": str(page)
+        })
