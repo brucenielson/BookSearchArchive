@@ -257,9 +257,8 @@ class DoclingParser:
                 continue
 
             p_str = str(text.text).strip()  # Convert text to a string and remove leading/trailing whitespace
-            p_str = re.sub(r'\s+', ' ', p_str).strip()  # Replace multiple whitespace with single space
-            p_str_chars = len(p_str)  # Get the number of characters in the processed string
 
+            p_str = re.sub(r'\s+', ' ', p_str).strip()  # Replace multiple whitespace with single space
             p_str = re.sub(r"([.!?]) '", r"\1'", p_str)  # Remove the space between punctuation (.!?) and '
             p_str = re.sub(r'([.!?]) "', r'\1"', p_str)  # Remove the space between punctuation (.!?) and "
             p_str = re.sub(r'\s+\)', ')', p_str)  # Remove whitespace before a closing parenthesis
@@ -277,6 +276,8 @@ class DoclingParser:
             # until there are no more digits or the sentence is now a valid end of a sentence.
             while p_str and p_str[-1].isdigit() and not is_sentence_end(p_str):
                 p_str = p_str[:-1].strip()
+
+            p_str_chars = len(p_str)  # Get the number of characters in the processed string
 
             # If the paragraph ends without final punctuation, combine it with the next paragraph
             if not is_sentence_end(p_str):
