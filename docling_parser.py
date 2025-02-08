@@ -202,6 +202,7 @@ def should_skip_element(text: Union[SectionHeaderItem, ListItem, TextItem]) -> b
 
 
 def clean_text(p_str: str) -> str:
+    p_str = p_str.encode('utf-8').decode('utf-8')
     p_str = re.sub(r'\s+', ' ', p_str).strip()  # Replace multiple whitespace with single space
     p_str = re.sub(r"([.!?]) '", r"\1'", p_str)  # Remove the space between punctuation (.!?) and '
     p_str = re.sub(r'([.!?]) "', r'\1"', p_str)  # Remove the space between punctuation (.!?) and "
@@ -215,6 +216,10 @@ def clean_text(p_str: str) -> str:
     p_str = re.sub(r'(?<=\s)\.([a-zA-Z])', r'\1',
                    p_str)  # Remove a period that follows a whitespace and comes before a letter
     p_str = re.sub(r'\s+\.', '.', p_str)  # Remove any whitespace before a period
+    # Remove footnote numbers at end of a sentence. Check for a digit at the end and drop it
+    # until there are no more digits or the sentence is now a valid end of a sentence.
+    while p_str and p_str[-1].isdigit() and not is_sentence_end(p_str):
+        p_str = p_str[:-1].strip()
     return p_str
 
 
@@ -248,6 +253,9 @@ class DoclingParser:
         texts = self._get_processed_texts()
 
         for i, text in enumerate(texts):
+            # prev_tag: Tag = tags[j - 1] if j > 0 else None
+            next_text = get_next_text(texts, i)
+
             page_no = get_current_page(text, combined_paragraph, page_no)
 
             # Check if paragraph is in valid range
@@ -260,10 +268,6 @@ class DoclingParser:
                     first_note = True
                 continue
 
-            text.text = text.text.encode('utf-8').decode('utf-8')
-            # prev_tag: Tag = tags[j - 1] if j > 0 else None
-            next_text = get_next_text(texts, i)
-
             # Update the section header
             if is_section_header(text):
                 section_name = text.text
@@ -275,11 +279,6 @@ class DoclingParser:
 
             p_str = str(text.text).strip()  # Convert text to a string and remove leading/trailing whitespace
             p_str = clean_text(p_str)
-
-            # Remove footnote numbers at end of a sentence. Check for a digit at the end and drop it
-            # until there are no more digits or the sentence is now a valid end of a sentence.
-            while p_str and p_str[-1].isdigit() and not is_sentence_end(p_str):
-                p_str = p_str[:-1].strip()
 
             p_str_chars = len(p_str)  # Get the number of characters in the processed string
 
