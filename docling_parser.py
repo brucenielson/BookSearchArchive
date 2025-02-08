@@ -192,12 +192,18 @@ def is_roman_numeral(s: str) -> bool:
 
 
 class DoclingParser:
-    def __init__(self, doc: DoclingDocument, meta_data: dict[str, str], min_paragraph_size: int = 300):
+    def __init__(self, doc: DoclingDocument,
+                 meta_data: dict[str, str],
+                 min_paragraph_size: int = 300,
+                 start_page: Optional[int] = None,
+                 end_page: Optional[int] = None):
         self._doc: DoclingDocument = doc
         self._min_paragraph_size: int = min_paragraph_size
         self._docs_list: List[ByteStream] = []
         self._meta_list: List[Dict[str, str]] = []
         self._meta_data: dict[str, str] = meta_data
+        self._start_page: Optional[int] = start_page
+        self._end_page: Optional[int] = end_page
 
     def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         temp_docs: List[ByteStream] = []
@@ -207,6 +213,7 @@ class DoclingParser:
         i: int
         combined_chars: int = 0
         section_name: str = ""
+        page_no: Optional[int] = None
 
         # Before we begin, we need to find all footnotes and move them to the end of the texts list
         # This is because footnotes are often interspersed with the text, and we want to process them all at once
@@ -217,6 +224,17 @@ class DoclingParser:
         filtered_texts = [text for text in texts if not is_footnote(text) and not is_bottom_note(text.text)]
 
         for i, text in enumerate(texts):
+            # Deal with page number
+            if page_no is None or combined_paragraph == "":
+                page_no = text.prov[0].page_no
+
+            # Check if paragraph is in valid range
+            if self._start_page is not None and page_no is not None and page_no < self._start_page:
+                page_no = None
+                continue
+            if self._end_page is not None and page_no is not None and page_no > self._end_page:
+                break
+
             text.text = text.text.encode('utf-8').decode('utf-8')
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
             next_text = get_next_text(texts, i)
@@ -300,6 +318,8 @@ class DoclingParser:
                 meta_data.update(self._meta_data)
                 meta_data["paragraph_#"] = str(para_num)
                 meta_data["section_name"] = section_name
+                meta_data["page_#"] = str(page_no)
+                page_no = None
                 temp_docs.append(byte_stream)
                 temp_meta.append(meta_data)
 

@@ -72,6 +72,24 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
             print(value)
 
 
+def load_valid_pages(skip_file: str) -> Dict[str, Tuple[int, int]]:
+    book_paragraphs: Dict[str, Tuple[int, int]] = {}
+    skip_file_path = Path(skip_file)
+
+    if skip_file_path.exists():
+        with open(skip_file_path, 'r', newline='', encoding='utf-8') as csvfile:
+            reader: csv.DictReader[str] = csv.DictReader(csvfile)
+            row: dict[str, str]
+            for row in reader:
+                book_title: str = row['Book Title'].strip()
+                start: str = row['Start'].strip()
+                end: str = row['End'].strip()
+                if book_title and start and end:
+                    book_paragraphs[book_title] = (int(start), int(end))
+
+    return book_paragraphs
+
+
 # pip install git+https://github.com/huggingface/parler-tts.git
 # pip install sounddevice
 @component
@@ -563,11 +581,16 @@ class HTMLParserComponent:
 
 @component
 class DoclingParserComponent:
-    def __init__(self, min_paragraph_size: int = 300, min_section_size: int = 1000, verbose: bool = False) -> None:
+    def __init__(self, min_paragraph_size: int = 300,
+                 min_section_size: int = 1000,
+                 skip_file: str = "documents/pdf_valid_pages.csv",
+                 verbose: bool = False) -> None:
         self._min_section_size: int = min_section_size
         self._min_paragraph_size: int = min_paragraph_size
         self._verbose: bool = verbose
-        self._sections_to_skip: Dict[str, Set[str]] = {}
+        self._valid_pages: Dict[str, Tuple[int, int]] = {}
+        # Load pages to skip
+        self._valid_pages = load_valid_pages(skip_file)
 
     @component.output_types(sources=List[ByteStream], meta=List[Dict[str, str]])
     def run(self, sources: List[DoclingDocument], meta: List[Dict[str, str]]) -> Dict[str, Any]:
@@ -577,7 +600,14 @@ class DoclingParserComponent:
         for i, doc in enumerate(sources):
             meta_data: Dict[str, str] = meta[i]
             parser: DoclingParser
-            parser = DoclingParser(doc, meta_data, min_paragraph_size=self._min_paragraph_size)
+            start_page: Optional[int] = None
+            end_page: Optional[int] = None
+            if doc.name in self._valid_pages:
+                start_page, end_page = self._valid_pages[doc.name]
+            parser = DoclingParser(doc, meta_data,
+                                   min_paragraph_size=self._min_paragraph_size,
+                                   start_page=start_page,
+                                   end_page=end_page)
             # Start here
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]
