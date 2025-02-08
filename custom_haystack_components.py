@@ -607,7 +607,8 @@ class DoclingParserComponent:
             parser = DoclingParser(doc, meta_data,
                                    min_paragraph_size=self._min_paragraph_size,
                                    start_page=start_page,
-                                   end_page=end_page)
+                                   end_page=end_page,
+                                   double_notes=True)
             # Start here
             temp_docs: List[ByteStream]
             temp_meta: List[Dict[str, str]]

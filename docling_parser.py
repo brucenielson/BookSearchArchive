@@ -136,11 +136,13 @@ def is_ends_with_punctuation(text: str) -> bool:
     return text.endswith(".") or text.endswith("?") or text.endswith("!")
 
 
-def is_bottom_note(text: str) -> bool:
+def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+    if text is None or not is_page_text(text):
+        return False
     # Check for · at the beginning of the line. This is often how OCR represents footnote number.
-    if text.startswith("·") and not text.startswith("· "):
+    if text.text.startswith("·") and not text.text.startswith("· "):
         return True
-    return bool(re.match(r"^\d+[^\s].*", text))
+    return bool(re.match(r"^\d+[^\s].*", text.text))
 
 
 def is_sentence_end(text: str) -> bool:
@@ -158,9 +160,7 @@ def is_sentence_end(text: str) -> bool:
 def is_text_item(item: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
     return not (is_section_header(item)
                 or is_page_footer(item)
-                or is_page_header(item)
-                or is_footnote(item)
-                or is_bottom_note(item.text))
+                or is_page_header(item))
 
 
 def get_next_text(texts: List[Union[SectionHeaderItem, ListItem, TextItem]], i: int) \
@@ -196,7 +196,8 @@ class DoclingParser:
                  meta_data: dict[str, str],
                  min_paragraph_size: int = 300,
                  start_page: Optional[int] = None,
-                 end_page: Optional[int] = None):
+                 end_page: Optional[int] = None,
+                 double_notes: bool = False):
         self._doc: DoclingDocument = doc
         self._min_paragraph_size: int = min_paragraph_size
         self._docs_list: List[ByteStream] = []
@@ -204,6 +205,7 @@ class DoclingParser:
         self._meta_data: dict[str, str] = meta_data
         self._start_page: Optional[int] = start_page
         self._end_page: Optional[int] = end_page
+        self._double_notes: bool = double_notes
 
     def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         temp_docs: List[ByteStream] = []
@@ -214,16 +216,26 @@ class DoclingParser:
         combined_chars: int = 0
         section_name: str = ""
         page_no: Optional[int] = None
+        first_note: bool = False
 
         # Before we begin, we need to find all footnotes and move them to the end of the texts list
         # This is because footnotes are often interspersed with the text, and we want to process them all at once
-        # Do this as a single list comprehension
-        texts = list(self._doc.texts)
-        footnotes = [text for text in texts if is_footnote(text)]
-        bottom_notes = [text for text in texts if is_bottom_note(text.text)]
-        # filtered_texts = [text for text in texts if not is_footnote(text) and not is_bottom_note(text.text)]
+        # Split texts into regular content and notes (footnotes + bottom notes)
+        regular_texts = []
+        notes = []
+        for text in self._doc.texts:
+            if is_footnote(text) or is_bottom_note(text):
+                notes.append(text)
+            else:
+                regular_texts.append(text)
+
+        # Combine regular content first, then notes at the end
+        texts = regular_texts + notes
 
         for i, text in enumerate(texts):
+            if para_num >= 1298:
+                pass
+
             # Deal with page number
             if page_no is None or combined_paragraph == "":
                 page_no = text.prov[0].page_no
@@ -233,7 +245,10 @@ class DoclingParser:
                 page_no = None
                 continue
             if self._end_page is not None and page_no is not None and page_no > self._end_page:
-                break
+                if self._double_notes and not first_note:
+                    self._min_paragraph_size *= 2
+                    first_note = True
+                continue
 
             text.text = text.text.encode('utf-8').decode('utf-8')
             # prev_tag: Tag = tags[j - 1] if j > 0 else None
@@ -247,10 +262,7 @@ class DoclingParser:
             # Skip conditions
             if is_page_footer(text): continue
             if is_page_header(text): continue
-            if is_page_not_text(text): pass
             if is_roman_numeral(text.text): continue
-            if is_bottom_note(text.text): continue
-            if is_footnote(text): continue
 
             p_str = str(text.text).strip()
             p_str = re.sub(r'\s+', ' ', p_str).strip()
