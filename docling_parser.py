@@ -55,7 +55,7 @@ def is_valid_word(word):
     return False
 
 
-def clean_text(p_str):
+def combine_hyphenated_words(p_str):
     # This regular expression looks for cases where a dash separates two parts of a word
     # The idea is to combine the two parts and check if they form a valid word.
     def replace_dash(match):
@@ -201,6 +201,23 @@ def should_skip_element(text: Union[SectionHeaderItem, ListItem, TextItem]) -> b
     ])
 
 
+def clean_text(p_str: str) -> str:
+    p_str = re.sub(r'\s+', ' ', p_str).strip()  # Replace multiple whitespace with single space
+    p_str = re.sub(r"([.!?]) '", r"\1'", p_str)  # Remove the space between punctuation (.!?) and '
+    p_str = re.sub(r'([.!?]) "', r'\1"', p_str)  # Remove the space between punctuation (.!?) and "
+    p_str = re.sub(r'\s+\)', ')', p_str)  # Remove whitespace before a closing parenthesis
+    p_str = re.sub(r'\s+]', ']', p_str)  # Remove whitespace before a closing square bracket
+    p_str = re.sub(r'\s+}', '}', p_str)  # Remove whitespace before a closing curly brace
+    p_str = re.sub(r'\s+,', ',', p_str)  # Remove whitespace before a comma
+    p_str = re.sub(r'\(\s+', '(', p_str)  # Remove whitespace after an opening parenthesis
+    p_str = re.sub(r'\[\s+', '[', p_str)  # Remove whitespace after an opening square bracket
+    p_str = re.sub(r'\{\s+', '{', p_str)  # Remove whitespace after an opening curly brace
+    p_str = re.sub(r'(?<=\s)\.([a-zA-Z])', r'\1',
+                   p_str)  # Remove a period that follows a whitespace and comes before a letter
+    p_str = re.sub(r'\s+\.', '.', p_str)  # Remove any whitespace before a period
+    return p_str
+
+
 class DoclingParser:
     def __init__(self, doc: DoclingDocument,
                  meta_data: dict[str, str],
@@ -257,20 +274,7 @@ class DoclingParser:
                 continue
 
             p_str = str(text.text).strip()  # Convert text to a string and remove leading/trailing whitespace
-
-            p_str = re.sub(r'\s+', ' ', p_str).strip()  # Replace multiple whitespace with single space
-            p_str = re.sub(r"([.!?]) '", r"\1'", p_str)  # Remove the space between punctuation (.!?) and '
-            p_str = re.sub(r'([.!?]) "', r'\1"', p_str)  # Remove the space between punctuation (.!?) and "
-            p_str = re.sub(r'\s+\)', ')', p_str)  # Remove whitespace before a closing parenthesis
-            p_str = re.sub(r'\s+]', ']', p_str)  # Remove whitespace before a closing square bracket
-            p_str = re.sub(r'\s+}', '}', p_str)  # Remove whitespace before a closing curly brace
-            p_str = re.sub(r'\s+,', ',', p_str)  # Remove whitespace before a comma
-            p_str = re.sub(r'\(\s+', '(', p_str)  # Remove whitespace after an opening parenthesis
-            p_str = re.sub(r'\[\s+', '[', p_str)  # Remove whitespace after an opening square bracket
-            p_str = re.sub(r'\{\s+', '{', p_str)  # Remove whitespace after an opening curly brace
-            p_str = re.sub(r'(?<=\s)\.([a-zA-Z])', r'\1',
-                           p_str)  # Remove a period that follows a whitespace and comes before a letter
-            p_str = re.sub(r'\s+\.', '.', p_str)  # Remove any whitespace before a period
+            p_str = clean_text(p_str)
 
             # Remove footnote numbers at end of a sentence. Check for a digit at the end and drop it
             # until there are no more digits or the sentence is now a valid end of a sentence.
@@ -316,7 +320,7 @@ class DoclingParser:
                 combined_paragraph = ""
                 combined_chars = 0
 
-            p_str = clean_text(p_str)
+            p_str = combine_hyphenated_words(p_str)
             if p_str:  # Only create entry if we have content
                 para_num += 1
                 self._add_paragraph(p_str, para_num, section_name, page_no, temp_docs, temp_meta)
