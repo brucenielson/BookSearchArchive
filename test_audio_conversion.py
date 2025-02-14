@@ -4,6 +4,8 @@ from docling_core.types import DoclingDocument
 from pathlib import Path
 from kokoro import KPipeline
 import sounddevice as sd
+import soundfile as sf
+import numpy as np
 
 
 def load_pdf(file_path: str) -> Tuple[DoclingDocument, Dict[str, str]]:
@@ -26,8 +28,10 @@ def load_pdf(file_path: str) -> Tuple[DoclingDocument, Dict[str, str]]:
 
 
 def kokoro_pipeline():
+    # https://huggingface.co/hexgrad/Kokoro-82M#usage
+    output_file = 'output.wav'
     # 🇺🇸 'a' => American English, 🇬🇧 'b' => British English
-    pipeline = KPipeline(lang_code='a') # <= make sure lang_code matches voice
+    pipeline = KPipeline(lang_code='a')  # <= make sure lang_code matches voice
 
     # This text is for demonstration purposes only, unseen during training
     text = '''
@@ -45,6 +49,7 @@ def kokoro_pipeline():
         text, voice='af_heart', # <= change voice here
         speed=1, split_pattern=r'\n+'
     )
+    audio_segments = []
     for i, (gs, ps, audio) in enumerate(generator):
         print(i)  # i => index
         print(gs) # gs => graphemes/text
@@ -53,6 +58,15 @@ def kokoro_pipeline():
         # sf.write(f'{i}.wav', audio, 24000) # save each audio file
         sd.play(audio, 24000)
         sd.wait()  # Wait until the current audio segment finishes playing.
+        audio_segments.append(audio)
+
+    # Concatenate all segments into one audio array.
+    combined_audio = np.concatenate(audio_segments)
+
+    # Save to a single file. Adjust sample_rate as per your model (assumed here to be 24000 Hz).
+    sample_rate = 24000
+    sf.write(output_file, combined_audio, sample_rate)
+    print(f"Audio saved to {output_file}")
 
 
 def main():
