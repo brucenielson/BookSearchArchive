@@ -60,10 +60,10 @@ def simple_pdf_to_audio():
     simple_generate_and_save_audio(text, "output.wav")
 
 
-def docling_pdf_to_audio(file_path: str,
-                         output_file: str,
-                         voice: str = 'af_heart',
-                         sample_rate: int = 24000):
+def docling_parser_pdf_to_audio(file_path: str,
+                                output_file: str,
+                                voice: str = 'af_heart',
+                                sample_rate: int = 24000):
     converter = DocumentConverter()
     result: ConversionResult = converter.convert(file_path)
     book: DoclingDocument = result.document
@@ -98,7 +98,9 @@ def docling_pdf_to_audio(file_path: str,
 
 def main():
     file_path = r"D:\Documents\AI\BookSearchArchive\documents\A World of Propensities -- Karl Popper -- 2018.pdf"
-    docling_pdf_to_audio(file_path, "output.wav")
+    # docling_parser_pdf_to_audio(file_path, "output.wav")
+    text = load_pdf_text(file_path)
+    simple_generate_and_save_audio(text, "output2.wav")
 
 
 if __name__ == "__main__":
