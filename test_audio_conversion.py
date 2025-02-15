@@ -2,7 +2,7 @@ from docling.document_converter import DocumentConverter, ConversionResult
 from docling_core.types import DoclingDocument
 from pathlib import Path
 from kokoro import KPipeline
-import sounddevice as sd
+# import sounddevice as sd
 import soundfile as sf
 import numpy as np
 from docling_parser import DoclingParser
@@ -38,9 +38,9 @@ def simple_generate_and_save_audio(text: str,
 
     for i, (gs, ps, audio) in enumerate(pipeline(text, voice=voice, speed=1, split_pattern=r'\n+')):
         print(f"Segment {i}: Graphemes: {gs} | Phonemes: {ps}")
-        if play_audio:
-            sd.play(audio, sample_rate)
-            sd.wait()
+        # if play_audio:
+        #     sd.play(audio, sample_rate)
+        #     sd.wait()
         audio_segments.append(audio)
 
     combined_audio = np.concatenate(audio_segments)
