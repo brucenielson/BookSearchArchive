@@ -8,6 +8,8 @@ import numpy as np
 
 
 # https://huggingface.co/hexgrad/Kokoro-82M/discussions/64
+# pip install kokoro
+# pip install soundfile
 def load_pdf_text(file_path: str) -> str:
     """Load a PDF, caching as JSON if needed, and export its text."""
     converter = DocumentConverter()
