@@ -137,7 +137,7 @@ def is_ends_with_punctuation(text: str) -> bool:
     return text.endswith(".") or text.endswith("?") or text.endswith("!")
 
 
-def is_near_bottom(doc_item: DocItem, doc: DoclingDocument, threshold: float = 0.3, debug: bool = False) -> bool:
+def is_near_bottom(doc_item: DocItem, same_page_items: [DocItem], threshold: float = 0.3, debug: bool = False) -> bool:
     """
     Determine if a DocItem is near the bottom of its page.
 
@@ -158,9 +158,6 @@ def is_near_bottom(doc_item: DocItem, doc: DoclingDocument, threshold: float = 0
     # Extract the coordinate origin and bounding box coordinates
     coord_origin = bbox.coord_origin
     x0, y0, x1, y1 = bbox.l, bbox.b, bbox.r, bbox.t
-
-    # Filter doc_items that are on the same page
-    same_page_items = [item for item in doc.texts if item.prov[0].page_no == doc_item.prov[0].page_no]
 
     # Print out the text, page number, and x0, y0, x1, y1 for each item on the same page
     if debug:
@@ -275,16 +272,19 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: Docl
     if text.text.startswith("·") and not text.text.startswith("· "):
         return True
 
+    # Filter doc_items that are on the same page
+    same_page_items: List[DocItem] = [item for item in doc.texts if item.prov[0].page_no == text.prov[0].page_no]
+
     # Check if this text starts with a digit
     if bool(re.match(r"^\d", text.text)):
         # Check if this is digits NOT followed by space or period - e.g. 1Hello is always a bottom note
         if bool(re.match(r"^\d+(?![ .]|\d|$)", text.text)):
             # However, don't invoke if we're right at the top of the page (try to be sure we combine
             # top of a page with previous paragraph that might have been split by a page break)
-            if is_near_bottom(text, doc, threshold=0.75, debug=debug):
+            if is_near_bottom(text, same_page_items, threshold=0.75, debug=debug):
                 return True
         # Check if we're at the bottom of the page
-        if is_near_bottom(text, doc, threshold=0.5, debug=debug):
+        if is_near_bottom(text, same_page_items, threshold=0.5, debug=debug):
             # Check if this is three digits with the third digit being a 1 followed by a space
             # This is usually where the last 1 was supposed to be an 'I'.
             if bool(re.match(r"^\d{1,2}1 ", text.text)):
