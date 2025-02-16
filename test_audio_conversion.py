@@ -96,12 +96,26 @@ def docling_parser_pdf_to_audio(file_path: str,
     print(f"Audio saved to {output_file}")
 
 
+def test():
+    import re
+
+    string = "11.  An apple tree"  # Note: I've included the non-breaking space here
+
+    for char in string:
+        print(f"'{char}': Unicode code point = {ord(char)}")
+
+    match = re.match(r"^\d+(?![ .]|\d|$)", string)
+    if match:
+        print("Match found!")
+    else:
+        print("Match not found.")
+
 def main():
     file_path = r"D:\Documents\AI\BookSearchArchive\documents\A World of Propensities -- Karl Popper -- 2018.pdf"
     docling_parser_pdf_to_audio(file_path, "output.wav")
     # text = load_pdf_text(file_path)
     # simple_generate_and_save_audio(text, "output2.wav")
-
+    # test()
 
 if __name__ == "__main__":
     main()

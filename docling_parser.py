@@ -137,7 +137,7 @@ def is_ends_with_punctuation(text: str) -> bool:
     return text.endswith(".") or text.endswith("?") or text.endswith("!")
 
 
-def is_near_bottom(doc_item: DocItem, doc: DoclingDocument, threshold: int = 50) -> bool:
+def is_near_bottom(doc_item: DocItem, doc: DoclingDocument, threshold: int = 200) -> bool:
     """
     Determine if a DocItem is near the bottom of its page.
 
@@ -164,16 +164,56 @@ def is_near_bottom(doc_item: DocItem, doc: DoclingDocument, threshold: int = 50)
 
     # Find the maximum y1 value on the page
     max_y1 = max(item.prov[0].bbox.t for item in same_page_items if hasattr(item.prov[0], 'bbox'))
+    # Find the min y1 value on the page
+    min_y1 = min(item.prov[0].bbox.t for item in same_page_items if hasattr(item.prov[0], 'bbox'))
 
     if coord_origin == CoordOrigin.BOTTOMLEFT:
         # In this system, y0 is the distance from the bottom of the page
-        return y0 <= threshold
+        return y0 <= threshold + min_y1
     elif coord_origin == CoordOrigin.TOPLEFT:
         # In this system, y1 is the distance from the top of the page
         return (max_y1 - y1) <= threshold
     else:
         raise ValueError("Unknown coordinate origin.")
 
+
+def is_smaller_text(doc_item: DocItem, doc: DoclingDocument, threshold: float = 0.8) -> bool:
+    """
+    Determine if a DocItem's text is smaller than the average text size on its page.
+
+    Parameters:
+    - doc_item: The DocItem object containing provenance data with 'bbox'.
+    - doc: The DoclingDocument containing all DocItems.
+    - threshold: Ratio of the average text size to consider as 'smaller text'.
+
+    Returns:
+    - True if the DocItem's text is smaller than the average text size, False otherwise.
+    """
+    # Check if the DocItem has provenance data with a bounding box
+    if hasattr(doc_item.prov[0], 'bbox'):
+        bbox = doc_item.prov[0].bbox
+    else:
+        return False  # No bounding box available
+
+    # Extract the bounding box coordinates
+    x0, y0, x1, y1 = bbox.l, bbox.b, bbox.r, bbox.t
+
+    # Calculate the area of the DocItem's bounding box
+    doc_item_area = (x1 - x0) * (y1 - y0)
+
+    # Filter doc_items that are on the same page
+    same_page_items = [item for item in doc.texts if item.prov[0].page_no == doc_item.prov[0].page_no]
+
+    # Calculate the average area of bounding boxes on the page
+    total_area = sum(
+        (item.prov[0].bbox.r - item.prov[0].bbox.l) * (item.prov[0].bbox.t - item.prov[0].bbox.b)
+        for item in same_page_items if hasattr(item.prov[0], 'bbox')
+    )
+    num_items = sum(1 for item in same_page_items if hasattr(item.prov[0], 'bbox'))
+    average_area = total_area / num_items if num_items > 0 else 0
+
+    # Compare the DocItem's area to the average
+    return doc_item_area < average_area * threshold
 
 def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: DoclingDocument) -> bool:
     if text.text.startswith("8Cp. my 'The Rationality of Scientific Revolutions"):
@@ -184,18 +224,54 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: Docl
         else:
             bbox = None
         pass
+    if text.text.startswith("2Lord Rutherford:"):
+        pass
+    if text.text.startswith("12See my 'The Rationality of Scientific Revolutions'"):
+        pass
+    if text.text.startswith("171 do not think that Norbert Wiener"):
+        pass
+    if text.text.startswith("2See L.Sc.D."):
+        pass
+    if text.text.startswith("12 I criticized Carnap"):
+        pass
+    if text.text.startswith("19'fhis idea is taken from the last sentence"):
+        pass
+    if text.text.startswith("2The assertion made here"):
+        pass
+    if text.text.startswith("10. Summing up o f"):
+        pass
+    if text.text.startswith("15. Philosophers  and  even  scientists"):
+        pass
+
     if text is None or not is_page_text(text):
         return False
     # Check for · at the beginning of the line. This is often how OCR represents footnote number.
     if text.text.startswith("·") and not text.text.startswith("· "):
         return True
-    if is_near_bottom(text, doc) and bool(re.match(r"^\d+\S.*", text.text)):
-        return True
-    if is_list_item(text) and bool(re.match(r"^\d+[^\d\s.]", text.text)):
-        return True
-    if text.label == 'text' and bool(re.match(r"^\d+\S.*", text.text)):
-        return True
+
+    # Check if this text starts with a digit
+    if bool(re.match(r"^\d", text.text)):
+        # Check if we're at the bottom of the page
+        if is_near_bottom(text, doc):
+            # Check if this is digits not followed by space or period
+            if bool(re.match(r"^\d+(?![ .]|\d|$)", text.text)):
+                return True
+            # Check if this is three digits with the third digit being a 1 followed by a space
+            # This is usually where the last 1 was supposed to be an 'I'.
+            if bool(re.match(r"^\d{1,2}1 ", text.text)):
+                return True
+            if not is_list_item(text):
+                return True
+
     return False
+
+    # if is_near_bottom(text, doc) and bool(re.match(r"^\d+\S.*", text.text)):
+    #     return True
+    # if is_list_item(text) and bool(re.match(r"^\d+[^\d\s.]", text.text)):
+    #     return True
+    # if text.label == 'text' and bool(re.match(r"^\d+\S.*", text.text)):
+    #     return True
+    # return False
 
 
 def is_sentence_end(text: str) -> bool:
