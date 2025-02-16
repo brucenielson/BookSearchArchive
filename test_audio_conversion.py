@@ -98,9 +98,9 @@ def docling_parser_pdf_to_audio(file_path: str,
 
 def main():
     file_path = r"D:\Documents\AI\BookSearchArchive\documents\A World of Propensities -- Karl Popper -- 2018.pdf"
-    # docling_parser_pdf_to_audio(file_path, "output.wav")
-    text = load_pdf_text(file_path)
-    simple_generate_and_save_audio(text, "output2.wav")
+    docling_parser_pdf_to_audio(file_path, "output.wav")
+    # text = load_pdf_text(file_path)
+    # simple_generate_and_save_audio(text, "output2.wav")
 
 
 if __name__ == "__main__":

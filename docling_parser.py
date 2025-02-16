@@ -138,7 +138,7 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
     # Check for · at the beginning of the line. This is often how OCR represents footnote number.
     if text.text.startswith("·") and not text.text.startswith("· "):
         return True
-    return bool(re.match(r"^\d+\S.*", text.text))
+    return bool(re.match(r"^\d+[^\d\s.]", text.text))
 
 
 def is_sentence_end(text: str) -> bool:
