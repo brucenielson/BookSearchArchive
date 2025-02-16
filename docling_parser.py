@@ -274,6 +274,15 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: Docl
 
     # Filter doc_items that are on the same page
     same_page_items: List[DocItem] = [item for item in doc.texts if item.prov[0].page_no == text.prov[0].page_no]
+    # Get an index for 'text' into same_page_items by finding it in the list
+    text_index = same_page_items.index(text)
+    prev_text = same_page_items[text_index - 1] if text_index > 0 else None
+    # If there are no items before this one, it can't possibly be a bottom note
+    if prev_text is None:
+        return False
+    # If the previous item is itself a bottom note, then this one must be as well
+    if is_bottom_note(prev_text, doc):
+        return True
 
     # Check if this text starts with a digit
     if bool(re.match(r"^\d", text.text)):
@@ -416,6 +425,17 @@ class DoclingParser:
         texts = self._get_processed_texts()
 
         for i, text in enumerate(texts):
+            if 'The preceding section was' in text.text:
+                pass
+            if 'Indeed, (cc) is an immediate consequence' in text.text:
+                pass
+            if '(iii) More generally even' in text.text:
+                pass
+            if 'What seduces so many people' in text.text:
+                pass
+            if '0 1 00 1 1 000000 1 1 1 1 1 1' in text.text:
+                pass
+
             next_text = get_next_text(texts, i)
             page_no = get_current_page(text, combined_paragraph, page_no)
 
