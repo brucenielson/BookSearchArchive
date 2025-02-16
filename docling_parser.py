@@ -3,7 +3,8 @@ import re
 # noinspection PyPackageRequirements
 from haystack.dataclasses import ByteStream
 from docling_core.types import DoclingDocument
-from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem
+from docling_core.types.doc import CoordOrigin
+from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, DocItem
 import nltk
 from nltk.stem import WordNetLemmatizer, PorterStemmer
 # Download the words corpus if needed
@@ -116,6 +117,10 @@ def is_footnote(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
     return text.label == "footnote"
 
 
+def is_list_item(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+    return text.label == "list_item"
+
+
 def is_text_break(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
     return is_page_header(text) or is_section_header(text) or is_footnote(text)
 
@@ -132,13 +137,65 @@ def is_ends_with_punctuation(text: str) -> bool:
     return text.endswith(".") or text.endswith("?") or text.endswith("!")
 
 
-def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem]) -> bool:
+def is_near_bottom(doc_item: DocItem, doc: DoclingDocument, threshold: int = 50) -> bool:
+    """
+    Determine if a DocItem is near the bottom of its page.
+
+    Parameters:
+    - doc_item: The DocItem object containing provenance data with 'bbox'.
+    - doc: The DoclingDocument containing all DocItems.
+    - threshold: Distance in points from the bottom to consider as 'near the bottom'.
+
+    Returns:
+    - True if the DocItem is within the threshold from the bottom, False otherwise.
+    """
+    # Check if the DocItem has provenance data with a bounding box
+    if hasattr(doc_item.prov[0], 'bbox'):
+        bbox = doc_item.prov[0].bbox
+    else:
+        return False  # No bounding box available
+
+    # Extract the coordinate origin and bounding box coordinates
+    coord_origin = bbox.coord_origin
+    x0, y0, x1, y1 = bbox.l, bbox.b, bbox.r, bbox.t
+
+    # Filter doc_items that are on the same page
+    same_page_items = [item for item in doc.texts if item.prov[0].page_no == doc_item.prov[0].page_no]
+
+    # Find the maximum y1 value on the page
+    max_y1 = max(item.prov[0].bbox.t for item in same_page_items if hasattr(item.prov[0], 'bbox'))
+
+    if coord_origin == CoordOrigin.BOTTOMLEFT:
+        # In this system, y0 is the distance from the bottom of the page
+        return y0 <= threshold
+    elif coord_origin == CoordOrigin.TOPLEFT:
+        # In this system, y1 is the distance from the top of the page
+        return (max_y1 - y1) <= threshold
+    else:
+        raise ValueError("Unknown coordinate origin.")
+
+
+def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: DoclingDocument) -> bool:
+    if text.text.startswith("8Cp. my 'The Rationality of Scientific Revolutions"):
+        pass
+    if 'Morgenstern was then the director' in text.text:
+        if hasattr(text.prov[0], 'bbox'):
+            bbox = text.prov[0].bbox
+        else:
+            bbox = None
+        pass
     if text is None or not is_page_text(text):
         return False
     # Check for · at the beginning of the line. This is often how OCR represents footnote number.
     if text.text.startswith("·") and not text.text.startswith("· "):
         return True
-    return bool(re.match(r"^\d+[^\d\s.]", text.text))
+    if is_near_bottom(text, doc) and bool(re.match(r"^\d+\S.*", text.text)):
+        return True
+    if is_list_item(text) and bool(re.match(r"^\d+[^\d\s.]", text.text)):
+        return True
+    if text.label == 'text' and bool(re.match(r"^\d+\S.*", text.text)):
+        return True
+    return False
 
 
 def is_sentence_end(text: str) -> bool:
@@ -319,8 +376,8 @@ class DoclingParser:
         # Before we begin, we need to find all footnotes and move them to the end of the texts list
         # This is because footnotes are often interspersed with the text, and we want to process them all at once
         # Split texts into regular content and notes (footnotes + bottom notes)
-        regular = [t for t in self._doc.texts if not (is_footnote(t) or is_bottom_note(t))]
-        notes = [t for t in self._doc.texts if is_footnote(t) or is_bottom_note(t)]
+        regular = [t for t in self._doc.texts if not (is_footnote(t) or is_bottom_note(t, self._doc))]
+        notes = [t for t in self._doc.texts if is_footnote(t) or is_bottom_note(t, self._doc)]
         return regular + notes
 
     def _add_paragraph(self, text: str, para_num: int, section: str,
@@ -328,7 +385,7 @@ class DoclingParser:
         docs.append(ByteStream(text.encode('utf-8')))
         meta.append({
             **self._meta_data,
-            "paragraph_#": str(para_num),
+            # "paragraph_#": str(para_num),
             "section_name": section,
             "page_#": str(page)
         })
