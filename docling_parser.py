@@ -137,7 +137,7 @@ def is_ends_with_punctuation(text: str) -> bool:
     return text.endswith(".") or text.endswith("?") or text.endswith("!")
 
 
-def is_near_bottom(doc_item: DocItem, doc: DoclingDocument, threshold: int = 200) -> bool:
+def is_near_bottom(doc_item: DocItem, doc: DoclingDocument, threshold: float = 0.3, debug: bool = False) -> bool:
     """
     Determine if a DocItem is near the bottom of its page.
 
@@ -162,17 +162,27 @@ def is_near_bottom(doc_item: DocItem, doc: DoclingDocument, threshold: int = 200
     # Filter doc_items that are on the same page
     same_page_items = [item for item in doc.texts if item.prov[0].page_no == doc_item.prov[0].page_no]
 
+    # Print out the text, page number, and x0, y0, x1, y1 for each item on the same page
+    if debug:
+        for item in same_page_items:
+            if hasattr(item.prov[0], 'bbox'):
+                bbox = item.prov[0].bbox
+                print(f"Text: {item.text}, Page: {item.prov[0].page_no}, x0: {bbox.l}, y0: {bbox.b}, x1: {bbox.r}, y1: {bbox.t}")
+
     # Find the maximum y1 value on the page
-    max_y1 = max(item.prov[0].bbox.t for item in same_page_items if hasattr(item.prov[0], 'bbox'))
+    page_top: float = max(item.prov[0].bbox.t for item in same_page_items if hasattr(item.prov[0], 'bbox'))
     # Find the min y1 value on the page
-    min_y1 = min(item.prov[0].bbox.t for item in same_page_items if hasattr(item.prov[0], 'bbox'))
+    page_bottom: float = min(item.prov[0].bbox.b for item in same_page_items if hasattr(item.prov[0], 'bbox'))
+    page_size: float = page_top - page_bottom
+    # Threshold is page_bottom + (size of page * threshold amount) (i.e. % of page to be considered the 'bottom')
+    bottom_threshold: float = page_bottom + (page_size * threshold)
 
     if coord_origin == CoordOrigin.BOTTOMLEFT:
-        # In this system, y0 is the distance from the bottom of the page
-        return y0 <= threshold + min_y1
+        # In this system, y1 is the distance from the top of the paragraph to the bottom of the page
+        return y1 <= bottom_threshold
     elif coord_origin == CoordOrigin.TOPLEFT:
-        # In this system, y1 is the distance from the top of the page
-        return (max_y1 - y1) <= threshold
+        # In this system, y1 is the distance from the top of the paragraph to the top of the page
+        return y1 >= bottom_threshold
     else:
         raise ValueError("Unknown coordinate origin.")
 
@@ -216,6 +226,7 @@ def is_smaller_text(doc_item: DocItem, doc: DoclingDocument, threshold: float = 
     return doc_item_area < average_area * threshold
 
 def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: DoclingDocument) -> bool:
+    debug = False
     if text.text.startswith("8Cp. my 'The Rationality of Scientific Revolutions"):
         pass
     if 'Morgenstern was then the director' in text.text:
@@ -231,16 +242,31 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: Docl
     if text.text.startswith("171 do not think that Norbert Wiener"):
         pass
     if text.text.startswith("2See L.Sc.D."):
+        debug = True
+        pass
+    if text.text.startswith("11Hume's criticism of induction"):
+        debug = True
         pass
     if text.text.startswith("12 I criticized Carnap"):
+        debug = True
         pass
     if text.text.startswith("19'fhis idea is taken from the last sentence"):
+        debug = True
         pass
     if text.text.startswith("2The assertion made here"):
+        debug = True
         pass
     if text.text.startswith("10. Summing up o f"):
+        debug = True
         pass
     if text.text.startswith("15. Philosophers  and  even  scientists"):
+        debug = True
+        pass
+    if text.text.startswith("19'. But there were other problems which led to the task of defining this phrase"):
+        debug = True
+        pass
+    if 'valid under the condition' in text.text:
+        debug = True
         pass
 
     if text is None or not is_page_text(text):
@@ -251,11 +277,14 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: Docl
 
     # Check if this text starts with a digit
     if bool(re.match(r"^\d", text.text)):
-        # Check if we're at the bottom of the page
-        if is_near_bottom(text, doc):
-            # Check if this is digits not followed by space or period
-            if bool(re.match(r"^\d+(?![ .]|\d|$)", text.text)):
+        # Check if this is digits NOT followed by space or period - e.g. 1Hello is always a bottom note
+        if bool(re.match(r"^\d+(?![ .]|\d|$)", text.text)):
+            # However, don't invoke if we're right at the top of the page (try to be sure we combine
+            # top of a page with previous paragraph that might have been split by a page break)
+            if is_near_bottom(text, doc, threshold=0.75, debug=debug):
                 return True
+        # Check if we're at the bottom of the page
+        if is_near_bottom(text, doc, threshold=0.5, debug=debug):
             # Check if this is three digits with the third digit being a 1 followed by a space
             # This is usually where the last 1 was supposed to be an 'I'.
             if bool(re.match(r"^\d{1,2}1 ", text.text)):
