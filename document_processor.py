@@ -67,6 +67,7 @@ class DocumentProcessor:
                  write_to_file: bool = False,
                  pdf_reading_strategy: PDFReadingStrategy = PDFReadingStrategy.PDFReader,
                  document_store_type: DocumentStoreType = DocumentStoreType.Pgvector,
+                 create_audio: bool = False,
                  ) -> None:
 
         # Instance variables
@@ -86,6 +87,7 @@ class DocumentProcessor:
         self._db_user_name: str = db_user_name
         self._db_password: str = db_password
         self._db_name: str = db_name
+        self._create_audio: bool = create_audio
 
         # File paths
         self._file_or_folder_path: str = file_or_folder_path  # New instance variable
