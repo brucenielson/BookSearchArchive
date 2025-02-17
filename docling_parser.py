@@ -64,12 +64,6 @@ def combine_hyphenated_words(p_str):
         combined = word1.strip() + word2.strip()
         first_word = p_str.strip().split(' ')[0]
 
-        if combined == 'Rei7':
-            pass
-
-        if combined == 'Marsden':
-            pass
-
         # does word 1 contain a space after the hyphen?
         if word2.startswith(" ") and is_valid_word(combined):
             # When there is a space after the hyphen, it is likely that the hyphen is separating two parts
@@ -222,7 +216,10 @@ def is_smaller_text(doc_item: DocItem, doc: DoclingDocument, threshold: float = 
     # Compare the DocItem's area to the average
     return doc_item_area < average_area * threshold
 
-def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: DoclingDocument) -> bool:
+
+def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
+                   doc: DoclingDocument,
+                   allow_section_headers: bool = False) -> bool:
     debug = False
     if text.text.startswith("8Cp. my 'The Rationality of Scientific Revolutions"):
         pass
@@ -265,8 +262,20 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: Docl
     if 'valid under the condition' in text.text:
         debug = True
         pass
+    if text.text.startswith('5To  make all this quite clear we write'):
+        pass
 
-    if text is None or not is_page_text(text):
+    # Check if this text starts with a digit
+    if bool(re.match(r"^\d", text.text)):
+        # If it is specifically digits followed by a period, followed by a space and it is
+        # a section header or a list item, then it is NOT a bottom note
+        if bool(re.match(r"^\d+\.\s", text.text)) and (is_section_header(text) or is_list_item(text)):
+            return False
+        # If it's digits followed by a letter without a space then it's a footnote
+        if bool(re.match(r"^\d+[A-Za-z]", text.text)):
+            return True
+
+    if text is None or (not allow_section_headers and not is_page_text(text)):
         return False
     # Check for · at the beginning of the line. This is often how OCR represents footnote number.
     if text.text.startswith("·") and not text.text.startswith("· "):
@@ -286,12 +295,19 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem], doc: Docl
 
     # Check if this text starts with a digit
     if bool(re.match(r"^\d", text.text)):
+        # If it starts with a zero, it's not a bottom note
+        if text.text.startswith("0"):
+            return False
         # Check if this is digits NOT followed by space or period - e.g. 1Hello is always a bottom note
         if bool(re.match(r"^\d+(?![ .]|\d|$)", text.text)):
             # However, don't invoke if we're right at the top of the page (try to be sure we combine
             # top of a page with previous paragraph that might have been split by a page break)
             if is_near_bottom(text, same_page_items, threshold=0.75, debug=debug):
                 return True
+        # If it is specifically digits followed by a period, followed by a space and it is
+        # a section header or a list item, then it is NOT a bottom note
+        if bool(re.match(r"^\d+\.\s", text.text)) and (is_section_header(text) or is_list_item(text)):
+            return False
         # Check if we're at the bottom of the page
         if is_near_bottom(text, same_page_items, threshold=0.5, debug=debug):
             # Check if this is three digits with the third digit being a 1 followed by a space
@@ -435,6 +451,12 @@ class DoclingParser:
                 pass
             if '0 1 00 1 1 000000 1 1 1 1 1 1' in text.text:
                 pass
+            if '4Take a sequence' in text.text:
+                pass
+            if '18. A' in text.text:
+                pass
+            if text.text.startswith('In order to show that these'):
+                pass
 
             next_text = get_next_text(texts, i)
             page_no = get_current_page(text, combined_paragraph, page_no)
@@ -450,7 +472,7 @@ class DoclingParser:
                 continue
 
             # Update section header if the element is a section header
-            if is_section_header(text):
+            if is_section_header(text) and not is_bottom_note(text, self._doc, allow_section_headers=True):
                 section_name = text.text
                 continue
 
