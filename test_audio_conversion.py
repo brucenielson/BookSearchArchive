@@ -61,7 +61,6 @@ def simple_pdf_to_audio():
 
 
 def docling_parser_pdf_to_audio(file_path: str,
-                                output_file: str,
                                 voice: str = 'af_heart',
                                 sample_rate: int = 24000):
     converter = DocumentConverter()
@@ -92,6 +91,7 @@ def docling_parser_pdf_to_audio(file_path: str,
             audio_segments.append(audio)
 
     combined_audio = np.concatenate(audio_segments)
+    output_file = file_path.replace('.pdf', '.wav')
     sf.write(output_file, combined_audio, sample_rate)
     print(f"Audio saved to {output_file}")
 
@@ -110,12 +110,14 @@ def test():
     else:
         print("Match not found.")
 
+
 def main():
     file_path = r"D:\Documents\AI\BookSearchArchive\documents\A World of Propensities -- Karl Popper -- 2018.pdf"
-    docling_parser_pdf_to_audio(file_path, "output.wav")
+    docling_parser_pdf_to_audio(file_path)
     # text = load_pdf_text(file_path)
     # simple_generate_and_save_audio(text, "output2.wav")
     # test()
+
 
 if __name__ == "__main__":
     main()
