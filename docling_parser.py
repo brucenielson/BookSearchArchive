@@ -221,48 +221,14 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
                    doc: DoclingDocument,
                    allow_section_headers: bool = False) -> bool:
     debug = False
-    if text.text.startswith("8Cp. my 'The Rationality of Scientific Revolutions"):
-        pass
     if 'Morgenstern was then the director' in text.text:
         if hasattr(text.prov[0], 'bbox'):
             bbox = text.prov[0].bbox
         else:
             bbox = None
         pass
-    if text.text.startswith("2Lord Rutherford:"):
-        pass
-    if text.text.startswith("12See my 'The Rationality of Scientific Revolutions'"):
-        pass
-    if text.text.startswith("171 do not think that Norbert Wiener"):
-        pass
-    if text.text.startswith("2See L.Sc.D."):
-        debug = True
-        pass
-    if text.text.startswith("11Hume's criticism of induction"):
-        debug = True
-        pass
-    if text.text.startswith("12 I criticized Carnap"):
-        debug = True
-        pass
-    if text.text.startswith("19'fhis idea is taken from the last sentence"):
-        debug = True
-        pass
-    if text.text.startswith("2The assertion made here"):
-        debug = True
-        pass
     if text.text.startswith("10. Summing up o f"):
         debug = True
-        pass
-    if text.text.startswith("15. Philosophers  and  even  scientists"):
-        debug = True
-        pass
-    if text.text.startswith("19'. But there were other problems which led to the task of defining this phrase"):
-        debug = True
-        pass
-    if 'valid under the condition' in text.text:
-        debug = True
-        pass
-    if text.text.startswith('5To  make all this quite clear we write'):
         pass
 
     # Check if this text starts with a digit
@@ -442,20 +408,21 @@ class DoclingParser:
 
         for i, text in enumerate(texts):
             if 'The preceding section was' in text.text:
+                # Thinks this is a section header
                 pass
             if 'Indeed, (cc) is an immediate consequence' in text.text:
+                # Doesn't break this section up right
                 pass
             if '(iii) More generally even' in text.text:
+                # Inappropriately sent to footnotes
                 pass
             if 'What seduces so many people' in text.text:
-                pass
-            if '0 1 00 1 1 000000 1 1 1 1 1 1' in text.text:
-                pass
-            if '4Take a sequence' in text.text:
+                # This whole section seems messed up in paragraphs before and after.
                 pass
             if '18. A' in text.text:
                 pass
             if text.text.startswith('In order to show that these'):
+                # Stops before the one above
                 pass
 
             next_text = get_next_text(texts, i)
