@@ -222,7 +222,7 @@ def is_too_short(doc_item: DocItem, threshold: int = 2) -> bool:
 
 
 def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
-                   doc: DoclingDocument,
+                   same_page_items: List[DocItem],
                    allow_section_headers: bool = False) -> bool:
     debug = False
     if 'Morgenstern was then the director' in text.text:
@@ -253,8 +253,6 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
     if text.text.startswith("·") and not text.text.startswith("· "):
         return True
 
-    # Filter doc_items that are on the same page
-    same_page_items: List[DocItem] = [item for item in doc.texts if item.prov[0].page_no == text.prov[0].page_no]
     # Get an index for 'text' into same_page_items by finding it in the list
     text_index = same_page_items.index(text)
     prev_text = same_page_items[text_index - 1] if text_index > 0 else None
@@ -263,7 +261,7 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
     if prev_text is None:
         return False
     # If the previous item is itself a bottom note, then this one must be as well
-    if is_bottom_note(prev_text, doc):
+    if is_bottom_note(prev_text, same_page_items):
         return True
 
     if re.match(r"^\d", text.text):
@@ -423,7 +421,10 @@ class DoclingParser:
                 continue
 
             # Update section header if the element is a section header
-            if is_section_header(text) and not is_bottom_note(text, self._doc, allow_section_headers=True):
+            # Filter doc_items that are on the same page
+            same_page_items: List[DocItem] = [item for item in self._doc.texts if
+                                              item.prov[0].page_no == text.prov[0].page_no]
+            if is_section_header(text) and not is_bottom_note(text, same_page_items, allow_section_headers=True):
                 section_name = text.text
                 continue
 
@@ -470,14 +471,33 @@ class DoclingParser:
 
         return temp_docs, temp_meta
 
-    def _get_processed_texts(self) -> List:
-        # Before we begin, we need to find all footnotes and move them to the end of the texts list
-        # This is because footnotes are often interspersed with the text, and we want to process them all at once
-        # Split texts into regular content and notes (footnotes + bottom notes)
-        regular = [t for t in self._doc.texts if not (is_footnote(t) or is_bottom_note(t, self._doc)
-                                                      or is_too_short(t))]
-        notes = [t for t in self._doc.texts if is_footnote(t) or is_bottom_note(t, self._doc)]
-        return regular + notes
+    def _get_processed_texts(self) -> List[DocItem]:
+        """
+        Processes the document's text items page by page, separating regular content from notes
+        (footnotes and bottom notes), and returns a list of DocItems with notes at the end.
+        """
+        regular_texts = []
+        notes = []
+        processed_pages = set()  # Keep track of processed pages
+
+        for text_item in self._doc.texts:
+            page_number = text_item.prov[0].page_no
+
+            if page_number not in processed_pages:
+                # Get all items on the current page
+                same_page_items: List[DocItem] = [
+                    item for item in self._doc.texts if item.prov[0].page_no == page_number
+                ]
+                processed_pages.add(page_number)  # Mark the page as processed
+
+                for item in same_page_items:
+                    if is_footnote(item) or is_bottom_note(item, same_page_items) or is_too_short(item):
+                        if not is_too_short(item):
+                            notes.append(item)
+                    else:
+                        regular_texts.append(item)
+
+        return regular_texts + notes
 
     def _add_paragraph(self, text: str, para_num: int, section: str,
                        page: Optional[int], docs: List[ByteStream], meta: List[Dict]):
