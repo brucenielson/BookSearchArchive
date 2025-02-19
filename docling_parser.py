@@ -4,7 +4,7 @@ import re
 from haystack.dataclasses import ByteStream
 from docling_core.types import DoclingDocument
 from docling_core.types.doc import CoordOrigin
-from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, DocItem
+from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, DocItem, DocItemLabel
 import nltk
 from nltk.stem import WordNetLemmatizer, PorterStemmer
 # Download the words corpus if needed
@@ -363,6 +363,8 @@ class DoclingParser:
         self._start_page: Optional[int] = start_page
         self._end_page: Optional[int] = end_page
         self._double_notes: bool = double_notes
+        self._mislabeled: List[DocItem] = []
+
 
     def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         temp_docs: List[ByteStream] = []
@@ -411,14 +413,11 @@ class DoclingParser:
 
             # Update section header if the element is a section header
 
-            if is_section_header(text):
-                # Filter doc_items that are on the same page
-                same_page_items: List[DocItem] = [item for item in self._doc.texts if
-                                                  item.prov[0].page_no == text.prov[0].page_no]
-                near_bottom: bool = is_near_bottom(text, same_page_items, threshold=0.5)
-                if not is_bottom_note(text, near_bottom=near_bottom, allow_section_headers=True):
-                    section_name = text.text
-                    continue
+            if is_section_header(text) and text not in self._mislabeled:
+                if text.text.startswith("p(e,hbe)"):
+                    pass
+                section_name = text.text
+                continue
 
             if should_skip_element(text):
                 continue
@@ -473,6 +472,7 @@ class DoclingParser:
         processed_pages: set[int] = set()  # Keep track of processed pages
         reached_bottom_notes: bool = False
         same_page_items: List[DocItem] = []
+        near_bottom: bool = False
 
         for text_item in self._doc.texts:
             page_number = text_item.prov[0].page_no
@@ -485,7 +485,8 @@ class DoclingParser:
                 processed_pages.add(page_number)  # Mark the page as processed
                 reached_bottom_notes = False
 
-            near_bottom: bool = is_near_bottom(text_item, same_page_items, threshold=0.5)
+            if not reached_bottom_notes:
+                near_bottom = is_near_bottom(text_item, same_page_items, threshold=0.5)
 
             if is_too_short(text_item):
                 continue
@@ -496,6 +497,10 @@ class DoclingParser:
                 reached_bottom_notes = True
             else:
                 regular_texts.append(text_item)
+
+            # Check if the DocItem is a SectionHeaderItem. If so, turn it into a TextItem.
+            if reached_bottom_notes and is_section_header(text_item):
+                self._mislabeled.append(text_item)
 
         return regular_texts + notes
 
