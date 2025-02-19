@@ -131,7 +131,7 @@ def is_ends_with_punctuation(text: str) -> bool:
     return text.endswith(".") or text.endswith("?") or text.endswith("!")
 
 
-def is_near_bottom(doc_item: DocItem, same_page_items: [DocItem], threshold: float = 0.3, debug: bool = False) -> bool:
+def is_near_bottom(doc_item: DocItem, same_page_items: [DocItem], threshold: float = 0.3) -> bool:
     """
     Determine if a DocItem is near the bottom of its page.
 
@@ -152,13 +152,6 @@ def is_near_bottom(doc_item: DocItem, same_page_items: [DocItem], threshold: flo
     # Extract the coordinate origin and bounding box coordinates
     coord_origin = bbox.coord_origin
     x0, y0, x1, y1 = bbox.l, bbox.b, bbox.r, bbox.t
-
-    # Print out the text, page number, and x0, y0, x1, y1 for each item on the same page
-    if debug:
-        for item in same_page_items:
-            if hasattr(item.prov[0], 'bbox'):
-                bbox = item.prov[0].bbox
-                print(f"Text: {item.text}, Page: {item.prov[0].page_no}, x0: {bbox.l}, y0: {bbox.b}, x1: {bbox.r}, y1: {bbox.t}")
 
     # Find the maximum y1 value on the page
     page_top: float = max(item.prov[0].bbox.t for item in same_page_items if hasattr(item.prov[0], 'bbox'))
@@ -224,19 +217,9 @@ def is_too_short(doc_item: DocItem, threshold: int = 2) -> bool:
 def is_bottom_note(text: DocItem,
                    near_bottom: bool = False,
                    allow_section_headers: bool = False) -> bool:
-    debug = False
     if 'Morgenstern was then the director' in text.text:
-        if hasattr(text.prov[0], 'bbox'):
-            bbox = text.prov[0].bbox
-        else:
-            bbox = None
         pass
     if text.text.startswith("10. Summing up o f"):
-        # debug = True
-        pass
-
-    if text.text.startswith("Each of the bundles of perception"):
-        debug = True
         pass
 
     # If it is specifically digits followed by a period, followed by a space, and it is
@@ -365,7 +348,6 @@ class DoclingParser:
         self._double_notes: bool = double_notes
         self._mislabeled: List[DocItem] = []
 
-
     def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         temp_docs: List[ByteStream] = []
         temp_meta: List[Dict[str, str]] = []
@@ -412,10 +394,7 @@ class DoclingParser:
                 continue
 
             # Update section header if the element is a section header
-
             if is_section_header(text) and text not in self._mislabeled:
-                if text.text.startswith("p(e,hbe)"):
-                    pass
                 section_name = text.text
                 continue
 
