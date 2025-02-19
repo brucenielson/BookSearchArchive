@@ -217,6 +217,10 @@ def is_smaller_text(doc_item: DocItem, doc: DoclingDocument, threshold: float = 
     return doc_item_area < average_area * threshold
 
 
+def is_too_short(doc_item: DocItem, threshold: int = 2) -> bool:
+    return doc_item.label == "text" and len(doc_item.text) <= threshold
+
+
 def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
                    doc: DoclingDocument,
                    allow_section_headers: bool = False) -> bool:
@@ -228,18 +232,20 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
             bbox = None
         pass
     if text.text.startswith("10. Summing up o f"):
+        # debug = True
+        pass
+
+    if text.text.startswith("Each of the bundles of perception"):
         debug = True
         pass
 
-    # Check if this text starts with a digit
-    if bool(re.match(r"^\d", text.text)):
-        # If it is specifically digits followed by a period, followed by a space and it is
-        # a section header or a list item, then it is NOT a bottom note
-        if bool(re.match(r"^\d+\.\s", text.text)) and (is_section_header(text) or is_list_item(text)):
-            return False
-        # If it's digits followed by a letter without a space then it's a footnote
-        if bool(re.match(r"^\d+[A-Za-z]", text.text)):
-            return True
+    # If it is specifically digits followed by a period, followed by a space, and it is
+    # a section header or a list item, then it is NOT a bottom note
+    if bool(re.match(r"^\d+\.\s", text.text)) and (is_section_header(text) or is_list_item(text)):
+        return False
+    # If it's digits followed by a letter without a space then it's a bottom note
+    if bool(re.match(r"^\d+[A-Za-z]", text.text)):
+        return True
 
     if text is None or (not allow_section_headers and not is_page_text(text)):
         return False
@@ -252,6 +258,7 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
     # Get an index for 'text' into same_page_items by finding it in the list
     text_index = same_page_items.index(text)
     prev_text = same_page_items[text_index - 1] if text_index > 0 else None
+
     # If there are no items before this one, it can't possibly be a bottom note
     if prev_text is None:
         return False
@@ -259,39 +266,16 @@ def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
     if is_bottom_note(prev_text, doc):
         return True
 
-    # Check if this text starts with a digit
-    if bool(re.match(r"^\d", text.text)):
-        # If it starts with a zero, it's not a bottom note
+    if re.match(r"^\d", text.text):
+        # If the first digit is zero, it can't be a footnote because that should never happen.
         if text.text.startswith("0"):
             return False
-        # Check if this is digits NOT followed by space or period - e.g. 1Hello is always a bottom note
-        if bool(re.match(r"^\d+(?![ .]|\d|$)", text.text)):
-            # However, don't invoke if we're right at the top of the page (try to be sure we combine
-            # top of a page with previous paragraph that might have been split by a page break)
-            if is_near_bottom(text, same_page_items, threshold=0.75, debug=debug):
-                return True
-        # If it is specifically digits followed by a period, followed by a space and it is
-        # a section header or a list item, then it is NOT a bottom note
-        if bool(re.match(r"^\d+\.\s", text.text)) and (is_section_header(text) or is_list_item(text)):
-            return False
-        # Check if we're at the bottom of the page
         if is_near_bottom(text, same_page_items, threshold=0.5, debug=debug):
             # Check if this is three digits with the third digit being a 1 followed by a space
             # This is usually where the last 1 was supposed to be an 'I'.
-            if bool(re.match(r"^\d{1,2}1 ", text.text)):
-                return True
-            if not is_list_item(text):
-                return True
+            return re.match(r"^\d{1,2}1 ", text.text) or not is_list_item(text)
 
     return False
-
-    # if is_near_bottom(text, doc) and bool(re.match(r"^\d+\S.*", text.text)):
-    #     return True
-    # if is_list_item(text) and bool(re.match(r"^\d+[^\d\s.]", text.text)):
-    #     return True
-    # if text.label == 'text' and bool(re.match(r"^\d+\S.*", text.text)):
-    #     return True
-    # return False
 
 
 def is_sentence_end(text: str) -> bool:
@@ -490,7 +474,8 @@ class DoclingParser:
         # Before we begin, we need to find all footnotes and move them to the end of the texts list
         # This is because footnotes are often interspersed with the text, and we want to process them all at once
         # Split texts into regular content and notes (footnotes + bottom notes)
-        regular = [t for t in self._doc.texts if not (is_footnote(t) or is_bottom_note(t, self._doc))]
+        regular = [t for t in self._doc.texts if not (is_footnote(t) or is_bottom_note(t, self._doc)
+                                                      or is_too_short(t))]
         notes = [t for t in self._doc.texts if is_footnote(t) or is_bottom_note(t, self._doc)]
         return regular + notes
 
