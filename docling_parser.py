@@ -476,26 +476,31 @@ class DoclingParser:
         Processes the document's text items page by page, separating regular content from notes
         (footnotes and bottom notes), and returns a list of DocItems with notes at the end.
         """
-        regular_texts = []
-        notes = []
-        processed_pages = set()  # Keep track of processed pages
+        regular_texts: List[DocItem] = []
+        notes: List[DocItem] = []
+        processed_pages: set[int] = set()  # Keep track of processed pages
+        reached_bottom_notes: bool = False
+        same_page_items: List[DocItem] = []
 
         for text_item in self._doc.texts:
             page_number = text_item.prov[0].page_no
 
             if page_number not in processed_pages:
-                # Get all items on the current page
+                # On new page, so get all items on the current page
                 same_page_items: List[DocItem] = [
                     item for item in self._doc.texts if item.prov[0].page_no == page_number
                 ]
                 processed_pages.add(page_number)  # Mark the page as processed
-
-                for item in same_page_items:
-                    if is_footnote(item) or is_bottom_note(item, same_page_items) or is_too_short(item):
-                        if not is_too_short(item):
-                            notes.append(item)
-                    else:
-                        regular_texts.append(item)
+                reached_bottom_notes = False
+            if is_too_short(text_item):
+                continue
+            elif reached_bottom_notes or is_footnote(text_item):
+                notes.append(text_item)
+            elif is_bottom_note(text_item, same_page_items):
+                notes.append(text_item)
+                reached_bottom_notes = True
+            else:
+                regular_texts.append(text_item)
 
         return regular_texts + notes
 
