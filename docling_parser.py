@@ -393,6 +393,7 @@ class DoclingParser:
                 continue
 
             # Update section header if the element is a section header
+            # TODO: Need a stronger check on section headers that takes top of page into account, etc
             if is_section_header(text) and text not in self._mislabeled:
                 section_name = text.text
                 continue
