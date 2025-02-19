@@ -215,8 +215,7 @@ def is_too_short(doc_item: DocItem, threshold: int = 2) -> bool:
 
 
 def is_bottom_note(text: DocItem,
-                   near_bottom: bool = False,
-                   allow_section_headers: bool = False) -> bool:
+                   near_bottom: bool = False) -> bool:
     if 'Morgenstern was then the director' in text.text:
         pass
     if text.text.startswith("10. Summing up o f"):
@@ -230,7 +229,7 @@ def is_bottom_note(text: DocItem,
     if bool(re.match(r"^\d+[A-Za-z]", text.text)):
         return True
 
-    if text is None or (not allow_section_headers and not is_page_text(text)):
+    if text is None or not is_page_text(text):
         return False
     # Check for · at the beginning of the line. This is often how OCR represents footnote number.
     if text.text.startswith("·") and not text.text.startswith("· "):
