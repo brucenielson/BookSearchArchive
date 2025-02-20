@@ -4,7 +4,7 @@ import re
 from haystack.dataclasses import ByteStream
 from docling_core.types import DoclingDocument
 from docling_core.types.doc import CoordOrigin
-from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, DocItem
+from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, DocItem, DocItemLabel
 import nltk
 from nltk.stem import WordNetLemmatizer, PorterStemmer
 # Download the words corpus if needed
@@ -131,7 +131,7 @@ def is_ends_with_punctuation(text: str) -> bool:
     return text.endswith(".") or text.endswith("?") or text.endswith("!")
 
 
-def is_near_bottom(doc_item: DocItem, same_page_items: [DocItem], threshold: float = 0.3, debug: bool = False) -> bool:
+def is_near_bottom(doc_item: DocItem, same_page_items: [DocItem], threshold: float = 0.3) -> bool:
     """
     Determine if a DocItem is near the bottom of its page.
 
@@ -152,13 +152,6 @@ def is_near_bottom(doc_item: DocItem, same_page_items: [DocItem], threshold: flo
     # Extract the coordinate origin and bounding box coordinates
     coord_origin = bbox.coord_origin
     x0, y0, x1, y1 = bbox.l, bbox.b, bbox.r, bbox.t
-
-    # Print out the text, page number, and x0, y0, x1, y1 for each item on the same page
-    if debug:
-        for item in same_page_items:
-            if hasattr(item.prov[0], 'bbox'):
-                bbox = item.prov[0].bbox
-                print(f"Text: {item.text}, Page: {item.prov[0].page_no}, x0: {bbox.l}, y0: {bbox.b}, x1: {bbox.r}, y1: {bbox.t}")
 
     # Find the maximum y1 value on the page
     page_top: float = max(item.prov[0].bbox.t for item in same_page_items if hasattr(item.prov[0], 'bbox'))
@@ -217,81 +210,41 @@ def is_smaller_text(doc_item: DocItem, doc: DoclingDocument, threshold: float = 
     return doc_item_area < average_area * threshold
 
 
-def is_bottom_note(text: Union[SectionHeaderItem, ListItem, TextItem],
-                   doc: DoclingDocument,
-                   allow_section_headers: bool = False) -> bool:
-    debug = False
+def is_too_short(doc_item: DocItem, threshold: int = 2) -> bool:
+    return doc_item.label == "text" and len(doc_item.text) <= threshold
+
+
+def is_bottom_note(text: DocItem,
+                   near_bottom: bool = False) -> bool:
     if 'Morgenstern was then the director' in text.text:
-        if hasattr(text.prov[0], 'bbox'):
-            bbox = text.prov[0].bbox
-        else:
-            bbox = None
         pass
     if text.text.startswith("10. Summing up o f"):
-        debug = True
         pass
 
-    # Check if this text starts with a digit
-    if bool(re.match(r"^\d", text.text)):
-        # If it is specifically digits followed by a period, followed by a space and it is
-        # a section header or a list item, then it is NOT a bottom note
-        if bool(re.match(r"^\d+\.\s", text.text)) and (is_section_header(text) or is_list_item(text)):
-            return False
-        # If it's digits followed by a letter without a space then it's a footnote
-        if bool(re.match(r"^\d+[A-Za-z]", text.text)):
-            return True
+    # If it is specifically digits followed by a period, followed by a space, and it is
+    # a section header or a list item, then it is NOT a bottom note
+    if bool(re.match(r"^\d+\.\s", text.text)) and (is_section_header(text) or is_list_item(text)):
+        return False
+    # If it's digits followed by a letter without a space then it's a bottom note
+    if bool(re.match(r"^\d+[A-Za-z]", text.text)):
+        return True
 
-    if text is None or (not allow_section_headers and not is_page_text(text)):
+    if text is None or not is_page_text(text):
         return False
     # Check for · at the beginning of the line. This is often how OCR represents footnote number.
     if text.text.startswith("·") and not text.text.startswith("· "):
         return True
 
-    # Filter doc_items that are on the same page
-    same_page_items: List[DocItem] = [item for item in doc.texts if item.prov[0].page_no == text.prov[0].page_no]
-    # Get an index for 'text' into same_page_items by finding it in the list
-    text_index = same_page_items.index(text)
-    prev_text = same_page_items[text_index - 1] if text_index > 0 else None
-    # If there are no items before this one, it can't possibly be a bottom note
-    if prev_text is None:
-        return False
-    # If the previous item is itself a bottom note, then this one must be as well
-    if is_bottom_note(prev_text, doc):
-        return True
-
-    # Check if this text starts with a digit
-    if bool(re.match(r"^\d", text.text)):
-        # If it starts with a zero, it's not a bottom note
+    if re.match(r"^\d", text.text):
+        # If the first digit is zero, it can't be a footnote because that should never happen.
         if text.text.startswith("0"):
             return False
-        # Check if this is digits NOT followed by space or period - e.g. 1Hello is always a bottom note
-        if bool(re.match(r"^\d+(?![ .]|\d|$)", text.text)):
-            # However, don't invoke if we're right at the top of the page (try to be sure we combine
-            # top of a page with previous paragraph that might have been split by a page break)
-            if is_near_bottom(text, same_page_items, threshold=0.75, debug=debug):
-                return True
-        # If it is specifically digits followed by a period, followed by a space and it is
-        # a section header or a list item, then it is NOT a bottom note
-        if bool(re.match(r"^\d+\.\s", text.text)) and (is_section_header(text) or is_list_item(text)):
-            return False
-        # Check if we're at the bottom of the page
-        if is_near_bottom(text, same_page_items, threshold=0.5, debug=debug):
+        if near_bottom:
             # Check if this is three digits with the third digit being a 1 followed by a space
             # This is usually where the last 1 was supposed to be an 'I'.
-            if bool(re.match(r"^\d{1,2}1 ", text.text)):
-                return True
-            if not is_list_item(text):
-                return True
+            return re.match(r"^\d{1,2}1 ", text.text) or not is_list_item(text)
 
     return False
-
-    # if is_near_bottom(text, doc) and bool(re.match(r"^\d+\S.*", text.text)):
-    #     return True
-    # if is_list_item(text) and bool(re.match(r"^\d+[^\d\s.]", text.text)):
-    #     return True
-    # if text.label == 'text' and bool(re.match(r"^\d+\S.*", text.text)):
-    #     return True
-    # return False
 
 
 def is_sentence_end(text: str) -> bool:
@@ -392,6 +345,7 @@ class DoclingParser:
         self._start_page: Optional[int] = start_page
         self._end_page: Optional[int] = end_page
         self._double_notes: bool = double_notes
+        self._mislabeled: List[DocItem] = []
 
     def run(self) -> Tuple[List[ByteStream], List[Dict[str, str]]]:
         temp_docs: List[ByteStream] = []
@@ -439,7 +393,8 @@ class DoclingParser:
                 continue
 
             # Update section header if the element is a section header
-            if is_section_header(text) and not is_bottom_note(text, self._doc, allow_section_headers=True):
+            # TODO: Need a stronger check on section headers that takes top of page into account, etc
+            if is_section_header(text) and text not in self._mislabeled:
                 section_name = text.text
                 continue
 
@@ -486,13 +441,47 @@ class DoclingParser:
 
         return temp_docs, temp_meta
 
-    def _get_processed_texts(self) -> List:
-        # Before we begin, we need to find all footnotes and move them to the end of the texts list
-        # This is because footnotes are often interspersed with the text, and we want to process them all at once
-        # Split texts into regular content and notes (footnotes + bottom notes)
-        regular = [t for t in self._doc.texts if not (is_footnote(t) or is_bottom_note(t, self._doc))]
-        notes = [t for t in self._doc.texts if is_footnote(t) or is_bottom_note(t, self._doc)]
-        return regular + notes
+    def _get_processed_texts(self) -> List[DocItem]:
+        """
+        Processes the document's text items page by page, separating regular content from notes
+        (footnotes and bottom notes), and returns a list of DocItems with notes at the end.
+        """
+        regular_texts: List[DocItem] = []
+        notes: List[DocItem] = []
+        processed_pages: set[int] = set()  # Keep track of processed pages
+        reached_bottom_notes: bool = False
+        same_page_items: List[DocItem] = []
+        near_bottom: bool = False
+
+        for text_item in self._doc.texts:
+            page_number = text_item.prov[0].page_no
+
+            if page_number not in processed_pages:
+                # On new page, so get all items on the current page
+                same_page_items = [
+                    item for item in self._doc.texts if item.prov[0].page_no == page_number
+                ]
+                processed_pages.add(page_number)  # Mark the page as processed
+                reached_bottom_notes = False
+
+            if not reached_bottom_notes:
+                near_bottom = is_near_bottom(text_item, same_page_items, threshold=0.5)
+
+            if is_too_short(text_item):
+                continue
+            elif reached_bottom_notes or is_footnote(text_item):
+                notes.append(text_item)
+            elif is_bottom_note(text_item, near_bottom=near_bottom):
+                notes.append(text_item)
+                reached_bottom_notes = True
+            else:
+                regular_texts.append(text_item)
+
+            # Check if the DocItem is a SectionHeaderItem. If so, turn it into a TextItem.
+            if reached_bottom_notes and is_section_header(text_item):
+                self._mislabeled.append(text_item)
+
+        return regular_texts + notes
 
     def _add_paragraph(self, text: str, para_num: int, section: str,
                        page: Optional[int], docs: List[ByteStream], meta: List[Dict]):
