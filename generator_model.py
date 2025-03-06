@@ -17,7 +17,7 @@ from haystack.utils.auth import Secret
 # Other imports
 from typing import Optional, Union, Callable
 from abc import ABC, abstractmethod
-from haystack_integrations.components.generators.ollama import OllamaGenerator
+# from haystack_integrations.components.generators.ollama import OllamaGenerator
 from haystack_integrations.components.generators.llama_cpp import LlamaCppGenerator
 import os
 import urllib.request
