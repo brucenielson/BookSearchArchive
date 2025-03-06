@@ -1,3 +1,4 @@
+import functools
 import gradio as gr
 # noinspection PyPackageRequirements
 from google.genai import Client
@@ -6,8 +7,6 @@ from google.genai.types import GenerateContentConfig
 # noinspection PyPackageRequirements
 from google.genai.chats import Chat
 import generator_model as gen
-
-chat: Chat
 
 
 # Transform Gradio history to Gemini format
@@ -19,28 +18,32 @@ def transform_history(history):
     return new_history
 
 
-def response(message, history):
-    global chat
+def response(chat: Chat, message, history):
     # The history will be the same as in Gradio, the 'Undo' and 'Clear' buttons will work correctly.
     chat.history = transform_history(history)
     chat_response = chat.send_message(message)
 
     # Each character of the answer is displayed
     for i in range(len(chat_response.text)):
-        yield chat_response.text[: i+1]
+        yield chat_response.text[: i + 1]
 
 
 def main():
-    global chat
     google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
     client: Client = Client(api_key=google_secret)
     config: GenerateContentConfig = GenerateContentConfig(
         system_instruction="You are a Dungeon Master that will play a game with me.")
-    chat = client.chats.create(model="gemini-1.5-flash", config=config)
-    demo = gr.ChatInterface(response,
-                            title='RPG Chat',
-                            textbox=gr.Textbox(placeholder="Chat to the Dungeon Master"),
-                            )
+
+    chat_instance: Chat = client.chats.create(model="gemini-1.5-flash", config=config)
+
+    # Use functools.partial to pass chat_instance without using a global
+    partial_response = functools.partial(response, chat_instance)
+
+    demo = gr.ChatInterface(
+        fn=partial_response,
+        title='RPG Chat',
+        textbox=gr.Textbox(placeholder="Chat to the Dungeon Master"),
+    )
     demo.launch(debug=True)
 
 
