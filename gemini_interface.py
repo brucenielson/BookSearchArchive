@@ -1,13 +1,14 @@
 import gradio as gr
-from google import genai
-from google.genai import types
+from google.genai import Client
+from google.genai.types import GenerateContentConfig
+from google.genai.chats import Chat
 import generator_model as gen
 
 
 google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')  # Put your path here # noqa: F841
-client = genai.Client(api_key=google_secret)
-config = types.GenerateContentConfig(system_instruction="You are a Dungeon Master that will play a game with me.")
-chat = client.chats.create(model="gemini-1.5-flash", config=config)
+client: Client = Client(api_key=google_secret)
+config: GenerateContentConfig = GenerateContentConfig(system_instruction="You are a Dungeon Master that will play a game with me.")
+chat: Chat = client.chats.create(model="gemini-1.5-flash", config=config)
 
 
 # Transform Gradio history to Gemini format
