@@ -18,8 +18,8 @@ class RPGChat:
         # Create a Gemini chat instance and store it as a property of the class
         self.chat: Chat = client.chats.create(model="gemini-1.5-flash", config=config)
 
-    # Transform Gradio history to Gemini format
-    def transform_history(self, history):
+    @staticmethod
+    def transform_history(history):
         new_history = []
         for chat_response in history:
             new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
@@ -28,7 +28,7 @@ class RPGChat:
 
     def response(self, message, history):
         # The history will be the same as in Gradio; the 'Undo' and 'Clear' buttons work correctly.
-        self.chat.history = self.transform_history(history)
+        self.chat.history = RPGChat.transform_history(history)
         chat_response = self.chat.send_message(message)
         # Yield the answer character by character
         for i in range(len(chat_response.text)):
