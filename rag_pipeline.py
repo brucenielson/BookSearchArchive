@@ -444,7 +444,7 @@ def main() -> None:
     # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder",
     # "joiner", "llm", "prompt_builder", "doc_query_collector"
     include_outputs_from: Optional[set[str]] = None # {"prompt_builder", "reranker_streamer"}
-    rag_processor: RagPipeline = RagPipeline(table_name="book_archive",
+    rag_processor: RagPipeline = RagPipeline(table_name="popper_archive",
                                              generator_model=model,
                                              db_user_name=user_name,
                                              db_password=password,

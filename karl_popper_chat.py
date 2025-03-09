@@ -24,7 +24,7 @@ class KarlPopperChat:
         user_name: str = "postgres"
         db_name: str = "postgres"
         self.doc_pipeline = DocRetrievalPipeline(
-            table_name="book_archive",
+            table_name="popper_archive",
             db_user_name=user_name,
             db_password=password,
             postgres_host='localhost',
@@ -46,7 +46,7 @@ class KarlPopperChat:
             "query_input": {"query": message, "llm_top_k": self.doc_pipeline.llm_top_k}
         }
         # Run the pipeline (this returns a dictionary with the retrieved documents).
-        results = self.doc_pipeline._pipeline.run(inputs, include_outputs_from=self.doc_pipeline._include_outputs_from)
+        results = self.doc_pipeline._pipeline.run(inputs)
         # Retrieve quotes from the results (assuming they’re under "reranker" -> "documents").
         docs = results["reranker"]["documents"]
         # Extract the content of each document.

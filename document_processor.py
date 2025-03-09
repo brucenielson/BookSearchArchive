@@ -369,8 +369,8 @@ def main() -> None:
     include_outputs_from: Optional[set[str]] = None  # {"final_counter"}
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
-        table_name="book_archive",
-        recreate_table=True,
+        table_name="popper_archive",
+        recreate_table=False,
         embedder_model_name="BAAI/llm-embedder",
         file_or_folder_path=file_path,
         db_user_name=user_name,
