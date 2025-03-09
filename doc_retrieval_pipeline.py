@@ -112,7 +112,7 @@ class DocRetrievalPipeline:
             # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
             # https://medium.com/towards-data-science/reranking-using-huggingface-transformers-for-optimizing-retrieval-in-rag-pipelines-fbfc6288c91f
             ranker = TransformersSimilarityRanker(device=self._component_device, top_k=self._llm_top_k,
-                                                  score_threshold=0.20)
+                                                  score_threshold=0.0)
             ranker.warm_up()
             self._ranker = ranker
             # TODO: Fix this with annotations
@@ -236,7 +236,10 @@ class DocRetrievalPipeline:
 
         # Run the pipeline
         results: Dict[str, Any] = self._pipeline.run(inputs, include_outputs_from=self._include_outputs_from)
-        documents: list[Document] = results["reranker"]["documents"]
+        if self._use_reranker:
+            documents: list[Document] = results["reranker"]["documents"]
+        else:
+            documents: list[Document] = results["doc_query_collector"]["documents"]
         print()
         print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
@@ -301,7 +304,7 @@ def main() -> None:
     db_name: str = "postgres"
 
     include_outputs_from: Optional[set[str]] = None  # {"prompt_builder", "reranker_streamer"}
-    rag_processor: DocRetrievalPipeline = DocRetrievalPipeline(table_name="book_archive",
+    rag_processor: DocRetrievalPipeline = DocRetrievalPipeline(table_name="popper_archive",
                                                                db_user_name=user_name,
                                                                db_password=password,
                                                                postgres_host='localhost',
@@ -321,7 +324,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "How do we test mathematical theories?"
+    query: str = "What is your stance on coercion?"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"
