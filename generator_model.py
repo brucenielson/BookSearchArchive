@@ -468,7 +468,7 @@ class GoogleGeminiModel(GeneratorModel):
             print("Warming up Gemini Large Language Model")
 
         self._model: GoogleAIGeminiGenerator = GoogleAIGeminiGenerator(
-            model="gemini-pro",
+            model="gemini-1.5-flash",
             api_key=Secret.from_token(password)
         )
 
