@@ -4,7 +4,6 @@ from google.genai import Client
 # noinspection PyPackageRequirements
 from google.genai.types import GenerateContentConfig
 import generator_model as gen
-
 import textwrap
 # Import your DocRetrievalPipeline and SearchMode (adjust import paths as needed)
 from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
@@ -16,7 +15,6 @@ class KarlPopperChat:
         google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
         client: Client = Client(api_key=google_secret)
         config: GenerateContentConfig = GenerateContentConfig(
-            system_instruction="You are philosopher Karl Popper. Answer questions with philosophical insights, and use the provided quotes as reference."
             system_instruction="You are philosopher Karl Popper. Answer questions with philosophical insights, and use the provided quotes along with their metadata as reference."
         )
         self.chat = client.chats.create(model="gemini-1.5-flash", config=config)
