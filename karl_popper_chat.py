@@ -4,11 +4,8 @@ from google.genai import Client
 # noinspection PyPackageRequirements
 from google.genai.types import GenerateContentConfig
 import generator_model as gen
-import textwrap
 # Import your DocRetrievalPipeline and SearchMode (adjust import paths as needed)
 from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
-import logging
-logging.basicConfig(level=logging.DEBUG)
 
 
 class KarlPopperChat:
@@ -17,7 +14,8 @@ class KarlPopperChat:
         google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
         client: Client = Client(api_key=google_secret)
         config: GenerateContentConfig = GenerateContentConfig(
-            system_instruction="You are philosopher Karl Popper. Answer questions with philosophical insights, and use the provided quotes along with their metadata as reference."
+            system_instruction="You are philosopher Karl Popper. Answer questions with philosophical insights, "
+                               "and use the provided quotes along with their metadata as reference."
         )
         self.chat = client.chats.create(model="gemini-1.5-flash", config=config)
 
@@ -63,26 +61,21 @@ class KarlPopperChat:
         return formatted
 
     def respond(self, message, chat_history):
-        logging.debug(f"Received message: '{message}'")
-        logging.debug(f"Current chat history: {chat_history}")
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
         inputs = {
             "query_input": {"query": message, "llm_top_k": self.doc_pipeline.llm_top_k}
         }
-        if message.strip() == "" or message is None:
-            pass
         results = self.doc_pipeline._pipeline.run(inputs)
         docs = results["reranker"]["documents"]
-        logging.debug(f"Docs Returned: {len(docs)}")
 
         # Format each retrieved document (quote + metadata).
         formatted_docs = [self.format_document(doc) for doc in docs]
         quotes_text = "\n\n".join(formatted_docs)
 
-        # --- Step 2: Prepare modified prompt for Gemini ---
         modified_query = (
-            f"You are philosopher Karl Popper. Use the following quotes with their metadata as reference in your answer:\n\n"
-            f"{quotes_text}\n\nNow, answer the following question: {message}"
+            f"You are philosopher Karl Popper. "
+            f"Use the following quotes with their metadata as reference in your answer:\n\n{quotes_text}\n\n"
+            f"Now, answer the following question: {message}"
         )
 
         # Send the modified query to Gemini.
@@ -93,16 +86,17 @@ class KarlPopperChat:
         current_text = ""
         for char in answer_text:
             current_text += char
-            yield (chat_history + [(message, current_text)], quotes_text)
+            yield chat_history + [(message, current_text)], quotes_text
 
 
 def build_interface():
     karl_chat = KarlPopperChat()
 
-    with gr.Blocks() as demo:
+    with gr.Blocks() as chat_interface:
         gr.Markdown("# Karl Popper Chatbot")
         gr.Markdown(
-            "This chatbot retrieves quotes with metadata from a document store and uses them as context for its Gemini-powered responses. The quotes and metadata are displayed on the right.")
+            "This chatbot retrieves quotes with metadata from a document store and uses them as context "
+            "for its Gemini-powered responses. The quotes and metadata are displayed on the right.")
         with gr.Row():
             with gr.Column(scale=2):
                 chatbot = gr.Chatbot(label="Chat")
@@ -112,24 +106,21 @@ def build_interface():
                 quotes_box = gr.Textbox(label="Retrieved Quotes & Metadata", interactive=False, lines=15)
 
         def user_message(message, chat_history):
-            logging.debug(f"user_message: User submitted message: '{message}'")
-            if message.strip() == "" or message is None:
-                pass
+            # Append the user's message to the chat history
             updated_history = chat_history + [(message, None)]
             return "", updated_history
 
         def process_message(message, chat_history):
-            logging.debug(f"process_message: User submitted message: '{message}'")
             for updated_history, quotes_text in karl_chat.respond(message, chat_history):
                 yield updated_history, quotes_text
 
-        msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=False)
+        msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot], [chatbot, quotes_box], queue=True)
         clear.click(lambda: ([], ""), None, [chatbot, quotes_box], queue=False)
 
-    return demo
+    return chat_interface
 
 
 if __name__ == "__main__":
-    demo = build_interface()
-    demo.launch(debug=True)
+    popper_chat = build_interface()
+    popper_chat.launch(debug=True)
