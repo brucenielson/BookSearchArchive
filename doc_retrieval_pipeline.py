@@ -226,9 +226,6 @@ class DocRetrievalPipeline:
         Args:
             query (str): The input query to process.
         """
-        print()
-        print("Generating Response...")
-
         # Prepare inputs for the pipeline
         inputs: Dict[str, Any] = {
             "query_input": {"query": query, "llm_top_k": self._llm_top_k},
@@ -240,13 +237,10 @@ class DocRetrievalPipeline:
             documents: list[Document] = results["reranker"]["documents"]
         else:
             documents: list[Document] = results["doc_query_collector"]["documents"]
-        print()
         print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
         # Print retrieved documents
-        print()
         self._print_verbose("Retrieved Documents:")
-        print_documents(documents)
         return documents
 
     def _create_rag_pipeline(self) -> None:

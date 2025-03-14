@@ -6,6 +6,8 @@ from google.genai.types import GenerateContentConfig
 import generator_model as gen
 # Import your DocRetrievalPipeline and SearchMode (adjust import paths as needed)
 from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
+# noinspection PyPackageRequirements
+from haystack import Document
 
 
 class KarlPopperChat:
@@ -40,14 +42,6 @@ class KarlPopperChat:
         )
 
     @staticmethod
-    def transform_history(history):
-        new_history = []
-        for chat_response in history:
-            new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
-            new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})
-        return new_history
-
-    @staticmethod
     def format_document(doc) -> str:
         """
         Format a document by including its metadata followed by the quote.
@@ -75,21 +69,19 @@ class KarlPopperChat:
         #     "query_input": {"query": message, "llm_top_k": self.doc_pipeline.llm_top_k}
         # }
         # results = self.doc_pipeline._pipeline.run(inputs)
-        results = self.doc_pipeline.generate_response(message)
-        docs = results
+        docs: list[Document] = self.doc_pipeline.generate_response(message)
 
         # Format each retrieved document (quote + metadata).
         formatted_docs = [self.format_document(doc) for doc in docs]
         quotes_text = "\n\n".join(formatted_docs)
 
         modified_query = (
-            f"You are philosopher Karl Popper. "
             f"Use the following quotes with their metadata as reference in your answer:\n\n{quotes_text}\n\n"
+            f"Reference the quotes and their metadata in your answer where possible. "
             f"Now, answer the following question: {message}"
         )
 
         # Send the modified query to Gemini.
-        self.chat.history = self.transform_history(chat_history)
         chat_response = self.chat.send_message(modified_query)
         answer_text = chat_response.text
 
