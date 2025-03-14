@@ -748,8 +748,6 @@ class RetrieverWrapper:
     @component.output_types(documents=List[Document])
     def run(self, query: Union[List[float], str]) -> Dict[str, Any]:
         documents: List[Document] = []
-        if query is None or (type(query) == str and query.strip() == ""):
-            pass
         if isinstance(query, list):
             documents = self._retriever.run(query_embedding=query)['documents']
         elif isinstance(query, str):
