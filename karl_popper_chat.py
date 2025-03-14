@@ -69,6 +69,17 @@ class KarlPopperChat:
         #     "query_input": {"query": message, "llm_top_k": self.doc_pipeline.llm_top_k}
         # }
         # results = self.doc_pipeline._pipeline.run(inputs)
+        if message.strip() == "" or message is None:
+            # This is a kludge to deal with the fact that Gradio sometimes get a race condition and we lose the message
+            # To correct, try to get the last message from chat history
+            if chat_history and len(chat_history) > 0 and chat_history[-1][1] is None:
+                # If the last message has no response, then grab the message portion and remove it
+                # It will get added back again below
+                # There has got to be a better way to do this, but this will work for now
+                message = chat_history[-1][0]
+                # Remove last message from chat history
+                chat_history = chat_history[:-1]
+
         docs: list[Document] = self.doc_pipeline.generate_response(message)
 
         # Format each retrieved document (quote + metadata).
@@ -111,11 +122,13 @@ def build_interface():
                 quotes_box = gr.Textbox(label="Retrieved Quotes & Metadata", interactive=False, lines=15)
 
         def user_message(message, chat_history):
+            # print(f"user_message: User submitted message: '{message}'")
             # Append the user's message to the chat history
             updated_history = chat_history + [(message, None)]
             return "", updated_history
 
         def process_message(message, chat_history):
+            # print(f"process_message: User submitted message: '{message}'")
             updated_history, quotes_text = karl_chat.respond(message, chat_history)
             yield updated_history, quotes_text
             # How to do streaming

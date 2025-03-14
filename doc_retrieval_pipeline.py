@@ -25,7 +25,7 @@ from haystack.utils.auth import Secret
 # Neo4j imports
 from neo4j_haystack import Neo4jDocumentStore
 # Other imports
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any, Union, List
 from pathlib import Path
 import generator_model as gen
 from enum import Enum
@@ -219,7 +219,7 @@ class DocRetrievalPipeline:
         self._document_store = init_doc_store()
         self._print_verbose("Document Count: " + str(self._document_store.count_documents()))
 
-    def generate_response(self, query: str) -> list[Document]:
+    def generate_response(self, query: str) -> List[Document]:
         """
         Generate a response to a given query using the RAG pipeline.
 
@@ -234,9 +234,9 @@ class DocRetrievalPipeline:
         # Run the pipeline
         results: Dict[str, Any] = self._pipeline.run(inputs, include_outputs_from=self._include_outputs_from)
         if self._use_reranker:
-            documents: list[Document] = results["reranker"]["documents"]
+            documents: List[Document] = results["reranker"]["documents"]
         else:
-            documents: list[Document] = results["doc_query_collector"]["documents"]
+            documents: List[Document] = results["doc_query_collector"]["documents"]
         print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
         # Print retrieved documents
