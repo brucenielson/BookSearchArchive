@@ -7,6 +7,8 @@ import generator_model as gen
 import textwrap
 # Import your DocRetrievalPipeline and SearchMode (adjust import paths as needed)
 from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 
 class KarlPopperChat:
@@ -32,7 +34,7 @@ class KarlPopperChat:
             db_name=db_name,
             verbose=False,
             llm_top_k=5,
-            retriever_top_k_docs=5,
+            retriever_top_k_docs=100,
             include_outputs_from=None,
             search_mode=SearchMode.HYBRID,
             use_reranker=True,
@@ -61,6 +63,8 @@ class KarlPopperChat:
         return formatted
 
     def respond(self, message, chat_history):
+        logging.debug(f"Received message: '{message}'")
+        logging.debug(f"Current chat history: {chat_history}")
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
         inputs = {
             "query_input": {"query": message, "llm_top_k": self.doc_pipeline.llm_top_k}
@@ -69,6 +73,7 @@ class KarlPopperChat:
             pass
         results = self.doc_pipeline._pipeline.run(inputs)
         docs = results["reranker"]["documents"]
+        logging.debug(f"Docs Returned: {len(docs)}")
 
         # Format each retrieved document (quote + metadata).
         formatted_docs = [self.format_document(doc) for doc in docs]
@@ -107,11 +112,14 @@ def build_interface():
                 quotes_box = gr.Textbox(label="Retrieved Quotes & Metadata", interactive=False, lines=15)
 
         def user_message(message, chat_history):
+            logging.debug(f"user_message: User submitted message: '{message}'")
             if message.strip() == "" or message is None:
                 pass
-            return "", chat_history + [(message, None)]
+            updated_history = chat_history + [(message, None)]
+            return "", updated_history
 
         def process_message(message, chat_history):
+            logging.debug(f"process_message: User submitted message: '{message}'")
             for updated_history, quotes_text in karl_chat.respond(message, chat_history):
                 yield updated_history, quotes_text
 
