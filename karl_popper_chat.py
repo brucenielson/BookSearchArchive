@@ -39,7 +39,16 @@ class KarlPopperChat:
             embedder_model_name="BAAI/llm-embedder"
         )
 
-    def format_document(self, doc) -> str:
+    @staticmethod
+    def transform_history(history):
+        new_history = []
+        for chat_response in history:
+            new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
+            new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})
+        return new_history
+
+    @staticmethod
+    def format_document(doc) -> str:
         """
         Format a document by including its metadata followed by the quote.
         """
@@ -62,11 +71,12 @@ class KarlPopperChat:
 
     def respond(self, message, chat_history):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
-        inputs = {
-            "query_input": {"query": message, "llm_top_k": self.doc_pipeline.llm_top_k}
-        }
-        results = self.doc_pipeline._pipeline.run(inputs)
-        docs = results["reranker"]["documents"]
+        # inputs = {
+        #     "query_input": {"query": message, "llm_top_k": self.doc_pipeline.llm_top_k}
+        # }
+        # results = self.doc_pipeline._pipeline.run(inputs)
+        results = self.doc_pipeline.generate_response(message)
+        docs = results
 
         # Format each retrieved document (quote + metadata).
         formatted_docs = [self.format_document(doc) for doc in docs]
@@ -79,14 +89,17 @@ class KarlPopperChat:
         )
 
         # Send the modified query to Gemini.
+        self.chat.history = self.transform_history(chat_history)
         chat_response = self.chat.send_message(modified_query)
         answer_text = chat_response.text
 
         # --- Step 3: Stream the answer character-by-character ---
-        current_text = ""
-        for char in answer_text:
-            current_text += char
-            yield chat_history + [(message, current_text)], quotes_text
+        return chat_history + [(message, answer_text)], quotes_text
+        # How to do streaming
+        # current_text = ""
+        # for char in answer_text:
+        #     current_text += char
+        #     yield chat_history + [(message, current_text)], quotes_text
 
 
 def build_interface():
@@ -111,8 +124,11 @@ def build_interface():
             return "", updated_history
 
         def process_message(message, chat_history):
-            for updated_history, quotes_text in karl_chat.respond(message, chat_history):
-                yield updated_history, quotes_text
+            updated_history, quotes_text = karl_chat.respond(message, chat_history)
+            yield updated_history, quotes_text
+            # How to do streaming
+            # for updated_history, quotes_text in karl_chat.respond(message, chat_history):
+            #     yield updated_history, quotes_text
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot], [chatbot, quotes_box], queue=True)

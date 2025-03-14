@@ -219,7 +219,7 @@ class DocRetrievalPipeline:
         self._document_store = init_doc_store()
         self._print_verbose("Document Count: " + str(self._document_store.count_documents()))
 
-    def generate_response(self, query: str) -> None:
+    def generate_response(self, query: str) -> list[Document]:
         """
         Generate a response to a given query using the RAG pipeline.
 
@@ -247,6 +247,7 @@ class DocRetrievalPipeline:
         print()
         self._print_verbose("Retrieved Documents:")
         print_documents(documents)
+        return documents
 
     def _create_rag_pipeline(self) -> None:
         def doc_collector_completed() -> None:
