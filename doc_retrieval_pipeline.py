@@ -239,8 +239,6 @@ class DocRetrievalPipeline:
             documents: List[Document] = results["doc_query_collector"]["documents"]
         print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
-        # Print retrieved documents
-        self._print_verbose("Retrieved Documents:")
         return documents
 
     def _create_rag_pipeline(self) -> None:

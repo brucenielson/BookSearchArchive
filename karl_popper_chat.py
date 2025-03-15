@@ -49,7 +49,7 @@ class KarlPopperChat:
         formatted = ""
         # If the document has metadata, format each key-value pair.
         if hasattr(doc, 'meta') and doc.meta:
-            meta_entries = []
+            meta_entries = ["Score: {:.4f}".format(doc.score) if hasattr(doc, 'score') else "Score: N/A"]
             # Define keys to ignore (customize as needed).
             ignore_keys = {"file_path", "item_#", "item_id"}
             for key, value in doc.meta.items():
