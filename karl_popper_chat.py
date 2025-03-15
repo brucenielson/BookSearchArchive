@@ -98,7 +98,7 @@ class KarlPopperChat:
 
         # --- Step 3: Stream the answer character-by-character ---
         return chat_history + [(message, answer_text)], quotes_text
-        # How to do streaming
+        # How to do streaming 
         # current_text = ""
         # for char in answer_text:
         #     current_text += char
