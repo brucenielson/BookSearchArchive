@@ -17,7 +17,7 @@ from haystack.utils.auth import Secret
 # Other imports
 from typing import Optional, Union, Callable
 from abc import ABC, abstractmethod
-from haystack_integrations.components.generators.ollama import OllamaGenerator
+# from haystack_integrations.components.generators.ollama import OllamaGenerator
 from haystack_integrations.components.generators.llama_cpp import LlamaCppGenerator
 import os
 import urllib.request
@@ -468,7 +468,7 @@ class GoogleGeminiModel(GeneratorModel):
             print("Warming up Gemini Large Language Model")
 
         self._model: GoogleAIGeminiGenerator = GoogleAIGeminiGenerator(
-            model="gemini-pro",
+            model="gemini-1.5-flash",
             api_key=Secret.from_token(password)
         )
 

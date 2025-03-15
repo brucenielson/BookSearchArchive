@@ -4,90 +4,121 @@ import re
 from haystack.dataclasses import ByteStream
 from docling_core.types import DoclingDocument
 from docling_core.types.doc import CoordOrigin
-from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, DocItem, DocItemLabel
-import nltk
-from nltk.stem import WordNetLemmatizer, PorterStemmer
-# Download the words corpus if needed
-nltk.download('words')
-nltk.download('wordnet')
-nltk.download('omw-1.4')
-words_list: set = set(nltk.corpus.words.words())
-# Initialize lemmatizer
-lemmatizer = WordNetLemmatizer()
-stemmer = PorterStemmer()
+from docling_core.types.doc.document import SectionHeaderItem, ListItem, TextItem, DocItem
+
+# Module-level caches (private)
+_words_list = None
+_lemmatizer = None
+_stemmer = None
+
+
+def get_words_list():
+    """Lazily load and cache the NLTK words list."""
+    global _words_list
+    if _words_list is None:
+        import nltk
+        nltk.download('words')
+        _words_list = set(nltk.corpus.words.words())
+    return _words_list
+
+
+def get_lemmatizer():
+    """Lazily load and cache the WordNetLemmatizer."""
+    global _lemmatizer
+    if _lemmatizer is None:
+        from nltk.stem import WordNetLemmatizer
+        _lemmatizer = WordNetLemmatizer()
+    return _lemmatizer
+
+
+def get_stemmer():
+    """Lazily load and cache the PorterStemmer."""
+    global _stemmer
+    if _stemmer is None:
+        from nltk.stem import PorterStemmer
+        _stemmer = PorterStemmer()
+    return _stemmer
 
 
 def is_valid_word(word):
-    """Check if a word is valid by comparing it directly and via stemming."""
+    """
+    Check if a word is valid by comparing it directly and via stemming/lemmatization.
+
+    Returns True (or the valid modified word) if the word is found,
+    otherwise returns False.
+    """
+    words_list = get_words_list()
+    stemmer = get_stemmer()
+    lemmatizer = get_lemmatizer()
+
     stem = stemmer.stem(word)
-    if (word.lower() in words_list
-            or word in words_list):
+    if word.lower() in words_list or word in words_list:
         return True
-    elif (stem in words_list
-          or stem.lower() in words_list):
+    elif stem in words_list or stem.lower() in words_list:
         return True
+
     # Check all lemmatizations of the word
-    options = ['n', 'v', 'a', 'r', 's']
-    for option in options:
-        lemma = lemmatizer.lemmatize(word, pos=option)
+    for pos in ['n', 'v', 'a', 'r', 's']:
+        lemma = lemmatizer.lemmatize(word, pos=pos)
         if lemma in words_list:
             return True
+
     # Check for custom lemmatizations
+    # noinspection SpellCheckingInspection
     suffixes = {
         "ability": "able",  # testability -> testable
         "ibility": "ible",  # possibility -> possible
-        "iness": "y",         # happiness -> happy
-        "ity": "e",          # creativity -> create
-        "tion": "e",         # creation -> create
-        "able": "",         # testable -> test
-        "ible": "",         # possible -> poss
-        "ing": "",          # running -> run
-        "ed": "",           # tested -> test
-        "s": ""             # tests -> test
+        "iness": "y",  # happiness -> happy
+        "ity": "e",  # creativity -> create
+        "tion": "e",  # creation -> create
+        "able": "",  # testable -> test
+        "ible": "",  # possible -> poss
+        "ing": "",  # running -> run
+        "ed": "",  # tested -> test
+        "s": ""  # tests -> test
     }
     for suffix, replacement in suffixes.items():
         if word.endswith(suffix):
-            if suffix != 's':
-                pass
-            stripped_word = word[: -len(suffix)] + replacement
-            if is_valid_word(stripped_word):
-                return stripped_word
+            stripped_word = word[:-len(suffix)] + replacement
+            # Recursively check the modified word; if valid, return the modified form.
+            result = is_valid_word(stripped_word)
+            if result:
+                return result
 
     return False
 
 
 def combine_hyphenated_words(p_str):
-    # This regular expression looks for cases where a dash separates two parts of a word
-    # The idea is to combine the two parts and check if they form a valid word.
+    """
+    Combine hyphenated words if the parts together form a valid word.
+    Otherwise, preserve the hyphen (assuming it connects two valid words).
+    """
+
     def replace_dash(match):
         word1, word2 = match.group(1), match.group(2)
         combined = word1.strip() + word2.strip()
-        first_word = p_str.strip().split(' ')[0]
 
-        # does word 1 contain a space after the hyphen?
+        # If there is a space after the hyphen and the combined word is valid,
+        # assume the hyphen was splitting a single word.
         if word2.startswith(" ") and is_valid_word(combined):
-            # When there is a space after the hyphen, it is likely that the hyphen is separating two parts
-            # of a single word
             return combined
-        # else check for each part individually being a word. If so, this is probably a compound word
+        # If both parts are valid words on their own, keep them hyphenated.
         elif is_valid_word(word1.strip()) and is_valid_word(word2.strip()):
             return word1.strip() + '-' + word2.strip()
-        # else if the combined word is a valid word, then we probably had one word broken in two
+        # Otherwise, if the combined word is valid, return it.
         elif is_valid_word(combined):
-            return combined  # Combine the parts if they form a valid word
-        # if the combined word starts with a capital letter, then it is likely a proper noun. Combine the parts.
-        # TODO: I can make this work better if I be sure this is a capital that isn't the first word of a sentence.
+            return combined
+        # If the combined word starts with a capital letter (likely a proper noun)
+        # and the second part isn’t valid on its own, combine them.
         elif combined[0].isupper() and not word2.strip()[0].isupper() and not is_valid_word(word2.strip()):
             return combined
 
-        # Default - assume the hyphen is separating two words
+        # Default: assume the hyphen is meant to connect two words.
         return word1.strip() + '-' + word2.strip()
 
-    # Replace soft hyphen characters (­) with a regular dash
+    # Replace any soft hyphen characters with a regular dash.
     p_str = p_str.replace("­", "-")
-    # p_str = p_str.replace("- ", "-")
-
-    # Look for dashes separating word parts (no spaces involved)
+    # Look for hyphens between word parts (with or without an extra space)
     p_str = re.sub(r'(\w+)-(\s?\w+)', replace_dash, p_str)
 
     return p_str
