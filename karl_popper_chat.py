@@ -70,11 +70,11 @@ class KarlPopperChat:
         # }
         # results = self.doc_pipeline._pipeline.run(inputs)
         if message.strip() == "" or message is None:
-            # This is a kludge to deal with the fact that Gradio sometimes get a race condition and we lose the message
+            # This is a kludge to deal with the fact that Gradio sometimes get a race condition, and we lose the message
             # To correct, try to get the last message from chat history
             if chat_history and len(chat_history) > 0 and chat_history[-1][1] is None:
-                # If the last message has no response, then grab the message portion and remove it
-                # It will get added back again below
+                # If the last message has no response, then grab the message portion and remove it.
+                # It will get added back again below.
                 # There has got to be a better way to do this, but this will work for now
                 message = chat_history[-1][0]
                 # Remove last message from chat history
