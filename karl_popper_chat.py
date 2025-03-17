@@ -97,28 +97,32 @@ class KarlPopperChat:
             max_score = max(doc.score for doc in docs if hasattr(doc, 'score'))
 
         if max_score is not None and max_score < 0.30:
-            # If there are no quotes with a scare at least 0.30, then we need to do additional checks
-            # Let's ask Gemini outside a chat session if each quote is relevant to the question or not
-            relevant_docs = []
-            for doc in docs:
-                try:
-                    prompt = (
-                        f"Given the question: '{message}', determine if the following quote will help answer "
-                        f"the question. \n\nQuote: {doc.content}\n\nAnswer with only 'yes' or 'no'."
-                    )
-                    # Start a new chat session with no history for this check.
-                    chat_session = self.model.start_chat(history=[])
-                    chat_response = chat_session.send_message(prompt)
-                    # If Gemini's response includes 'yes', consider the quote relevant.
-                    if "yes" in chat_response.text.lower():
-                        relevant_docs.append(doc)
-                except Exception as e:
-                    # Capture any exceptions. Likely to exceeding quota for Gemini rate limits.
-                    # Wait for a few seconds before continuing.
-                    print(f"Error during doc relevance check: {e}")
-                    time.sleep(1)
-                    break
-            docs = relevant_docs
+            # If there are no quotes with a score at least 0.30,
+            # then we ask Gemini in one go which quotes are relevant.
+            prompt = (
+                f"Given the question: '{message}', review the following numbered quotes and "
+                "return a comma-separated list of the numbers for the quotes that you believe will help answer the "
+                "question. Answer with only the numbers, for example: 1,3,5.\n\n"
+            )
+            for i, doc in enumerate(docs, start=1):
+                prompt += f"{i}. {doc.content}\n\n"
+
+            # Start a new chat session with no history for this check.
+            chat_session = self.model.start_chat(history=[])
+            chat_response = chat_session.send_message(prompt)
+
+            # Extract numbers from Gemini's response.
+            response_text = chat_response.text.strip()
+            # Split by commas, remove any extra spaces, and convert to integers.
+            try:
+                relevant_numbers = [int(num.strip()) for num in response_text.split(',') if num.strip().isdigit()]
+            except Exception as parse_e:
+                print(f"Error parsing Gemini response: {parse_e}")
+                time.sleep(1)
+                relevant_numbers = []
+
+            # Filter docs based on the numbered positions.
+            docs = [doc for idx, doc in enumerate(docs, start=1) if idx in relevant_numbers]
         else:
             # Drop any quotes with a score less than 0.20 if we have at least 3 quotes above 20
             # Otherwise drop any quotes with a score less than 0.10
