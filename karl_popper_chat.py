@@ -67,6 +67,7 @@ class KarlPopperChat:
         formatted += f"Quote: {doc.content}"
         return formatted
 
+    # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
     @staticmethod
     def transform_history(history):
         new_history = []
@@ -156,16 +157,13 @@ class KarlPopperChat:
         # We just want questions and answers in the chat history
         chat_session = self.model.start_chat(history=gemini_chat_history)
         # Send the modified query to Gemini.
-        chat_response = chat_session.send_message(modified_query)
-        answer_text = chat_response.text
-
-        # --- Step 3: Stream the answer character-by-character ---
-        return chat_history + [(message, answer_text)], quotes_text
-        # How to do streaming
-        # current_text = ""
-        # for char in answer_text:
-        #     current_text += char
-        #     yield chat_history + [(message, current_text)], quotes_text
+        chat_response = chat_session.send_message(modified_query, stream=True)
+        answer_text = ""
+        # # --- Step 3: Stream the answer character-by-character ---
+        for chunk in chat_response:
+            if hasattr(chunk, 'text'):
+                answer_text += chunk.text
+                yield chat_history + [(message, answer_text)], quotes_text
 
 
 def build_interface():
@@ -192,11 +190,8 @@ def build_interface():
 
         def process_message(message, chat_history):
             # print(f"process_message: User submitted message: '{message}'")
-            updated_history, quotes_text = karl_chat.respond(message, chat_history)
-            yield updated_history, quotes_text
-            # How to do streaming
-            # for updated_history, quotes_text in karl_chat.respond(message, chat_history):
-            #     yield updated_history, quotes_text
+            for updated_history, quotes_text in karl_chat.respond(message, chat_history):
+                yield updated_history, quotes_text
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot], [chatbot, quotes_box], queue=True)
