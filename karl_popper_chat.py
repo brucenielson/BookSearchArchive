@@ -1,25 +1,29 @@
+import time
 import gradio as gr
 # noinspection PyPackageRequirements
-from google.genai import Client
+# from google.genai import Client
 # noinspection PyPackageRequirements
 from google.genai.types import GenerateContentConfig
 import generator_model as gen
+# noinspection PyPackageRequirements
+import google.generativeai as genai
 # Import your DocRetrievalPipeline and SearchMode (adjust import paths as needed)
 from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
 # noinspection PyPackageRequirements
 from haystack import Document
+from typing import Optional, List
 
 
 class KarlPopperChat:
     def __init__(self):
         # Initialize Gemini Chat with a system instruction to act like philosopher Karl Popper.
         google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
-        client: Client = Client(api_key=google_secret)
-        config: GenerateContentConfig = GenerateContentConfig(
+        genai.configure(api_key=google_secret)
+        model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash-exp",
             system_instruction="You are philosopher Karl Popper. Answer questions with philosophical insights, "
-                               "and use the provided quotes along with their metadata as reference."
-        )
-        self.chat = client.chats.create(model="gemini-1.5-flash", config=config)
+                               "and use the provided quotes along with their metadata as reference.")
+        self.model = model
 
         # Initialize the document retrieval pipeline with top-5 quote retrieval.
         password: str = gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt')
@@ -63,12 +67,17 @@ class KarlPopperChat:
         formatted += f"Quote: {doc.content}"
         return formatted
 
+    # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
+    @staticmethod
+    def transform_history(history):
+        new_history = []
+        for chat_response in history:
+            new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
+            new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})
+        return new_history
+
     def respond(self, message, chat_history):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
-        # inputs = {
-        #     "query_input": {"query": message, "llm_top_k": self.doc_pipeline.llm_top_k}
-        # }
-        # results = self.doc_pipeline._pipeline.run(inputs)
         if message.strip() == "" or message is None:
             # This is a kludge to deal with the fact that Gradio sometimes get a race condition, and we lose the message
             # To correct, try to get the last message from chat history
@@ -80,29 +89,86 @@ class KarlPopperChat:
                 # Remove last message from chat history
                 chat_history = chat_history[:-1]
 
-        docs: list[Document] = self.doc_pipeline.generate_response(message)
+        docs: List[Document] = self.doc_pipeline.generate_response(message)
+
+        # Find the largest score
+        max_score: float = 100.0
+        if docs:
+            max_score = max(doc.score for doc in docs if hasattr(doc, 'score'))
+
+        if max_score is not None and max_score < 0.30:
+            # If there are no quotes with a score at least 0.30,
+            # then we ask Gemini in one go which quotes are relevant.
+            prompt = (
+                f"Given the question: '{message}', review the following numbered quotes and "
+                "return a comma-separated list of the numbers for the quotes that you believe will help answer the "
+                "question. If there are no quotes relevant to the question, return an empty string. "
+                "Answer with only the numbers or an empty string, for example: '1,3,5' or ''.\n\n"
+            )
+            for i, doc in enumerate(docs, start=1):
+                prompt += f"{i}. {doc.content}\n\n"
+
+            # Start a new chat session with no history for this check.
+            chat_session = self.model.start_chat(history=[])
+            chat_response = chat_session.send_message(prompt)
+
+            # Extract numbers from Gemini's response.
+            response_text = chat_response.text.strip()
+            # Split by commas, remove any extra spaces, and convert to integers.
+            try:
+                relevant_numbers = [int(num.strip()) for num in response_text.split(',') if num.strip().isdigit()]
+            except Exception as parse_e:
+                print(f"Error parsing Gemini response: {parse_e}")
+                time.sleep(1)
+                relevant_numbers = []
+
+            # Filter docs based on the numbered positions.
+            docs = [doc for idx, doc in enumerate(docs, start=1) if idx in relevant_numbers]
+        else:
+            # Drop any quotes with a score less than 0.20 if we have at least 3 quotes above 20
+            # Otherwise drop any quotes with a score less than 0.10
+            # Count how many quotes have a score >= 0.20.
+            threshold: float = 0.20
+            num_high = len([doc for doc in docs if hasattr(doc, 'score') and doc.score >= threshold])
+            # If we have at least 3 such quotes, drop any with a score less than 0.20.
+            # Otherwise, drop quotes with a score less than 0.10.
+            threshold = 0.20 if num_high >= 3 else 0.10
+            docs = [doc for doc in docs if hasattr(doc, 'score') and doc.score >= threshold]
 
         # Format each retrieved document (quote + metadata).
         formatted_docs = [self.format_document(doc) for doc in docs]
         quotes_text = "\n\n".join(formatted_docs)
 
-        modified_query = (
-            f"Use the following quotes with their metadata as reference in your answer:\n\n{quotes_text}\n\n"
-            f"Reference the quotes and their metadata in your answer where possible. "
-            f"Now, answer the following question: {message}"
-        )
-
+        modified_query: str = ""
+        if not quotes_text or quotes_text.strip() == "":
+            modified_query = message
+        elif max_score > 0.50:
+            modified_query = (
+                f"Use the following quotes with their metadata as reference in your answer:\n\n{quotes_text}\n\n"
+                f"Reference the quotes and their metadata in your answer where possible. "
+                f"Now, answer the following question: {message}"
+            )
+        else:
+            modified_query = (
+                f"The following quotes are available. You may use them as reference to answer my question"
+                f"if you find them relevant:\n\n{quotes_text}\n\n"
+                f"Reference the quotes and their metadata in your answer if used. But don't "
+                f"feel obligated to use the quotes if they are not relevant. "
+                f"Now, answer the following question: {message}"
+            )
+        # Put the chat_history into the correct format for Gemini
+        gemini_chat_history = self.transform_history(chat_history)
+        # We start a new chat session each time so that we can control the chat history and remove all the rag docs
+        # We just want questions and answers in the chat history
+        chat_session = self.model.start_chat(history=gemini_chat_history)
         # Send the modified query to Gemini.
-        chat_response = self.chat.send_message(modified_query)
-        answer_text = chat_response.text
-
-        # --- Step 3: Stream the answer character-by-character ---
-        return chat_history + [(message, answer_text)], quotes_text
-        # How to do streaming
-        # current_text = ""
-        # for char in answer_text:
-        #     current_text += char
-        #     yield chat_history + [(message, current_text)], quotes_text
+        chat_response = chat_session.send_message(modified_query, stream=True)
+        answer_text = ""
+        # # --- Step 3: Stream the answer character-by-character ---
+        for chunk in chat_response:
+            if hasattr(chunk, 'text'):
+                answer_text += chunk.text
+                yield chat_history + [(message, answer_text)], quotes_text
 
 
 def build_interface():
@@ -129,11 +195,8 @@ def build_interface():
 
         def process_message(message, chat_history):
             # print(f"process_message: User submitted message: '{message}'")
-            updated_history, quotes_text = karl_chat.respond(message, chat_history)
-            yield updated_history, quotes_text
-            # How to do streaming
-            # for updated_history, quotes_text in karl_chat.respond(message, chat_history):
-            #     yield updated_history, quotes_text
+            for updated_history, quotes_text in karl_chat.respond(message, chat_history):
+                yield updated_history, quotes_text
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot], [chatbot, quotes_box], queue=True)
