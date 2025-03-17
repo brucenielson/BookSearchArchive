@@ -102,7 +102,8 @@ class KarlPopperChat:
             prompt = (
                 f"Given the question: '{message}', review the following numbered quotes and "
                 "return a comma-separated list of the numbers for the quotes that you believe will help answer the "
-                "question. Answer with only the numbers, for example: 1,3,5.\n\n"
+                "question. If there are no quotes relevant to the question, return an empty string. "
+                "Answer with only the numbers or an empty string, for example: '1,3,5' or ''.\n\n"
             )
             for i, doc in enumerate(docs, start=1):
                 prompt += f"{i}. {doc.content}\n\n"
