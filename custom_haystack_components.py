@@ -32,6 +32,10 @@ import generator_model as gen
 from docling.document_converter import DocumentConverter, ConversionResult
 from docling_core.types import DoclingDocument
 from docling_parser import DoclingParser
+# noinspection PyPackageRequirements
+from haystack.components.rankers import TransformersSimilarityRanker
+# noinspection PyPackageRequirements
+from haystack.utils import ComponentDevice, Device
 # import markdown
 
 
@@ -245,6 +249,31 @@ class PyMuPdf4LLM:
             if title in pdf_meta_data and value is not None and value != "":
                 meta_data[title] = pdf_meta_data[title]
         return meta_data
+
+
+@component
+class Reranker:
+    def __init__(self,
+                 component_device: Optional[ComponentDevice] = None):
+        if component_device is None:
+            has_cuda: bool = torch.cuda.is_available()
+            component_device: ComponentDevice = ComponentDevice(Device.gpu() if has_cuda else Device.cpu())
+        # Warmup Reranker model
+        # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
+        # https://medium.com/towards-data-science/reranking-using-huggingface-transformers-for-optimizing-retrieval-in-rag-pipelines-fbfc6288c91f
+        ranker: TransformersSimilarityRanker = TransformersSimilarityRanker(device=component_device)
+        ranker.warm_up()
+        self._ranker: TransformersSimilarityRanker = ranker
+
+    @component.output_types(documents=List[Document])
+    def run(self, query: str, documents: List[Document],
+            llm_top_k: int = 5,
+            score_threshold: float = 0.0) -> Dict[str, List[Document]]:
+        ranked_docs: List[Document] = self._ranker.run(documents=documents,
+                                                       query=query,
+                                                       top_k=llm_top_k,
+                                                       score_threshold=score_threshold)["documents"]
+        return {"top_documents": ranked_docs, "all_documents": documents}
 
 
 @component

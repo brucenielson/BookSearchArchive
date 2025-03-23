@@ -89,12 +89,14 @@ class KarlPopperChat:
                 # Remove last message from chat history
                 chat_history = chat_history[:-1]
 
-        docs: List[Document] = self.doc_pipeline.generate_response(message)
+        retrieved_docs: List[Document]
+        all_docs: List[Document]
+        retrieved_docs, all_docs = self.doc_pipeline.generate_response(message)
 
         # Find the largest score
         max_score: float = 100.0
-        if docs:
-            max_score = max(doc.score for doc in docs if hasattr(doc, 'score'))
+        if retrieved_docs:
+            max_score = max(doc.score for doc in retrieved_docs if hasattr(doc, 'score'))
 
         if max_score is not None and max_score < 0.30:
             # If there are no quotes with a score at least 0.30,
@@ -105,7 +107,7 @@ class KarlPopperChat:
                 "question. If there are no quotes relevant to the question, return an empty string. "
                 "Answer with only the numbers or an empty string, for example: '1,3,5' or ''.\n\n"
             )
-            for i, doc in enumerate(docs, start=1):
+            for i, doc in enumerate(retrieved_docs, start=1):
                 prompt += f"{i}. {doc.content}\n\n"
 
             # Start a new chat session with no history for this check.
@@ -123,35 +125,37 @@ class KarlPopperChat:
                 relevant_numbers = []
 
             # Filter docs based on the numbered positions.
-            docs = [doc for idx, doc in enumerate(docs, start=1) if idx in relevant_numbers]
+            ranked_docs = [doc for idx, doc in enumerate(retrieved_docs, start=1) if idx in relevant_numbers]
         else:
             # Drop any quotes with a score less than 0.20 if we have at least 3 quotes above 20
             # Otherwise drop any quotes with a score less than 0.10
             # Count how many quotes have a score >= 0.20.
             threshold: float = 0.20
-            num_high = len([doc for doc in docs if hasattr(doc, 'score') and doc.score >= threshold])
+            num_high = len([doc for doc in retrieved_docs if hasattr(doc, 'score') and doc.score >= threshold])
             # If we have at least 3 such quotes, drop any with a score less than 0.20.
             # Otherwise, drop quotes with a score less than 0.10.
             threshold = 0.20 if num_high >= 3 else 0.10
-            docs = [doc for doc in docs if hasattr(doc, 'score') and doc.score >= threshold]
+            ranked_docs = [doc for doc in retrieved_docs if hasattr(doc, 'score') and doc.score >= threshold]
 
         # Format each retrieved document (quote + metadata).
-        formatted_docs = [self.format_document(doc) for doc in docs]
-        quotes_text = "\n\n".join(formatted_docs)
+        formatted_docs = [self.format_document(doc) for doc in ranked_docs]
+        retrieved_quotes = "\n\n".join(formatted_docs)
+        formatted_docs = [self.format_document(doc) for doc in all_docs]
+        all_quotes = "\n\n".join(formatted_docs)
 
         modified_query: str = ""
-        if not quotes_text or quotes_text.strip() == "":
+        if not retrieved_quotes or retrieved_quotes.strip() == "":
             modified_query = message
         elif max_score > 0.50:
             modified_query = (
-                f"Use the following quotes with their metadata as reference in your answer:\n\n{quotes_text}\n\n"
+                f"Use the following quotes with their metadata as reference in your answer:\n\n{retrieved_quotes}\n\n"
                 f"Reference the quotes and their metadata in your answer where possible. "
                 f"Now, answer the following question: {message}"
             )
         else:
             modified_query = (
                 f"The following quotes are available. You may use them as reference to answer my question"
-                f"if you find them relevant:\n\n{quotes_text}\n\n"
+                f"if you find them relevant:\n\n{retrieved_quotes}\n\n"
                 f"Reference the quotes and their metadata in your answer if used. But don't "
                 f"feel obligated to use the quotes if they are not relevant. "
                 f"Now, answer the following question: {message}"
@@ -168,24 +172,31 @@ class KarlPopperChat:
         for chunk in chat_response:
             if hasattr(chunk, 'text'):
                 answer_text += chunk.text
-                yield chat_history + [(message, answer_text)], quotes_text
+                yield chat_history + [(message, answer_text)], retrieved_quotes, all_quotes
 
 
 def build_interface():
     karl_chat = KarlPopperChat()
 
     with gr.Blocks() as chat_interface:
-        gr.Markdown("# Karl Popper Chatbot")
-        gr.Markdown(
-            "This chatbot retrieves quotes with metadata from a document store and uses them as context "
-            "for its Gemini-powered responses. The quotes and metadata are displayed on the right.")
         with gr.Row():
             with gr.Column(scale=2):
+                gr.Markdown("# Karl Popper Chatbot")
+                gr.Markdown(
+                    "Chat with AI Karl Popper. He'll respond in the chat box on the left and utilize and cite "
+                    "sources from the box on the right.")
                 chatbot = gr.Chatbot(label="Chat")
                 msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
                 clear = gr.Button("Clear Chat")
             with gr.Column(scale=1):
-                quotes_box = gr.Textbox(label="Retrieved Quotes & Metadata", interactive=False, lines=15)
+                with gr.Tab("Retrieved Quotes"):
+                    retrieved_quotes_box = gr.Textbox(label="Retrieved Quotes & Metadata",
+                                                      interactive=False,
+                                                      lines=27)
+                with gr.Tab("Raw Quotes"):
+                    raw_quotes_box = gr.Textbox(label="Raw Quotes & Metadata",
+                                                interactive=False,
+                                                lines=27)
 
         def user_message(message, chat_history):
             # print(f"user_message: User submitted message: '{message}'")
@@ -195,12 +206,12 @@ def build_interface():
 
         def process_message(message, chat_history):
             # print(f"process_message: User submitted message: '{message}'")
-            for updated_history, quotes_text in karl_chat.respond(message, chat_history):
-                yield updated_history, quotes_text
+            for updated_history, ranked_docs, all_docs in karl_chat.respond(message, chat_history):
+                yield updated_history, ranked_docs, all_docs
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
-        msg.submit(process_message, [msg, chatbot], [chatbot, quotes_box], queue=True)
-        clear.click(lambda: ([], ""), None, [chatbot, quotes_box], queue=False)
+        msg.submit(process_message, [msg, chatbot], [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
+        clear.click(lambda: ([], ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
 
     return chat_interface
 

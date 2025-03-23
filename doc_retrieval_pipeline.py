@@ -25,14 +25,14 @@ from haystack.utils.auth import Secret
 # Neo4j imports
 from neo4j_haystack import Neo4jDocumentStore
 # Other imports
-from typing import Optional, Dict, Any, Union, List
+from typing import Optional, Dict, Any, Union, List, Tuple
 from pathlib import Path
 import generator_model as gen
 from enum import Enum
 import textwrap
 from document_processor import DocumentStoreType
 from custom_haystack_components import (DocumentQueryCollector, RetrieverWrapper, print_documents,
-                                        QueryComponent, print_debug_results,
+                                        QueryComponent, print_debug_results, Reranker
                                         )
 
 
@@ -108,14 +108,7 @@ class DocRetrievalPipeline:
         self._initialize_document_store()
 
         if self._use_reranker:
-            # Warmup Reranker model
-            # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
-            # https://medium.com/towards-data-science/reranking-using-huggingface-transformers-for-optimizing-retrieval-in-rag-pipelines-fbfc6288c91f
-            ranker = TransformersSimilarityRanker(device=self._component_device, top_k=self._llm_top_k,
-                                                  score_threshold=0.0)
-            ranker.warm_up()
-            self._ranker = ranker
-            # TODO: Fix this with annotations
+            self._ranker: Reranker = Reranker(component_device=self._component_device)
 
         # Declare rag pipeline
         self._pipeline: Optional[Pipeline] = None
@@ -219,7 +212,7 @@ class DocRetrievalPipeline:
         self._document_store = init_doc_store()
         self._print_verbose("Document Count: " + str(self._document_store.count_documents()))
 
-    def generate_response(self, query: str) -> List[Document]:
+    def generate_response(self, query: str) -> Tuple[List[Document], List[Document]]:
         """
         Generate a response to a given query using the RAG pipeline.
 
@@ -233,13 +226,18 @@ class DocRetrievalPipeline:
 
         # Run the pipeline
         results: Dict[str, Any] = self._pipeline.run(inputs, include_outputs_from=self._include_outputs_from)
+        ranked_documents: List[Document] = []
         if self._use_reranker:
-            documents: List[Document] = results["reranker"]["documents"]
+            ranked_documents: List[Document] = results["reranker"]["top_documents"]
+            all_documents: List[Document] = results["reranker"]["all_documents"]
         else:
-            documents: List[Document] = results["doc_query_collector"]["documents"]
+            all_documents: List[Document] = results["doc_query_collector"]["documents"]
         print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
-        return documents
+        if self._use_reranker:
+            return ranked_documents, all_documents
+        else:
+            return all_documents, all_documents
 
     def _create_rag_pipeline(self) -> None:
         def doc_collector_completed() -> None:
@@ -284,7 +282,7 @@ class DocRetrievalPipeline:
             rag_pipeline.add_component("reranker", self._ranker)
             rag_pipeline.connect("doc_query_collector.documents", "reranker.documents")
             rag_pipeline.connect("doc_query_collector.query", "reranker.query")
-            rag_pipeline.connect("doc_query_collector.llm_top_k", "reranker.top_k")
+            rag_pipeline.connect("doc_query_collector.llm_top_k", "reranker.llm_top_k")
 
         # Set the pipeline instance
         self._pipeline = rag_pipeline
