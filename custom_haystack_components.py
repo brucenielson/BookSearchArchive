@@ -708,7 +708,7 @@ class DocumentCollector:
     This component should be unnecessary, but a bug in DocumentJoiner requires it to avoid
     strange results on streaming happening from the LLM component prior to receiving the documents.
     """
-    @component.output_types(documents=List[Document], query=str, llm_top_k=int)
+    @component.output_types(documents=List[Document])
     def run(self,
             duplicate_boost: bool = False,
             semantic_documents: Optional[List[Document]] = None,

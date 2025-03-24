@@ -44,6 +44,7 @@ class KarlPopperChat:
             use_reranker=True,
             embedder_model_name="BAAI/llm-embedder"
         )
+        self.doc_pipeline.draw_pipeline()
 
     @staticmethod
     def format_document(doc, include_raw_info: bool = False) -> str:
