@@ -267,11 +267,15 @@ class Reranker:
 
     @component.output_types(documents=List[Document])
     def run(self, query: str, documents: List[Document],
-            llm_top_k: int = 5,
+            top_k: int = 5,
             score_threshold: float = 0.0) -> Dict[str, List[Document]]:
+        # Save off the scores in the documents in a duplicate attribute so that we don't lose them in reranking
+        for doc in documents:
+            doc.orig_score = doc.score
+        # Do reranking
         ranked_docs: List[Document] = self._ranker.run(documents=documents,
                                                        query=query,
-                                                       top_k=llm_top_k,
+                                                       top_k=top_k,
                                                        score_threshold=score_threshold)["documents"]
         return {"top_documents": ranked_docs, "all_documents": documents}
 
@@ -692,7 +696,7 @@ class DocumentStreamer:
 
 
 @component
-class DocumentQueryCollector:
+class DocumentCollector:
     def __init__(self, do_stream: bool = False, callback_func: Callable = None) -> None:
         self._do_stream: bool = do_stream
         self._callback_func: Callable = callback_func  # TODO: Get rid of this callback
@@ -705,8 +709,8 @@ class DocumentQueryCollector:
     strange results on streaming happening from the LLM component prior to receiving the documents.
     """
     @component.output_types(documents=List[Document], query=str, llm_top_k=int)
-    def run(self, query: str,
-            llm_top_k: int = 5,
+    def run(self,
+            duplicate_boost: bool = False,
             semantic_documents: Optional[List[Document]] = None,
             lexical_documents: Optional[List[Document]] = None
             ) -> Dict[str, Any]:
@@ -724,13 +728,16 @@ class DocumentQueryCollector:
             for docs in docs_per_id.values():
                 # Take the document with the best score
                 doc_with_best_score = max(docs, key=lambda a_doc: a_doc.score if a_doc.score else -inf)
-                # Give a slight boost to the score for each duplicate - Add .1 to the score for each duplicate
-                # but adjust the 0.1 boost by score of the duplicate
-                if len(docs) > 1:
-                    for doc in docs:
-                        if doc != doc_with_best_score:
-                            doc_with_best_score.score += min(max(doc.score, 0.0), 0.1)
+                if duplicate_boost:
+                    # Give a slight boost to the score for each duplicate - Add .1 to the score for each duplicate
+                    # but adjust the 0.1 boost by score of the duplicate
+                    if len(docs) > 1:
+                        for doc in docs:
+                            if doc != doc_with_best_score:
+                                doc_with_best_score.score += min(max(doc.score, 0.0), 0.1)
                 output.append(doc_with_best_score)
+
+            # Sort by score
             output.sort(key=lambda a_doc: a_doc.score if a_doc.score else -inf, reverse=True)
             documents = output
         elif semantic_documents is not None:
@@ -743,7 +750,7 @@ class DocumentQueryCollector:
             print_documents(documents)
         if self._callback_func is not None:
             self._callback_func()
-        return {"documents": documents, "query": query, "llm_top_k": llm_top_k}
+        return {"documents": documents}
 
 
 @component
@@ -752,9 +759,9 @@ class QueryComponent:
     A simple component that takes a query and llm_top_k and returns it in a dictionary so that we can connect it to
     other components.
     """
-    @component.output_types(query=str, llm_top_k=int)
-    def run(self, query: str, llm_top_k: int) -> Dict[str, Any]:
-        return {"query": query, "llm_top_k": llm_top_k}
+    @component.output_types(query=str, llm_top_k=int, retriever_top_k=int)
+    def run(self, query: str, llm_top_k: int, retriever_top_k: Optional[int] = None) -> Dict[str, Any]:
+        return {"query": query, "llm_top_k": llm_top_k, "retriever_top_k": retriever_top_k or llm_top_k}
 
 
 @component
@@ -775,12 +782,18 @@ class RetrieverWrapper:
         # component.set_input_types(self, query_embedding=List[float], query=Optional[str])
 
     @component.output_types(documents=List[Document])
-    def run(self, query: Union[List[float], str]) -> Dict[str, Any]:
+    def run(self, query: Union[List[float], str], top_k: int = 5) -> Dict[str, Any]:
         documents: List[Document] = []
         if isinstance(query, list):
-            documents = self._retriever.run(query_embedding=query)['documents']
+            documents = self._retriever.run(query_embedding=query, top_k=top_k)['documents']
+            # Mark these documents as retrieved by semantic search
+            for doc in documents:
+                doc.retrieval_method = 'semantic search'
         elif isinstance(query, str):
-            documents = self._retriever.run(query=query)['documents']
+            documents = self._retriever.run(query=query, top_k=top_k)['documents']
+            # Mark these documents as retrieved by semantic search
+            for doc in documents:
+                doc.retrieval_method = 'lexical search'
         if self._do_stream:
             print()
             if isinstance(self._retriever, PgvectorEmbeddingRetriever):

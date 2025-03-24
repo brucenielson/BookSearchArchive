@@ -46,7 +46,7 @@ class KarlPopperChat:
         )
 
     @staticmethod
-    def format_document(doc) -> str:
+    def format_document(doc, include_raw_info: bool = False) -> str:
         """
         Format a document by including its metadata followed by the quote.
         """
@@ -54,6 +54,10 @@ class KarlPopperChat:
         # If the document has metadata, format each key-value pair.
         if hasattr(doc, 'meta') and doc.meta:
             meta_entries = ["Score: {:.4f}".format(doc.score) if hasattr(doc, 'score') else "Score: N/A"]
+            # Add the original score if requested.
+            if include_raw_info and hasattr(doc, 'orig_score'):
+                meta_entries.append("Original Score: {:.4f}".format(doc.orig_score))
+                meta_entries.append("Retrieved By: {}".format(doc.retrieval_method))
             # Define keys to ignore (customize as needed).
             ignore_keys = {"file_path", "item_#", "item_id"}
             for key, value in doc.meta.items():
@@ -140,7 +144,7 @@ class KarlPopperChat:
         # Format each retrieved document (quote + metadata).
         formatted_docs = [self.format_document(doc) for doc in ranked_docs]
         retrieved_quotes = "\n\n".join(formatted_docs)
-        formatted_docs = [self.format_document(doc) for doc in all_docs]
+        formatted_docs = [self.format_document(doc, include_raw_info=True) for doc in all_docs]
         all_quotes = "\n\n".join(formatted_docs)
 
         modified_query: str = ""
