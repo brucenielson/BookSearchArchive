@@ -182,8 +182,15 @@ class KarlPopperChat:
 
 def build_interface():
     karl_chat = KarlPopperChat()
+    css: str = """
+    #retrieved_quotes, #raw_quotes {
+        height: calc(100vh - 100px);
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }
+    """
 
-    with gr.Blocks() as chat_interface:
+    with gr.Blocks(css=css) as chat_interface:
         with gr.Row():
             with gr.Column(scale=2):
                 gr.Markdown("# Karl Popper Chatbot")
@@ -193,15 +200,22 @@ def build_interface():
                 chatbot = gr.Chatbot(label="Chat")
                 msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
                 clear = gr.Button("Clear Chat")
+
             with gr.Column(scale=1):
                 with gr.Tab("Retrieved Quotes"):
-                    retrieved_quotes_box = gr.Textbox(label="Retrieved Quotes & Metadata",
-                                                      interactive=False,
-                                                      lines=27)
+                    retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
+                                                       elem_id="retrieved_quotes")
                 with gr.Tab("Raw Quotes"):
-                    raw_quotes_box = gr.Textbox(label="Raw Quotes & Metadata",
-                                                interactive=False,
-                                                lines=27)
+                    raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="raw_quotes")
+
+                # with gr.Tab("Retrieved Quotes"):
+                #     retrieved_quotes_box = gr.Textbox(label="Retrieved Quotes & Metadata",
+                #                                       interactive=False,
+                #                                       lines=27)
+                # with gr.Tab("Raw Quotes"):
+                #     raw_quotes_box = gr.Textbox(label="Raw Quotes & Metadata",
+                #                                 interactive=False,
+                #                                 lines=27)
 
         def user_message(message, chat_history):
             # print(f"user_message: User submitted message: '{message}'")

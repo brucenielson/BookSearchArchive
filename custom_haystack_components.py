@@ -788,12 +788,12 @@ class RetrieverWrapper:
             documents = self._retriever.run(query_embedding=query, top_k=top_k)['documents']
             # Mark these documents as retrieved by semantic search
             for doc in documents:
-                doc.retrieval_method = 'semantic search'
+                doc.retrieval_method = 'Semantic Search'
         elif isinstance(query, str):
             documents = self._retriever.run(query=query, top_k=top_k)['documents']
             # Mark these documents as retrieved by semantic search
             for doc in documents:
-                doc.retrieval_method = 'lexical search'
+                doc.retrieval_method = 'Lexical Search'
         if self._do_stream:
             print()
             if isinstance(self._retriever, PgvectorEmbeddingRetriever):

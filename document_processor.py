@@ -399,3 +399,23 @@ if __name__ == "__main__":
     main()
 
 # TODO: Add other document types
+
+# TODO: Problems with seciton headers with PDF loader
+"""
+Score: 0.9775
+Page #: 188
+Book Title: Realism and the Aim of Science -- Karl Popper -- 2017
+Section Name: (1)  The preceding section was, as noted above, first published in 1 957. It contains, among other things, a refutation of the view, held
+Quote: By induction I mean an argument which, given some empirical (singular or particular) premises, leads to a universal conclusion, a universal theory, either with logical certainty, or with 'probability' (in the sense in which this term is used in the calculus of probability).
+The argument against induction that I wish to restate here is very simple: Many theories, such as Newton's, which have been thought to be the result of induction, actually are inconsistent with their alleged (partial) inductive premises, as shown above.
+
+
+
+Score: 0.9992
+Page #: 188
+Book Title: Realism and the Aim of Science -- Karl Popper -- 2017
+Section Name: (1)  The preceding section was, as noted above, first published in 1 957. It contains, among other things, a refutation of the view, held
+Quote: By induction I mean an argument which, given some empirical (singular or particular) premises, leads to a universal conclusion, a universal theory, either with logical certainty, or with 'probability' (in the sense in which this term is used in the calculus of probability).
+The argument against induction that I wish to restate here is very simple: Many theories, such as Newton's, which have been thought to be the result of induction, actually are inconsistent with their alleged (partial) inductive premises, as shown above.
+
+"""
