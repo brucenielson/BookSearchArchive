@@ -208,15 +208,6 @@ def build_interface():
                 with gr.Tab("Raw Quotes"):
                     raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="raw_quotes")
 
-                # with gr.Tab("Retrieved Quotes"):
-                #     retrieved_quotes_box = gr.Textbox(label="Retrieved Quotes & Metadata",
-                #                                       interactive=False,
-                #                                       lines=27)
-                # with gr.Tab("Raw Quotes"):
-                #     raw_quotes_box = gr.Textbox(label="Raw Quotes & Metadata",
-                #                                 interactive=False,
-                #                                 lines=27)
-
         def user_message(message, chat_history):
             # print(f"user_message: User submitted message: '{message}'")
             # Append the user's message to the chat history
