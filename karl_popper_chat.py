@@ -132,12 +132,13 @@ class KarlPopperChat:
         prompt = (
             f"Given the query: '{message}' and the current chat history, the database of relevant quotes found none "
             f"that were a strong match. This might be due to poor wording on the user's part. "
-            f"Reviewing the chat history, determine if you can provide a better wording for the query that might "
-            f"yield better results. If you can improve the query, return the improved "
-            f"query. If you cannot improve the question, return an empty string and we'll continue with the user's "
-            f"original query. There is no need to explain your thinking if you want to return an empty string.\n\n"
-            f"You must either return a single sentence or phrase that is the new query or an empty string. "
-            f"For example: 'Alternative views of induction' or ''"
+            f"Reviewing the query and chat history, determine if you can provide a better wording for the query "
+            f"that might yield better results. If you can improve the query, return the improved "
+            f"query. If you cannot improve the question, return an empty string (without quotes around it) and we'll "
+            f"continue with the user's original query. There is no need to explain your thinking if you want to return "
+            f"an empty string. Do not return quotes around your answer.\n\n"
+            f"You must either return a single sentence or phrase that is the new query (without quotes around it) or "
+            f"an empty string (without quotes around it). Keep the new query as concise as possible to improve matches."
             f"\n\n"
         )
 
@@ -190,8 +191,11 @@ class KarlPopperChat:
             # empty string. So we need to check for that and convert it to an empty string.
             # Unfortunately, dropping that instruction tends to cause it to think out loud before returning an empty
             # string at the end. Which sort of defeats the purpose.
-            if improved_query == "''":
-                improved_query = ""
+
+            # Strip off double or single quotes if the improved query starts and ends with them.
+            if improved_query.startswith(('"', "'")) and improved_query.endswith(('"', "'")):
+                improved_query = improved_query[1:-1]
+
             new_retrieved_docs: List[Document]
             temp_all_docs: List[Document]
             if improved_query != "":
