@@ -400,7 +400,7 @@ if __name__ == "__main__":
 
 # TODO: Add other document types
 
-# TODO: Problems with seciton headers with PDF loader
+# TODO: Problems with section headers with PDF loader
 """
 Score: 0.9775
 Page #: 188
@@ -418,4 +418,16 @@ Section Name: (1)  The preceding section was, as noted above, first published in
 Quote: By induction I mean an argument which, given some empirical (singular or particular) premises, leads to a universal conclusion, a universal theory, either with logical certainty, or with 'probability' (in the sense in which this term is used in the calculus of probability).
 The argument against induction that I wish to restate here is very simple: Many theories, such as Newton's, which have been thought to be the result of induction, actually are inconsistent with their alleged (partial) inductive premises, as shown above.
 
+"""
+
+# TODO: This passage is too long I think. Why isn't it getting split up? This is the EPUB loader.
+#  Semantic search won't work on end of this passage.
+"""
+Score: 0.0007
+Page #: 267
+Book Title: The Open Society and Its Enemies (New One-Volume Edition)
+Paragraph #: 53
+Section Name: 12: Hegel And The New Tribalism
+Subsection Name: III
+Quote: These are a few episodes in the career of the man whose ‘windbaggery’ has given rise to modern nationalism as well as to modern Idealist philosophy, erected upon the perversion of Kant’s teaching. (I follow Schopenhauer in distinguishing between Fichte’s ‘windbaggery’ and Hegel’s ‘charlatanry’, although I must admit that to insist on this distinction is perhaps a little pedantic.) The whole story is interesting mainly because of the light it throws upon the ‘history of philosophy’ and upon ‘history’ in general. I mean not only the perhaps more humorous than scandalous fact that such clowns are taken seriously, and that they are made the objects of a kind of worship, of solemn although often boring studies (and of examination papers to match). I mean not only the appalling fact that the windbag Fichte and the charlatan Hegel are treated on a level with men like Democritus, Pascal, Descartes, Spinoza, Locke, Hume, Kant, J. S. Mill, and Bertrand Russell, and that their moral teaching is taken seriously and perhaps even considered superior to that of these other men. But I mean that many of these eulogist historians of philosophy, unable to discriminate between thought and fancy, not to mention good and bad, dare to pronounce that their history is our judge, or that their history of philosophy is an implicit criticism of the different ‘systems of thought’. For it is clear, I think, that their adulation can only be an implicit criticism of their histories of philosophy, and of that pomposity and conspiracy of noise by which the business of philosophy is glorified. It seems to be a law of what these people are pleased to call ‘human nature’ that bumptiousness grows in direct proportion to deficiency of thought and inversely to the amount of service rendered to human welfare.
 """

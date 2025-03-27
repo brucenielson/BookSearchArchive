@@ -81,6 +81,26 @@ class KarlPopperChat:
             new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})
         return new_history
 
+    def ask_llm_question(self, prompt: str, chat_history: Optional[str] = None) -> str:
+        """
+        Ask a question to the LLM (Large Language Model) and get a response.
+
+        Args:
+            prompt (str): The question or prompt to send to the LLM.
+            chat_history (Optional[str]): The chat history to include in the session. Defaults to None.
+            If None, a new chat session is started without history.
+
+        Returns:
+            str: The response from the LLM.
+        """
+        if chat_history is None:
+            chat_history = []
+        # Start a new chat session with no history for this check.
+        chat_session = self.model.start_chat(history=chat_history)
+        chat_response = chat_session.send_message(prompt)
+        # Extract numbers from Gemini's response.
+        return chat_response.text.strip()
+
     def respond(self, message, chat_history):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
         if message.strip() == "" or message is None:
@@ -103,6 +123,10 @@ class KarlPopperChat:
         if retrieved_docs:
             max_score = max(doc.score for doc in retrieved_docs if hasattr(doc, 'score'))
 
+        if max_score is not None and max_score < 0.60:
+            # If we don't have any good quotes, ask the LLM if it wants to do its own search
+            pass
+
         if max_score is not None and max_score < 0.30:
             # If there are no quotes with a score at least 0.30,
             # then we ask Gemini in one go which quotes are relevant.
@@ -115,12 +139,7 @@ class KarlPopperChat:
             for i, doc in enumerate(retrieved_docs, start=1):
                 prompt += f"{i}. {doc.content}\n\n"
 
-            # Start a new chat session with no history for this check.
-            chat_session = self.model.start_chat(history=[])
-            chat_response = chat_session.send_message(prompt)
-
-            # Extract numbers from Gemini's response.
-            response_text = chat_response.text.strip()
+            response_text = self.ask_llm_question(prompt)
             # Split by commas, remove any extra spaces, and convert to integers.
             try:
                 relevant_numbers = [int(num.strip()) for num in response_text.split(',') if num.strip().isdigit()]

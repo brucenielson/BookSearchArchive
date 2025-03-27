@@ -486,5 +486,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# TODO: Add a way to chat with the model
 # TODO: Add graph rag pipeline
