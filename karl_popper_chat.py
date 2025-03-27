@@ -11,7 +11,7 @@ import google.generativeai as genai
 from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
 # noinspection PyPackageRequirements
 from haystack import Document
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 
 
 class KarlPopperChat:
@@ -74,20 +74,21 @@ class KarlPopperChat:
 
     # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
     @staticmethod
-    def transform_history(history):
+    def transform_history(history) -> List[Dict[str, Any]]:
         new_history = []
         for chat_response in history:
             new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
             new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})
         return new_history
 
-    def ask_llm_question(self, prompt: str, chat_history: Optional[str] = None) -> str:
+    def ask_llm_question(self, prompt: str, chat_history: Optional[List[Dict[str, Any]]] = None) -> str:
         """
         Ask a question to the LLM (Large Language Model) and get a response.
 
         Args:
             prompt (str): The question or prompt to send to the LLM.
             chat_history (Optional[str]): The chat history to include in the session. Defaults to None.
+            Format is assumed to be correct for Gemini (for now).
             If None, a new chat session is started without history.
 
         Returns:
@@ -101,7 +102,65 @@ class KarlPopperChat:
         # Extract numbers from Gemini's response.
         return chat_response.text.strip()
 
-    def respond(self, message, chat_history):
+    def ask_llm_for_quote_relevance(self, message: str, docs: List[Document]) -> str:
+        """
+        Given a question and a list of retrieved documents, ask the LLM to determine which quotes are relevant.
+        This function formats the question and documents into a prompt for the LLM, which will then return a list of
+        relevant quote numbers based on order of Documents in the docs list. e.g. "1,3,5".
+        You can then use this list to filter the documents to which the LLM found most relevant to the question.
+
+        Args:
+            message (str): The question or prompt to evaluate.
+            docs (List[Document]): The list of documents containing quotes to be reviewed.
+
+        Returns:
+            str: A comma-separated list of numbers indicating the relevant quotes, or an empty string if none are
+            relevant.
+        """
+        prompt = (
+            f"Given the question: '{message}', review the following numbered quotes and "
+            "return a comma-separated list of the numbers for the quotes that you believe will help answer the "
+            "question. If there are no quotes relevant to the question, return an empty string. "
+            "Answer with only the numbers or an empty string, for example: '1,3,5' or ''.\n\n"
+        )
+        for i, doc in enumerate(docs, start=1):
+            prompt += f"{i}. {doc.content}\n\n"
+
+        return self.ask_llm_question(prompt)
+
+    def ask_llm_for_improved_query(self, message: str, chat_history: List[Dict[str, Any]]) -> str:
+        prompt = (
+            f"Given the query: '{message}' and the current chat history, the database of relevant quotes found none "
+            f"that were a strong match. This might be due to poor wording on the user's part. "
+            f"Reviewing the chat history, determine if you can provide a better wording for the query that might "
+            f"yield better results. If you can improve the query, return the improved "
+            f"query. If you cannot improve the question, return an empty string and we'll continue with the user's "
+            f"original query. There is no need to explain your thinking if you want to return an empty string.\n\n"
+            f"You must either return a single sentence or phrase that is the new query or an empty string. "
+            f"For example: 'Alternative views of induction' or ''"
+            f"\n\n"
+        )
+
+        return self.ask_llm_question(prompt, chat_history)
+
+    @staticmethod
+    def get_max_score(docs: Optional[List[Document]]) -> float:
+        """
+        Get the maximum score from a list of documents.
+
+        Args:
+            docs (List[Document]): The list of documents to evaluate.
+
+        Returns:
+            float: The maximum score found in the documents.
+        """
+        # Find the largest score
+        max_score: float = 0.0
+        if docs:
+            max_score = max(doc.score for doc in docs if hasattr(doc, 'score'))
+        return max_score
+
+    def respond(self, message: Optional[str], chat_history: List[Optional[List[str]]]):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
         if message.strip() == "" or message is None:
             # This is a kludge to deal with the fact that Gradio sometimes get a race condition, and we lose the message
@@ -114,32 +173,40 @@ class KarlPopperChat:
                 # Remove last message from chat history
                 chat_history = chat_history[:-1]
 
+        # Put the chat_history into the correct format for Gemini
+        gemini_chat_history: List[Dict[str, Any]] = self.transform_history(chat_history)
+
         retrieved_docs: List[Document]
         all_docs: List[Document]
         retrieved_docs, all_docs = self.doc_pipeline.generate_response(message)
 
         # Find the largest score
-        max_score: float = 100.0
-        if retrieved_docs:
-            max_score = max(doc.score for doc in retrieved_docs if hasattr(doc, 'score'))
+        max_score: float = self.get_max_score(retrieved_docs)
 
-        if max_score is not None and max_score < 0.60:
+        if max_score is not None and max_score < 0.50:
             # If we don't have any good quotes, ask the LLM if it wants to do its own search
-            pass
+            improved_query: str = self.ask_llm_for_improved_query(message, gemini_chat_history)
+            # The LLM is sometimes stupid and takes my example too literally and returns "''" instead of "" for an
+            # empty string. So we need to check for that and convert it to an empty string.
+            # Unfortunately, dropping that instruction tends to cause it to think out loud before returning an empty
+            # string at the end. Which sort of defeats the purpose.
+            if improved_query == "''":
+                improved_query = ""
+            new_retrieved_docs: List[Document]
+            temp_all_docs: List[Document]
+            if improved_query != "":
+                new_retrieved_docs, temp_all_docs = self.doc_pipeline.generate_response(improved_query)
+                new_max_score: float = self.get_max_score(new_retrieved_docs)
+                if new_max_score > max_score:
+                    # If the new max score is better than the old one, use the new docs
+                    retrieved_docs = new_retrieved_docs
+                    all_docs = temp_all_docs
+                    max_score = new_max_score
 
         if max_score is not None and max_score < 0.30:
             # If there are no quotes with a score at least 0.30,
             # then we ask Gemini in one go which quotes are relevant.
-            prompt = (
-                f"Given the question: '{message}', review the following numbered quotes and "
-                "return a comma-separated list of the numbers for the quotes that you believe will help answer the "
-                "question. If there are no quotes relevant to the question, return an empty string. "
-                "Answer with only the numbers or an empty string, for example: '1,3,5' or ''.\n\n"
-            )
-            for i, doc in enumerate(retrieved_docs, start=1):
-                prompt += f"{i}. {doc.content}\n\n"
-
-            response_text = self.ask_llm_question(prompt)
+            response_text = self.ask_llm_for_quote_relevance(message, retrieved_docs)
             # Split by commas, remove any extra spaces, and convert to integers.
             try:
                 relevant_numbers = [int(num.strip()) for num in response_text.split(',') if num.strip().isdigit()]
@@ -184,8 +251,6 @@ class KarlPopperChat:
                 f"feel obligated to use the quotes if they are not relevant. "
                 f"Now, answer the following question: {message}"
             )
-        # Put the chat_history into the correct format for Gemini
-        gemini_chat_history = self.transform_history(chat_history)
         # We start a new chat session each time so that we can control the chat history and remove all the rag docs
         # We just want questions and answers in the chat history
         chat_session = self.model.start_chat(history=gemini_chat_history)
