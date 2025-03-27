@@ -102,6 +102,7 @@ class KarlPopperChat:
         # Extract numbers from Gemini's response.
         return chat_response.text.strip()
 
+
     def ask_llm_for_quote_relevance(self, message: str, docs: List[Document]) -> str:
         """
         Given a question and a list of retrieved documents, ask the LLM to determine which quotes are relevant.
@@ -195,13 +196,15 @@ class KarlPopperChat:
             # Strip off double or single quotes if the improved query starts and ends with them.
             if improved_query.startswith(('"', "'")) and improved_query.endswith(('"', "'")):
                 improved_query = improved_query[1:-1]
+            if improved_query.lower() == "empty string":
+                improved_query = ""
 
             new_retrieved_docs: List[Document]
             temp_all_docs: List[Document]
             if improved_query != "":
                 new_retrieved_docs, temp_all_docs = self.doc_pipeline.generate_response(improved_query)
                 new_max_score: float = self.get_max_score(new_retrieved_docs)
-                if new_max_score > max_score:
+                if new_max_score > max(max_score * 1.1, max_score + 0.05):
                     # If the new max score is better than the old one, use the new docs
                     retrieved_docs = new_retrieved_docs
                     all_docs = temp_all_docs
