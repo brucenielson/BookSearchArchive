@@ -25,14 +25,14 @@ from haystack.utils.auth import Secret
 # Neo4j imports
 from neo4j_haystack import Neo4jDocumentStore
 # Other imports
-from typing import Optional, Dict, Any, Union, List
+from typing import Optional, Dict, Any, Union, List, Tuple
 from pathlib import Path
 import generator_model as gen
 from enum import Enum
 import textwrap
 from document_processor import DocumentStoreType
-from custom_haystack_components import (DocumentQueryCollector, RetrieverWrapper, print_documents,
-                                        QueryComponent, print_debug_results,
+from custom_haystack_components import (DocumentCollector, RetrieverWrapper, print_documents,
+                                        QueryComponent, print_debug_results, Reranker
                                         )
 
 
@@ -108,14 +108,7 @@ class DocRetrievalPipeline:
         self._initialize_document_store()
 
         if self._use_reranker:
-            # Warmup Reranker model
-            # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
-            # https://medium.com/towards-data-science/reranking-using-huggingface-transformers-for-optimizing-retrieval-in-rag-pipelines-fbfc6288c91f
-            ranker = TransformersSimilarityRanker(device=self._component_device, top_k=self._llm_top_k,
-                                                  score_threshold=0.0)
-            ranker.warm_up()
-            self._ranker = ranker
-            # TODO: Fix this with annotations
+            self._ranker: Reranker = Reranker(component_device=self._component_device)
 
         # Declare rag pipeline
         self._pipeline: Optional[Pipeline] = None
@@ -219,7 +212,7 @@ class DocRetrievalPipeline:
         self._document_store = init_doc_store()
         self._print_verbose("Document Count: " + str(self._document_store.count_documents()))
 
-    def generate_response(self, query: str) -> List[Document]:
+    def generate_response(self, query: str) -> Tuple[List[Document], List[Document]]:
         """
         Generate a response to a given query using the RAG pipeline.
 
@@ -228,23 +221,27 @@ class DocRetrievalPipeline:
         """
         # Prepare inputs for the pipeline
         inputs: Dict[str, Any] = {
-            "query_input": {"query": query, "llm_top_k": self._llm_top_k},
+            "query_input": {"query": query,
+                            "llm_top_k": self._llm_top_k,
+                            "retriever_top_k": self._retriever_top_k},
         }
 
         # Run the pipeline
         results: Dict[str, Any] = self._pipeline.run(inputs, include_outputs_from=self._include_outputs_from)
+        ranked_documents: List[Document] = []
         if self._use_reranker:
-            documents: List[Document] = results["reranker"]["documents"]
+            ranked_documents: List[Document] = results["reranker"]["top_documents"]
+            all_documents: List[Document] = results["reranker"]["all_documents"]
         else:
-            documents: List[Document] = results["doc_query_collector"]["documents"]
+            all_documents: List[Document] = results["doc_query_collector"]["documents"]
         print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
-        return documents
+        if self._use_reranker:
+            return ranked_documents, all_documents
+        else:
+            return all_documents, all_documents
 
     def _create_rag_pipeline(self) -> None:
-        def doc_collector_completed() -> None:
-            self._allow_streaming_callback = True
-
         rag_pipeline: Pipeline = Pipeline()
         self._setup_embedder()
 
@@ -257,34 +254,34 @@ class DocRetrievalPipeline:
 
         # Add the document query collector component with an inline callback function to specify when completed
         # This is an extra way to be sure the LLM doesn't prematurely start calling the streaming callback
-        doc_collector: DocumentQueryCollector = DocumentQueryCollector(do_stream=False,
-                                                                       callback_func=None)
+        doc_collector: DocumentCollector = DocumentCollector(do_stream=False,
+                                                             callback_func=None)
         rag_pipeline.add_component("doc_query_collector", doc_collector)
-        rag_pipeline.connect("query_input.query", "doc_query_collector.query")
-        rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
 
         # Add the retriever component(s) depending on search mode
         if self._search_mode == SearchMode.LEXICAL or self._search_mode == SearchMode.HYBRID:
             lex_retriever: RetrieverWrapper = RetrieverWrapper(
-                PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
+                PgvectorKeywordRetriever(document_store=self._document_store))
             rag_pipeline.add_component("lex_retriever", lex_retriever)
             rag_pipeline.connect("query_input.query", "lex_retriever.query")
+            rag_pipeline.connect("query_input.retriever_top_k", "lex_retriever.top_k")
             rag_pipeline.connect("lex_retriever.documents", "doc_query_collector.lexical_documents")
 
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
             semantic_retriever: RetrieverWrapper
             semantic_retriever = RetrieverWrapper(
-                PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
+                PgvectorEmbeddingRetriever(document_store=self._document_store))
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
+            rag_pipeline.connect("query_input.retriever_top_k", "semantic_retriever.top_k")
             rag_pipeline.connect("semantic_retriever.documents", "doc_query_collector.semantic_documents")
 
         if self._use_reranker:
             # Reranker
             rag_pipeline.add_component("reranker", self._ranker)
             rag_pipeline.connect("doc_query_collector.documents", "reranker.documents")
-            rag_pipeline.connect("doc_query_collector.query", "reranker.query")
-            rag_pipeline.connect("doc_query_collector.llm_top_k", "reranker.top_k")
+            rag_pipeline.connect("query_input.query", "reranker.query")
+            rag_pipeline.connect("query_input.llm_top_k", "reranker.top_k")
 
         # Set the pipeline instance
         self._pipeline = rag_pipeline

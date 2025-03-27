@@ -29,7 +29,7 @@ import generator_model as gen
 from enum import Enum
 import textwrap
 from document_processor import DocumentStoreType
-from custom_haystack_components import (MergeResults, DocumentQueryCollector, RetrieverWrapper, print_documents,
+from custom_haystack_components import (MergeResults, DocumentCollector, RetrieverWrapper, print_documents,
                                         QueryComponent, print_debug_results, DocumentStreamer, TextToSpeechLocal,
                                         )
 
@@ -345,8 +345,8 @@ class RagPipeline:
 
         # Add the document query collector component with an inline callback function to specify when completed
         # This is an extra way to be sure the LLM doesn't prematurely start calling the streaming callback
-        doc_collector: DocumentQueryCollector = DocumentQueryCollector(do_stream=self._can_stream(),
-                                                                       callback_func=lambda: doc_collector_completed())
+        doc_collector: DocumentCollector = DocumentCollector(do_stream=self._can_stream(),
+                                                             callback_func=lambda: doc_collector_completed())
         rag_pipeline.add_component("doc_query_collector", doc_collector)
         rag_pipeline.connect("query_input.query", "doc_query_collector.query")
         rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
@@ -486,5 +486,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# TODO: Add a way to chat with the model
 # TODO: Add graph rag pipeline
