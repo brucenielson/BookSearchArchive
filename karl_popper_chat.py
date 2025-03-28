@@ -3,7 +3,7 @@ import gradio as gr
 # noinspection PyPackageRequirements
 # from google.genai import Client
 # noinspection PyPackageRequirements
-from google.genai.types import GenerateContentConfig
+# from google.genai.types import GenerateContentConfig
 import generator_model as gen
 # noinspection PyPackageRequirements
 import google.generativeai as genai
@@ -283,13 +283,20 @@ def build_interface():
     with gr.Blocks(css=css) as chat_interface:
         with gr.Row():
             with gr.Column(scale=2):
-                gr.Markdown("# Karl Popper Chatbot")
-                gr.Markdown(
-                    "Chat with AI Karl Popper. He'll respond in the chat box on the left and utilize and cite "
-                    "sources from the box on the right.")
-                chatbot = gr.Chatbot(label="Chat")
-                msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
-                clear = gr.Button("Clear Chat")
+                with gr.Tab("Chat"):
+                    gr.Markdown("# Karl Popper Chatbot")
+                    gr.Markdown(
+                        "Chat with AI Karl Popper. He'll respond in the chat box on the left and utilize and cite "
+                        "sources from the box on the right.")
+                    chatbot = gr.Chatbot(label="Chat")
+                    msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
+                    clear = gr.Button("Clear Chat")
+
+                with gr.Tab("Load"):
+                    gr.Markdown("Drag and drop your files here to load them into the database. ")
+                    gr.Markdown("Supported file types: PDF and EPUB.")
+                    file_upload = gr.File(file_types=[".pdf", ".epub"], label="Upload Files", interactive=True)
+                    upload_status = gr.Textbox(label="Upload Status", interactive=False)
 
             with gr.Column(scale=1):
                 with gr.Tab("Retrieved Quotes"):
@@ -309,9 +316,17 @@ def build_interface():
             for updated_history, ranked_docs, all_docs in karl_chat.respond(message, chat_history):
                 yield updated_history, ranked_docs, all_docs
 
+        def process_file(uploaded_file):
+            if uploaded_file is None:
+                return "No file uploaded."
+            # Perform processing here (e.g., extract text, store in DB)
+            file_path = uploaded_file.name
+            return f"File '{file_path}' uploaded successfully!"
+
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot], [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
         clear.click(lambda: ([], ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
+        file_upload.change(process_file, inputs=file_upload, outputs=upload_status)
 
     return chat_interface
 
