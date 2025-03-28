@@ -1,4 +1,5 @@
 import time
+import os
 import gradio as gr
 # noinspection PyPackageRequirements
 # from google.genai import Client
@@ -327,8 +328,8 @@ def build_interface():
             if new_files is not None:
                 # Append new files to the current list.
                 current_files.extend(new_files)
-            # Create a string of file names to display.
-            file_names = ", ".join([file.name for file in current_files])
+            # Create a string of file names (only the base names, not full paths) to display.
+            file_names = "\n".join([os.path.basename(file.name) for file in current_files])
             return current_files, file_names
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
