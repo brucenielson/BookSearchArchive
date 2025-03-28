@@ -102,7 +102,6 @@ class KarlPopperChat:
         # Extract numbers from Gemini's response.
         return chat_response.text.strip()
 
-
     def ask_llm_for_quote_relevance(self, message: str, docs: List[Document]) -> str:
         """
         Given a question and a list of retrieved documents, ask the LLM to determine which quotes are relevant.
@@ -241,7 +240,7 @@ class KarlPopperChat:
         formatted_docs = [self.format_document(doc, include_raw_info=True) for doc in all_docs]
         all_quotes = "\n\n".join(formatted_docs)
 
-        modified_query: str = ""
+        modified_query: str
         if not retrieved_quotes or retrieved_quotes.strip() == "":
             modified_query = message
         elif max_score > 0.50:
