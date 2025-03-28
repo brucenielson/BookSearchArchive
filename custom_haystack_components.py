@@ -265,7 +265,7 @@ class Reranker:
         ranker.warm_up()
         self._ranker: TransformersSimilarityRanker = ranker
 
-    @component.output_types(documents=List[Document])
+    @component.output_types(top_documents=List[Document], all_documents=List[Document])
     def run(self, query: str, documents: List[Document],
             top_k: int = 5,
             score_threshold: float = 0.0) -> Dict[str, List[Document]]:
