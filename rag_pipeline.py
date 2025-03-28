@@ -117,15 +117,7 @@ class RagPipeline:
         self._initialize_document_store()
 
         if self._use_reranker:
-            # Warmup Reranker model
-            # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
-            # https://medium.com/towards-data-science/reranking-using-huggingface-transformers-for-optimizing-retrieval-in-rag-pipelines-fbfc6288c91f
-            ranker = TransformersSimilarityRanker(device=self._component_device, top_k=self._llm_top_k,
-                                                  score_threshold=0.0)
-            ranker.warm_up()
-            self._ranker = ranker
-            # self._ranker: Reranker = Reranker(component_device=self._component_device)
-            # TODO: Fix this with annotations
+            self._ranker: Reranker = Reranker(component_device=self._component_device)
 
         if generator_model is None:
             raise ValueError("Generator model must be provided")
@@ -358,6 +350,7 @@ class RagPipeline:
                 PgvectorKeywordRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
             rag_pipeline.add_component("lex_retriever", lex_retriever)
             rag_pipeline.connect("query_input.query", "lex_retriever.query")
+            rag_pipeline.connect("query_input.retriever_top_k", "lex_retriever.top_k")
             rag_pipeline.connect("lex_retriever.documents", "doc_query_collector.lexical_documents")
 
         if self._search_mode == SearchMode.SEMANTIC or self._search_mode == SearchMode.HYBRID:
@@ -370,6 +363,7 @@ class RagPipeline:
                     PgvectorEmbeddingRetriever(document_store=self._document_store, top_k=self._retriever_top_k))
             rag_pipeline.add_component("semantic_retriever", semantic_retriever)
             rag_pipeline.connect("query_embedder.embedding", "semantic_retriever.query")
+            rag_pipeline.connect("query_input.retriever_top_k", "semantic_retriever.top_k")
             rag_pipeline.connect("semantic_retriever.documents", "doc_query_collector.semantic_documents")
 
         if self._use_reranker:
@@ -377,10 +371,10 @@ class RagPipeline:
             rag_pipeline.add_component("reranker", self._ranker)
             rag_pipeline.connect("doc_query_collector.documents", "reranker.documents")
             rag_pipeline.connect("query_input.query", "reranker.query")
-            rag_pipeline.connect("query_input.llm_top_k", "reranker.top_k")
+            rag_pipeline.connect("query_input.retriever_top_k", "reranker.top_k")
             # Stream the reranked documents
             rag_pipeline.add_component("reranker_streamer", DocumentStreamer(do_stream=self._can_stream()))
-            rag_pipeline.connect("reranker.documents", "reranker_streamer.documents")
+            rag_pipeline.connect("reranker.top_documents", "reranker_streamer.documents")
 
         # Add the prompt builder component
         prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
@@ -403,7 +397,11 @@ class RagPipeline:
         if not self._can_stream():
             # Add the final merger of documents and llm response only when streaming is disabled
             rag_pipeline.add_component("merger", MergeResults())
-            rag_pipeline.connect("doc_query_collector.documents", "merger.documents")
+            if self._use_reranker:
+                # Connect the reranker streamer documents to the merger
+                rag_pipeline.connect("reranker_streamer.documents", "merger.documents")
+            else:
+                rag_pipeline.connect("doc_query_collector.documents", "merger.documents")
             rag_pipeline.connect("llm.replies", "merger.replies")
 
         # Connect prompt builder to the llm
