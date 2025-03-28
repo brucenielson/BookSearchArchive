@@ -6,14 +6,7 @@ from haystack import Pipeline
 # noinspection PyPackageRequirements
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder, SentenceTransformersTextEmbedder
 # noinspection PyPackageRequirements
-from haystack.components.builders import PromptBuilder
-# noinspection PyPackageRequirements
-from haystack.components.generators import HuggingFaceLocalGenerator
-# noinspection PyPackageRequirements
-from haystack.components.rankers import TransformersSimilarityRanker
-# noinspection PyPackageRequirements
 from haystack.dataclasses import StreamingChunk
-from haystack_integrations.components.generators.google_ai import GoogleAIGeminiGenerator
 from haystack_integrations.components.retrievers.pgvector import PgvectorEmbeddingRetriever, PgvectorKeywordRetriever
 # noinspection PyPackageRequirements
 from haystack import Document
@@ -29,7 +22,6 @@ from typing import Optional, Dict, Any, Union, List, Tuple
 from pathlib import Path
 import generator_model as gen
 from enum import Enum
-import textwrap
 from document_processor import DocumentStoreType
 from custom_haystack_components import (DocumentCollector, RetrieverWrapper, print_documents,
                                         QueryComponent, print_debug_results, Reranker

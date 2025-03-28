@@ -31,6 +31,7 @@ import textwrap
 from document_processor import DocumentStoreType
 from custom_haystack_components import (MergeResults, DocumentCollector, RetrieverWrapper, print_documents,
                                         QueryComponent, print_debug_results, DocumentStreamer, TextToSpeechLocal,
+                                        Reranker
                                         )
 
 
@@ -120,9 +121,10 @@ class RagPipeline:
             # https://docs.haystack.deepset.ai/docs/transformerssimilarityranker
             # https://medium.com/towards-data-science/reranking-using-huggingface-transformers-for-optimizing-retrieval-in-rag-pipelines-fbfc6288c91f
             ranker = TransformersSimilarityRanker(device=self._component_device, top_k=self._llm_top_k,
-                                                  score_threshold=0.20)
+                                                  score_threshold=0.0)
             ranker.warm_up()
             self._ranker = ranker
+            # self._ranker: Reranker = Reranker(component_device=self._component_device)
             # TODO: Fix this with annotations
 
         if generator_model is None:
@@ -298,7 +300,7 @@ class RagPipeline:
 
         # Prepare inputs for the pipeline
         inputs: Dict[str, Any] = {
-            "query_input": {"query": query, "llm_top_k": self._llm_top_k},
+            "query_input": {"query": query, "llm_top_k": self._llm_top_k, "retriever_top_k": self._retriever_top_k},
         }
 
         # Run the pipeline
@@ -348,8 +350,6 @@ class RagPipeline:
         doc_collector: DocumentCollector = DocumentCollector(do_stream=self._can_stream(),
                                                              callback_func=lambda: doc_collector_completed())
         rag_pipeline.add_component("doc_query_collector", doc_collector)
-        rag_pipeline.connect("query_input.query", "doc_query_collector.query")
-        rag_pipeline.connect("query_input.llm_top_k", "doc_query_collector.llm_top_k")
 
         # Add the retriever component(s) depending on search mode
         if self._search_mode == SearchMode.LEXICAL or self._search_mode == SearchMode.HYBRID \
@@ -376,8 +376,8 @@ class RagPipeline:
             # Reranker
             rag_pipeline.add_component("reranker", self._ranker)
             rag_pipeline.connect("doc_query_collector.documents", "reranker.documents")
-            rag_pipeline.connect("doc_query_collector.query", "reranker.query")
-            rag_pipeline.connect("doc_query_collector.llm_top_k", "reranker.top_k")
+            rag_pipeline.connect("query_input.query", "reranker.query")
+            rag_pipeline.connect("query_input.llm_top_k", "reranker.top_k")
             # Stream the reranked documents
             rag_pipeline.add_component("reranker_streamer", DocumentStreamer(do_stream=self._can_stream()))
             rag_pipeline.connect("reranker.documents", "reranker_streamer.documents")
@@ -385,8 +385,8 @@ class RagPipeline:
         # Add the prompt builder component
         prompt_builder: PromptBuilder = PromptBuilder(template=self._prompt_template)
         rag_pipeline.add_component("prompt_builder", prompt_builder)
-        rag_pipeline.connect("doc_query_collector.query", "prompt_builder.query")
-        rag_pipeline.connect("doc_query_collector.llm_top_k", "prompt_builder.llm_top_k")
+        rag_pipeline.connect("query_input.query", "prompt_builder.query")
+        rag_pipeline.connect("query_input.llm_top_k", "prompt_builder.llm_top_k")
         if self._use_reranker:
             # Connect the reranker documents to the prompt builder
             rag_pipeline.connect("reranker_streamer.documents", "prompt_builder.documents")
