@@ -281,6 +281,9 @@ def build_interface():
     """
 
     with gr.Blocks(css=css) as chat_interface:
+        # State to hold the list of all uploaded files.
+        uploaded_state = gr.State([])
+
         with gr.Row():
             with gr.Column(scale=2):
                 with gr.Tab("Chat"):
@@ -295,8 +298,10 @@ def build_interface():
                 with gr.Tab("Load"):
                     gr.Markdown("Drag and drop your files here to load them into the database. ")
                     gr.Markdown("Supported file types: PDF and EPUB.")
-                    file_upload = gr.File(file_types=[".pdf", ".epub"], label="Upload Files", interactive=True)
-                    upload_status = gr.Textbox(label="Upload Status", interactive=False)
+                    # The file upload component allowing multiple files.
+                    file_upload = gr.File(file_count="multiple", label="Upload Files", interactive=True)
+                    # A textbox to display names of uploaded files.
+                    uploaded_files_display = gr.Textbox(label="Uploaded Files", interactive=False)
 
             with gr.Column(scale=1):
                 with gr.Tab("Retrieved Quotes"):
@@ -316,17 +321,22 @@ def build_interface():
             for updated_history, ranked_docs, all_docs in karl_chat.respond(message, chat_history):
                 yield updated_history, ranked_docs, all_docs
 
-        def process_file(uploaded_file):
-            if uploaded_file is None:
-                return "No file uploaded."
-            # Perform processing here (e.g., extract text, store in DB)
-            file_path = uploaded_file.name
-            return f"File '{file_path}' uploaded successfully!"
+        def update_uploaded_files(current_files, new_files):
+            if current_files is None:
+                current_files = []
+            if new_files is not None:
+                # Append new files to the current list.
+                current_files.extend(new_files)
+            # Create a string of file names to display.
+            file_names = ", ".join([file.name for file in current_files])
+            return current_files, file_names
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot], [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
         clear.click(lambda: ([], ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
-        file_upload.change(process_file, inputs=file_upload, outputs=upload_status)
+        file_upload.change(fn=update_uploaded_files,
+                           inputs=[uploaded_state, file_upload],
+                           outputs=[uploaded_state, uploaded_files_display])
 
     return chat_interface
 
