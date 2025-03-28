@@ -162,6 +162,14 @@ class KarlPopperChat:
             max_score = max(doc.score for doc in docs if hasattr(doc, 'score'))
         return max_score
 
+    def load_documents(self, files):
+        """
+        This method will process the uploaded documents and load them into the database.
+        For now, it's just a stub.
+        """
+        # TODO: Implement document load process using the provided list of files.
+        pass
+
     def respond(self, message: Optional[str], chat_history: List[Optional[List[str]]]):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
         if message.strip() == "" or message is None:
@@ -274,11 +282,16 @@ class KarlPopperChat:
 def build_interface():
     karl_chat = KarlPopperChat()
     css: str = """
-    #retrieved_quotes, #raw_quotes {
+    #QuoteBoxes {
         height: calc(100vh - 100px);
         overflow-y: auto;
         white-space: pre-wrap;
     }
+    #FilesBox {
+        height: calc(100vh - 500px);
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }    
     """
 
     with gr.Blocks(css=css) as chat_interface:
@@ -299,17 +312,18 @@ def build_interface():
                 with gr.Tab("Load"):
                     gr.Markdown("Drag and drop your files here to load them into the database. ")
                     gr.Markdown("Supported file types: PDF and EPUB.")
-                    # The file upload component allowing multiple files.
                     file_upload = gr.File(file_count="multiple", label="Upload Files", interactive=True)
-                    # A textbox to display names of uploaded files.
-                    uploaded_files_display = gr.Textbox(label="Uploaded Files", interactive=False)
+                    # Scrollable markdown to display uploaded file names.
+                    uploaded_files_md = gr.Markdown(label="Uploaded Files", value="", elem_id="FilesBox")
+                    # Button to start the document load process.
+                    load_documents_btn = gr.Button("Load Documents")
 
             with gr.Column(scale=1):
                 with gr.Tab("Retrieved Quotes"):
                     retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
-                                                       elem_id="retrieved_quotes")
+                                                       elem_id="QuoteBoxes")
                 with gr.Tab("Raw Quotes"):
-                    raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="raw_quotes")
+                    raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes")
 
         def user_message(message, chat_history):
             # print(f"user_message: User submitted message: '{message}'")
@@ -332,13 +346,23 @@ def build_interface():
             file_names = "\n".join([os.path.basename(file.name) for file in current_files])
             return current_files, file_names
 
+        def process_load_documents(current_files):
+            # For now, call the load_documents method (which is a stub) and return a status message.
+            karl_chat.load_documents(current_files)
+            return "Document load process started."
+
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
-        msg.submit(process_message, [msg, chatbot], [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
+        msg.submit(process_message, [msg, chatbot],
+                   [chatbot, retrieved_quotes_box,
+                    raw_quotes_box],
+                   queue=True)
         clear.click(lambda: ([], ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
         file_upload.change(fn=update_uploaded_files,
                            inputs=[uploaded_state, file_upload],
-                           outputs=[uploaded_state, uploaded_files_display])
-
+                           outputs=[uploaded_state, uploaded_files_md])
+        load_documents_btn.click(fn=process_load_documents,
+                                 inputs=uploaded_state,
+                                 outputs=uploaded_files_md)
     return chat_interface
 
 
