@@ -324,6 +324,11 @@ def build_interface():
                     file_upload = gr.File(file_count="multiple", label="Upload Files", interactive=True)
                     # A progress bar using a slider to show % complete.
                     progress_bar = gr.Slider(minimum=0, maximum=100, step=1, label="Upload Progress", interactive=False)
+
+                    file_input = gr.File(file_count="multiple", label="Upload a file", interactive=True)
+                    progress_text = gr.Textbox(label="Progress")
+                    load_button = gr.Button("Load")
+
             with gr.Column(scale=1):
                 with gr.Tab("Retrieved Quotes"):
                     retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
@@ -351,6 +356,21 @@ def build_interface():
                 yield (None, int(prog * 100))
             # Once finished, clear the file upload component and set progress to 100%
             yield ([], 100)
+
+        def process_with_custom_progress(files, progress=gr.Progress()):
+            total_steps = 10
+            for i, file in enumerate(files):
+                file_name = os.path.basename(file.name)
+                for step in range(total_steps):
+                    time.sleep(0.1)  # Simulate processing time
+                    desc = f"Processing {file_name}: Step {step + 1}/{total_steps}"
+                    prog = (step + 1) / total_steps
+                    progress(prog, desc=desc)
+            return "Finished processing"
+
+        def update_progress(files):
+            return process_with_custom_progress(files)
+        load_button.click(update_progress, inputs=file_input, outputs=progress_text)
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot],
