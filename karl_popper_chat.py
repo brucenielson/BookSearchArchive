@@ -129,7 +129,7 @@ class KarlPopperChat:
             max_score = max(doc.score for doc in docs if hasattr(doc, 'score'))
         return max_score
 
-    def load_documents(self, files: List[str]) -> Iterator[float]:
+    def load_documents(self, files: List[str]) -> Iterator[None]:
         if self._load_pipeline is None:
             self._load_pipeline: DocumentProcessor = DocumentProcessor(
                 table_name=self._table_name,
@@ -145,8 +145,8 @@ class KarlPopperChat:
                 min_paragraph_size=300,
             )
         # Load the documents into the database.
-        for progress in self._load_pipeline.run(files):
-            yield progress
+        for _ in self._load_pipeline.run(files):
+            yield
 
     def respond(self, message: Optional[str], chat_history: List[Optional[List[str]]]):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---

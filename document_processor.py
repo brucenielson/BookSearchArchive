@@ -146,14 +146,14 @@ class DocumentProcessor:
         else:
             return None
 
-    def run(self, file_folder_path_or_list: Union[str, List[str]] = None) -> Iterator[float]:
+    def run(self, file_folder_path_or_list: Union[str, List[str]] = None) -> Iterator[None]:
         if file_folder_path_or_list is not None:
             self._file_folder_path_or_list = file_folder_path_or_list
         if self._doc_convert_pipeline is None:
             self._init_doc_converter_pipeline()
         # Iterate over the progress updates from _process_documents and yield each one.
-        for progress in self._process_documents():
-            yield progress
+        for _ in self._process_documents():
+            yield
 
     def draw_pipeline(self) -> None:
         """
@@ -336,7 +336,7 @@ class DocumentProcessor:
         document_store = init_doc_store()
         self._document_store = document_store
 
-    def _process_documents(self) -> Iterator[float]:
+    def _process_documents(self) -> Iterator[None]:
         doc_count: int = self._document_store.count_documents()
         self._print_verbose("Document Count: " + str(doc_count))
         self._print_verbose("Loading document file")
@@ -347,7 +347,7 @@ class DocumentProcessor:
         file_list: List[str] = list(self._create_file_list())
         num_files: int = len(file_list)
         if num_files == 0:
-            yield 1.0  # nothing to do, so we're done
+            yield
             return
 
         for i, file_path in enumerate(file_list):
@@ -360,11 +360,7 @@ class DocumentProcessor:
             written = results["final_counter"]["documents_written"]
             total_written += written
             self._print_verbose(f"Wrote {written} documents for {file_path}.")
-            yield (i+1) / num_files
-
-        self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
-        # Ensure we yield 100% at the end.
-        yield 1.0
+            yield
 
 
 def main() -> None:
