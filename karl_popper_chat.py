@@ -364,10 +364,13 @@ def build_interface():
 
             # Call the load_documents method, which now yields progress (a float between 0 and 1)
             file_enumerator = karl_chat.load_documents(files)
-            for i, prog in enumerate(file_enumerator):
-                file_name = os.path.basename(files[i])
+            for i, file in enumerate(files):
+                file_name = os.path.basename(file)
                 desc = f"Processing {file_name}"
+                prog = i / len(files)
                 progress(prog, desc=desc)
+                next(file_enumerator)
+            progress(1.0, desc="Finished processing")
             return "Finished processing"
 
         def update_progress(files):
