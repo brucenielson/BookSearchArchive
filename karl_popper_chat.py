@@ -334,7 +334,6 @@ def build_interface(title: str = 'RAG Chat', system_instruction: Optional[str] =
 
         def process_message(message, chat_history):
             for updated_history, ranked_docs, all_docs in karl_chat.respond(message, chat_history):
-                pass
                 yield updated_history, ranked_docs.strip(), all_docs.strip()
 
         def process_with_custom_progress(files, progress=gr.Progress()):
