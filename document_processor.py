@@ -146,6 +146,7 @@ class DocumentProcessor:
         else:
             return None
 
+    def run(self, file_folder_path_or_list: Union[str, List[str]] = None) -> None:
         """
         Run the document processing pipeline.
 
