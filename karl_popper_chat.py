@@ -315,11 +315,6 @@ def build_interface():
                 with gr.Tab("Load"):
                     gr.Markdown("Drag and drop your files here to load them into the database. ")
                     gr.Markdown("Supported file types: PDF and EPUB.")
-                    # File upload will trigger the load process immediately.
-                    file_upload = gr.File(file_count="multiple", label="Upload Files", interactive=True)
-                    # A progress bar using a slider to show % complete.
-                    progress_bar = gr.Slider(minimum=0, maximum=100, step=1, label="Upload Progress", interactive=False)
-
                     file_input = gr.File(file_count="multiple", label="Upload a file", interactive=True)
                     progress_text = gr.Textbox(label="Progress")
                     load_button = gr.Button("Load")
@@ -338,19 +333,6 @@ def build_interface():
         def process_message(message, chat_history):
             for updated_history, ranked_docs, all_docs in karl_chat.respond(message, chat_history):
                 yield updated_history, ranked_docs, all_docs
-
-        def process_load_documents(files):
-            if files is None or len(files) == 0:
-                # If no files, immediately yield cleared file list and 0% progress.
-                yield ([], 0)
-                return
-            # Call the load_documents method, which now yields progress (a float between 0 and 1)
-            file_enumerator = karl_chat.load_documents(files)
-            for prog in file_enumerator:
-                # Yield None for file_upload (i.e. do not change it yet) and update progress_bar
-                yield (None, int(prog * 100))
-            # Once finished, clear the file upload component and set progress to 100%
-            yield ([], 100)
 
         def process_with_custom_progress(files, progress=gr.Progress()):
             if files is None or len(files) == 0:
@@ -377,8 +359,6 @@ def build_interface():
         msg.submit(process_message, [msg, chatbot],
                    [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
         clear.click(lambda: ([], ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
-        # Set outputs to both file_upload and the progress bar.
-        file_upload.change(fn=process_load_documents, inputs=file_upload, outputs=[file_upload, progress_bar])
 
     return chat_interface
 
