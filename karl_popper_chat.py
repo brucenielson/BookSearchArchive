@@ -45,6 +45,7 @@ class RagChat:
         )
         self._load_pipeline: Optional[DocumentProcessor] = None
 
+    def _initialize_model(self, system_instruction: Optional[str]):
         model = genai.GenerativeModel(
             model_name="gemini-2.0-flash-exp",
             system_instruction=system_instruction
