@@ -16,16 +16,12 @@ from haystack import Document
 from typing import Optional, List, Dict, Any, Iterator
 
 
-class KarlPopperChat:
-    def __init__(self):
+class RagChat:
+    def __init__(self, system_instruction: Optional[str] = None):
         # Initialize Gemini Chat with a system instruction to act like philosopher Karl Popper.
         google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
         genai.configure(api_key=google_secret)
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash-exp",
-            system_instruction="You are philosopher Karl Popper. Answer questions with philosophical insights, "
-                               "and use the provided quotes along with their metadata as reference.")
-        self._model = model
+        self._initialize_model(system_instruction=system_instruction)
 
         # Initialize the document retrieval pipeline with top-5 quote retrieval.
         self._password: str = gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt')
@@ -48,6 +44,12 @@ class KarlPopperChat:
             embedder_model_name="BAAI/llm-embedder"
         )
         self._load_pipeline: Optional[DocumentProcessor] = None
+
+        model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash-exp",
+            system_instruction=system_instruction
+        )
+        self._model = model
 
     def ask_llm_question(self, prompt: str, chat_history: Optional[List[Dict[str, Any]]] = None) -> str:
         """
@@ -292,38 +294,38 @@ class KarlPopperChat:
         return new_history
 
 
-def build_interface():
-    karl_chat = KarlPopperChat()
+def build_interface(title: str = 'RAG Chat', system_instruction: Optional[str] = None) -> gr.Interface:
+    karl_chat = RagChat(system_instruction=system_instruction)
     css: str = """
     #QuoteBoxes {
-        height: calc(100vh - 100px);
+        height: calc(100vh - 175px);
         overflow-y: auto;
         white-space: pre-wrap;
-    }
     """
-    with (gr.Blocks(css=css) as chat_interface):
-        with gr.Row():
-            with gr.Column(scale=2):
-                with gr.Tab("Chat"):
-                    gr.Markdown("# Karl Popper Chatbot")
-                    gr.Markdown(
-                        "Chat with AI Karl Popper. He'll respond in the chat box on the left and utilize and cite "
-                        "sources from the box on the right.")
+    with gr.Blocks(css=css) as chat_interface:
+        with gr.Tab("Chat"):
+            with gr.Row():
+                with gr.Column(scale=3):
+                    with gr.Row():
+                        with gr.Column(scale=3):
+                            gr.Markdown("## " + title)
+                            gr.Markdown("Chat on the left. "
+                                        "It will cite sources from the retrieved quotes on the right.")
+                        with gr.Column(scale=1):
+                            clear = gr.Button("Clear Chat")
                     chatbot = gr.Chatbot(label="Chat")
                     msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
-                    clear = gr.Button("Clear Chat")
-                with gr.Tab("Load"):
-                    gr.Markdown("Drag and drop your files here to load them into the database. ")
-                    gr.Markdown("Supported file types: PDF and EPUB.")
-                    file_input = gr.File(file_count="multiple", label="Upload a file", interactive=True)
-                    load_button = gr.Button("Load")
-
-            with gr.Column(scale=1):
-                with gr.Tab("Retrieved Quotes"):
-                    retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
-                                                       elem_id="QuoteBoxes")
-                with gr.Tab("Raw Quotes"):
-                    raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes")
+                with gr.Column(scale=1):
+                    with gr.Tab("Retrieved Quotes"):
+                        retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
+                                                           elem_id="QuoteBoxes")
+                    with gr.Tab("Raw Quotes"):
+                        raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes")
+        with gr.Tab("Load"):
+            gr.Markdown("Drag and drop your files here to load them into the database. ")
+            gr.Markdown("Supported file types: PDF and EPUB.")
+            file_input = gr.File(file_count="multiple", label="Upload a file", interactive=True)
+            load_button = gr.Button("Load")
 
         def user_message(message, chat_history):
             updated_history = chat_history + [(message, None)]
@@ -331,7 +333,8 @@ def build_interface():
 
         def process_message(message, chat_history):
             for updated_history, ranked_docs, all_docs in karl_chat.respond(message, chat_history):
-                yield updated_history, ranked_docs, all_docs
+                pass
+                yield updated_history, ranked_docs.strip(), all_docs.strip()
 
         def process_with_custom_progress(files, progress=gr.Progress()):
             if files is None or len(files) == 0:
@@ -360,11 +363,13 @@ def build_interface():
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot],
                    [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
-        clear.click(lambda: ([], ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
+        clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
 
     return chat_interface
 
 
 if __name__ == "__main__":
-    popper_chat = build_interface()
-    popper_chat.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
+    sys_instruction: str = ("You are philosopher Karl Popper. Answer questions with philosophical insights, and use "
+                            "the provided quotes along with their metadata as reference.")
+    rag_chat = build_interface(title="Karl Popper Chatbot", system_instruction=sys_instruction)
+    rag_chat.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
