@@ -22,7 +22,7 @@ from haystack.document_stores.types import DuplicatePolicy
 from haystack.utils.auth import Secret
 from neo4j_haystack import Neo4jDocumentStore
 # Other imports
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any, Union, Iterator
 from pathlib import Path
 from enum import Enum
 from generator_model import get_secret
@@ -146,19 +146,14 @@ class DocumentProcessor:
         else:
             return None
 
-    def run(self, file_folder_path_or_list: Union[str, List[str]] = None) -> None:
-        """
-        Run the document processing pipeline.
-
-        Args:
-            file_folder_path_or_list (Union[str, List[str]], optional): The file or folder path to process.
-                If not provided, the previously set path will be used.
-        """
+    def run(self, file_folder_path_or_list: Union[str, List[str]] = None) -> Iterator[float]:
         if file_folder_path_or_list is not None:
             self._file_folder_path_or_list = file_folder_path_or_list
         if self._doc_convert_pipeline is None:
             self._init_doc_converter_pipeline()
-        self._process_documents(file_folder_path_or_list=self._file_folder_path_or_list)
+        # Iterate over the progress updates from _process_documents and yield each one.
+        for progress in self._process_documents():
+            yield progress
 
     def draw_pipeline(self) -> None:
         """
@@ -341,7 +336,7 @@ class DocumentProcessor:
         document_store = init_doc_store()
         self._document_store = document_store
 
-    def _process_documents(self, file_folder_path_or_list: Union[str, List[str]] = None) -> None:
+    def _process_documents(self) -> Iterator[float]:
         doc_count: int = self._document_store.count_documents()
         self._print_verbose("Document Count: " + str(doc_count))
         self._print_verbose("Loading document file")
@@ -349,7 +344,13 @@ class DocumentProcessor:
         # Iterate over the document and metadata pairs as they are loaded
         total_written: int = 0
 
-        for file_path in self._create_file_list():
+        file_list: List[str] = list(self._create_file_list())
+        num_files: int = len(file_list)
+        if num_files == 0:
+            yield 1.0  # nothing to do, so we're done
+            return
+
+        for i, file_path in enumerate(file_list):
             file_path_list: List[str] = [file_path]
             self._print_verbose(f"Processing file: {file_path} ")
             results: Dict[str, Any] = self._doc_convert_pipeline.run(
@@ -359,8 +360,11 @@ class DocumentProcessor:
             written = results["final_counter"]["documents_written"]
             total_written += written
             self._print_verbose(f"Wrote {written} documents for {file_path}.")
+            yield (i+1) / num_files
 
         self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
+        # Ensure we yield 100% at the end.
+        yield 1.0
 
 
 def main() -> None:

@@ -13,7 +13,7 @@ from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
 from document_processor import DocumentProcessor
 # noinspection PyPackageRequirements
 from haystack import Document
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Iterator
 
 
 class KarlPopperChat:
@@ -129,7 +129,7 @@ class KarlPopperChat:
             max_score = max(doc.score for doc in docs if hasattr(doc, 'score'))
         return max_score
 
-    def load_documents(self, files: List[str]):
+    def load_documents(self, files: List[str]) -> Iterator[float]:
         if self._load_pipeline is None:
             self._load_pipeline: DocumentProcessor = DocumentProcessor(
                 table_name=self._table_name,
@@ -145,7 +145,13 @@ class KarlPopperChat:
                 min_paragraph_size=300,
             )
         # Load the documents into the database.
-        self._load_pipeline.run(files)
+        progress_yielded = False
+        for progress in self._load_pipeline.run(files):
+            yield progress
+            progress_yielded = True
+
+        if not progress_yielded:
+            yield 1.0  # Ensure completion signal
 
     def respond(self, message: Optional[str], chat_history: List[Optional[List[str]]]):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
@@ -316,6 +322,8 @@ def build_interface():
                     gr.Markdown("Supported file types: PDF and EPUB.")
                     # File upload will trigger the load process immediately.
                     file_upload = gr.File(file_count="multiple", label="Upload Files", interactive=True)
+                    # A progress bar using a slider to show % complete.
+                    progress_bar = gr.Slider(minimum=0, maximum=100, step=1, label="Upload Progress", interactive=False)
             with gr.Column(scale=1):
                 with gr.Tab("Retrieved Quotes"):
                     retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
@@ -333,20 +341,27 @@ def build_interface():
 
         def process_load_documents(files):
             if files is None or len(files) == 0:
-                return []
-            # Process the uploaded files
-            karl_chat.load_documents(files)
-            # Return an empty list to clear the file input
-            return []
+                # If no files, immediately yield cleared file list and 0% progress.
+                yield ([], 0)
+                return
+            # Call the load_documents method, which now yields progress (a float between 0 and 1)
+            file_enumerator = karl_chat.load_documents(files)
+            for prog in file_enumerator:
+                # Yield None for file_upload (i.e. do not change it yet) and update progress_bar
+                yield (None, int(prog * 100))
+            # Once finished, clear the file upload component and set progress to 100%
+            yield ([], 100)
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
-        msg.submit(process_message, [msg, chatbot], [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
+        msg.submit(process_message, [msg, chatbot],
+                   [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
         clear.click(lambda: ([], ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
-        file_upload.change(fn=process_load_documents, inputs=file_upload, outputs=file_upload)
+        # Set outputs to both file_upload and the progress bar.
+        file_upload.change(fn=process_load_documents, inputs=file_upload, outputs=[file_upload, progress_bar])
 
     return chat_interface
 
 
 if __name__ == "__main__":
     popper_chat = build_interface()
-    popper_chat.launch(debug=True)
+    popper_chat.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
