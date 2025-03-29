@@ -280,7 +280,6 @@ class DocRetrievalPipeline:
 
 
 def main() -> None:
-    doc_store_type: DocumentStoreType = DocumentStoreType.Pgvector
     password: str = gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt')
     user_name: str = "postgres"
     db_name: str = "postgres"

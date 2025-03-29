@@ -1,85 +1,70 @@
 import time
+import os
 import gradio as gr
 # noinspection PyPackageRequirements
 # from google.genai import Client
 # noinspection PyPackageRequirements
-from google.genai.types import GenerateContentConfig
+# from google.genai.types import GenerateContentConfig
 import generator_model as gen
 # noinspection PyPackageRequirements
 import google.generativeai as genai
 # Import your DocRetrievalPipeline and SearchMode (adjust import paths as needed)
 from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
+from document_processor import DocumentProcessor
 # noinspection PyPackageRequirements
 from haystack import Document
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Iterator
 
 
-class KarlPopperChat:
-    def __init__(self):
+class RagChat:
+    def __init__(self,
+                 google_secret: str,
+                 postgres_password: str,
+                 postgres_user_name: str = "postgres",
+                 postgres_db_name: str = "postgres",
+                 postgres_table_name: str = "book_archive",
+                 postgres_host: str = 'localhost',
+                 postgres_port: int = 5432,
+                 postgres_table_recreate: bool = False,
+                 postgres_table_embedder_model_name: str = "BAAI/llm-embedder",
+                 system_instruction: Optional[str] = None, ):
         # Initialize Gemini Chat with a system instruction to act like philosopher Karl Popper.
-        google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
         genai.configure(api_key=google_secret)
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash-exp",
-            system_instruction="You are philosopher Karl Popper. Answer questions with philosophical insights, "
-                               "and use the provided quotes along with their metadata as reference.")
-        self.model = model
+        self._initialize_model(system_instruction=system_instruction)
 
         # Initialize the document retrieval pipeline with top-5 quote retrieval.
-        password: str = gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt')
-        user_name: str = "postgres"
-        db_name: str = "postgres"
-        self.doc_pipeline = DocRetrievalPipeline(
-            table_name="popper_archive",
-            db_user_name=user_name,
-            db_password=password,
-            postgres_host='localhost',
-            postgres_port=5432,
-            db_name=db_name,
+        self._postgres_password: str = postgres_password
+        self._postgres_user_name: str = postgres_user_name
+        self._postgres_db_name: str = postgres_db_name
+        self._postgres_table_name: str = postgres_table_name
+        self._postgres_table_recreate: bool = postgres_table_recreate
+        self._postgres_table_embedder_model_name: str = postgres_table_embedder_model_name
+        self._postgres_host: str = postgres_host
+        self._postgres_port: int = postgres_port
+        # Initialize the document retrieval pipeline.
+        self._doc_pipeline = DocRetrievalPipeline(
+            table_name=self._postgres_table_name,
+            db_user_name=self._postgres_user_name,
+            db_password=self._postgres_password,
+            postgres_host=self._postgres_host,
+            postgres_port=self._postgres_port,
+            db_name=self._postgres_db_name,
             verbose=False,
             llm_top_k=5,
             retriever_top_k_docs=100,
             include_outputs_from=None,
             search_mode=SearchMode.HYBRID,
             use_reranker=True,
-            embedder_model_name="BAAI/llm-embedder"
+            embedder_model_name=self._postgres_table_embedder_model_name,
         )
-        self.doc_pipeline.draw_pipeline()
+        self._load_pipeline: Optional[DocumentProcessor] = None
 
-    @staticmethod
-    def format_document(doc, include_raw_info: bool = False) -> str:
-        """
-        Format a document by including its metadata followed by the quote.
-        """
-        formatted = ""
-        # If the document has metadata, format each key-value pair.
-        if hasattr(doc, 'meta') and doc.meta:
-            meta_entries = ["Score: {:.4f}".format(doc.score) if hasattr(doc, 'score') else "Score: N/A"]
-            # Add the original score if requested.
-            if include_raw_info and hasattr(doc, 'orig_score'):
-                meta_entries.append("Original Score: {:.4f}".format(doc.orig_score))
-                meta_entries.append("Retrieved By: {}".format(doc.retrieval_method))
-            # Define keys to ignore (customize as needed).
-            ignore_keys = {"file_path", "item_#", "item_id"}
-            for key, value in doc.meta.items():
-                if key.lower() in ignore_keys or key.startswith('_') or key.startswith('split'):
-                    continue
-                # Append each key-value pair.
-                meta_entries.append(f"{key.replace('_', ' ').title()}: {value}")
-            if meta_entries:
-                formatted += "\n".join(meta_entries) + "\n"
-        # Append the main quote.
-        formatted += f"Quote: {doc.content}"
-        return formatted
-
-    # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
-    @staticmethod
-    def transform_history(history) -> List[Dict[str, Any]]:
-        new_history = []
-        for chat_response in history:
-            new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
-            new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})
-        return new_history
+    def _initialize_model(self, system_instruction: Optional[str]):
+        model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash-exp",
+            system_instruction=system_instruction
+        )
+        self._model = model
 
     def ask_llm_question(self, prompt: str, chat_history: Optional[List[Dict[str, Any]]] = None) -> str:
         """
@@ -97,7 +82,7 @@ class KarlPopperChat:
         if chat_history is None:
             chat_history = []
         # Start a new chat session with no history for this check.
-        chat_session = self.model.start_chat(history=chat_history)
+        chat_session = self._model.start_chat(history=chat_history)
         chat_response = chat_session.send_message(prompt)
         # Extract numbers from Gemini's response.
         return chat_response.text.strip()
@@ -161,6 +146,25 @@ class KarlPopperChat:
             max_score = max(doc.score for doc in docs if hasattr(doc, 'score'))
         return max_score
 
+    def load_documents(self, files: List[str]) -> Iterator[None]:
+        if self._load_pipeline is None:
+            self._load_pipeline: DocumentProcessor = DocumentProcessor(
+                table_name=self._postgres_table_name,
+                recreate_table=False,
+                embedder_model_name="BAAI/llm-embedder",
+                file_folder_path_or_list=files,
+                db_user_name=self._postgres_user_name,
+                db_password=self._postgres_password,
+                postgres_host='localhost',
+                postgres_port=5432,
+                db_name=self._postgres_db_name,
+                min_section_size=3000,
+                min_paragraph_size=300,
+            )
+        # Load the documents into the database.
+        for _ in self._load_pipeline.run(files, use_iterator=True):
+            yield
+
     def respond(self, message: Optional[str], chat_history: List[Optional[List[str]]]):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
         if message.strip() == "" or message is None:
@@ -179,7 +183,7 @@ class KarlPopperChat:
 
         retrieved_docs: List[Document]
         all_docs: List[Document]
-        retrieved_docs, all_docs = self.doc_pipeline.generate_response(message)
+        retrieved_docs, all_docs = self._doc_pipeline.generate_response(message)
 
         # Find the largest score
         max_score: float = self.get_max_score(retrieved_docs)
@@ -201,7 +205,7 @@ class KarlPopperChat:
             new_retrieved_docs: List[Document]
             temp_all_docs: List[Document]
             if improved_query != "":
-                new_retrieved_docs, temp_all_docs = self.doc_pipeline.generate_response(improved_query)
+                new_retrieved_docs, temp_all_docs = self._doc_pipeline.generate_response(improved_query)
                 new_max_score: float = self.get_max_score(new_retrieved_docs)
                 if new_max_score > max(max_score * 1.1, max_score + 0.05):
                     # If the new max score is better than the old one, use the new docs
@@ -259,7 +263,7 @@ class KarlPopperChat:
             )
         # We start a new chat session each time so that we can control the chat history and remove all the rag docs
         # We just want questions and answers in the chat history
-        chat_session = self.model.start_chat(history=gemini_chat_history)
+        chat_session = self._model.start_chat(history=gemini_chat_history)
         # Send the modified query to Gemini.
         chat_response = chat_session.send_message(modified_query, stream=True)
         answer_text = ""
@@ -269,53 +273,137 @@ class KarlPopperChat:
                 answer_text += chunk.text
                 yield chat_history + [(message, answer_text)], retrieved_quotes, all_quotes
 
+    @staticmethod
+    def format_document(doc, include_raw_info: bool = False) -> str:
+        """
+        Format a document by including its metadata followed by the quote.
+        """
+        formatted = ""
+        # If the document has metadata, format each key-value pair.
+        if hasattr(doc, 'meta') and doc.meta:
+            meta_entries = ["Score: {:.4f}".format(doc.score) if hasattr(doc, 'score') else "Score: N/A"]
+            # Add the original score if requested.
+            if include_raw_info and hasattr(doc, 'orig_score'):
+                meta_entries.append("Original Score: {:.4f}".format(doc.orig_score))
+                meta_entries.append("Retrieved By: {}".format(doc.retrieval_method))
+            # Define keys to ignore (customize as needed).
+            ignore_keys = {"file_path", "item_#", "item_id"}
+            for key, value in doc.meta.items():
+                if key.lower() in ignore_keys or key.startswith('_') or key.startswith('split'):
+                    continue
+                # Append each key-value pair.
+                meta_entries.append(f"{key.replace('_', ' ').title()}: {value}")
+            if meta_entries:
+                formatted += "\n".join(meta_entries) + "\n"
+        # Append the main quote.
+        formatted += f"Quote: {doc.content}"
+        return formatted
 
-def build_interface():
-    karl_chat = KarlPopperChat()
+    # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
+    @staticmethod
+    def transform_history(history) -> List[Dict[str, Any]]:
+        new_history = []
+        for chat_response in history:
+            new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
+            new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})
+        return new_history
+
+
+def build_interface(google_secret: str,
+                    postgres_password: str,
+                    title: str = 'RAG Chat',
+                    system_instruction: Optional[str] = None) -> gr.Interface:
+    karl_chat = RagChat(
+        google_secret=google_secret,
+        postgres_password=postgres_password,
+        system_instruction=system_instruction
+    )
     css: str = """
-    #retrieved_quotes, #raw_quotes {
-        height: calc(100vh - 100px);
+    #QuoteBoxes {
+        height: calc(100vh - 175px);
         overflow-y: auto;
         white-space: pre-wrap;
-    }
     """
-
     with gr.Blocks(css=css) as chat_interface:
-        with gr.Row():
-            with gr.Column(scale=2):
-                gr.Markdown("# Karl Popper Chatbot")
-                gr.Markdown(
-                    "Chat with AI Karl Popper. He'll respond in the chat box on the left and utilize and cite "
-                    "sources from the box on the right.")
-                chatbot = gr.Chatbot(label="Chat")
-                msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
-                clear = gr.Button("Clear Chat")
-
-            with gr.Column(scale=1):
-                with gr.Tab("Retrieved Quotes"):
-                    retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
-                                                       elem_id="retrieved_quotes")
-                with gr.Tab("Raw Quotes"):
-                    raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="raw_quotes")
+        with gr.Tab("Chat"):
+            with gr.Row():
+                with gr.Column(scale=3):
+                    with gr.Row():
+                        with gr.Column(scale=3):
+                            gr.Markdown("## " + title)
+                            gr.Markdown("Chat on the left. "
+                                        "It will cite sources from the retrieved quotes on the right.")
+                        with gr.Column(scale=1):
+                            clear = gr.Button("Clear Chat")
+                    chatbot = gr.Chatbot(label="Chat")
+                    msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
+                with gr.Column(scale=1):
+                    with gr.Tab("Retrieved Quotes"):
+                        retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
+                                                           elem_id="QuoteBoxes")
+                    with gr.Tab("Raw Quotes"):
+                        raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes")
+        with gr.Tab("Load"):
+            gr.Markdown("Drag and drop your files here to load them into the database. ")
+            gr.Markdown("Supported file types: PDF and EPUB.")
+            file_input = gr.File(file_count="multiple", label="Upload a file", interactive=True)
+            load_button = gr.Button("Load")
+        with gr.Tab("Config"):
+            gr.Markdown("Settings for chat and load.")
+            gr.Textbox(label="Gemini API Key", placeholder="Enter your Gemini API key here",
+                       value=google_secret, type="password", interactive=True)
+            gr.Textbox(label="Postgres Password", placeholder="Enter your Postgres password here",
+                       value=postgres_password, type="password", interactive=True)
+            gr.Textbox(label="Chat Title", placeholder="Enter the title for the chat",
+                       value=title, interactive=True)
+            gr.Textbox(label="System Instructions", placeholder="Enter your system instructions here",
+                       value=system_instruction, interactive=True)
 
         def user_message(message, chat_history):
-            # print(f"user_message: User submitted message: '{message}'")
-            # Append the user's message to the chat history
             updated_history = chat_history + [(message, None)]
             return "", updated_history
 
         def process_message(message, chat_history):
-            # print(f"process_message: User submitted message: '{message}'")
             for updated_history, ranked_docs, all_docs in karl_chat.respond(message, chat_history):
-                yield updated_history, ranked_docs, all_docs
+                yield updated_history, ranked_docs.strip(), all_docs.strip()
+
+        def process_with_custom_progress(files, progress=gr.Progress()):
+            if files is None or len(files) == 0:
+                # If no files, immediately yield cleared file list and 0% progress.
+                return
+
+            # Call the load_documents method, which now yields progress (a float between 0 and 1)
+            file_enumerator = karl_chat.load_documents(files)
+            for i, file in enumerate(files):
+                file_name = os.path.basename(file)
+                desc = f"Processing {file_name}"
+                prog = i / len(files)
+                progress(prog, desc=desc)
+                next(file_enumerator)
+            progress(1.0, desc="Finished processing")
+            time.sleep(0.5)
+            return "Finished processing"
+
+        def update_progress(files):
+            # Process the files and return a progress message along with an empty list to clear the widget
+            process_with_custom_progress(files)
+            return []
+
+        load_button.click(update_progress, inputs=file_input, outputs=file_input)
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
-        msg.submit(process_message, [msg, chatbot], [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
-        clear.click(lambda: ([], ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
+        msg.submit(process_message, [msg, chatbot],
+                   [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
+        clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
 
     return chat_interface
 
 
 if __name__ == "__main__":
-    popper_chat = build_interface()
-    popper_chat.launch(debug=True)
+    sys_instruction: str = ("You are philosopher Karl Popper. Answer questions with philosophical insights, and use "
+                            "the provided quotes along with their metadata as reference.")
+    rag_chat = build_interface(google_secret=gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt'),
+                               postgres_password=gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt'),
+                               title="Karl Popper Chatbot",
+                               system_instruction=sys_instruction)
+    rag_chat.launch(debug=True, max_file_size=100 * gr.FileSize.MB)

@@ -22,7 +22,7 @@ from haystack.document_stores.types import DuplicatePolicy
 from haystack.utils.auth import Secret
 from neo4j_haystack import Neo4jDocumentStore
 # Other imports
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any, Union, Iterator
 from pathlib import Path
 from enum import Enum
 from generator_model import get_secret
@@ -30,7 +30,7 @@ from doc_content_checker import skip_content
 from custom_haystack_components import (CustomDocumentSplitter, RemoveIllegalDocs, FinalDocCounter, DuplicateChecker,
                                         EPubLoader, HTMLParserComponent, print_debug_results, EpubVsPdfSplitter,
                                         EPubPdfMerger, PyMuPdf4LLM, PDFReader, PyMuPDFReader,
-                                        DoclingToMarkdown, PdfLoader, DoclingParserComponent)
+                                        PdfLoader, DoclingParserComponent)
 
 
 # Create an enum for PDF reading strategy: PyPDFToDocument, PDFReader, PyMuPdf4LLM, PyMuPDFReader
@@ -49,7 +49,7 @@ class DocumentStoreType(Enum):
 
 class DocumentProcessor:
     def __init__(self,
-                 file_or_folder_path: str,
+                 file_folder_path_or_list: Union[str, List[str]],
                  table_name: str = 'haystack_pgvector_docs',
                  recreate_table: bool = False,
                  db_user_name: str = 'postgres',
@@ -65,7 +65,7 @@ class DocumentProcessor:
                  include_outputs_from: Optional[set[str]] = None,
                  verbose: bool = False,
                  write_to_file: bool = False,
-                 pdf_reading_strategy: PDFReadingStrategy = PDFReadingStrategy.PDFReader,
+                 pdf_reading_strategy: PDFReadingStrategy = PDFReadingStrategy.Docling,
                  document_store_type: DocumentStoreType = DocumentStoreType.Pgvector,
                  create_audio: bool = False,
                  ) -> None:
@@ -90,15 +90,7 @@ class DocumentProcessor:
         self._create_audio: bool = create_audio
 
         # File paths
-        self._file_or_folder_path: str = file_or_folder_path  # New instance variable
-
-        # Determine if the path is a file or directory
-        if Path(self._file_or_folder_path).is_file():
-            self._is_directory = False
-        elif Path(self._file_or_folder_path).is_dir():
-            self._is_directory = True
-        else:
-            raise ValueError("The provided path must be a valid file or directory.")
+        self._file_folder_path_or_list: Union[str, List[str]] = file_folder_path_or_list  # New instance variable
 
         # GPU or CPU
         self._has_cuda: bool = torch.cuda.is_available()
@@ -154,6 +146,28 @@ class DocumentProcessor:
         else:
             return None
 
+    def run(self,
+            file_folder_path_or_list: Union[str, List[str]] = None,
+            use_iterator: bool = False) -> Union[Iterator[None], List[None]]:
+        if file_folder_path_or_list is not None:
+            self._file_folder_path_or_list = file_folder_path_or_list
+        if self._doc_convert_pipeline is None:
+            self._init_doc_converter_pipeline()
+
+        if use_iterator:
+            # Return an iterator
+            return self._process_documents()
+        else:
+            # Collect and return all results as a list
+            return list(self._process_documents())
+
+    def draw_pipeline(self) -> None:
+        """
+        Draw and save visual representations of the document conversion pipelines.
+        """
+        if self._doc_convert_pipeline is not None:
+            self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
+
     def _print_verbose(self, *args, **kwargs) -> None:
         if self._verbose:
             print(*args, **kwargs)
@@ -170,27 +184,26 @@ class DocumentProcessor:
             if hasattr(self._sentence_embedder, 'warm_up'):
                 self._sentence_embedder.warm_up()
 
-    def draw_pipeline(self) -> None:
-        """
-        Draw and save visual representations of the document conversion pipelines.
-        """
-        if self._doc_convert_pipeline is not None:
-            self._doc_convert_pipeline.draw(Path("Document Conversion Pipeline.png"))
-
     def _create_file_list(self) -> str:
-        if self._is_directory:
-            for file_path in Path(self._file_or_folder_path).glob('*'):
+        # Handle the case where the input is a list of file paths
+        if isinstance(self._file_folder_path_or_list, list):
+            for file_path in self._file_folder_path_or_list:
+                if file_path.lower().endswith(('.epub', '.pdf')):
+                    yield file_path
+        elif Path(self._file_folder_path_or_list).is_dir():
+            for file_path in Path(self._file_folder_path_or_list).glob('*'):
                 if file_path.suffix.lower() in {'.epub', '.pdf'}:
                     yield str(file_path)
-        else:
-            path: Path = Path(self._file_or_folder_path)
+        elif Path(self._file_folder_path_or_list).is_file():
+            path: Path = Path(self._file_folder_path_or_list)
             if path.suffix.lower() in {'.epub', '.pdf'}:
                 yield str(path)
             else:
                 raise ValueError("The provided file must be an .epub or .pdf")
+        else:
+            raise ValueError("The provided path must be a valid file, directory, or list of files.")
 
-    def _doc_converter_pipeline(self,
-                                pdf_reading_strategy: PDFReadingStrategy = PDFReadingStrategy.PyMuPDFReader) -> None:
+    def _init_doc_converter_pipeline(self) -> None:
         self._setup_embedder()
         # Create the custom splitter
         custom_splitter: CustomDocumentSplitter = CustomDocumentSplitter(self._sentence_embedder,
@@ -218,21 +231,21 @@ class DocumentProcessor:
         # Create the document conversion pipeline
         doc_convert_pipe: Pipeline = Pipeline()
         doc_convert_pipe.add_component("epub_vs_pdf_splitter", EpubVsPdfSplitter())
-        if pdf_reading_strategy == PDFReadingStrategy.PyPDFToDocument:
+        if self._pdf_reading_strategy == PDFReadingStrategy.PyPDFToDocument:
             doc_convert_pipe.add_component("pdf_loader", PyPDFToDocument())
-        elif pdf_reading_strategy == PDFReadingStrategy.PDFReader:
+        elif self._pdf_reading_strategy == PDFReadingStrategy.PDFReader:
             doc_convert_pipe.add_component("pdf_loader", PDFReader())
-        elif pdf_reading_strategy == PDFReadingStrategy.PyMuPdf4LLM:
+        elif self._pdf_reading_strategy == PDFReadingStrategy.PyMuPdf4LLM:
             doc_convert_pipe.add_component("pdf_loader", PyMuPdf4LLM())
             doc_convert_pipe.add_component("markdown_converter", MarkdownToDocument())
-        elif pdf_reading_strategy == PDFReadingStrategy.Docling:
+        elif self._pdf_reading_strategy == PDFReadingStrategy.Docling:
             doc_convert_pipe.add_component("pdf_loader", PdfLoader(verbose=self._verbose))
             doc_convert_pipe.add_component("docling_parser",
                                            DoclingParserComponent(min_paragraph_size=self._min_paragraph_size,
                                                                   min_section_size=self._min_section_size,
                                                                   verbose=self._verbose))
             doc_convert_pipe.add_component("text_converter", TextFileToDocument())
-        elif pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
+        elif self._pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
             doc_convert_pipe.add_component("pdf_loader", PyMuPDFReader())
 
         doc_convert_pipe.add_component("epub_loader", EPubLoader(verbose=self._verbose))
@@ -264,21 +277,21 @@ class DocumentProcessor:
         doc_convert_pipe.connect("html_parser.meta", "html_converter.meta")
         doc_convert_pipe.connect("html_converter.documents", "epub_pdf_merger.epub_docs")
         # PDF pipeline
-        if pdf_reading_strategy == PDFReadingStrategy.PyPDFToDocument:
+        if self._pdf_reading_strategy == PDFReadingStrategy.PyPDFToDocument:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
-        elif pdf_reading_strategy == PDFReadingStrategy.PDFReader:
+        elif self._pdf_reading_strategy == PDFReadingStrategy.PDFReader:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
-        elif pdf_reading_strategy == PDFReadingStrategy.PyMuPdf4LLM:
+        elif self._pdf_reading_strategy == PDFReadingStrategy.PyMuPdf4LLM:
             doc_convert_pipe.connect("pdf_loader.sources", "markdown_converter.sources")
             doc_convert_pipe.connect("pdf_loader.meta", "markdown_converter.meta")
             doc_convert_pipe.connect("markdown_converter.documents", "epub_pdf_merger.pdf_docs")
-        elif pdf_reading_strategy == PDFReadingStrategy.Docling:
+        elif self._pdf_reading_strategy == PDFReadingStrategy.Docling:
             doc_convert_pipe.connect("pdf_loader.docling_docs", "docling_parser.sources")
             doc_convert_pipe.connect("pdf_loader.meta", "docling_parser.meta")
             doc_convert_pipe.connect("docling_parser.sources", "text_converter.sources")
             doc_convert_pipe.connect("docling_parser.meta", "text_converter.meta")
             doc_convert_pipe.connect("text_converter.documents", "epub_pdf_merger.pdf_docs")
-        elif pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
+        elif self._pdf_reading_strategy == PDFReadingStrategy.PyMuPDFReader:
             doc_convert_pipe.connect("pdf_loader.documents", "epub_pdf_merger.pdf_docs")
 
         # Remaining pipeline to final counter
@@ -293,7 +306,6 @@ class DocumentProcessor:
         doc_convert_pipe.connect("router.no_documents", "final_counter.no_documents")
 
         self._doc_convert_pipeline = doc_convert_pipe
-        self.draw_pipeline()
 
     def _initialize_document_store(self) -> None:
         def init_doc_store(force_recreate: bool = False) -> Union[PgvectorDocumentStore, Neo4jDocumentStore]:
@@ -330,15 +342,21 @@ class DocumentProcessor:
         document_store = init_doc_store()
         self._document_store = document_store
 
-        doc_count: int = document_store.count_documents()
+    def _process_documents(self) -> Iterator[None]:
+        doc_count: int = self._document_store.count_documents()
         self._print_verbose("Document Count: " + str(doc_count))
         self._print_verbose("Loading document file")
 
         # Iterate over the document and metadata pairs as they are loaded
         total_written: int = 0
-        self._doc_converter_pipeline(pdf_reading_strategy=self._pdf_reading_strategy)
 
-        for file_path in self._create_file_list():
+        file_list: List[str] = list(self._create_file_list())
+        num_files: int = len(file_list)
+        if num_files == 0:
+            yield
+            return
+
+        for i, file_path in enumerate(file_list):
             file_path_list: List[str] = [file_path]
             self._print_verbose(f"Processing file: {file_path} ")
             results: Dict[str, Any] = self._doc_convert_pipeline.run(
@@ -348,8 +366,7 @@ class DocumentProcessor:
             written = results["final_counter"]["documents_written"]
             total_written += written
             self._print_verbose(f"Wrote {written} documents for {file_path}.")
-
-        self._print_verbose(f"Finished writing documents to document store. Final document count: {total_written}")
+            yield
 
 
 def main() -> None:
@@ -369,10 +386,10 @@ def main() -> None:
     include_outputs_from: Optional[set[str]] = None  # {"final_counter"}
     # noinspection SpellCheckingInspection
     processor: DocumentProcessor = DocumentProcessor(
-        table_name="popper_archive",
+        table_name="book_archive",
         recreate_table=False,
         embedder_model_name="BAAI/llm-embedder",
-        file_or_folder_path=file_path,
+        file_folder_path_or_list=file_path,
         db_user_name=user_name,
         db_password=password,
         postgres_host='localhost',
@@ -387,6 +404,9 @@ def main() -> None:
         write_to_file=True,
         document_store_type=doc_store_type,
     )
+
+    # Process documents in the specified folder
+    processor.run(file_path)
 
     # Draw images of the pipelines
     if processor.verbose:
