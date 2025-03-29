@@ -10,6 +10,7 @@ import generator_model as gen
 import google.generativeai as genai
 # Import your DocRetrievalPipeline and SearchMode (adjust import paths as needed)
 from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
+from document_processor import DocumentProcessor
 # noinspection PyPackageRequirements
 from haystack import Document
 from typing import Optional, List, Dict, Any
@@ -24,19 +25,20 @@ class KarlPopperChat:
             model_name="gemini-2.0-flash-exp",
             system_instruction="You are philosopher Karl Popper. Answer questions with philosophical insights, "
                                "and use the provided quotes along with their metadata as reference.")
-        self.model = model
+        self._model = model
 
         # Initialize the document retrieval pipeline with top-5 quote retrieval.
-        password: str = gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt')
-        user_name: str = "postgres"
-        db_name: str = "postgres"
-        self.doc_pipeline = DocRetrievalPipeline(
-            table_name="popper_archive",
-            db_user_name=user_name,
-            db_password=password,
+        self._password: str = gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt')
+        self._user_name: str = "postgres"
+        self._db_name: str = "postgres"
+        self._table_name: str = "book_archive"
+        self._doc_pipeline = DocRetrievalPipeline(
+            table_name=self._table_name,
+            db_user_name=self._user_name,
+            db_password=self._password,
             postgres_host='localhost',
             postgres_port=5432,
-            db_name=db_name,
+            db_name=self._db_name,
             verbose=False,
             llm_top_k=5,
             retriever_top_k_docs=100,
@@ -45,42 +47,7 @@ class KarlPopperChat:
             use_reranker=True,
             embedder_model_name="BAAI/llm-embedder"
         )
-        self.doc_pipeline.draw_pipeline()
-
-    @staticmethod
-    def format_document(doc, include_raw_info: bool = False) -> str:
-        """
-        Format a document by including its metadata followed by the quote.
-        """
-        formatted = ""
-        # If the document has metadata, format each key-value pair.
-        if hasattr(doc, 'meta') and doc.meta:
-            meta_entries = ["Score: {:.4f}".format(doc.score) if hasattr(doc, 'score') else "Score: N/A"]
-            # Add the original score if requested.
-            if include_raw_info and hasattr(doc, 'orig_score'):
-                meta_entries.append("Original Score: {:.4f}".format(doc.orig_score))
-                meta_entries.append("Retrieved By: {}".format(doc.retrieval_method))
-            # Define keys to ignore (customize as needed).
-            ignore_keys = {"file_path", "item_#", "item_id"}
-            for key, value in doc.meta.items():
-                if key.lower() in ignore_keys or key.startswith('_') or key.startswith('split'):
-                    continue
-                # Append each key-value pair.
-                meta_entries.append(f"{key.replace('_', ' ').title()}: {value}")
-            if meta_entries:
-                formatted += "\n".join(meta_entries) + "\n"
-        # Append the main quote.
-        formatted += f"Quote: {doc.content}"
-        return formatted
-
-    # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
-    @staticmethod
-    def transform_history(history) -> List[Dict[str, Any]]:
-        new_history = []
-        for chat_response in history:
-            new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
-            new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})
-        return new_history
+        self._load_pipeline: Optional[DocumentProcessor] = None
 
     def ask_llm_question(self, prompt: str, chat_history: Optional[List[Dict[str, Any]]] = None) -> str:
         """
@@ -98,7 +65,7 @@ class KarlPopperChat:
         if chat_history is None:
             chat_history = []
         # Start a new chat session with no history for this check.
-        chat_session = self.model.start_chat(history=chat_history)
+        chat_session = self._model.start_chat(history=chat_history)
         chat_response = chat_session.send_message(prompt)
         # Extract numbers from Gemini's response.
         return chat_response.text.strip()
@@ -162,13 +129,23 @@ class KarlPopperChat:
             max_score = max(doc.score for doc in docs if hasattr(doc, 'score'))
         return max_score
 
-    def load_documents(self, files):
-        """
-        This method will process the uploaded documents and load them into the database.
-        For now, it's just a stub.
-        """
-        # TODO: Implement document load process using the provided list of files.
-        pass
+    def load_documents(self, files: List[str]):
+        if self._load_pipeline is None:
+            self._load_pipeline: DocumentProcessor = DocumentProcessor(
+                table_name=self._table_name,
+                recreate_table=False,
+                embedder_model_name="BAAI/llm-embedder",
+                file_folder_path_or_list=files,
+                db_user_name=self._user_name,
+                db_password=self._password,
+                postgres_host='localhost',
+                postgres_port=5432,
+                db_name=self._db_name,
+                min_section_size=3000,
+                min_paragraph_size=300,
+            )
+        # Load the documents into the database.
+        self._load_pipeline.run(files)
 
     def respond(self, message: Optional[str], chat_history: List[Optional[List[str]]]):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
@@ -188,7 +165,7 @@ class KarlPopperChat:
 
         retrieved_docs: List[Document]
         all_docs: List[Document]
-        retrieved_docs, all_docs = self.doc_pipeline.generate_response(message)
+        retrieved_docs, all_docs = self._doc_pipeline.generate_response(message)
 
         # Find the largest score
         max_score: float = self.get_max_score(retrieved_docs)
@@ -210,7 +187,7 @@ class KarlPopperChat:
             new_retrieved_docs: List[Document]
             temp_all_docs: List[Document]
             if improved_query != "":
-                new_retrieved_docs, temp_all_docs = self.doc_pipeline.generate_response(improved_query)
+                new_retrieved_docs, temp_all_docs = self._doc_pipeline.generate_response(improved_query)
                 new_max_score: float = self.get_max_score(new_retrieved_docs)
                 if new_max_score > max(max_score * 1.1, max_score + 0.05):
                     # If the new max score is better than the old one, use the new docs
@@ -268,7 +245,7 @@ class KarlPopperChat:
             )
         # We start a new chat session each time so that we can control the chat history and remove all the rag docs
         # We just want questions and answers in the chat history
-        chat_session = self.model.start_chat(history=gemini_chat_history)
+        chat_session = self._model.start_chat(history=gemini_chat_history)
         # Send the modified query to Gemini.
         chat_response = chat_session.send_message(modified_query, stream=True)
         answer_text = ""
@@ -277,6 +254,41 @@ class KarlPopperChat:
             if hasattr(chunk, 'text'):
                 answer_text += chunk.text
                 yield chat_history + [(message, answer_text)], retrieved_quotes, all_quotes
+
+    @staticmethod
+    def format_document(doc, include_raw_info: bool = False) -> str:
+        """
+        Format a document by including its metadata followed by the quote.
+        """
+        formatted = ""
+        # If the document has metadata, format each key-value pair.
+        if hasattr(doc, 'meta') and doc.meta:
+            meta_entries = ["Score: {:.4f}".format(doc.score) if hasattr(doc, 'score') else "Score: N/A"]
+            # Add the original score if requested.
+            if include_raw_info and hasattr(doc, 'orig_score'):
+                meta_entries.append("Original Score: {:.4f}".format(doc.orig_score))
+                meta_entries.append("Retrieved By: {}".format(doc.retrieval_method))
+            # Define keys to ignore (customize as needed).
+            ignore_keys = {"file_path", "item_#", "item_id"}
+            for key, value in doc.meta.items():
+                if key.lower() in ignore_keys or key.startswith('_') or key.startswith('split'):
+                    continue
+                # Append each key-value pair.
+                meta_entries.append(f"{key.replace('_', ' ').title()}: {value}")
+            if meta_entries:
+                formatted += "\n".join(meta_entries) + "\n"
+        # Append the main quote.
+        formatted += f"Quote: {doc.content}"
+        return formatted
+
+    # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
+    @staticmethod
+    def transform_history(history) -> List[Dict[str, Any]]:
+        new_history = []
+        for chat_response in history:
+            new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
+            new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})
+        return new_history
 
 
 def build_interface():
