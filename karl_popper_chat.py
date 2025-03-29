@@ -145,13 +145,8 @@ class KarlPopperChat:
                 min_paragraph_size=300,
             )
         # Load the documents into the database.
-        progress_yielded = False
         for progress in self._load_pipeline.run(files):
             yield progress
-            progress_yielded = True
-
-        if not progress_yielded:
-            yield 1.0  # Ensure completion signal
 
     def respond(self, message: Optional[str], chat_history: List[Optional[List[str]]]):
         # --- Step 1: Retrieve the top-5 quotes with metadata ---
@@ -371,6 +366,7 @@ def build_interface():
                 progress(prog, desc=desc)
                 next(file_enumerator)
             progress(1.0, desc="Finished processing")
+            time.sleep(0.5)
             return "Finished processing"
 
         def update_progress(files):
