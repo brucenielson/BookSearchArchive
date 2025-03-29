@@ -301,7 +301,7 @@ def build_interface():
         white-space: pre-wrap;
     }
     """
-    with gr.Blocks(css=css) as chat_interface:
+    with (gr.Blocks(css=css) as chat_interface):
         with gr.Row():
             with gr.Column(scale=2):
                 with gr.Tab("Chat"):
@@ -316,7 +316,6 @@ def build_interface():
                     gr.Markdown("Drag and drop your files here to load them into the database. ")
                     gr.Markdown("Supported file types: PDF and EPUB.")
                     file_input = gr.File(file_count="multiple", label="Upload a file", interactive=True)
-                    progress_text = gr.Textbox(label="Progress")
                     load_button = gr.Button("Load")
 
             with gr.Column(scale=1):
@@ -352,8 +351,11 @@ def build_interface():
             return "Finished processing"
 
         def update_progress(files):
-            return process_with_custom_progress(files)
-        load_button.click(update_progress, inputs=file_input, outputs=progress_text)
+            # Process the files and return a progress message along with an empty list to clear the widget
+            process_with_custom_progress(files)
+            return []
+
+        load_button.click(update_progress, inputs=file_input, outputs=file_input)
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot],
