@@ -327,6 +327,14 @@ def build_interface(title: str = 'RAG Chat', system_instruction: Optional[str] =
             gr.Markdown("Supported file types: PDF and EPUB.")
             file_input = gr.File(file_count="multiple", label="Upload a file", interactive=True)
             load_button = gr.Button("Load")
+        with gr.Tab("Config"):
+            gr.Markdown("Settings for chat and load.")
+            gr.Textbox(label="Gemini API Key", placeholder="Enter your Gemini API key here",
+                       value=gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt'), interactive=True)
+            gr.Textbox(label="Postgres Password", placeholder="Enter your Postgres password here",
+                       value=gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt'), interactive=True)
+            gr.Textbox(label="System Instructions", placeholder="Enter your system instructions here",
+                       value=system_instruction, interactive=True)
 
         def user_message(message, chat_history):
             updated_history = chat_history + [(message, None)]
