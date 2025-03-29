@@ -186,12 +186,10 @@ class DocumentProcessor:
     def _create_file_list(self) -> str:
         # Handle the case where the input is a list of file paths
         if isinstance(self._file_folder_path_or_list, list):
-            yield from self._file_folder_path_or_list
-
-        # Now cast to be a string
-        if not isinstance(self._file_folder_path_or_list, str):
-            self._file_folder_path_or_list = str(self._file_folder_path_or_list[0])
-        if Path(self._file_folder_path_or_list).is_dir():
+            for file_path in self._file_folder_path_or_list:
+                if file_path.lower().endswith(('.epub', '.pdf')):
+                    yield file_path
+        elif Path(self._file_folder_path_or_list).is_dir():
             for file_path in Path(self._file_folder_path_or_list).glob('*'):
                 if file_path.suffix.lower() in {'.epub', '.pdf'}:
                     yield str(file_path)

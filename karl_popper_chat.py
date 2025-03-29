@@ -299,17 +299,8 @@ def build_interface():
         overflow-y: auto;
         white-space: pre-wrap;
     }
-    #FilesBox {
-        height: calc(100vh - 500px);
-        overflow-y: auto;
-        white-space: pre-wrap;
-    }    
     """
-
     with gr.Blocks(css=css) as chat_interface:
-        # State to hold the list of all uploaded files.
-        uploaded_state = gr.State([])
-
         with gr.Row():
             with gr.Column(scale=2):
                 with gr.Tab("Chat"):
@@ -320,16 +311,11 @@ def build_interface():
                     chatbot = gr.Chatbot(label="Chat")
                     msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
                     clear = gr.Button("Clear Chat")
-
                 with gr.Tab("Load"):
                     gr.Markdown("Drag and drop your files here to load them into the database. ")
                     gr.Markdown("Supported file types: PDF and EPUB.")
+                    # File upload will trigger the load process immediately.
                     file_upload = gr.File(file_count="multiple", label="Upload Files", interactive=True)
-                    # Scrollable markdown to display uploaded file names.
-                    uploaded_files_md = gr.Markdown(label="Uploaded Files", value="", elem_id="FilesBox")
-                    # Button to start the document load process.
-                    load_documents_btn = gr.Button("Load Documents")
-
             with gr.Column(scale=1):
                 with gr.Tab("Retrieved Quotes"):
                     retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
@@ -338,43 +324,26 @@ def build_interface():
                     raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes")
 
         def user_message(message, chat_history):
-            # print(f"user_message: User submitted message: '{message}'")
-            # Append the user's message to the chat history
             updated_history = chat_history + [(message, None)]
             return "", updated_history
 
         def process_message(message, chat_history):
-            # print(f"process_message: User submitted message: '{message}'")
             for updated_history, ranked_docs, all_docs in karl_chat.respond(message, chat_history):
                 yield updated_history, ranked_docs, all_docs
 
-        def update_uploaded_files(current_files, new_files):
-            if current_files is None:
-                current_files = []
-            if new_files is not None:
-                # Append new files to the current list.
-                current_files.extend(new_files)
-            # Create a string of file names (only the base names, not full paths) to display.
-            file_names = "\n".join([os.path.basename(file.name) for file in current_files])
-            return current_files, file_names
-
-        def process_load_documents(current_files):
-            # For now, call the load_documents method (which is a stub) and return a status message.
-            karl_chat.load_documents(current_files)
-            return "Document load process started."
+        def process_load_documents(files):
+            if files is None or len(files) == 0:
+                return []
+            # Process the uploaded files
+            karl_chat.load_documents(files)
+            # Return an empty list to clear the file input
+            return []
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
-        msg.submit(process_message, [msg, chatbot],
-                   [chatbot, retrieved_quotes_box,
-                    raw_quotes_box],
-                   queue=True)
+        msg.submit(process_message, [msg, chatbot], [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
         clear.click(lambda: ([], ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
-        file_upload.change(fn=update_uploaded_files,
-                           inputs=[uploaded_state, file_upload],
-                           outputs=[uploaded_state, uploaded_files_md])
-        load_documents_btn.click(fn=process_load_documents,
-                                 inputs=uploaded_state,
-                                 outputs=uploaded_files_md)
+        file_upload.change(fn=process_load_documents, inputs=file_upload, outputs=file_upload)
+
     return chat_interface
 
 
