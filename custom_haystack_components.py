@@ -1,4 +1,6 @@
 import csv
+import os.path
+
 from ebooklib import ITEM_DOCUMENT, epub
 # noinspection PyPackageRequirements
 from haystack import Document, component
@@ -77,7 +79,7 @@ def _print_hierarchy(data: Dict[str, Any], level: int) -> None:
 
 
 def load_valid_pages(skip_file: str) -> Dict[str, Tuple[int, int]]:
-    book_paragraphs: Dict[str, Tuple[int, int]] = {}
+    book_pages: Dict[str, Tuple[int, int]] = {}
     skip_file_path = Path(skip_file)
 
     if skip_file_path.exists():
@@ -89,9 +91,9 @@ def load_valid_pages(skip_file: str) -> Dict[str, Tuple[int, int]]:
                 start: str = row['Start'].strip()
                 end: str = row['End'].strip()
                 if book_title and start and end:
-                    book_paragraphs[book_title] = (int(start), int(end))
+                    book_pages[book_title] = (int(start), int(end))
 
-    return book_paragraphs
+    return book_pages
 
 
 # pip install git+https://github.com/huggingface/parler-tts.git
@@ -364,7 +366,6 @@ class EpubVsPdfSplitter:
 class EPubLoader:
     def __init__(self, verbose: bool = False, skip_file: str = "sections_to_skip.csv") -> None:
         self._verbose: bool = verbose
-        self._is_directory: bool = False
         self._file_paths: List[str] = []
         self._skip_file: str = skip_file
         self._sections_to_skip: Dict[str, Set[str]] = {}
@@ -434,7 +435,7 @@ class EPubLoader:
 
     def _load_sections_to_skip(self) -> Dict[str, Set[str]]:
         sections_to_skip: Dict[str, Set[str]] = {}
-        if self._is_directory:
+        if os.path.isdir(self._file_paths[0]):
             csv_path = Path(self._file_paths[0]) / self._skip_file
         else:
             # Get the directory of the file and then look for the csv file in that directory
@@ -465,7 +466,6 @@ class EPubLoader:
 class PdfLoader:
     def __init__(self, verbose: bool = False, skip_file: str = "sections_to_skip.csv") -> None:
         self._verbose: bool = verbose
-        self._is_directory: bool = False
         self._file_paths: List[str] = []
         self._skip_file: str = skip_file
         self._sections_to_skip: Dict[str, Set[str]] = {}

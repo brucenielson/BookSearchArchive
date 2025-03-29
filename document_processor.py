@@ -146,14 +146,20 @@ class DocumentProcessor:
         else:
             return None
 
-    def run(self, file_folder_path_or_list: Union[str, List[str]] = None) -> Iterator[None]:
+    def run(self,
+            file_folder_path_or_list: Union[str, List[str]] = None,
+            use_iterator: bool = True) -> Union[Iterator[None], List[None]]:
         if file_folder_path_or_list is not None:
             self._file_folder_path_or_list = file_folder_path_or_list
         if self._doc_convert_pipeline is None:
             self._init_doc_converter_pipeline()
-        # Iterate over the progress updates from _process_documents and yield each one.
-        for _ in self._process_documents():
-            yield
+
+        if use_iterator:
+            # Return an iterator
+            return self._process_documents()
+        else:
+            # Collect and return all results as a list
+            return list(self._process_documents())
 
     def draw_pipeline(self) -> None:
         """
@@ -400,7 +406,7 @@ def main() -> None:
     )
 
     # Process documents in the specified folder
-    processor.run(file_path)
+    processor.run(file_path, use_iterator=False)
 
     # Draw images of the pipelines
     if processor.verbose:
