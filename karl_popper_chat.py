@@ -17,31 +17,45 @@ from typing import Optional, List, Dict, Any, Iterator
 
 
 class RagChat:
-    def __init__(self, system_instruction: Optional[str] = None):
+    def __init__(self,
+                 google_secret: str,
+                 postgres_password: str,
+                 postgres_user_name: str = "postgres",
+                 postgres_db_name: str = "postgres",
+                 postgres_table_name: str = "book_archive",
+                 postgres_host: str = 'localhost',
+                 postgres_port: int = 5432,
+                 postgres_table_recreate: bool = False,
+                 postgres_table_embedder_model_name: str = "BAAI/llm-embedder",
+                 system_instruction: Optional[str] = None, ):
         # Initialize Gemini Chat with a system instruction to act like philosopher Karl Popper.
-        google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
         genai.configure(api_key=google_secret)
         self._initialize_model(system_instruction=system_instruction)
 
         # Initialize the document retrieval pipeline with top-5 quote retrieval.
-        self._password: str = gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt')
-        self._user_name: str = "postgres"
-        self._db_name: str = "postgres"
-        self._table_name: str = "book_archive"
+        self._postgres_password: str = postgres_password
+        self._postgres_user_name: str = postgres_user_name
+        self._postgres_db_name: str = postgres_db_name
+        self._postgres_table_name: str = postgres_table_name
+        self._postgres_table_recreate: bool = postgres_table_recreate
+        self._postgres_table_embedder_model_name: str = postgres_table_embedder_model_name
+        self._postgres_host: str = postgres_host
+        self._postgres_port: int = postgres_port
+        # Initialize the document retrieval pipeline.
         self._doc_pipeline = DocRetrievalPipeline(
-            table_name=self._table_name,
-            db_user_name=self._user_name,
-            db_password=self._password,
-            postgres_host='localhost',
-            postgres_port=5432,
-            db_name=self._db_name,
+            table_name=self._postgres_table_name,
+            db_user_name=self._postgres_user_name,
+            db_password=self._postgres_password,
+            postgres_host=self._postgres_host,
+            postgres_port=self._postgres_port,
+            db_name=self._postgres_db_name,
             verbose=False,
             llm_top_k=5,
             retriever_top_k_docs=100,
             include_outputs_from=None,
             search_mode=SearchMode.HYBRID,
             use_reranker=True,
-            embedder_model_name="BAAI/llm-embedder"
+            embedder_model_name=self._postgres_table_embedder_model_name,
         )
         self._load_pipeline: Optional[DocumentProcessor] = None
 
@@ -135,15 +149,15 @@ class RagChat:
     def load_documents(self, files: List[str]) -> Iterator[None]:
         if self._load_pipeline is None:
             self._load_pipeline: DocumentProcessor = DocumentProcessor(
-                table_name=self._table_name,
+                table_name=self._postgres_table_name,
                 recreate_table=False,
                 embedder_model_name="BAAI/llm-embedder",
                 file_folder_path_or_list=files,
-                db_user_name=self._user_name,
-                db_password=self._password,
+                db_user_name=self._postgres_user_name,
+                db_password=self._postgres_password,
                 postgres_host='localhost',
                 postgres_port=5432,
-                db_name=self._db_name,
+                db_name=self._postgres_db_name,
                 min_section_size=3000,
                 min_paragraph_size=300,
             )
@@ -295,8 +309,15 @@ class RagChat:
         return new_history
 
 
-def build_interface(title: str = 'RAG Chat', system_instruction: Optional[str] = None) -> gr.Interface:
-    karl_chat = RagChat(system_instruction=system_instruction)
+def build_interface(google_secret: str,
+                    postgres_password: str,
+                    title: str = 'RAG Chat',
+                    system_instruction: Optional[str] = None) -> gr.Interface:
+    karl_chat = RagChat(
+        google_secret=google_secret,
+        postgres_password=postgres_password,
+        system_instruction=system_instruction
+    )
     css: str = """
     #QuoteBoxes {
         height: calc(100vh - 175px);
@@ -330,9 +351,11 @@ def build_interface(title: str = 'RAG Chat', system_instruction: Optional[str] =
         with gr.Tab("Config"):
             gr.Markdown("Settings for chat and load.")
             gr.Textbox(label="Gemini API Key", placeholder="Enter your Gemini API key here",
-                       value=gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt'), interactive=True)
+                       value=google_secret, type="password", interactive=True)
             gr.Textbox(label="Postgres Password", placeholder="Enter your Postgres password here",
-                       value=gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt'), interactive=True)
+                       value=postgres_password, type="password", interactive=True)
+            gr.Textbox(label="Chat Title", placeholder="Enter the title for the chat",
+                       value=title, interactive=True)
             gr.Textbox(label="System Instructions", placeholder="Enter your system instructions here",
                        value=system_instruction, interactive=True)
 
@@ -379,5 +402,8 @@ def build_interface(title: str = 'RAG Chat', system_instruction: Optional[str] =
 if __name__ == "__main__":
     sys_instruction: str = ("You are philosopher Karl Popper. Answer questions with philosophical insights, and use "
                             "the provided quotes along with their metadata as reference.")
-    rag_chat = build_interface(title="Karl Popper Chatbot", system_instruction=sys_instruction)
+    rag_chat = build_interface(google_secret=gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt'),
+                               postgres_password=gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt'),
+                               title="Karl Popper Chatbot",
+                               system_instruction=sys_instruction)
     rag_chat.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
