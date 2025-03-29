@@ -358,14 +358,16 @@ def build_interface():
             yield ([], 100)
 
         def process_with_custom_progress(files, progress=gr.Progress()):
-            total_steps = 10
-            for i, file in enumerate(files):
-                file_name = os.path.basename(file.name)
-                for step in range(total_steps):
-                    time.sleep(0.1)  # Simulate processing time
-                    desc = f"Processing {file_name}: Step {step + 1}/{total_steps}"
-                    prog = (step + 1) / total_steps
-                    progress(prog, desc=desc)
+            if files is None or len(files) == 0:
+                # If no files, immediately yield cleared file list and 0% progress.
+                return
+
+            # Call the load_documents method, which now yields progress (a float between 0 and 1)
+            file_enumerator = karl_chat.load_documents(files)
+            for i, prog in enumerate(file_enumerator):
+                file_name = os.path.basename(files[i])
+                desc = f"Processing {file_name}"
+                progress(prog, desc=desc)
             return "Finished processing"
 
         def update_progress(files):
