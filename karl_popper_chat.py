@@ -148,7 +148,7 @@ class RagChat:
                 min_paragraph_size=300,
             )
         # Load the documents into the database.
-        for _ in self._load_pipeline.run(files):
+        for _ in self._load_pipeline.run(files, use_iterator=True):
             yield
 
     def respond(self, message: Optional[str], chat_history: List[Optional[List[str]]]):

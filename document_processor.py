@@ -148,7 +148,7 @@ class DocumentProcessor:
 
     def run(self,
             file_folder_path_or_list: Union[str, List[str]] = None,
-            use_iterator: bool = True) -> Union[Iterator[None], List[None]]:
+            use_iterator: bool = False) -> Union[Iterator[None], List[None]]:
         if file_folder_path_or_list is not None:
             self._file_folder_path_or_list = file_folder_path_or_list
         if self._doc_convert_pipeline is None:
@@ -406,7 +406,7 @@ def main() -> None:
     )
 
     # Process documents in the specified folder
-    processor.run(file_path, use_iterator=False)
+    processor.run(file_path)
 
     # Draw images of the pipelines
     if processor.verbose:
