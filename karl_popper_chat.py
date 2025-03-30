@@ -7,7 +7,6 @@ from google.generativeai.types import generation_types
 # from google.genai import Client
 # noinspection PyPackageRequirements
 # from google.genai.types import GenerateContentConfig
-import generator_model as gen
 # noinspection PyPackageRequirements
 import google.generativeai as genai
 # Import your DocRetrievalPipeline and SearchMode (adjust import paths as needed)
@@ -89,8 +88,8 @@ class RagChat:
             else:
                 return chat_response.text.strip()
         else:
-            # If no secret is provided, return an empty string.
-            return "You must first enter your Gemini API key in the settings tab before you can use the chat."
+            # If no secret is provided, throw an error
+            raise ValueError("Google secret is not provided. Please provide a valid API key.")
 
     def ask_llm_for_quote_relevance(self, message: str, docs: List[Document]) -> str:
         """
@@ -315,15 +314,67 @@ class RagChat:
         return new_history
 
 
-def build_interface(google_secret: str,
-                    postgres_password: str,
-                    title: str = 'RAG Chat',
-                    system_instruction: Optional[str] = None) -> gr.Interface:
-    rag_chat = RagChat(
-        google_secret=google_secret,
-        postgres_password=postgres_password,
-        system_instruction=system_instruction
-    )
+def build_interface(title: str = 'RAG Chat',
+                    system_instructions: str = "You are a helpful assistant.") -> gr.Interface:
+    def load_rag_chat(google_secret_param: str,
+                      postgres_password_param: str,
+                      postgres_user_name_param: str,
+                      postgres_db_name_param: str,
+                      postgres_table_name_param: str,
+                      postgres_host_param: str,
+                      postgres_port_param: int,
+                      system_instructions_param: str) -> RagChat:
+        return RagChat(
+            google_secret=google_secret_param,
+            postgres_password=postgres_password_param,
+            postgres_user_name=postgres_user_name_param,
+            postgres_db_name=postgres_db_name_param,
+            postgres_table_name=postgres_table_name_param,
+            postgres_host=postgres_host_param,
+            postgres_port=postgres_port_param,
+            system_instruction=system_instructions_param
+        )
+
+    # Attempt to load the config from a file if it exists.
+    # If it doesn't exist, default to the config tab.
+    google_secret: str = ""
+    postgres_password: str = ""
+    postgres_user_name: str = ""
+    postgres_db_name: str = ""
+    postgres_table_name: str = ""
+    postgres_host: str = ""
+    postgres_port: int = 0
+    loaded_config: bool = False
+    default_tab: str = "Chat"
+    rag_chat: Optional[RagChat] = None
+    if os.path.exists("config.txt"):
+        with open("config.txt", "r") as f:
+            lines = f.readlines()
+            if len(lines) >= 8:
+                google_secret = lines[0].strip()
+                postgres_password = lines[1].strip()
+                postgres_user_name = lines[2].strip()
+                postgres_db_name = lines[3].strip()
+                postgres_table_name = lines[4].strip()
+                postgres_host = lines[5].strip()
+                postgres_port = int(lines[6].strip())
+                title = lines[7].strip()
+                system_instructions = lines[8].strip()
+                default_tab: str = "Chat"
+                loaded_config = True
+                rag_chat = load_rag_chat(google_secret,
+                                         postgres_password,
+                                         postgres_user_name,
+                                         postgres_db_name,
+                                         postgres_table_name,
+                                         postgres_host,
+                                         postgres_port,
+                                         system_instructions)
+
+    if not loaded_config:
+        # No config settings yet, so set Config tab as default
+        default_tab: str = "Config"
+
     css: str = """
     #QuoteBoxes {
         height: calc(100vh - 175px);
@@ -331,74 +382,85 @@ def build_interface(google_secret: str,
         white-space: pre-wrap;
     """
     with gr.Blocks(css=css) as chat_interface:
-        with gr.Tab("Chat"):
-            with gr.Row():
-                with gr.Column(scale=3):
-                    with gr.Row():
-                        with gr.Column(scale=3):
-                            title_md: gr.Markdown = gr.Markdown("## " + title)
-                            gr.Markdown("Chat on the left. "
-                                        "It will cite sources from the retrieved quotes on the right.")
-                        with gr.Column(scale=1):
-                            clear: gr.Button = gr.Button("Clear Chat")
-                    chatbot = gr.Chatbot(label="Chat")
-                    msg: gr.Textbox = gr.Textbox(placeholder="Ask your question...", label="Your Message")
-                with gr.Column(scale=1):
-                    with gr.Tab("Retrieved Quotes"):
-                        retrieved_quotes_box: gr.Markdown = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
-                                                                        elem_id="QuoteBoxes")
-                    with gr.Tab("Raw Quotes"):
-                        raw_quotes_box: gr.Markdown = gr.Markdown(label="Raw Quotes & Metadata", value="",
-                                                                  elem_id="QuoteBoxes")
-        with gr.Tab("Load"):
-            gr.Markdown("Drag and drop your files here to load them into the database. ")
-            gr.Markdown("Supported file types: PDF and EPUB.")
-            file_input: gr.File = gr.File(file_count="multiple", label="Upload a file", interactive=True)
-            load_button: gr.Button = gr.Button("Load")
-        with gr.Tab("Config"):
-            with gr.Row():
-                with gr.Column(scale=2):
-                    gr.Markdown("Settings for chat and load.")
-                    gr.Markdown("### Chat Settings")
-                with gr.Column(scale=1):
-                    save_settings: gr.Button = gr.Button("Save Settings")
-            with gr.Row():
-                with gr.Column(scale=1):
-                    with gr.Group():
-                        chat_title: gr.Textbox = gr.Textbox(label="Chat Title", placeholder="Enter the title for the chat",
-                                                            value=title, interactive=True)
-                        sys_inst_box: gr.Textbox = gr.Textbox(label="System Instructions",
-                                                              placeholder="Enter your system instructions here",
-                                                              value=system_instruction,
-                                                              interactive=True)
-                    gr.Markdown("### API Keys")
-                    with gr.Group():
-                        gemini_secret: gr.Textbox = gr.Textbox(label="Gemini API Key",
-                                                               placeholder="Enter your Gemini API key here",
-                                                               value=google_secret,
-                                                               type="password",
-                                                               interactive=True)
-                    gr.Markdown("### Postgres Settings")
-                    with gr.Group():
-                        postgres_secret: gr.Textbox = gr.Textbox(label="Postgres Password",
-                                                                 placeholder="Enter your Postgres password here",
-                                                                 value=postgres_password,
-                                                                 type="password", interactive=True)
-                        postgres_user: gr.Textbox = gr.Textbox(label="Postgres User",
-                                                               placeholder="Enter your Postgres user here",
-                                                               value="postgres", interactive=True)
-                        postgres_db: gr.Textbox = gr.Textbox(label="Postgres DB",
-                                                             placeholder="Enter your Postgres DB name here",
-                                                             value="postgres", interactive=True)
-                        postgres_table: gr.Textbox = gr.Textbox(label="Postgres Table",
-                                                                placeholder="Enter your Postgres table name here",
-                                                                value="book_archive", interactive=True)
-                        postgres_host: gr.Textbox = gr.Textbox(label="Postgres Host",
-                                                               placeholder="Enter your Postgres host here",
-                                                               value="localhost", interactive=True)
-                        postgres_port: gr.Textbox = gr.Textbox(label="Postgres Port",
-                                                               placeholder="Enter your Postgres port here",
-                                                               value="5432", interactive=True)
+        with gr.Tabs(selected=default_tab):
+            with gr.Tab(label="Chat", id="Chat", interactive=(default_tab == "Chat")):
+                with gr.Row():
+                    with gr.Column(scale=3):
+                        with gr.Row():
+                            with gr.Column(scale=3):
+                                title_md: gr.Markdown = gr.Markdown("## " + title)
+                                gr.Markdown(
+                                    "Chat on the left. It will cite sources from the retrieved quotes on the right.")
+                            with gr.Column(scale=1):
+                                clear: gr.Button = gr.Button("Clear Chat")
+                        chatbot = gr.Chatbot(label="Chat")
+                        msg: gr.Textbox = gr.Textbox(placeholder="Ask your question...", label="Your Message")
+                    with gr.Column(scale=1):
+                        with gr.Tab("Retrieved Quotes"):
+                            retrieved_quotes_box: gr.Markdown = gr.Markdown(
+                                label="Retrieved Quotes & Metadata", value="", elem_id="QuoteBoxes"
+                            )
+                        with gr.Tab("Raw Quotes"):
+                            raw_quotes_box: gr.Markdown = gr.Markdown(
+                                label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes"
+                            )
+
+            with gr.Tab(label="Load", id="Load", interactive=(default_tab == "Chat")):
+                gr.Markdown("Drag and drop your files here to load them into the database.")
+                gr.Markdown("Supported file types: PDF and EPUB.")
+                file_input: gr.File = gr.File(file_count="multiple", label="Upload a file", interactive=True)
+                load_button: gr.Button = gr.Button("Load")
+
+            with gr.Tab(label="Config", id="Config"):
+                with gr.Row():
+                    with gr.Column(scale=2):
+                        gr.Markdown("Settings for chat and load.")
+                        gr.Markdown("### Chat Settings")
+                    with gr.Column(scale=1):
+                        save_settings: gr.Button = gr.Button("Save Settings")
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        with gr.Group():
+                            chat_title: gr.Textbox = gr.Textbox(
+                                label="Chat Title", placeholder="Enter the title for the chat",
+                                value=title, interactive=True
+                            )
+                            sys_inst_box: gr.Textbox = gr.Textbox(
+                                label="System Instructions", placeholder="Enter your system instructions here",
+                                value=system_instructions, interactive=True
+                            )
+                        gr.Markdown("### API Keys")
+                        with gr.Group():
+                            gemini_secret: gr.Textbox = gr.Textbox(
+                                label="Gemini API Key", placeholder="Enter your Gemini API key here",
+                                value=google_secret, type="password", interactive=True
+                            )
+                        gr.Markdown("### Postgres Settings")
+                        with gr.Group():
+                            postgres_secret_tb: gr.Textbox = gr.Textbox(
+                                label="Postgres Password", placeholder="Enter your Postgres password here",
+                                value=postgres_password, type="password", interactive=True
+                            )
+                            postgres_user_tb: gr.Textbox = gr.Textbox(
+                                label="Postgres User", placeholder="Enter your Postgres user here",
+                                value="postgres", interactive=True
+                            )
+                            postgres_db_tb: gr.Textbox = gr.Textbox(
+                                label="Postgres DB", placeholder="Enter your Postgres DB name here",
+                                value="postgres", interactive=True
+                            )
+                            postgres_table_tb: gr.Textbox = gr.Textbox(
+                                label="Postgres Table", placeholder="Enter your Postgres table name here",
+                                value="book_archive", interactive=True
+                            )
+                            postgres_host_tb: gr.Textbox = gr.Textbox(
+                                label="Postgres Host", placeholder="Enter your Postgres host here",
+                                value="localhost", interactive=True
+                            )
+                            postgres_port_tb: gr.Textbox = gr.Textbox(
+                                label="Postgres Port", placeholder="Enter your Postgres port here",
+                                value="5432", interactive=True
+                            )
 
         def user_message(message, chat_history):
             updated_history = chat_history + [(message, None)]
@@ -445,8 +507,8 @@ def build_interface(google_secret: str,
         msg.submit(process_message, [msg, chatbot],
                    [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
         clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
-        save_settings.click(update_config, [gemini_secret, postgres_secret, chat_title, sys_inst_box],
-                          [gemini_secret, postgres_secret, chat_title, sys_inst_box, title_md], queue=False)
+        save_settings.click(update_config, [gemini_secret, postgres_secret_tb, chat_title, sys_inst_box],
+                          [gemini_secret, postgres_secret_tb, chat_title, sys_inst_box, title_md], queue=False)
 
     return chat_interface
 
@@ -454,8 +516,6 @@ def build_interface(google_secret: str,
 if __name__ == "__main__":
     sys_instruction: str = ("You are philosopher Karl Popper. Answer questions with philosophical insights, and use "
                             "the provided quotes along with their metadata as reference.")
-    rag_chat_ui = build_interface(google_secret=gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt'),
-                                  postgres_password=gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt'),
-                                  title="Karl Popper Chatbot",
-                                  system_instruction=sys_instruction)
+    rag_chat_ui = build_interface(title="Karl Popper Chatbot",
+                                  system_instructions=sys_instruction)
     rag_chat_ui.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
