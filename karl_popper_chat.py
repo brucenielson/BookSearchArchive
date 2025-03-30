@@ -511,20 +511,17 @@ def build_interface(title: str = 'RAG Chat',
                 f.write(f"{main_title}\n")
                 f.write(f"{sys_instr}\n")
 
-            if rag_chat:
-                rag_chat.initialize_model(system_instruction=sys_instr, google_secret=google_pass)
-            else:
-                pass
-                # rag_chat = load_rag_chat(google_pass,
-                #                          postgres_pass,
-                #                          postgres_user_tb.value,
-                #                          postgres_db_tb.value,
-                #                          postgres_table_tb.value,
-                #                          postgres_host_tb.value,
-                #                          int(postgres_port_tb.value),
-                #                          sys_instr)
+            # Reset the RagChat instance with the new settings
+            rag_chat = load_rag_chat(google_pass,
+                                     postgres_pass,
+                                     postgres_user_tb.value,
+                                     postgres_db_tb.value,
+                                     postgres_table_tb.value,
+                                     postgres_host_tb.value,
+                                     int(postgres_port_tb.value),
+                                     sys_instr)
 
-            time.sleep(0.5)
+            time.sleep(0.25)
             return (
                 google_pass,
                 postgres_pass,
