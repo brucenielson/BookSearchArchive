@@ -356,20 +356,49 @@ def build_interface(google_secret: str,
             file_input: gr.File = gr.File(file_count="multiple", label="Upload a file", interactive=True)
             load_button: gr.Button = gr.Button("Load")
         with gr.Tab("Config"):
-            gr.Markdown("Settings for chat and load.")
-            gemini_secret: gr.Textbox = gr.Textbox(label="Gemini API Key", placeholder="Enter your Gemini API key here",
-                                                   value=google_secret, type="password", interactive=True)
-            postgres_secret: gr.Textbox = gr.Textbox(label="Postgres Password",
-                                                     placeholder="Enter your Postgres password here",
-                                                     value=postgres_password,
-                                                     type="password", interactive=True)
-            chat_title: gr.Textbox = gr.Textbox(label="Chat Title", placeholder="Enter the title for the chat",
-                                                value=title, interactive=True)
-            sys_inst_box: gr.Textbox = gr.Textbox(label="System Instructions",
-                                                  placeholder="Enter your system instructions here",
-                                                  value=system_instruction,
-                                                  interactive=True)
-            save_settings: gr.Button = gr.Button("Save Settings")
+            with gr.Row():
+                with gr.Column(scale=2):
+                    gr.Markdown("Settings for chat and load.")
+                    gr.Markdown("### Chat Settings")
+                with gr.Column(scale=1):
+                    save_settings: gr.Button = gr.Button("Save Settings")
+            with gr.Row():
+                with gr.Column(scale=1):
+                    with gr.Group():
+                        chat_title: gr.Textbox = gr.Textbox(label="Chat Title", placeholder="Enter the title for the chat",
+                                                            value=title, interactive=True)
+                        sys_inst_box: gr.Textbox = gr.Textbox(label="System Instructions",
+                                                              placeholder="Enter your system instructions here",
+                                                              value=system_instruction,
+                                                              interactive=True)
+                    gr.Markdown("### API Keys")
+                    with gr.Group():
+                        gemini_secret: gr.Textbox = gr.Textbox(label="Gemini API Key",
+                                                               placeholder="Enter your Gemini API key here",
+                                                               value=google_secret,
+                                                               type="password",
+                                                               interactive=True)
+                    gr.Markdown("### Postgres Settings")
+                    with gr.Group():
+                        postgres_secret: gr.Textbox = gr.Textbox(label="Postgres Password",
+                                                                 placeholder="Enter your Postgres password here",
+                                                                 value=postgres_password,
+                                                                 type="password", interactive=True)
+                        postgres_user: gr.Textbox = gr.Textbox(label="Postgres User",
+                                                               placeholder="Enter your Postgres user here",
+                                                               value="postgres", interactive=True)
+                        postgres_db: gr.Textbox = gr.Textbox(label="Postgres DB",
+                                                             placeholder="Enter your Postgres DB name here",
+                                                             value="postgres", interactive=True)
+                        postgres_table: gr.Textbox = gr.Textbox(label="Postgres Table",
+                                                                placeholder="Enter your Postgres table name here",
+                                                                value="book_archive", interactive=True)
+                        postgres_host: gr.Textbox = gr.Textbox(label="Postgres Host",
+                                                               placeholder="Enter your Postgres host here",
+                                                               value="localhost", interactive=True)
+                        postgres_port: gr.Textbox = gr.Textbox(label="Postgres Port",
+                                                               placeholder="Enter your Postgres port here",
+                                                               value="5432", interactive=True)
 
         def user_message(message, chat_history):
             updated_history = chat_history + [(message, None)]
