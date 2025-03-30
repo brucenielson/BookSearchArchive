@@ -383,7 +383,7 @@ def build_interface(title: str = 'RAG Chat',
     """
     with gr.Blocks(css=css) as chat_interface:
         with gr.Tabs(selected=default_tab):
-            with gr.Tab(label="Chat", id="Chat", interactive=(default_tab == "Chat")):
+            with gr.Tab(label="Chat", id="Chat", interactive=(default_tab == "Chat")) as chat_tab:
                 with gr.Row():
                     with gr.Column(scale=3):
                         with gr.Row():
@@ -405,13 +405,13 @@ def build_interface(title: str = 'RAG Chat',
                                 label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes"
                             )
 
-            with gr.Tab(label="Load", id="Load", interactive=(default_tab == "Chat")):
+            with gr.Tab(label="Load", id="Load", interactive=(default_tab == "Chat")) as load_tab:
                 gr.Markdown("Drag and drop your files here to load them into the database.")
                 gr.Markdown("Supported file types: PDF and EPUB.")
                 file_input: gr.File = gr.File(file_count="multiple", label="Upload a file", interactive=True)
                 load_button: gr.Button = gr.Button("Load")
 
-            with gr.Tab(label="Config", id="Config"):
+            with gr.Tab(label="Config", id="Config") as config_tab:
                 with gr.Row():
                     with gr.Column(scale=2):
                         gr.Markdown("Settings for chat and load.")
@@ -493,13 +493,46 @@ def build_interface(title: str = 'RAG Chat',
             return []
 
         def update_config(google_pass, postgres_pass, main_title, sys_instr):
+            nonlocal rag_chat
             if google_pass == "":
                 google_pass = None
             if sys_instr == "":
-                sys_instr = None
-            rag_chat.initialize_model(system_instruction=sys_instr, google_secret=google_pass)
+                sys_instr = "You are a helpful assistant."
+
+            # Save the settings to a file
+            with open("config.txt", "w") as f:
+                f.write(f"{google_pass}\n")
+                f.write(f"{postgres_pass}\n")
+                f.write(f"{postgres_user_tb.value}\n")
+                f.write(f"{postgres_db_tb.value}\n")
+                f.write(f"{postgres_table_tb.value}\n")
+                f.write(f"{postgres_host_tb.value}\n")
+                f.write(f"{postgres_port_tb.value}\n")
+                f.write(f"{main_title}\n")
+                f.write(f"{sys_instr}\n")
+
+            if rag_chat:
+                rag_chat.initialize_model(system_instruction=sys_instr, google_secret=google_pass)
+            else:
+                pass
+                # rag_chat = load_rag_chat(google_pass,
+                #                          postgres_pass,
+                #                          postgres_user_tb.value,
+                #                          postgres_db_tb.value,
+                #                          postgres_table_tb.value,
+                #                          postgres_host_tb.value,
+                #                          int(postgres_port_tb.value),
+                #                          sys_instr)
+
             time.sleep(0.5)
-            return google_pass, postgres_pass, main_title, sys_instr, "## " + main_title
+            return (
+                google_pass,
+                postgres_pass,
+                main_title,
+                sys_instr, "## " + main_title,
+                gr.update(id="Chat", interactive=True),
+                gr.update(id="Load", interactive=True),
+            )
 
         load_button.click(update_progress, inputs=file_input, outputs=file_input)
 
@@ -508,7 +541,16 @@ def build_interface(title: str = 'RAG Chat',
                    [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
         clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
         save_settings.click(update_config, [gemini_secret, postgres_secret_tb, chat_title, sys_inst_box],
-                          [gemini_secret, postgres_secret_tb, chat_title, sys_inst_box, title_md], queue=False)
+                            [
+                                gemini_secret,
+                                postgres_secret_tb,
+                                chat_title,
+                                sys_inst_box,
+                                title_md,
+                                chat_tab,
+                                load_tab,
+                            ],
+                            queue=False)
 
     return chat_interface
 
