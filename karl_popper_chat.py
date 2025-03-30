@@ -28,10 +28,10 @@ class RagChat:
                  postgres_table_recreate: bool = False,
                  postgres_table_embedder_model_name: str = "BAAI/llm-embedder",
                  system_instruction: Optional[str] = None, ):
+
         # Initialize Gemini Chat with a system instruction to act like philosopher Karl Popper.
-        genai.configure(api_key=google_secret)
         self._model: Optional[genai.GenerativeModel] = None
-        self.initialize_model(system_instruction=system_instruction)
+        self.initialize_model(system_instruction=system_instruction, google_secret=google_secret)
 
         # Initialize the document retrieval pipeline with top-5 quote retrieval.
         self._postgres_password: str = postgres_password
@@ -60,7 +60,9 @@ class RagChat:
         )
         self._load_pipeline: Optional[DocumentProcessor] = None
 
-    def initialize_model(self, system_instruction: Optional[str]):
+    def initialize_model(self, system_instruction: Optional[str] = None, google_secret: Optional[str] = None):
+        if google_secret is not None:
+            genai.configure(api_key=google_secret)
         model: genai.GenerativeModel = genai.GenerativeModel(
             model_name="gemini-2.0-flash-exp",
             system_instruction=system_instruction
@@ -397,7 +399,11 @@ def build_interface(google_secret: str,
             return []
 
         def update_config(google_pass, postgres_pass, main_title, sys_instr):
-            rag_chat.initialize_model(system_instruction=sys_instr)
+            if google_pass == "":
+                google_pass = None
+            if sys_instr == "":
+                sys_instr = None
+            rag_chat.initialize_model(system_instruction=sys_instr, google_secret=google_pass)
             return google_pass, postgres_pass, main_title, sys_instr, "## " + main_title
 
         load_button.click(update_progress, inputs=file_input, outputs=file_input)
