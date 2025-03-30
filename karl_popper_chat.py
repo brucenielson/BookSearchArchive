@@ -530,8 +530,8 @@ def build_interface(title: str = 'RAG Chat',
                 postgres_pass,
                 main_title,
                 sys_instr, "## " + main_title,
-                gr.update(id="Chat", interactive=True),
-                gr.update(id="Load", interactive=True),
+                gr.update(interactive=True),  # This is how we change attributes on a component
+                gr.update(interactive=True),
             )
 
         load_button.click(update_progress, inputs=file_input, outputs=file_input)
