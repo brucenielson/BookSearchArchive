@@ -2,6 +2,8 @@ import time
 import os
 import gradio as gr
 # noinspection PyPackageRequirements
+from google.generativeai.types import generation_types
+# noinspection PyPackageRequirements
 # from google.genai import Client
 # noinspection PyPackageRequirements
 # from google.genai.types import GenerateContentConfig
@@ -13,7 +15,7 @@ from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
 from document_processor import DocumentProcessor
 # noinspection PyPackageRequirements
 from haystack import Document
-from typing import Optional, List, Dict, Any, Iterator
+from typing import Optional, List, Dict, Any, Iterator, Union
 
 
 class RagChat:
@@ -31,6 +33,8 @@ class RagChat:
 
         # Initialize Gemini Chat with a system instruction to act like philosopher Karl Popper.
         self._model: Optional[genai.GenerativeModel] = None
+        self._system_instruction: Optional[str] = system_instruction
+        self._google_secret: str = google_secret
         self.initialize_model(system_instruction=system_instruction, google_secret=google_secret)
 
         # Initialize the document retrieval pipeline with top-5 quote retrieval.
@@ -61,34 +65,32 @@ class RagChat:
         self._load_pipeline: Optional[DocumentProcessor] = None
 
     def initialize_model(self, system_instruction: Optional[str] = None, google_secret: Optional[str] = None):
-        if google_secret is not None:
-            genai.configure(api_key=google_secret)
+        genai.configure(api_key=google_secret)
+        self._google_secret = google_secret
         model: genai.GenerativeModel = genai.GenerativeModel(
             model_name="gemini-2.0-flash-exp",
             system_instruction=system_instruction
         )
         self._model = model
 
-    def ask_llm_question(self, prompt: str, chat_history: Optional[List[Dict[str, Any]]] = None) -> str:
-        """
-        Ask a question to the LLM (Large Language Model) and get a response.
-
-        Args:
-            prompt (str): The question or prompt to send to the LLM.
-            chat_history (Optional[str]): The chat history to include in the session. Defaults to None.
-            Format is assumed to be correct for Gemini (for now).
-            If None, a new chat session is started without history.
-
-        Returns:
-            str: The response from the LLM.
-        """
+    def ask_llm_question(self, prompt: str,
+                         chat_history: Optional[List[Dict[str, Any]]] = None,
+                         stream: bool = False) -> Union[generation_types.GenerateContentResponse, str]:
         if chat_history is None:
             chat_history = []
-        # Start a new chat session with no history for this check.
-        chat_session = self._model.start_chat(history=chat_history)
-        chat_response = chat_session.send_message(prompt)
-        # Extract numbers from Gemini's response.
-        return chat_response.text.strip()
+        if self._google_secret is not None and self._google_secret != "":
+            # Start a new chat session with no history for this check.
+            chat_session = self._model.start_chat(history=chat_history)
+            chat_response = chat_session.send_message(prompt, stream=stream)
+            # If streaming is enabled, return the response object.
+            if stream:
+                return chat_response
+            # If streaming is not enabled, return the full response text.
+            else:
+                return chat_response.text.strip()
+        else:
+            # If no secret is provided, return an empty string.
+            return "You must first enter your Gemini API key in the settings tab before you can use the chat."
 
     def ask_llm_for_quote_relevance(self, message: str, docs: List[Document]) -> str:
         """
@@ -268,7 +270,8 @@ class RagChat:
         # We just want questions and answers in the chat history
         chat_session = self._model.start_chat(history=gemini_chat_history)
         # Send the modified query to Gemini.
-        chat_response = chat_session.send_message(modified_query, stream=True)
+        chat_response = self.ask_llm_question(modified_query, chat_history=gemini_chat_history, stream=True)
+        # chat_response = chat_session.send_message(modified_query, stream=True)
         answer_text = ""
         # # --- Step 3: Stream the answer character-by-character ---
         for chunk in chat_response:
@@ -404,6 +407,7 @@ def build_interface(google_secret: str,
             if sys_instr == "":
                 sys_instr = None
             rag_chat.initialize_model(system_instruction=sys_instr, google_secret=google_pass)
+            time.sleep(0.5)
             return google_pass, postgres_pass, main_title, sys_instr, "## " + main_title
 
         load_button.click(update_progress, inputs=file_input, outputs=file_input)
