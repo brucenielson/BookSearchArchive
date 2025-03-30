@@ -30,7 +30,8 @@ class RagChat:
                  system_instruction: Optional[str] = None, ):
         # Initialize Gemini Chat with a system instruction to act like philosopher Karl Popper.
         genai.configure(api_key=google_secret)
-        self._initialize_model(system_instruction=system_instruction)
+        self._model: Optional[genai.GenerativeModel] = None
+        self.initialize_model(system_instruction=system_instruction)
 
         # Initialize the document retrieval pipeline with top-5 quote retrieval.
         self._postgres_password: str = postgres_password
@@ -59,8 +60,8 @@ class RagChat:
         )
         self._load_pipeline: Optional[DocumentProcessor] = None
 
-    def _initialize_model(self, system_instruction: Optional[str]):
-        model = genai.GenerativeModel(
+    def initialize_model(self, system_instruction: Optional[str]):
+        model: genai.GenerativeModel = genai.GenerativeModel(
             model_name="gemini-2.0-flash-exp",
             system_instruction=system_instruction
         )
@@ -313,7 +314,7 @@ def build_interface(google_secret: str,
                     postgres_password: str,
                     title: str = 'RAG Chat',
                     system_instruction: Optional[str] = None) -> gr.Interface:
-    karl_chat = RagChat(
+    rag_chat = RagChat(
         google_secret=google_secret,
         postgres_password=postgres_password,
         system_instruction=system_instruction
@@ -330,41 +331,47 @@ def build_interface(google_secret: str,
                 with gr.Column(scale=3):
                     with gr.Row():
                         with gr.Column(scale=3):
-                            gr.Markdown("## " + title)
+                            title_md: gr.Markdown = gr.Markdown("## " + title)
                             gr.Markdown("Chat on the left. "
                                         "It will cite sources from the retrieved quotes on the right.")
                         with gr.Column(scale=1):
-                            clear = gr.Button("Clear Chat")
+                            clear: gr.Button = gr.Button("Clear Chat")
                     chatbot = gr.Chatbot(label="Chat")
-                    msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
+                    msg: gr.Textbox = gr.Textbox(placeholder="Ask your question...", label="Your Message")
                 with gr.Column(scale=1):
                     with gr.Tab("Retrieved Quotes"):
-                        retrieved_quotes_box = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
-                                                           elem_id="QuoteBoxes")
+                        retrieved_quotes_box: gr.Markdown = gr.Markdown(label="Retrieved Quotes & Metadata", value="",
+                                                                        elem_id="QuoteBoxes")
                     with gr.Tab("Raw Quotes"):
-                        raw_quotes_box = gr.Markdown(label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes")
+                        raw_quotes_box: gr.Markdown = gr.Markdown(label="Raw Quotes & Metadata", value="",
+                                                                  elem_id="QuoteBoxes")
         with gr.Tab("Load"):
             gr.Markdown("Drag and drop your files here to load them into the database. ")
             gr.Markdown("Supported file types: PDF and EPUB.")
-            file_input = gr.File(file_count="multiple", label="Upload a file", interactive=True)
-            load_button = gr.Button("Load")
+            file_input: gr.File = gr.File(file_count="multiple", label="Upload a file", interactive=True)
+            load_button: gr.Button = gr.Button("Load")
         with gr.Tab("Config"):
             gr.Markdown("Settings for chat and load.")
-            gr.Textbox(label="Gemini API Key", placeholder="Enter your Gemini API key here",
-                       value=google_secret, type="password", interactive=True)
-            gr.Textbox(label="Postgres Password", placeholder="Enter your Postgres password here",
-                       value=postgres_password, type="password", interactive=True)
-            gr.Textbox(label="Chat Title", placeholder="Enter the title for the chat",
-                       value=title, interactive=True)
-            gr.Textbox(label="System Instructions", placeholder="Enter your system instructions here",
-                       value=system_instruction, interactive=True)
+            gemini_secret: gr.Textbox = gr.Textbox(label="Gemini API Key", placeholder="Enter your Gemini API key here",
+                                                   value=google_secret, type="password", interactive=True)
+            postgres_secret: gr.Textbox = gr.Textbox(label="Postgres Password",
+                                                     placeholder="Enter your Postgres password here",
+                                                     value=postgres_password,
+                                                     type="password", interactive=True)
+            chat_title: gr.Textbox = gr.Textbox(label="Chat Title", placeholder="Enter the title for the chat",
+                                                value=title, interactive=True)
+            sys_inst_box: gr.Textbox = gr.Textbox(label="System Instructions",
+                                                  placeholder="Enter your system instructions here",
+                                                  value=system_instruction,
+                                                  interactive=True)
+            save_settings: gr.Button = gr.Button("Save Settings")
 
         def user_message(message, chat_history):
             updated_history = chat_history + [(message, None)]
             return "", updated_history
 
         def process_message(message, chat_history):
-            for updated_history, ranked_docs, all_docs in karl_chat.respond(message, chat_history):
+            for updated_history, ranked_docs, all_docs in rag_chat.respond(message, chat_history):
                 yield updated_history, ranked_docs.strip(), all_docs.strip()
 
         def process_with_custom_progress(files, progress=gr.Progress()):
@@ -373,7 +380,7 @@ def build_interface(google_secret: str,
                 return
 
             # Call the load_documents method, which now yields progress (a float between 0 and 1)
-            file_enumerator = karl_chat.load_documents(files)
+            file_enumerator = rag_chat.load_documents(files)
             for i, file in enumerate(files):
                 file_name = os.path.basename(file)
                 desc = f"Processing {file_name}"
@@ -389,12 +396,18 @@ def build_interface(google_secret: str,
             process_with_custom_progress(files)
             return []
 
+        def update_config(google_pass, postgres_pass, main_title, sys_instr):
+            rag_chat.initialize_model(system_instruction=sys_instr)
+            return google_pass, postgres_pass, main_title, sys_instr, "## " + main_title
+
         load_button.click(update_progress, inputs=file_input, outputs=file_input)
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot],
                    [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
         clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
+        save_settings.click(update_config, [gemini_secret, postgres_secret, chat_title, sys_inst_box],
+                          [gemini_secret, postgres_secret, chat_title, sys_inst_box, title_md], queue=False)
 
     return chat_interface
 
@@ -402,8 +415,8 @@ def build_interface(google_secret: str,
 if __name__ == "__main__":
     sys_instruction: str = ("You are philosopher Karl Popper. Answer questions with philosophical insights, and use "
                             "the provided quotes along with their metadata as reference.")
-    rag_chat = build_interface(google_secret=gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt'),
-                               postgres_password=gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt'),
-                               title="Karl Popper Chatbot",
-                               system_instruction=sys_instruction)
-    rag_chat.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
+    rag_chat_ui = build_interface(google_secret=gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt'),
+                                  postgres_password=gen.get_secret(r'D:\Documents\Secrets\postgres_password.txt'),
+                                  title="Karl Popper Chatbot",
+                                  system_instruction=sys_instruction)
+    rag_chat_ui.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
