@@ -500,16 +500,16 @@ def build_interface(title: str = 'RAG Chat',
                 sys_instr = "You are a helpful assistant."
 
             # Save the settings to a file
-            with open("config.txt", "w") as f:
-                f.write(f"{google_pass}\n")
-                f.write(f"{postgres_pass}\n")
-                f.write(f"{postgres_user_tb.value}\n")
-                f.write(f"{postgres_db_tb.value}\n")
-                f.write(f"{postgres_table_tb.value}\n")
-                f.write(f"{postgres_host_tb.value}\n")
-                f.write(f"{postgres_port_tb.value}\n")
-                f.write(f"{main_title}\n")
-                f.write(f"{sys_instr}\n")
+            with open("config.txt", "w") as file:
+                file.write(f"{google_pass}\n")
+                file.write(f"{postgres_pass}\n")
+                file.write(f"{postgres_user_tb.value}\n")
+                file.write(f"{postgres_db_tb.value}\n")
+                file.write(f"{postgres_table_tb.value}\n")
+                file.write(f"{postgres_host_tb.value}\n")
+                file.write(f"{postgres_port_tb.value}\n")
+                file.write(f"{main_title}\n")
+                file.write(f"{sys_instr}\n")
 
             # Reset the RagChat instance with the new settings
             rag_chat = load_rag_chat(google_pass,
