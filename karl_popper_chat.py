@@ -266,8 +266,6 @@ class RagChat:
                 f"Now, answer the following question: {message}"
             )
         # We start a new chat session each time so that we can control the chat history and remove all the rag docs
-        # We just want questions and answers in the chat history
-        chat_session = self._model.start_chat(history=gemini_chat_history)
         # Send the modified query to Gemini.
         chat_response = self.ask_llm_question(modified_query, chat_history=gemini_chat_history, stream=True)
         # chat_response = chat_session.send_message(modified_query, stream=True)
@@ -335,18 +333,47 @@ def build_interface(title: str = 'RAG Chat',
             system_instruction=system_instructions_param
         )
 
-    # Attempt to load the config from a file if it exists.
-    # If it doesn't exist, default to the config tab.
-    google_secret: str = ""
-    postgres_password: str = ""
-    postgres_user_name: str = ""
-    postgres_db_name: str = ""
-    postgres_table_name: str = ""
-    postgres_host: str = ""
-    postgres_port: int = 0
-    loaded_config: bool = False
+    # noinspection PyShadowingNames
+    def load_config_from_file(title: str, system_instructions: str):
+        # noinspection SpellCheckingInspection
+        google_secret: str = ""
+        postgres_password: str = ""
+        postgres_user_name: str = "postgres"
+        postgres_db_name: str = "postgres"
+        postgres_table_name: str = "book_archive"
+        postgres_host: str = "localhost"
+        postgres_port: int = 5432
+        system_instructions: str = system_instructions
+        title: str = title
+        if os.path.exists("config.txt"):
+            with open("config.txt", "r") as f:
+                lines = f.readlines()
+                if len(lines) >= 9:
+                    google_secret = lines[0].strip()
+                    postgres_password = lines[1].strip()
+                    postgres_user_name = lines[2].strip()
+                    postgres_db_name = lines[3].strip()
+                    postgres_table_name = lines[4].strip()
+                    postgres_host = lines[5].strip()
+                    postgres_port = int(lines[6].strip())
+                    title = lines[7].strip()
+                    system_instructions = lines[8].strip()
+        return {
+            "google_password": google_secret,
+            "postgres_password": postgres_password,
+            "postgres_user_name": postgres_user_name,
+            "postgres_db_name": postgres_db_name,
+            "postgres_table_name": postgres_table_name,
+            "postgres_host": postgres_host,
+            "postgres_port": int(postgres_port),
+            "system_instructions": system_instructions,
+            "title": title,
+        }
+
+    config_data = load_config_from_file(title, system_instructions)
     default_tab: str = "Chat"
     rag_chat: Optional[RagChat] = None
+    loaded_config: bool = False
     if os.path.exists("config.txt"):
         with open("config.txt", "r") as f:
             lines = f.readlines()
@@ -368,7 +395,7 @@ def build_interface(title: str = 'RAG Chat',
                                          postgres_db_name,
                                          postgres_table_name,
                                          postgres_host,
-                                         postgres_port,
+                                         int(postgres_port),
                                          system_instructions)
 
     if not loaded_config:
@@ -382,6 +409,7 @@ def build_interface(title: str = 'RAG Chat',
         white-space: pre-wrap;
     """
     with gr.Blocks(css=css) as chat_interface:
+        # config_state = gr.State(config_data)
         with gr.Tabs(selected=default_tab):
             with gr.Tab(label="Chat", id="Chat", interactive=(default_tab == "Chat")) as chat_tab:
                 with gr.Row():
@@ -411,7 +439,7 @@ def build_interface(title: str = 'RAG Chat',
                 file_input: gr.File = gr.File(file_count="multiple", label="Upload a file", interactive=True)
                 load_button: gr.Button = gr.Button("Load")
 
-            with gr.Tab(label="Config", id="Config") as config_tab:
+            with gr.Tab(label="Config", id="Config"):  # as config_tab:
                 with gr.Row():
                     with gr.Column(scale=2):
                         gr.Markdown("Settings for chat and load.")
@@ -421,45 +449,45 @@ def build_interface(title: str = 'RAG Chat',
                 with gr.Row():
                     with gr.Column(scale=1):
                         with gr.Group():
-                            chat_title: gr.Textbox = gr.Textbox(
+                            chat_title_tb: gr.Textbox = gr.Textbox(
                                 label="Chat Title", placeholder="Enter the title for the chat",
-                                value=title, interactive=True
+                                value=config_data["title"], interactive=True
                             )
-                            sys_inst_box: gr.Textbox = gr.Textbox(
+                            sys_inst_box_tb: gr.Textbox = gr.Textbox(
                                 label="System Instructions", placeholder="Enter your system instructions here",
-                                value=system_instructions, interactive=True
+                                value=config_data["system_instructions"], interactive=True
                             )
                         gr.Markdown("### API Keys")
                         with gr.Group():
-                            gemini_secret: gr.Textbox = gr.Textbox(
+                            google_secret_tb: gr.Textbox = gr.Textbox(
                                 label="Gemini API Key", placeholder="Enter your Gemini API key here",
-                                value=google_secret, type="password", interactive=True
+                                value=config_data["google_password"], type="password", interactive=True
                             )
                         gr.Markdown("### Postgres Settings")
                         with gr.Group():
                             postgres_secret_tb: gr.Textbox = gr.Textbox(
                                 label="Postgres Password", placeholder="Enter your Postgres password here",
-                                value=postgres_password, type="password", interactive=True
+                                value=config_data["postgres_password"], type="password", interactive=True
                             )
                             postgres_user_tb: gr.Textbox = gr.Textbox(
                                 label="Postgres User", placeholder="Enter your Postgres user here",
-                                value="postgres", interactive=True
+                                value=config_data["postgres_user_name"], interactive=True
                             )
                             postgres_db_tb: gr.Textbox = gr.Textbox(
                                 label="Postgres DB", placeholder="Enter your Postgres DB name here",
-                                value="postgres", interactive=True
+                                value=config_data["postgres_db_name"], interactive=True
                             )
                             postgres_table_tb: gr.Textbox = gr.Textbox(
                                 label="Postgres Table", placeholder="Enter your Postgres table name here",
-                                value="book_archive", interactive=True
+                                value=config_data["postgres_table_name"], interactive=True
                             )
                             postgres_host_tb: gr.Textbox = gr.Textbox(
                                 label="Postgres Host", placeholder="Enter your Postgres host here",
-                                value="localhost", interactive=True
+                                value=config_data["postgres_host"], interactive=True
                             )
                             postgres_port_tb: gr.Textbox = gr.Textbox(
                                 label="Postgres Port", placeholder="Enter your Postgres port here",
-                                value="5432", interactive=True
+                                value=str(config_data["postgres_port"]), interactive=True
                             )
 
         def user_message(message, chat_history):
@@ -492,42 +520,58 @@ def build_interface(title: str = 'RAG Chat',
             process_with_custom_progress(files)
             return []
 
-        def update_config(google_pass, postgres_pass, main_title, sys_instr):
+        def update_config(google_password_param: str,
+                          postgres_password_param: str,
+                          postgres_user_name_param: str,
+                          postgres_db_name_param: str,
+                          postgres_table_name_param: str,
+                          postgres_host_param: str,
+                          postgres_port_param: str,
+                          title_param: str,
+                          system_instructions_param: str):
             nonlocal rag_chat
-            if google_pass == "":
-                google_pass = None
-            if sys_instr == "":
-                sys_instr = "You are a helpful assistant."
+
+            # Update the gr.State object
+            # new_state = {"google_password": google_password_param, "postgres_password": postgres_password_param,
+            #              "postgres_user_name": postgres_user_name_param, "postgres_db_name": postgres_db_name_param,
+            #              "postgres_table_name": postgres_table_name_param, "postgres_host": postgres_host_param,
+            #              "postgres_port": int(postgres_port_param), "system_instructions": system_instructions_param,
+            #              "title": title}
 
             # Save the settings to a file
             with open("config.txt", "w") as file:
-                file.write(f"{google_pass}\n")
-                file.write(f"{postgres_pass}\n")
-                file.write(f"{postgres_user_tb.value}\n")
-                file.write(f"{postgres_db_tb.value}\n")
-                file.write(f"{postgres_table_tb.value}\n")
-                file.write(f"{postgres_host_tb.value}\n")
-                file.write(f"{postgres_port_tb.value}\n")
-                file.write(f"{main_title}\n")
-                file.write(f"{sys_instr}\n")
+                file.write(f"{google_password_param}\n")
+                file.write(f"{postgres_password_param}\n")
+                file.write(f"{postgres_user_name_param}\n")
+                file.write(f"{postgres_db_name_param}\n")
+                file.write(f"{postgres_table_name_param}\n")
+                file.write(f"{postgres_host_param}\n")
+                file.write(f"{int(postgres_port_param)}\n")
+                file.write(f"{title_param}\n")
+                file.write(f"{system_instructions_param}\n")
 
             # Reset the RagChat instance with the new settings
-            rag_chat = load_rag_chat(google_pass,
-                                     postgres_pass,
-                                     postgres_user_tb.value,
-                                     postgres_db_tb.value,
-                                     postgres_table_tb.value,
-                                     postgres_host_tb.value,
-                                     int(postgres_port_tb.value),
-                                     sys_instr)
+            rag_chat = load_rag_chat(google_password_param,
+                                     postgres_password_param,
+                                     postgres_user_name_param,
+                                     postgres_db_name_param,
+                                     postgres_table_name_param,
+                                     postgres_host_param,
+                                     int(postgres_port_param),
+                                     system_instructions_param)
 
-            time.sleep(0.25)
             return (
-                google_pass,
-                postgres_pass,
-                main_title,
-                sys_instr, "## " + main_title,
-                gr.update(interactive=True),  # This is how we change attributes on a component
+                google_password_param,
+                postgres_password_param,
+                postgres_user_name_param,
+                postgres_db_name_param,
+                postgres_table_name_param,
+                postgres_host_param,
+                postgres_port_param,
+                title_param,
+                system_instructions_param,
+                "## " + title_param,
+                gr.update(interactive=True),
                 gr.update(interactive=True),
             )
 
@@ -537,17 +581,16 @@ def build_interface(title: str = 'RAG Chat',
         msg.submit(process_message, [msg, chatbot],
                    [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
         clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
-        save_settings.click(update_config, [gemini_secret, postgres_secret_tb, chat_title, sys_inst_box],
-                            [
-                                gemini_secret,
-                                postgres_secret_tb,
-                                chat_title,
-                                sys_inst_box,
-                                title_md,
-                                chat_tab,
-                                load_tab,
+        save_settings.click(update_config,
+                            inputs=[google_secret_tb, postgres_secret_tb, postgres_user_tb, postgres_db_tb,
+                                    postgres_table_tb, postgres_host_tb, postgres_port_tb, chat_title_tb,
+                                    sys_inst_box_tb],
+                            outputs=[
+                                google_secret_tb, postgres_secret_tb, postgres_user_tb, postgres_db_tb,
+                                postgres_table_tb, postgres_host_tb, postgres_port_tb, chat_title_tb,
+                                sys_inst_box_tb, title_md, chat_tab, load_tab,
                             ],
-                            queue=False)
+                            queue=True)
 
     return chat_interface
 
