@@ -312,6 +312,140 @@ class RagChat:
         return new_history
 
 
+# --- Chat Tab ---
+def build_chat_tab(title: str, default_tab: str):
+    with gr.Tab(label="Chat", id="Chat", interactive=(default_tab == "Chat")) as chat_tab:
+        with gr.Row():
+            with gr.Column(scale=3):
+                with gr.Row():
+                    with gr.Column(scale=3):
+                        title_md = gr.Markdown("## " + title)
+                        gr.Markdown("Chat on the left. It will cite sources from the retrieved quotes on the right.")
+                    with gr.Column(scale=1):
+                        clear = gr.Button("Clear Chat")
+                chatbot = gr.Chatbot(label="Chat")
+                msg = gr.Textbox(placeholder="Ask your question...", label="Your Message")
+            with gr.Column(scale=1):
+                with gr.Tab("Retrieved Quotes"):
+                    retrieved_quotes_box = gr.Markdown(
+                        label="Retrieved Quotes & Metadata", value="", elem_id="QuoteBoxes"
+                    )
+                with gr.Tab("Raw Quotes"):
+                    raw_quotes_box = gr.Markdown(
+                        label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes"
+                    )
+    return {
+        "chat_tab": chat_tab,
+        "title_md": title_md,
+        "clear": clear,
+        "chatbot": chatbot,
+        "msg": msg,
+        "retrieved_quotes_box": retrieved_quotes_box,
+        "raw_quotes_box": raw_quotes_box,
+    }
+
+
+# --- Load Tab ---
+def build_load_tab(default_tab: str):
+    with gr.Tab(label="Load", id="Load", interactive=(default_tab == "Chat")) as load_tab:
+        gr.Markdown("Drag and drop your files here to load them into the database.")
+        gr.Markdown("Supported file types: PDF and EPUB.")
+        file_input = gr.File(file_count="multiple", label="Upload a file", interactive=True)
+        load_button = gr.Button("Load")
+    return {
+        "load_tab": load_tab,
+        "file_input": file_input,
+        "load_button": load_button,
+    }
+
+
+# --- Config Tab ---
+def build_config_tab(config_data: dict):
+    with gr.Tab(label="Config", id="Config") as config_tab:
+        with gr.Row():
+            with gr.Column(scale=2):
+                gr.Markdown("Settings for chat and load.")
+                gr.Markdown("### Chat Settings")
+            with gr.Column(scale=1):
+                save_settings = gr.Button("Save Settings")
+        with gr.Row():
+            with gr.Column(scale=1):
+                with gr.Group():
+                    chat_title_tb = gr.Textbox(
+                        label="Chat Title",
+                        placeholder="Enter the title for the chat",
+                        value=config_data["title"],
+                        interactive=True,
+                    )
+                    sys_inst_box_tb = gr.Textbox(
+                        label="System Instructions",
+                        placeholder="Enter your system instructions here",
+                        value=config_data["system_instructions"],
+                        interactive=True,
+                    )
+                gr.Markdown("### API Keys")
+                with gr.Group():
+                    google_secret_tb = gr.Textbox(
+                        label="Gemini API Key",
+                        placeholder="Enter your Gemini API key here",
+                        value=config_data["google_password"],
+                        type="password",
+                        interactive=True,
+                    )
+                gr.Markdown("### Postgres Settings")
+                with gr.Group():
+                    postgres_secret_tb = gr.Textbox(
+                        label="Postgres Password",
+                        placeholder="Enter your Postgres password here",
+                        value=config_data["postgres_password"],
+                        type="password",
+                        interactive=True,
+                    )
+                    postgres_user_tb = gr.Textbox(
+                        label="Postgres User",
+                        placeholder="Enter your Postgres user here",
+                        value=config_data["postgres_user_name"],
+                        interactive=True,
+                    )
+                    postgres_db_tb = gr.Textbox(
+                        label="Postgres DB",
+                        placeholder="Enter your Postgres DB name here",
+                        value=config_data["postgres_db_name"],
+                        interactive=True,
+                    )
+                    postgres_table_tb = gr.Textbox(
+                        label="Postgres Table",
+                        placeholder="Enter your Postgres table name here",
+                        value=config_data["postgres_table_name"],
+                        interactive=True,
+                    )
+                    postgres_host_tb = gr.Textbox(
+                        label="Postgres Host",
+                        placeholder="Enter your Postgres host here",
+                        value=config_data["postgres_host"],
+                        interactive=True,
+                    )
+                    postgres_port_tb = gr.Textbox(
+                        label="Postgres Port",
+                        placeholder="Enter your Postgres port here",
+                        value=str(config_data["postgres_port"]),
+                        interactive=True,
+                    )
+    return {
+        "config_tab": config_tab,
+        "save_settings": save_settings,
+        "chat_title_tb": chat_title_tb,
+        "sys_inst_box_tb": sys_inst_box_tb,
+        "google_secret_tb": google_secret_tb,
+        "postgres_secret_tb": postgres_secret_tb,
+        "postgres_user_tb": postgres_user_tb,
+        "postgres_db_tb": postgres_db_tb,
+        "postgres_table_tb": postgres_table_tb,
+        "postgres_host_tb": postgres_host_tb,
+        "postgres_port_tb": postgres_port_tb,
+    }
+
+
 def build_interface(title: str = 'RAG Chat',
                     system_instructions: str = "You are a helpful assistant.") -> gr.Interface:
     def load_rag_chat(google_secret_param: str,
@@ -427,95 +561,48 @@ def build_interface(title: str = 'RAG Chat',
         white-space: pre-wrap;
     """
     with gr.Blocks(css=css) as chat_interface:
-        # config_state = gr.State(config_data)
         with gr.Tabs(selected=default_tab) as tabs:
-            with gr.Tab(label="Chat", id="Chat", interactive=(default_tab == "Chat")) as chat_tab:
-                with gr.Row():
-                    with gr.Column(scale=3):
-                        with gr.Row():
-                            with gr.Column(scale=3):
-                                title_md: gr.Markdown = gr.Markdown("## " + title)
-                                gr.Markdown(
-                                    "Chat on the left. It will cite sources from the retrieved quotes on the right.")
-                            with gr.Column(scale=1):
-                                clear: gr.Button = gr.Button("Clear Chat")
-                        chatbot = gr.Chatbot(label="Chat")
-                        msg: gr.Textbox = gr.Textbox(placeholder="Ask your question...", label="Your Message")
-                    with gr.Column(scale=1):
-                        with gr.Tab("Retrieved Quotes"):
-                            retrieved_quotes_box: gr.Markdown = gr.Markdown(
-                                label="Retrieved Quotes & Metadata", value="", elem_id="QuoteBoxes"
-                            )
-                        with gr.Tab("Raw Quotes"):
-                            raw_quotes_box: gr.Markdown = gr.Markdown(
-                                label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes"
-                            )
-
-            with gr.Tab(label="Load", id="Load", interactive=(default_tab == "Chat")) as load_tab:
-                gr.Markdown("Drag and drop your files here to load them into the database.")
-                gr.Markdown("Supported file types: PDF and EPUB.")
-                file_input: gr.File = gr.File(file_count="multiple", label="Upload a file", interactive=True)
-                load_button: gr.Button = gr.Button("Load")
-
-            with gr.Tab(label="Config", id="Config") as config_tab:
-                with gr.Row():
-                    with gr.Column(scale=2):
-                        gr.Markdown("Settings for chat and load.")
-                        gr.Markdown("### Chat Settings")
-                    with gr.Column(scale=1):
-                        save_settings: gr.Button = gr.Button("Save Settings")
-                with gr.Row():
-                    with gr.Column(scale=1):
-                        with gr.Group():
-                            chat_title_tb: gr.Textbox = gr.Textbox(
-                                label="Chat Title", placeholder="Enter the title for the chat",
-                                value=config_data["title"], interactive=True
-                            )
-                            sys_inst_box_tb: gr.Textbox = gr.Textbox(
-                                label="System Instructions", placeholder="Enter your system instructions here",
-                                value=config_data["system_instructions"], interactive=True
-                            )
-                        gr.Markdown("### API Keys")
-                        with gr.Group():
-                            google_secret_tb: gr.Textbox = gr.Textbox(
-                                label="Gemini API Key", placeholder="Enter your Gemini API key here",
-                                value=config_data["google_password"], type="password", interactive=True
-                            )
-                        gr.Markdown("### Postgres Settings")
-                        with gr.Group():
-                            postgres_secret_tb: gr.Textbox = gr.Textbox(
-                                label="Postgres Password", placeholder="Enter your Postgres password here",
-                                value=config_data["postgres_password"], type="password", interactive=True
-                            )
-                            postgres_user_tb: gr.Textbox = gr.Textbox(
-                                label="Postgres User", placeholder="Enter your Postgres user here",
-                                value=config_data["postgres_user_name"], interactive=True
-                            )
-                            postgres_db_tb: gr.Textbox = gr.Textbox(
-                                label="Postgres DB", placeholder="Enter your Postgres DB name here",
-                                value=config_data["postgres_db_name"], interactive=True
-                            )
-                            postgres_table_tb: gr.Textbox = gr.Textbox(
-                                label="Postgres Table", placeholder="Enter your Postgres table name here",
-                                value=config_data["postgres_table_name"], interactive=True
-                            )
-                            postgres_host_tb: gr.Textbox = gr.Textbox(
-                                label="Postgres Host", placeholder="Enter your Postgres host here",
-                                value=config_data["postgres_host"], interactive=True
-                            )
-                            postgres_port_tb: gr.Textbox = gr.Textbox(
-                                label="Postgres Port", placeholder="Enter your Postgres port here",
-                                value=str(config_data["postgres_port"]), interactive=True
-                            )
-            # Attach the load event on the Blocks container:
-            chat_interface.load(
-                load_event,
-                outputs=[
-                    chat_title_tb, sys_inst_box_tb, google_secret_tb, postgres_secret_tb,
-                    postgres_user_tb, postgres_db_tb, postgres_table_tb, postgres_host_tb,
                     postgres_port_tb, chat_tab, load_tab,
-                ]
-            )
+            chat_components = build_chat_tab(title, default_tab)
+            load_components = build_load_tab(default_tab)
+            config_components = build_config_tab(config_data)
+
+        # Unpack Chat Tab components
+        chat_tab = chat_components["chat_tab"]
+        title_md = chat_components["title_md"]
+        clear = chat_components["clear"]
+        chatbot = chat_components["chatbot"]
+        msg = chat_components["msg"]
+        retrieved_quotes_box = chat_components["retrieved_quotes_box"]
+        raw_quotes_box = chat_components["raw_quotes_box"]
+
+        # Unpack Load Tab components
+        load_tab = load_components["load_tab"]
+        file_input = load_components["file_input"]
+        load_button = load_components["load_button"]
+
+        # Unpack Config Tab components
+        config_tab = config_components["config_tab"]
+        save_settings = config_components["save_settings"]
+        chat_title_tb = config_components["chat_title_tb"]
+        sys_inst_box_tb = config_components["sys_inst_box_tb"]
+        google_secret_tb = config_components["google_secret_tb"]
+        postgres_secret_tb = config_components["postgres_secret_tb"]
+        postgres_user_tb = config_components["postgres_user_tb"]
+        postgres_db_tb = config_components["postgres_db_tb"]
+        postgres_table_tb = config_components["postgres_table_tb"]
+        postgres_host_tb = config_components["postgres_host_tb"]
+        postgres_port_tb = config_components["postgres_port_tb"]
+
+        # Attach the load event on the Blocks container:
+        chat_interface.load(
+            load_event,
+            outputs=[
+                chat_title_tb, sys_inst_box_tb, google_secret_tb, postgres_secret_tb,
+                postgres_user_tb, postgres_db_tb, postgres_table_tb, postgres_host_tb,
+                postgres_port_tb, chat_tab, load_tab,
+            ]
+        )
 
         def user_message(message, chat_history):
             updated_history = chat_history + [(message, None)]
