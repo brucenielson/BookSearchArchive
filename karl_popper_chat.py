@@ -536,7 +536,7 @@ def build_interface(title: str = 'RAG Chat',
             config_data["system_instructions"] = system_instructions
 
         # Check if google_password and postgres_password are not empty
-        if not (config_data["google_password"] == "" or config_data["postgres_password"] == ""):
+        if not (config_data["google_password"] == "" or config_data["postgres_password"] == "") and rag_chat is None:
             # Attempt to load RagChat with loaded values
             try:
                 rag_chat = load_rag_chat(config_data["google_password"],
