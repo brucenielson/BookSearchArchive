@@ -562,7 +562,6 @@ def build_interface(title: str = 'RAG Chat',
     """
     with gr.Blocks(css=css) as chat_interface:
         with gr.Tabs(selected=default_tab) as tabs:
-                    postgres_port_tb, chat_tab, load_tab,
             chat_components = build_chat_tab(title, default_tab)
             load_components = build_load_tab(default_tab)
             config_components = build_config_tab(config_data)
