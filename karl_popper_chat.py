@@ -335,7 +335,6 @@ def build_interface(title: str = 'RAG Chat',
 
     # noinspection PyShadowingNames
     def load_config_from_file(title: str, system_instructions: str):
-        # noinspection SpellCheckingInspection
         google_secret: str = ""
         postgres_password: str = ""
         postgres_user_name: str = "postgres"
@@ -369,6 +368,22 @@ def build_interface(title: str = 'RAG Chat',
             "system_instructions": system_instructions,
             "title": title,
         }
+
+    def load_config():
+        # Load the config data from the file
+        config_data = load_config_from_file(title, system_instructions)
+        # Return an update for each Textbox in the same order as the outputs list below.
+        return (
+            gr.update(value=config_data["title"]),
+            gr.update(value=config_data["system_instructions"]),
+            gr.update(value=config_data["google_password"]),
+            gr.update(value=config_data["postgres_password"]),
+            gr.update(value=config_data["postgres_user_name"]),
+            gr.update(value=config_data["postgres_db_name"]),
+            gr.update(value=config_data["postgres_table_name"]),
+            gr.update(value=config_data["postgres_host"]),
+            gr.update(value=str(config_data["postgres_port"])),
+        )
 
     config_data = load_config_from_file(title, system_instructions)
     default_tab: str = "Chat"
@@ -409,8 +424,8 @@ def build_interface(title: str = 'RAG Chat',
         white-space: pre-wrap;
     """
     with gr.Blocks(css=css) as chat_interface:
-        # config_state = gr.State(config_data)
-        with gr.Tabs(selected=default_tab):
+        config_state = gr.State(config_data)
+        with gr.Tabs(selected=default_tab) as tabs:
             with gr.Tab(label="Chat", id="Chat", interactive=(default_tab == "Chat")) as chat_tab:
                 with gr.Row():
                     with gr.Column(scale=3):
@@ -439,7 +454,7 @@ def build_interface(title: str = 'RAG Chat',
                 file_input: gr.File = gr.File(file_count="multiple", label="Upload a file", interactive=True)
                 load_button: gr.Button = gr.Button("Load")
 
-            with gr.Tab(label="Config", id="Config"):  # as config_tab:
+            with gr.Tab(label="Config", id="Config") as config_tab:
                 with gr.Row():
                     with gr.Column(scale=2):
                         gr.Markdown("Settings for chat and load.")
@@ -489,6 +504,15 @@ def build_interface(title: str = 'RAG Chat',
                                 label="Postgres Port", placeholder="Enter your Postgres port here",
                                 value=str(config_data["postgres_port"]), interactive=True
                             )
+            # Attach the load event on the Blocks container:
+            chat_interface.load(
+                load_config,
+                outputs=[
+                    chat_title_tb, sys_inst_box_tb, google_secret_tb, postgres_secret_tb,
+                    postgres_user_tb, postgres_db_tb, postgres_table_tb, postgres_host_tb,
+                    postgres_port_tb
+                ]
+            )
 
         def user_message(message, chat_history):
             updated_history = chat_history + [(message, None)]
@@ -532,11 +556,11 @@ def build_interface(title: str = 'RAG Chat',
             nonlocal rag_chat
 
             # Update the gr.State object
-            # new_state = {"google_password": google_password_param, "postgres_password": postgres_password_param,
-            #              "postgres_user_name": postgres_user_name_param, "postgres_db_name": postgres_db_name_param,
-            #              "postgres_table_name": postgres_table_name_param, "postgres_host": postgres_host_param,
-            #              "postgres_port": int(postgres_port_param), "system_instructions": system_instructions_param,
-            #              "title": title}
+            new_state = {"google_password": google_password_param, "postgres_password": postgres_password_param,
+                         "postgres_user_name": postgres_user_name_param, "postgres_db_name": postgres_db_name_param,
+                         "postgres_table_name": postgres_table_name_param, "postgres_host": postgres_host_param,
+                         "postgres_port": int(postgres_port_param), "system_instructions": system_instructions_param,
+                         "title": title}
 
             # Save the settings to a file
             with open("config.txt", "w") as file:
