@@ -523,6 +523,7 @@ def build_interface(title: str = 'RAG Chat',
             gr.update(value=str(config_data["postgres_port"])),
             gr.update(interactive=(rag_chat is not None)),
             gr.update(interactive=(rag_chat is not None)),
+            gr.update(selected="Chat" if rag_chat is not None else "Config"),
         )
 
     def load_config():
@@ -603,7 +604,7 @@ def build_interface(title: str = 'RAG Chat',
             outputs=[
                 chat_title_tb, sys_inst_box_tb, google_secret_tb, postgres_secret_tb,
                 postgres_user_tb, postgres_db_tb, postgres_table_tb, postgres_host_tb,
-                postgres_port_tb, chat_tab, load_tab,
+                postgres_port_tb, chat_tab, load_tab, tabs
             ]
         )
 
