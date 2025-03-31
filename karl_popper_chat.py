@@ -334,6 +334,10 @@ def build_chat_tab(title: str, default_tab: str):
                     raw_quotes_box = gr.Markdown(
                         label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes"
                     )
+
+        # implement clear button
+        clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
+
     return {
         "chat_tab": chat_tab,
         "title_md": title_md,
@@ -681,12 +685,12 @@ def build_interface(title: str = 'RAG Chat',
                 gr.update(interactive=True),
             )
 
-        load_button.click(update_progress, inputs=file_input, outputs=file_input)
-
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot],
                    [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
-        clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
+
+        load_button.click(update_progress, inputs=file_input, outputs=file_input)
+
         save_settings.click(update_config,
                             inputs=[google_secret_tb, postgres_secret_tb, postgres_user_tb, postgres_db_tb,
                                     postgres_table_tb, postgres_host_tb, postgres_port_tb, chat_title_tb,
