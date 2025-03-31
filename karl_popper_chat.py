@@ -334,21 +334,21 @@ def build_interface(title: str = 'RAG Chat',
         )
 
     # noinspection PyShadowingNames
-    def load_config_from_file(title: str, system_instructions: str):
-        google_secret: str = ""
+    def load_config_data():
+        google_password: str = ""
         postgres_password: str = ""
         postgres_user_name: str = "postgres"
         postgres_db_name: str = "postgres"
         postgres_table_name: str = "book_archive"
         postgres_host: str = "localhost"
         postgres_port: int = 5432
-        system_instructions: str = system_instructions
-        title: str = title
+        title: str = ""
+        system_instructions: str = ""
         if os.path.exists("config.txt"):
             with open("config.txt", "r") as f:
                 lines = f.readlines()
                 if len(lines) >= 9:
-                    google_secret = lines[0].strip()
+                    google_password = lines[0].strip()
                     postgres_password = lines[1].strip()
                     postgres_user_name = lines[2].strip()
                     postgres_db_name = lines[3].strip()
@@ -358,7 +358,7 @@ def build_interface(title: str = 'RAG Chat',
                     title = lines[7].strip()
                     system_instructions = lines[8].strip()
         return {
-            "google_password": google_secret,
+            "google_password": google_password,
             "postgres_password": postgres_password,
             "postgres_user_name": postgres_user_name,
             "postgres_db_name": postgres_db_name,
@@ -369,9 +369,9 @@ def build_interface(title: str = 'RAG Chat',
             "title": title,
         }
 
-    def load_config():
-        # Load the config data from the file
-        config_data = load_config_from_file(title, system_instructions)
+    def load_event():
+        nonlocal config_data, rag_chat
+        load_config()
         # Return an update for each Textbox in the same order as the outputs list below.
         return (
             gr.update(value=config_data["title"]),
@@ -383,37 +383,40 @@ def build_interface(title: str = 'RAG Chat',
             gr.update(value=config_data["postgres_table_name"]),
             gr.update(value=config_data["postgres_host"]),
             gr.update(value=str(config_data["postgres_port"])),
+            gr.update(interactive=(rag_chat is not None)),
+            gr.update(interactive=(rag_chat is not None)),
         )
 
-    config_data = load_config_from_file(title, system_instructions)
-    default_tab: str = "Chat"
-    rag_chat: Optional[RagChat] = None
-    loaded_config: bool = False
-    if os.path.exists("config.txt"):
-        with open("config.txt", "r") as f:
-            lines = f.readlines()
-            if len(lines) >= 8:
-                google_secret = lines[0].strip()
-                postgres_password = lines[1].strip()
-                postgres_user_name = lines[2].strip()
-                postgres_db_name = lines[3].strip()
-                postgres_table_name = lines[4].strip()
-                postgres_host = lines[5].strip()
-                postgres_port = int(lines[6].strip())
-                title = lines[7].strip()
-                system_instructions = lines[8].strip()
-                default_tab: str = "Chat"
-                loaded_config = True
-                rag_chat = load_rag_chat(google_secret,
-                                         postgres_password,
-                                         postgres_user_name,
-                                         postgres_db_name,
-                                         postgres_table_name,
-                                         postgres_host,
-                                         int(postgres_port),
-                                         system_instructions)
+    def load_config():
+        nonlocal rag_chat, config_data, title, system_instructions
+        # Load the config data from the file
+        config_data = load_config_data()
+        if config_data["title"] is None or config_data["title"] == "":
+            config_data["title"] = title
+        if config_data["system_instructions"] is None or config_data["system_instructions"] == "":
+            config_data["system_instructions"] = system_instructions
 
-    if not loaded_config:
+        # Check if google_password and postgres_password are not empty
+        if not (config_data["google_password"] == "" or config_data["postgres_password"] == ""):
+            # Attempt to load RagChat with loaded values
+            try:
+                rag_chat = load_rag_chat(config_data["google_password"],
+                                         config_data["postgres_password"],
+                                         config_data["postgres_user_name"],
+                                         config_data["postgres_db_name"],
+                                         config_data["postgres_table_name"],
+                                         config_data["postgres_host"],
+                                         int(config_data["postgres_port"]),
+                                         config_data["system_instructions"])
+            except Exception as e:
+                rag_chat = None
+        # If RagChat was not loaded (None) then simply return the default values
+
+    rag_chat: Optional[RagChat] = None
+    config_data: dict = {}
+    load_config()
+    default_tab: str = "Chat"
+    if not rag_chat:
         # No config settings yet, so set Config tab as default
         default_tab: str = "Config"
 
@@ -424,7 +427,7 @@ def build_interface(title: str = 'RAG Chat',
         white-space: pre-wrap;
     """
     with gr.Blocks(css=css) as chat_interface:
-        config_state = gr.State(config_data)
+        # config_state = gr.State(config_data)
         with gr.Tabs(selected=default_tab) as tabs:
             with gr.Tab(label="Chat", id="Chat", interactive=(default_tab == "Chat")) as chat_tab:
                 with gr.Row():
@@ -506,11 +509,11 @@ def build_interface(title: str = 'RAG Chat',
                             )
             # Attach the load event on the Blocks container:
             chat_interface.load(
-                load_config,
+                load_event,
                 outputs=[
                     chat_title_tb, sys_inst_box_tb, google_secret_tb, postgres_secret_tb,
                     postgres_user_tb, postgres_db_tb, postgres_table_tb, postgres_host_tb,
-                    postgres_port_tb
+                    postgres_port_tb, chat_tab, load_tab,
                 ]
             )
 
@@ -554,13 +557,6 @@ def build_interface(title: str = 'RAG Chat',
                           title_param: str,
                           system_instructions_param: str):
             nonlocal rag_chat
-
-            # Update the gr.State object
-            new_state = {"google_password": google_password_param, "postgres_password": postgres_password_param,
-                         "postgres_user_name": postgres_user_name_param, "postgres_db_name": postgres_db_name_param,
-                         "postgres_table_name": postgres_table_name_param, "postgres_host": postgres_host_param,
-                         "postgres_port": int(postgres_port_param), "system_instructions": system_instructions_param,
-                         "title": title}
 
             # Save the settings to a file
             with open("config.txt", "w") as file:
