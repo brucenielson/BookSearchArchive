@@ -548,6 +548,7 @@ def build_interface(title: str = 'RAG Chat',
                                          int(config_data["postgres_port"]),
                                          config_data["system_instructions"])
             except Exception as e:
+                print(f"Error loading RagChat: {e}")
                 rag_chat = None
         # If RagChat was not loaded (None) then simply return the default values
 
@@ -574,7 +575,6 @@ def build_interface(title: str = 'RAG Chat',
         # Unpack Chat Tab components
         chat_tab = chat_components["chat_tab"]
         title_md = chat_components["title_md"]
-        clear = chat_components["clear"]
         chatbot = chat_components["chatbot"]
         msg = chat_components["msg"]
         retrieved_quotes_box = chat_components["retrieved_quotes_box"]
@@ -586,7 +586,6 @@ def build_interface(title: str = 'RAG Chat',
         load_button = load_components["load_button"]
 
         # Unpack Config Tab components
-        config_tab = config_components["config_tab"]
         save_settings = config_components["save_settings"]
         chat_title_tb = config_components["chat_title_tb"]
         sys_inst_box_tb = config_components["sys_inst_box_tb"]
