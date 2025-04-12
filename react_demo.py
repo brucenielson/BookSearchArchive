@@ -1,3 +1,6 @@
+# Example of ReAct with Gemini 2.0 in Colab
+# https://colab.research.google.com/drive/1lo7czGYVGgq1rfF69VBX2WhDPytW4906#scrollTo=cGsNrV_vTSGw
+
 import re
 import os
 from generator_model import get_secret
