@@ -1,5 +1,7 @@
 # Example of ReAct with Gemini 2.0 in Colab
 # https://colab.research.google.com/drive/1lo7czGYVGgq1rfF69VBX2WhDPytW4906#scrollTo=cGsNrV_vTSGw
+# https://github.com/google-gemini/cookbook/blob/main/examples/Search_Wikipedia_using_ReAct.ipynb
+from __future__ import annotations
 
 import re
 import os
@@ -16,8 +18,9 @@ model_instructions = """Solve a question answering task with interleaving Though
 (1) entity, which searches the exact entity on Wikipedia and returns the first paragraph if it exists. If not, it will return some similar entities to search and you can try to search the information from those topics.
 (2) keyword, which returns the next sentence containing keyword in the current context. This only does exact matches, so keep your searches short.
 (3) answer, which returns the answer and finishes the task.
-"""
+"""  # noqa: E501
 
+# noinspection SpellCheckingInspection
 examples = """
 Here are some examples.
 
@@ -202,22 +205,20 @@ Action 3
 yes
 
 Question
-{question}"""
+{question}"""  # noqa: E501
 
 ReAct_prompt = model_instructions + examples
-with open('model_instructions.txt', 'w') as f:
-    f.write(ReAct_prompt)
 
 
 class ReAct:
-    def __init__(self, model: str, ReAct_prompt: str | os.PathLike):
+    def __init__(self, model: str, react_prompt: str | os.PathLike):
         """Prepares Gemini to follow a `Few-shot ReAct prompt` by imitating
         `function calling` technique to generate both reasoning traces and
         task-specific actions in an interleaved manner.
 
-        Args:
+        Args:f
             model: name to the model.
-            ReAct_prompt: ReAct prompt OR path to the ReAct prompt.
+            react_prompt: ReAct prompt OR path to the ReAct prompt.
         """
         self.model = genai.GenerativeModel(model)
         self.chat = self.model.start_chat(history=[])
@@ -226,19 +227,19 @@ class ReAct:
         self._search_urls: list[str] = []
 
         try:
-          # try to read the file
-          with open(ReAct_prompt, 'r') as f:
-            self._prompt = f.read()
+            # try to read the file
+            with open(react_prompt, 'r') as f:
+                self._prompt = f.read()
         except FileNotFoundError:
-          # assume that the parameter represents prompt itself rather than path to the prompt file.
-          self._prompt = ReAct_prompt
+            # assume that the parameter represents prompt itself rather than path to the prompt file.
+            self._prompt = react_prompt
 
     @property
-        def prompt(self):
+    def prompt(self):
         return self._prompt
 
     @classmethod
-        def add_method(cls, func):
+    def add_method(cls, func):
         setattr(cls, func.__name__, func)
 
     @staticmethod
@@ -247,152 +248,143 @@ class ReAct:
         text = text.replace("\n", " ")
         return text
 
+    def search(self, query: str):
+        """Performs search on `query` via Wikipedia api and returns its summary.
 
-@ReAct.add_method
-def search(self, query: str):
-    """Perfoms search on `query` via Wikipedia api and returns its summary.
+        Args:
+            self: Instance of the ReAct class.
+            query: Search parameter to query the Wikipedia API with.
 
-    Args:
-        query: Search parameter to query the Wikipedia API with.
-
-    Returns:
-        observation: Summary of Wikipedia search for `query` if found else
-        similar search results.
-    """
-    observation = None
-    query = query.strip()
-    try:
-        # try to get the summary for requested `query` from the Wikipedia
-        observation = wikipedia.summary(query, sentences=4, auto_suggest=False)
-        wiki_url = wikipedia.page(query, auto_suggest=False).url
-        observation = self.clean(observation)
-
-        # if successful, return the first 2-3 sentences from the summary as model's context
-        observation = self.model.generate_content(f'Retun the first 2 or 3 \
-        sentences from the following text: {observation}')
-        observation = observation.text
-
-          # keep track of the model's search history
-          self._search_history.append(query)
-        self._search_urls.append(wiki_url)
-        print(f"Information Source: {wiki_url}")
-
-    # if the page is ambiguous/does not exist, return similar search phrases for model's context
-    except (DisambiguationError, PageError) as e:
-        observation = f'Could not find ["{query}"].'
-        # get a list of similar search topics
-        search_results = wikipedia.search(query)
-        observation += f' Similar: {search_results}. You should search for one of those instead.'
-
-    return observation
-
-
-@ReAct.add_method
-def lookup(self, phrase: str, context_length=200):
-    """Searches for the `phrase` in the lastest Wikipedia search page
-    and returns number of sentences which is controlled by the
-    `context_length` parameter.
-
-    Args:
-        phrase: Lookup phrase to search for within a page. Generally
-        attributes to some specification of any topic.
-
-        context_length: Number of words to consider
-        while looking for the answer.
-
-    Returns:
-        result: Context related to the `phrase` within the page.
-    """
-    # get the last searched Wikipedia page and find `phrase` in it.
-    page = wikipedia.page(self._search_history[-1], auto_suggest=False)
-    page = page.content
-    page = self.clean(page)
-    start_index = page.find(phrase)
-
-    # extract sentences considering the context length defined
-    result = page[max(0, start_index - context_length):start_index+len(phrase)+context_length]
-    print(f"Information Source: {self._search_urls[-1]}")
-    return result
-
-
-@ReAct.add_method
-def finish(self, _):
-    """Finishes the conversation on encountering  token by
-    setting the `self.should_continue_prompting` flag to `False`.
-    """
-    self.should_continue_prompting = False
-    print(f"Information Sources: {self._search_urls}")
-
-
-@ReAct.add_method
-def __call__(self, user_question, max_calls: int = 8, **generation_kwargs):
-    """Starts multi-turn conversation with the chat models with function calling
-
-    Args:
-        max_calls: max calls made to the model to get the final answer.
-
-        generation_kwargs: Same as genai.GenerativeModel.GenerationConfig
-                candidate_count: (int | None) = None,
-                stop_sequences: (Iterable[str] | None) = None,
-                max_output_tokens: (int | None) = None,
-                temperature: (float | None) = None,
-                top_p: (float | None) = None,
-                top_k: (int | None) = None
-
-    Raises:
-        AssertionError: if max_calls is not between 1 and 8
-    """
-
-    # hyperparameter fine-tuned according to the paper
-    assert 0 < max_calls <= 8, "max_calls must be between 1 and 8"
-
-    if len(self.chat.history) == 0:
-        model_prompt = self.prompt.format(question=user_question)
-    else:
-        model_prompt = user_question
-
-    # stop_sequences for the model to immitate function calling
-    callable_entities = ['<entity>', '<keyword>', '<answer>']
-
-    generation_kwargs.update({'stop_sequences': callable_entities})
-
-    self.should_continue_prompting = True
-    for idx in range(max_calls):
-
-        self.response = self.chat.send_message(content=[model_prompt],
-                                               generation_config=generation_kwargs, stream=False)
-
-        for chunk in self.response:
-            print(chunk.text, end=' ')
-
-        response_cmd = self.chat.history[-1].parts[-1].text
-
+        Returns:
+            observation: Summary of Wikipedia search for `query` if found else
+            similar search results.
+        """
+        observation: str
+        query = query.strip()
         try:
-            # regex to extract
-            cmd = re.findall(r'<(.*)>', response_cmd)[-1]
-            print(f'{cmd}>')
-            # regex to extract param
-            query = response_cmd.split(f'<{cmd}>')[-1].strip()
-            # call to appropriate function
-            observation = self.__getattribute__(cmd)(query)
+            # try to get the summary for requested `query` from the Wikipedia
+            observation = wikipedia.summary(query, sentences=4, auto_suggest=False)
+            wiki_url = wikipedia.page(query, auto_suggest=False).url
+            observation = self.clean(observation)
 
-            if not self.should_continue_prompting:
-                break
+            # if successful, return the first 2-3 sentences from the summary as model's context
+            observation = self.model.generate_content(f'Return the first 2 or 3 \
+            sentences from the following text: {observation}').text
 
-            stream_message = f"\nObservation {idx + 1}\n{observation}"
-            print(stream_message)
-            # send function's output as user's response
-            model_prompt = f"<{cmd}>{query}{cmd}>'s Output: {stream_message}"
+            # keep track of the model's search history
+            self._search_history.append(query)
+            self._search_urls.append(wiki_url)
+            print(f"Information Source: {wiki_url}")
 
-        except (IndexError, AttributeError) as e:
-            model_prompt = "Please try to generate thought-action-observation traces \
-       as instructed by the prompt."
+        # if the page is ambiguous/does not exist, return similar search phrases for model's context
+        except (DisambiguationError, PageError):
+            observation = f'Could not find ["{query}"].'
+            # get a list of similar search topics
+            search_results = wikipedia.search(query)
+            observation += f' Similar: {search_results}. You should search for one of those instead.'
+
+        return observation
+
+    def lookup(self, phrase: str, context_length=200):
+        """Searches for the `phrase` in the latest Wikipedia search page
+        and returns number of sentences which is controlled by the
+        `context_length` parameter.
+
+        Args:
+            self: Instance of the ReAct class.
+            phrase: Lookup phrase to search for within a page. Generally
+            attributes to some specification of any topic.
+
+            context_length: Number of words to consider
+            while looking for the answer.
+
+        Returns:
+            result: Context related to the `phrase` within the page.
+        """
+        # get the last searched Wikipedia page and find `phrase` in it.
+        page = wikipedia.page(self._search_history[-1], auto_suggest=False)
+        page = page.content
+        page = self.clean(page)
+        start_index = page.find(phrase)
+
+        # extract sentences considering the context length defined
+        result = page[max(0, start_index - context_length):start_index+len(phrase)+context_length]
+        print(f"Information Source: {self._search_urls[-1]}")
+        return result
+
+    def finish(self, _):
+        """Finishes the conversation on encountering  token by
+        setting the `self.should_continue_prompting` flag to `False`.
+        """
+        self.should_continue_prompting = False
+        print(f"Information Sources: {self._search_urls}")
+
+    def __call__(self, user_question, max_calls: int = 8, **generation_kwargs):
+        """Starts multi-turn conversation with the chat models with function calling
+
+        Args:
+            max_calls: max calls made to the model to get the final answer.
+
+            generation_kwargs: Same as genai.GenerativeModel.GenerationConfig
+                    candidate_count: (int | None) = None,
+                    stop_sequences: (Iterable[str] | None) = None,
+                    max_output_tokens: (int | None) = None,
+                    temperature: (float | None) = None,
+                    top_p: (float | None) = None,
+                    top_k: (int | None) = None
+
+        Raises:
+            AssertionError: if max_calls is not between 1 and 8
+        """
+
+        # hyperparameter fine-tuned according to the paper
+        assert 0 < max_calls <= 8, "max_calls must be between 1 and 8"
+
+        if len(self.chat.history) == 0:
+            model_prompt = self.prompt.format(question=user_question)
+        else:
+            model_prompt = user_question
+
+        # stop_sequences for the model to immitate function calling
+        callable_entities = ['<entity>', '<keyword>', '<answer>']
+
+        generation_kwargs.update({'stop_sequences': callable_entities})
+
+        self.should_continue_prompting = True
+        for idx in range(max_calls):
+
+            self.response = self.chat.send_message(content=[model_prompt],
+                                                   generation_config=generation_kwargs, stream=False)
+
+            for chunk in self.response:
+                print(chunk.text, end=' ')
+
+            response_cmd = self.chat.history[-1].parts[-1].text
+
+            try:
+                # regex to extract
+                cmd = re.findall(r'<(.*)>', response_cmd)[-1]
+                print(f'{cmd}>')
+                # regex to extract param
+                query = response_cmd.split(f'<{cmd}>')[-1].strip()
+                # call to appropriate function
+                observation = self.__getattribute__(cmd)(query)
+
+                if not self.should_continue_prompting:
+                    break
+
+                stream_message = f"\nObservation {idx + 1}\n{observation}"
+                print(stream_message)
+                # send function's output as user's response
+                model_prompt = f"<{cmd}>{query}{cmd}>'s Output: {stream_message}"
+
+            except (IndexError, AttributeError):
+                model_prompt = "Please try to generate thought-action-observation traces \
+           as instructed by the prompt."
 
 
-gemini_ReAct_chat = ReAct(model='gemini-2.0-flash', ReAct_prompt='model_instructions.txt')
+gemini_ReAct_chat = ReAct(model='gemini-2.0-flash', react_prompt=ReAct_prompt)
 # Note: try different combinations of generational_config parameters for variational results
 gemini_ReAct_chat(
     "What are the total of ages of the main trio from the new Percy Jackson and the Olympians TV series in real life?",
     temperature=0.2)
-
-
