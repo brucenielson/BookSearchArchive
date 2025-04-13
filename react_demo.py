@@ -281,7 +281,7 @@ class ReAct:
             model_prompt = user_question
 
         # Define stop sequences to mimic function calling behavior.
-        generation_kwargs.update({'stop_sequences': ['<stop>']})
+        # generation_kwargs.update({'stop_sequences': ['<stop>']})
         self.should_continue_prompting = True
 
         for idx in range(max_calls):

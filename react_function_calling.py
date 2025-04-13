@@ -1,1 +1,1 @@
-# https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling
+# https://ai.google.dev/gemini-api/docs/function-calling?example=meeting
