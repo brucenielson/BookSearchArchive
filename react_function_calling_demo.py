@@ -1,5 +1,8 @@
 # https://ai.google.dev/gemini-api/docs/function-calling?example=meeting
-
+# https://medium.com/google-cloud/building-react-agents-from-scratch-a-hands-on-guide-using-gemini-ffe4621d90ae
+# https://www.philschmid.de/gemini-function-calling
+# New approach
+# https://atamel.dev/posts/2025/04-08_simplified_function_calling_gemini/
 from __future__ import annotations
 
 import wikipedia
