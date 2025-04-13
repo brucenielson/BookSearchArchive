@@ -341,7 +341,7 @@ question: str = (
 
 # Uncomment alternate questions as needed.
 # question = "How many companions did Samuel Meladon have?"
-question = "What is the most famous case of reincarnation in the world?"
+# question = "What is the most famous case of reincarnation in the world?"
 
 # Instantiate the ReAct session using the defined model and prompt.
 gemini_ReAct_chat = ReAct(model='gemini-2.0-flash', react_prompt=ReAct_prompt)
