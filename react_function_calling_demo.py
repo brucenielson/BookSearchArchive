@@ -9,8 +9,6 @@ from wikipedia.exceptions import DisambiguationError, PageError
 # noinspection PyPackageRequirements
 import google.generativeai as genai
 # noinspection PyPackageRequirements
-from google.genai import types
-# noinspection PyPackageRequirements
 from google.generativeai.types import Tool, FunctionDeclaration
 # noinspection PyPackageRequirements
 from google.generativeai.types.generation_types import GenerationConfig
@@ -248,103 +246,93 @@ class ReActFunctionCaller:
             f"Question: {user_question}"
         )
 
-        # Create the initial conversation
-        messages = [
-            {"role": "user", "parts": [{"text": react_prompt}]}
-        ]
-
         # Set up the config with any provided generation parameters
         config = GenerationConfig(**generation_kwargs)
 
+        # Use the chat session for conversation management
+        self.chat = self.generative_model.start_chat(history=[])
+        response = self.chat.send_message(
+            react_prompt,
+            generation_config=config,
+            tools=self.tools
+        )
+
         # Main conversation loop
         self.should_continue_prompting = True
+        iteration = 1
 
-        for i in range(max_iterations):
-            if not self.should_continue_prompting:
-                break
+        while self.should_continue_prompting and iteration <= max_iterations:
+            # Process the current response
+            if hasattr(response, "candidates") and response.candidates:
+                candidate = response.candidates[0]
+                content = candidate.content
 
-            # Send the current state to the model
-            response = self.generative_model.generate_content(
-                generation_config=config,
-                tools=self.tools,
-                contents=messages
-            )
+                # Process all parts in the content
+                found_text = False
+                found_function_call = False
+                function_call = None
 
-            # Check for function calls in the response
-            candidate = response.candidates[0]
-            content = candidate.content
+                result: dict = {}
 
-            # Initialize variables to track whether we've found text or function calls
-            found_text = False
-            found_function_call = False
+                for part in content.parts:
+                    # Handle text part if present
+                    if hasattr(part, "text") and part.text:
+                        found_text = True
+                        print(f"\nThought {iteration}:")
+                        print(part.text)
 
-            # Process all parts in the content
-            for part in content.parts:
-                # Handle text part if present
-                if hasattr(part, "text") and part.text:
-                    found_text = True
-                    print(f"\nThought {i + 1}:")
-                    print(part.text)
+                    # Handle function call if present
+                    if hasattr(part, "function_call") and part.function_call:
+                        found_function_call = True
+                        function_call = part.function_call
+                        func_name = function_call.name
+                        args = function_call.args
 
-                # Handle function call if present
-                if hasattr(part, "function_call") and part.function_call:
-                    found_function_call = True
-                    function_call = part.function_call
-                    func_name = function_call.name
-                    args = function_call.args
+                        print(f"\nAction {iteration}:")
+                        print(f"<{func_name}>{list(args.values())[0] if args else ''}")
 
-                    print(f"\nAction {i + 1}:")
-                    print(f"<{func_name}>{list(args.values())[0] if args else ''}")
+                        # Execute the appropriate function
+                        if func_name == "search":
+                            result = self.search(**args)
+                        elif func_name == "lookup":
+                            context_length = args.get("context_length", 200)
+                            result = self.lookup(phrase=args["phrase"], context_length=context_length)
+                        elif func_name == "answer":
+                            result = self.answer(**args)
+                        else:
+                            result = {"result": f"Unknown function: {func_name}"}
 
-                    # Execute the appropriate function
-                    if func_name == "search":
-                        result = self.search(**args)
-                    elif func_name == "lookup":
-                        context_length = args.get("context_length", 200)
-                        result = self.lookup(phrase=args["phrase"], context_length=context_length)
-                    elif func_name == "answer":
-                        result = self.answer(**args)
-                    else:
-                        result = {"result": f"Unknown function: {func_name}"}
+                        # Print the observation
+                        print(f"\nObservation {iteration}:")
+                        print(result["result"])
 
-                    # Print the observation
-                    print(f"\nObservation {i + 1}:")
-                    print(result["result"])
-
-                    # Append the model's function call and result to messages
-                    messages.append(types.Content(role="model", parts=[types.Part(function_call=function_call)]))
-                    messages.append(
-                        types.Content(
-                            role="user",
-                            parts=[types.Part.from_function_response(name=function_call.name, response=result)]
-                        )
-                    )
-
-                    # If answer was called, we're done
-                    if func_name == "answer":
+                        # If answer was called, we're done
+                        if func_name == "answer":
+                            self.should_continue_prompting = False
                         break
 
-            # If no function call was found but we have text, treat it as a final response
-            if not found_function_call and found_text:
-                print("\nFinal response:")
-                print(response.text)
-                return response.text
+                # If no function call was found, but we have text, treat it as a final response
+                if not found_function_call and found_text:
+                    print("\nFinal response:")
+                    print(response.text)
+                    return response.text
 
-            # If answer function was called, break the loop
-            if not self.should_continue_prompting:
+                # If we've found a function call, continue the conversation with the function response
+                if found_function_call and function_call:
+                    response = self.chat.send_message(
+                        result["result"],
+                        generation_config=config,
+                        tools=self.tools
+                    )
+                    iteration += 1
+                elif not self.should_continue_prompting:
+                    break
+                else:
+                    print("\nNo function call or text found in response. Ending conversation.")
+                    break
+            else:
+                print("\nNo valid response from model. Ending conversation.")
                 break
-
-        # After reaching the max iterations or completing the loop,
-        # return the final model response if needed
-        if self.should_continue_prompting:
-            final_response = self.generative_model.generate_content(
-                generation_config=config,
-                tools=self.tools,
-                contents=messages,
-            )
-            print("\nFinal response:")
-            print(final_response.text)
-            return final_response.text
 
         return "Conversation completed with final answer."
 
