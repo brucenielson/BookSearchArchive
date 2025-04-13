@@ -2,23 +2,39 @@
 # https://colab.research.google.com/drive/1lo7czGYVGgq1rfF69VBX2WhDPytW4906#scrollTo=cGsNrV_vTSGw
 # https://github.com/google-gemini/cookbook/blob/main/examples/Search_Wikipedia_using_ReAct.ipynb
 from __future__ import annotations
-
 import re
 import os
-from generator_model import get_secret
 import wikipedia
 from wikipedia.exceptions import DisambiguationError, PageError
 # noinspection PyPackageRequirements
 import google.generativeai as genai
 
+# Import the secret retrieval function from a module.
+from generator_model import get_secret
+
+# -----------------------------------------------------------------------------
+# Configure API Key for Gemini 2.0 using a secret file.
+# -----------------------------------------------------------------------------
 secret = get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
 genai.configure(api_key=secret)
 
-model_instructions = """Solve a question answering task with interleaving Thought, Action, Observation steps. Thought can reason about the current situation, Observation is understanding relevant information from an Action's output and Action can be of three types:
-(1) <search>, which searches the exact entity on Wikipedia and returns the first paragraph if it exists. If not, it will return some similar entities to search and you can try to search the information from those topics.
-(2) <lookup>, which returns the next sentence containing keyword in the current context. This only does exact matches, so keep your searches short.
-(3) <answer>, which returns the answer and finishes the task.
-"""  # noqa: E501
+# -----------------------------------------------------------------------------
+# Define the model instructions and examples for the ReAct framework.
+# This prompt guides Gemini to follow the ReAct pattern by interleaving
+# thought, actions, and observations.
+# -----------------------------------------------------------------------------
+model_instructions = (
+    "Solve a question answering task with interleaving Thought, Action, "
+    "Observation steps. Thought can reason about the current situation, Observation "
+    "is understanding relevant information from an Action's output and Action can be "
+    "of three types:\n"
+    "(1) <search>, which searches the exact entity on Wikipedia and returns the first "
+    "paragraph if it exists. If not, it will return some similar entities to search and "
+    "you can try to search the information from those topics.\n"
+    "(2) <lookup>, which returns the next sentence containing keyword in the current "
+    "context. This only does exact matches, so keep your searches short.\n"
+    "(3) <answer>, which returns the answer and finishes the task.\n"
+)
 
 # noinspection SpellCheckingInspection
 examples = """
@@ -84,11 +100,9 @@ High Plains rise in elevation from around 1,800 to 7,000 ft, so the answer is 1,
 Action 5
 <answer>1,800 to 7,000 ft
 
+End of examples.
 
-End of examples. 
-
-Important: When generating an Action, output exactly one line in the format <function>parameter (with no additional 
-text) and then stop.
+Important: When generating an Action, output exactly one line in the format <function>parameter (with no additional text) and then stop.
 
 For example:
 Action 5
@@ -96,20 +110,26 @@ Action 5
 
 
 Question
-{question}"""  # noqa: E501
+{question}
+"""  # noqa: E501
 
 ReAct_prompt = model_instructions + examples
 
 
+# -----------------------------------------------------------------------------
+# ReAct Class: Implements a multi-turn conversation using the ReAct framework.
+# -----------------------------------------------------------------------------
 class ReAct:
     def __init__(self, model: str, react_prompt: str | os.PathLike):
-        """Prepares Gemini to follow a `Few-shot ReAct prompt` by imitating
-        `function calling` technique to generate both reasoning traces and
-        task-specific actions in an interleaved manner.
+        """
+        Initializes the ReAct instance by setting up the Gemini model,
+        loading the ReAct prompt (either directly or from a file), and
+        initializing relevant search history.
 
-        Args:f
-            model: name to the model.
-            react_prompt: ReAct prompt OR path to the ReAct prompt.
+        Args:
+            model: Name of the generative model (e.g., 'gemini-2.0-flash').
+            react_prompt: Either the actual ReAct prompt as a string or a path
+                          to a file containing the prompt.
         """
         self.model = genai.GenerativeModel(model)
         self.chat = self.model.start_chat(history=[])
@@ -118,172 +138,214 @@ class ReAct:
         self._search_urls: list[str] = []
 
         try:
-            # try to read the file
+            # Attempt to read the prompt from a file path.
             with open(react_prompt, 'r') as f:
                 self._prompt = f.read()
         except FileNotFoundError:
-            # assume that the parameter represents prompt itself rather than path to the prompt file.
+            # If file is not found, assume the given parameter is the prompt itself.
             self._prompt = react_prompt
 
     @property
-    def prompt(self):
+    def prompt(self) -> str:
+        """
+        Property getter for the ReAct prompt.
+
+        Returns:
+            The current ReAct prompt.
+        """
         return self._prompt
 
     @classmethod
     def add_method(cls, func):
+        """
+        Dynamically add a method to the ReAct class.
+
+        Args:
+            func: The function to add as a method of the class.
+        """
         setattr(cls, func.__name__, func)
 
     @staticmethod
-    def clean(text: str):
-        """Helper function for responses."""
-        text = text.replace("\n", " ")
-        return text
-
-    def search(self, query: str):
-        """Performs search on `query` via Wikipedia api and returns its summary.
+    def clean(text: str) -> str:
+        """
+        Cleans the input text by replacing newline characters with spaces.
 
         Args:
-            self: Instance of the ReAct class.
-            query: Search parameter to query the Wikipedia API with.
+            text: The text to be cleaned.
 
         Returns:
-            observation: Summary of Wikipedia search for `query` if found else
-            similar search results.
+            A single-line version of the input text.
         """
-        observation: str
+        return text.replace("\n", " ")
+
+    def search(self, query: str) -> str:
+        """
+        Searches for a given query using the Wikipedia API and returns a
+        summary or alternative suggestions if an error occurs.
+
+        Args:
+            query: The search term to query on Wikipedia.
+
+        Returns:
+            A summary of the Wikipedia page corresponding to the query or a
+            message with similar suggestions if the page is ambiguous or missing.
+        """
         query = query.strip()
         try:
-            # try to get the summary for requested `query` from the Wikipedia
-            observation = wikipedia.summary(query, sentences=4, auto_suggest=False)
-            wiki_url = wikipedia.page(query, auto_suggest=False).url
-            observation = self.clean(observation)
+            # Attempt to retrieve a summary for the query from Wikipedia.
+            summary_text = wikipedia.summary(query, sentences=4, auto_suggest=False)
+            wiki_page = wikipedia.page(query, auto_suggest=False)
+            wiki_url = wiki_page.url
 
-            # if successful, return the first 2-3 sentences from the summary as model's context
-            observation = self.model.generate_content(f'Return the first 2 or 3 \
-            sentences from the following text: {observation}').text
+            # Clean the summary text.
+            cleaned_summary = self.clean(summary_text)
 
-            # keep track of the model's search history
+            # Generate a shorter version containing the first 2-3 sentences from the summary.
+            observation = self.model.generate_content(
+                f'Return the first 2 or 3 sentences from the following text: {cleaned_summary}'
+            ).text
+
+            # Record the search details for later lookup.
             self._search_history.append(query)
             self._search_urls.append(wiki_url)
             print(f"Information Source: {wiki_url}")
 
-        # if the page is ambiguous/does not exist, return similar search phrases for model's context
         except (DisambiguationError, PageError):
+            # Handle ambiguous or non-existent pages.
             observation = f'Could not find ["{query}"].'
-            # get a list of similar search topics
-            search_results = wikipedia.search(query)
-            observation += f' Similar: {search_results}. You should search for one of those instead.'
+            similar_topics = wikipedia.search(query)
+            observation += f' Similar: {similar_topics}. You should search for one of those instead.'
 
         return observation
 
-    def lookup(self, phrase: str, context_length=200):
-        """Searches for the `phrase` in the latest Wikipedia search page
-        and returns number of sentences which is controlled by the
-        `context_length` parameter.
+    def lookup(self, phrase: str, context_length: int = 200) -> str:
+        """
+        Looks up a given phrase within the content of the most recently
+        searched Wikipedia page and returns a context snippet around it.
 
         Args:
-            self: Instance of the ReAct class.
-            phrase: Lookup phrase to search for within a page. Generally
-            attributes to some specification of any topic.
-
-            context_length: Number of words to consider
-            while looking for the answer.
+            phrase: The keyword or phrase to locate within the page content.
+            context_length: The number of characters before and after the phrase
+                            to include in the resulting context snippet.
 
         Returns:
-            result: Context related to the `phrase` within the page.
+            A context snippet from the Wikipedia page surrounding the phrase.
         """
-        # get the last searched Wikipedia page and find `phrase` in it.
+        # Retrieve the most recently searched page's content.
         page = wikipedia.page(self._search_history[-1], auto_suggest=False)
-        page = page.content
-        page = self.clean(page)
-        start_index = page.find(phrase)
+        content = self.clean(page.content)
+        start_index = content.find(phrase)
 
-        # extract sentences considering the context length defined
-        result = page[max(0, start_index - context_length):start_index+len(phrase)+context_length]
+        # Compute the context snippet boundaries.
+        snippet_start = max(0, start_index - context_length)
+        snippet_end = start_index + len(phrase) + context_length
+        result = content[snippet_start:snippet_end]
+
         print(f"Result: {result}")
         print(f"Information Source: {self._search_urls[-1]}")
         return result
 
-    def answer(self, _):
-        """Finishes the conversation on encountering  token by
-        setting the `self.should_continue_prompting` flag to `False`.
+    def answer(self, _ignored: str) -> None:
+        """
+        Marks the end of the conversation by setting a flag to stop further prompts.
+        Also prints all the gathered information sources (URLs) that were used during the session.
+
+        Args:
+            _ignored: This parameter is ignored as the answer function does not require input.
         """
         self.should_continue_prompting = False
         print(f"Information Sources: {self._search_urls}")
 
-    def __call__(self, user_question, max_calls: int = 10, **generation_kwargs):
-        """Starts multi-turn conversation with the chat models with function calling
+    def __call__(self, user_question: str, max_calls: int = 10, **generation_kwargs):
+        """
+        Initiates a multi-turn conversation with the generative model, using
+        function calls to perform a series of actions until the answer is found
+        or the maximum number of calls is reached.
 
         Args:
-            max_calls: max calls made to the model to get the final answer.
-
-            generation_kwargs: Same as genai.GenerativeModel.GenerationConfig
-                    candidate_count: (int | None) = None,
-                    stop_sequences: (Iterable[str] | None) = None,
-                    max_output_tokens: (int | None) = None,
-                    temperature: (float | None) = None,
-                    top_p: (float | None) = None,
-                    top_k: (int | None) = None
+            user_question: The question or prompt for which an answer is to be generated.
+            max_calls: Maximum number of interactions to attempt for resolving the query.
+            **generation_kwargs: Additional keyword arguments for model generation such as:
+                                 temperature, max_output_tokens, top_p, etc.
 
         Raises:
-            AssertionError: if max_calls is not between 1 and 8
+            AssertionError: If max_calls is set to a value not within the allowed range.
         """
+        # Validate the maximum allowed number of calls.
+        assert 0 < max_calls <= 10, "max_calls must be between 1 and 10"
 
-        # hyperparameter fine-tuned according to the paper
-        assert 0 < max_calls <= 10, "max_calls must be between 1 and 8"
-
+        # Determine the initial prompt to send to the model.
         if len(self.chat.history) == 0:
             model_prompt = self.prompt.format(question=user_question)
         else:
             model_prompt = user_question
 
-        # stop_sequences for the model to imitate function calling
-        callable_entities = ['<stop>']
-
-        generation_kwargs.update({'stop_sequences': callable_entities})
-
+        # Define stop sequences to mimic function calling behavior.
+        generation_kwargs.update({'stop_sequences': ['<stop>']})
         self.should_continue_prompting = True
+
         for idx in range(max_calls):
+            # Send the current prompt to the model.
+            self.response = self.chat.send_message(
+                content=[model_prompt],
+                generation_config=generation_kwargs,
+                stream=False
+            )
 
-            self.response = self.chat.send_message(content=[model_prompt],
-                                                   generation_config=generation_kwargs, stream=False)
-
+            # Print the full response for debugging/inspection.
             for chunk in self.response:
                 print(chunk.text, end=' ')
 
+            # Retrieve the model's latest message which should contain a function call.
             response_cmd = self.chat.history[-1].parts[-1].text
 
             try:
-                # regex to extract
+                # Extract the function name (e.g., search, lookup, answer) from the response.
                 cmd = re.search(r'<(\w+)>', response_cmd).group(1)
-                # regex to extract param
+                # Extract the parameter after the function tag.
                 query = response_cmd.split(f'<{cmd}>')[-1].strip()
-                # call to appropriate function
+
+                # Dynamically call the function based on the extracted command.
                 observation = self.__getattribute__(cmd)(query)
 
+                # If the answer function was triggered, break the loop.
                 if not self.should_continue_prompting:
                     break
 
+                # Prepare the observation to send back as context for the next round.
                 stream_message = f"\nObservation {idx + 1}\n{observation}"
                 print(stream_message)
-                # send function's output as user's response
+                # Update the prompt with both the action and its observation.
                 model_prompt = f"<{cmd}>{query}{cmd}>'s Output: {stream_message}"
 
             except (IndexError, AttributeError):
-                model_prompt = ("You failed to make a function call by following the function calling format. "
-                                "Please try again. When generating an Action, output exactly one line "
-                                "in the format <function>parameter (with no additional text) and then stop. "
-                                "For example:\n"
-                                "Action 5\n"
-                                "<answer>1,800 to 7,000 ft\n")
+                # If the expected function call format is not adhered to, send an error prompt.
+                model_prompt = (
+                    "You failed to make a function call by following the function calling format. "
+                    "Please try again. When generating an Action, output exactly one line "
+                    "in the format <function>parameter (with no additional text) and then stop. "
+                    "For example:\n"
+                    "Action 5\n"
+                    "<answer>1,800 to 7,000 ft\n"
+                )
 
 
-question: str = ("What are the total of ages of the main trio from the new Percy Jackson and the Olympians TV series "
-                 "in real life?")
+# -----------------------------------------------------------------------------
+# Example usage of the ReAct class.
+# You can change the question and generational configuration parameters below.
+# -----------------------------------------------------------------------------
+question: str = (
+    "What are the total of ages of the main trio from the new Percy Jackson and the Olympians TV series "
+    "in real life?"
+)
+
+# Uncomment alternate questions as needed.
 # question = "How many companions did Samuel Meladon have?"
-# question = "What is the most famous case of reincarnation in the world?"
+question = "What is the most famous case of reincarnation in the world?"
+
+# Instantiate the ReAct session using the defined model and prompt.
 gemini_ReAct_chat = ReAct(model='gemini-2.0-flash', react_prompt=ReAct_prompt)
-# Note: try different combinations of generational_config parameters for variational results
-gemini_ReAct_chat(
-    question,
-    temperature=0.2)
+
+# Start the conversation using the provided question and generation parameters.
+# Feel free to adjust generation_kwargs such as temperature for varied results.
+gemini_ReAct_chat(question, temperature=0.2)
