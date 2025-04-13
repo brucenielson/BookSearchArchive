@@ -254,8 +254,7 @@ class ReAct:
 
             try:
                 # regex to extract
-                cmd = re.findall(r'<(.*)>', response_cmd)[-1]
-                print(f'{cmd}>')
+                cmd = re.search(r'<(\w+)>', response_cmd).group(1)
                 # regex to extract param
                 query = response_cmd.split(f'<{cmd}>')[-1].strip()
                 # call to appropriate function
@@ -280,7 +279,7 @@ class ReAct:
 
 question: str = ("What are the total of ages of the main trio from the new Percy Jackson and the Olympians TV series "
                  "in real life?")
-# question = "How many companions did Samuel Meladon have?"
+question = "How many companions did Samuel Meladon have?"
 gemini_ReAct_chat = ReAct(model='gemini-2.0-flash', react_prompt=ReAct_prompt)
 # Note: try different combinations of generational_config parameters for variational results
 gemini_ReAct_chat(
