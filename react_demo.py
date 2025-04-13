@@ -200,6 +200,7 @@ class ReAct:
 
         # extract sentences considering the context length defined
         result = page[max(0, start_index - context_length):start_index+len(phrase)+context_length]
+        print(f"Result: {result}")
         print(f"Information Source: {self._search_urls[-1]}")
         return result
 
@@ -279,7 +280,8 @@ class ReAct:
 
 question: str = ("What are the total of ages of the main trio from the new Percy Jackson and the Olympians TV series "
                  "in real life?")
-question = "How many companions did Samuel Meladon have?"
+# question = "How many companions did Samuel Meladon have?"
+# question = "What is the most famous case of reincarnation in the world?"
 gemini_ReAct_chat = ReAct(model='gemini-2.0-flash', react_prompt=ReAct_prompt)
 # Note: try different combinations of generational_config parameters for variational results
 gemini_ReAct_chat(
