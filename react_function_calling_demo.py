@@ -282,7 +282,7 @@ class ReActFunctionCaller:
             return getattr(response, "text", None) or "[No response text]"
         except ResourceExhausted as e:
             print()
-            print(f"Rate limit exceeded: {e}. Retrying in 15 seconds...")
+            print(f"Rate limit exceeded. Retrying in 15 seconds...")
             time.sleep(15)
             return self.generate_content(prompt, **generation_kwargs)
         except Exception as e:
@@ -342,16 +342,13 @@ class ReActFunctionCaller:
                 args: Dict[str, Any] = func_call.args or {}
                 print(f"\nAction {iteration}: <{name}>{list(args.values())[0] if args else ''}</{name}>")
 
-                if name == "search":
-                    result: Dict[str, str] = self.search(**args)
-                elif name == "lookup":
-                    result = self.lookup(
-                        phrase=args.get("phrase", ''),
-                        context_length=args.get("context_length", 200)
-                    )
-                elif name == "answer":
-                    return self.answer(**args)["result"]
-                else:
+                try:
+                    method = getattr(self, name)
+                    # Dynamically call the method with the provided arguments
+                    result: Dict[str, str] = method(**args)
+                    if name == "answer":
+                        return result['result']
+                except AttributeError:
                     result = {"result": f"Unknown function: {name}"}
 
                 print(f"\nObservation {iteration}: {result['result']}")
