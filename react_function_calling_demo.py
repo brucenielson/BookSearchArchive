@@ -252,10 +252,10 @@ class ReActFunctionCaller:
             return self.chat.send_message(message,
                                           generation_config=config,
                                           tools=self.tools)
-        except ResourceExhausted as e:
+        except ResourceExhausted:
             # Handle rate limit errors by pausing and retrying
             print()
-            print(f"Rate limit exceeded: {e}. Retrying in 15 seconds...")
+            print(f"Rate limit exceeded. Retrying in 15 seconds...")
             time.sleep(15)
             return self.send_chat_message(message, **generation_kwargs)
         except Exception as e:
@@ -290,131 +290,77 @@ class ReActFunctionCaller:
             raise
 
     def __call__(
-        self,
-        user_question: str,
-        max_iterations: int = 25,
-        **generation_kwargs: Any,
+            self,
+            user_question: str,
+            max_iterations: int = 25,
+            **generation_kwargs: Any,
     ) -> str:
         """
-        Initiates a multi-turn conversation with the generative model, using
-        function calls to perform a series of actions until the answer is found
+        Orchestrates a ReAct-style multi-turn conversation until the "answer" function is invoked
         or the maximum number of iterations is reached.
 
         Args:
-            user_question: The question or prompt for which an answer is to be generated.
-            max_iterations: Maximum number of interactions to attempt for resolving the query.
-            **generation_kwargs: Additional keyword arguments for model generation.
+            user_question (str): The question or prompt for which an answer is to be generated.
+            max_iterations (int, optional): Maximum number of interactions. Defaults to 25.
+            **generation_kwargs (Any): Additional keyword arguments for generation.
 
         Returns:
-            The final response from the model.
+            str: The final response text from the model.
         """
-        # Validate the maximum allowed number of iterations.
-        assert 0 < max_iterations <= 25, "max_iterations must be between 1 and 8"
+        assert 0 < max_iterations <= 25, "max_iterations must be between 1 and 25"
 
-        # Create a prompt for the model that encourages ReAct-style reasoning
-        react_prompt: str = (
+        prompt: str = (
             "Solve this question step by step using the search, lookup, and answer functions. "
-            "First, think about how to approach the problem. "
-            "Use search to find relevant information from Wikipedia. "
-            "Use lookup to find specific details within the article. "
+            "First, think how to approach the problem. "
             "When you have the final answer, use the answer function.\n\n"
             f"Question: {user_question}"
         )
 
-        # Use the chat session for conversation management
-        response: GenerateContentResponse = self.send_chat_message(
-            react_prompt,
-            **generation_kwargs
-        )
+        response: GenerateContentResponse = self.send_chat_message(prompt, **generation_kwargs)
 
-        # Main conversation loop
-        self.should_continue_prompting = True
-        iteration: int = 1
-
-        while self.should_continue_prompting and iteration <= max_iterations:
-            # Process the current response
-            if hasattr(response, "candidates") and response.candidates:
-                candidate = response.candidates[0]
-                content = candidate.content
-
-                # Process all parts in the content
-                found_text = False
-                found_function_call = False
-                function_call = None
-
-                result: Dict[str, Any] = {}
-
-                for part in content.parts:
-                    # Handle text part if present
-                    if hasattr(part, "text") and part.text:
-                        found_text = True
-                        print(f"\nThought {iteration}:")
-                        print(part.text)
-
-                    # Handle function call if present
-                    if hasattr(part, "function_call") and part.function_call:
-                        found_function_call = True
-                        function_call = part.function_call
-                        func_name: str = function_call.name
-                        args: Dict[str, Any] = function_call.args
-
-                        print(f"\nAction {iteration}:")
-                        print(f"<{func_name}>{list(args.values())[0] if args else ''}</{func_name}>")
-
-                        # Execute the appropriate function
-                        if func_name == "search":
-                            result = self.search(**args)
-                        elif func_name == "lookup":
-                            context_length: int = args.get("context_length", 200)
-                            result = self.lookup(phrase=args["phrase"], context_length=context_length)
-                        elif func_name == "answer":
-                            result = self.answer(**args)
-                        else:
-                            result = {"result": f"Unknown function: {func_name}"}
-
-                        # Print the observation
-                        print(f"\nObservation {iteration}:")
-                        print(result["result"])
-
-                        # If answer was called, we're done
-                        if func_name == "answer":
-                            self.should_continue_prompting = False
-                        break
-
-                # If no function call was found, but we have text, treat it as a final response
-                if not self.should_continue_prompting or (not found_function_call and found_text):
-                    print("\nFinal response:")
-                    final_output: str
-                    if 'result' in result and result['result']:
-                        final_output = result["result"]
-                        print(final_output)
-                        return final_output
-                    elif hasattr(response, "text") and response.text:
-                        final_output = response.text
-                        print(final_output)
-                        return final_output
-
-                # If we've found a function call, continue the conversation with the function response
-                if found_function_call and function_call:
-                    response: GenerateContentResponse = self.send_chat_message(
-                        result["result"],
-                        **generation_kwargs
-                    )
-                    iteration += 1
-                elif not self.should_continue_prompting:
-                    break
-                else:
-                    print("\nNo function call or text found in response. Ending conversation.")
-                    break
-            else:
-                print("\nNo valid response from model. Ending conversation.")
+        for iteration in range(1, max_iterations + 1):
+            # Ensure there's a valid response
+            if not getattr(response, 'candidates', None):
+                print("\nNo valid response from model.\n")
                 break
 
-        if iteration > max_iterations:
-            print("\nMaximum iterations reached. Ending conversation.")
-            return "Maximum iterations reached."
+            candidate = response.candidates[0]
+            text_parts: List[str] = []
+            func_call = None
 
-        return "Conversation completed with final answer."
+            for part in candidate.content.parts:
+                if getattr(part, 'text', None):
+                    text_parts.append(part.text)
+                if getattr(part, 'function_call', None):
+                    func_call = part.function_call
+
+            if text_parts:
+                print(f"\nThought {iteration}: {' '.join(text_parts)}")
+
+            if func_call:
+                name: str = func_call.name
+                args: Dict[str, Any] = func_call.args or {}
+                print(f"\nAction {iteration}: <{name}>{list(args.values())[0] if args else ''}</{name}>")
+
+                if name == "search":
+                    result: Dict[str, str] = self.search(**args)
+                elif name == "lookup":
+                    result = self.lookup(
+                        phrase=args.get("phrase", ''),
+                        context_length=args.get("context_length", 200)
+                    )
+                elif name == "answer":
+                    return self.answer(**args)["result"]
+                else:
+                    result = {"result": f"Unknown function: {name}"}
+
+                print(f"\nObservation {iteration}: {result['result']}")
+                response = self.send_chat_message(result['result'], **generation_kwargs)
+            else:
+                print(f"\nNo function call detected. Ending conversation.")
+                return getattr(response, 'text', None) or ''
+
+        return "Maximum iterations reached."
 
 
 # -----------------------------------------------------------------------------
@@ -437,4 +383,7 @@ if __name__ == "__main__":
 
     # Start the conversation using the provided question and generation parameters.
     # Feel free to adjust generation_kwargs such as temperature for varied results.
-    gemini_react(question, temperature=0.2)
+    answer: str = gemini_react(question, temperature=0.2)
+    print()
+    print(f"\nFinal Answer:")
+    print(answer)
