@@ -5,21 +5,28 @@
 # https://atamel.dev/posts/2025/04-08_simplified_function_calling_gemini/
 from __future__ import annotations
 import wikipedia
+# noinspection PyPackageRequirements
+from google.api_core.exceptions import ResourceExhausted
+import time
 from wikipedia.exceptions import DisambiguationError, PageError
 # noinspection PyPackageRequirements
 import google.generativeai as genai
 # noinspection PyPackageRequirements
 from google.generativeai.types import Tool, FunctionDeclaration
 # noinspection PyPackageRequirements
-from google.generativeai.types.generation_types import GenerationConfig
+from google.generativeai.types.generation_types import GenerationConfig, GenerateContentResponse
+# noinspection PyPackageRequirements
+from google.generativeai import ChatSession
 
 # Import the secret retrieval function from a module.
 from generator_model import get_secret
 
+from typing import List, Dict, Any
+
 # -----------------------------------------------------------------------------
 # Configure API Key for Gemini 2.0 using a secret file.
 # -----------------------------------------------------------------------------
-secret = get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
+secret: str = get_secret(r'D:\Documents\Secrets\gemini_secret.txt')
 genai.configure(api_key=secret)
 
 # -----------------------------------------------------------------------------
@@ -27,7 +34,7 @@ genai.configure(api_key=secret)
 # -----------------------------------------------------------------------------
 
 # Function declaration for performing a Wikipedia search.
-search_declaration = {
+search_declaration: Dict[str, Any] = {
     "name": "search",
     "description": (
         "Searches Wikipedia for a given query and returns a summary of the page if found. "
@@ -46,7 +53,7 @@ search_declaration = {
 }
 
 # Function declaration for looking up a phrase in the most recently searched Wikipedia page.
-lookup_declaration = {
+lookup_declaration: Dict[str, Any] = {
     "name": "lookup",
     "description": (
         "Looks up a phrase within the content of the most recent Wikipedia search result "
@@ -65,7 +72,7 @@ lookup_declaration = {
 }
 
 # Function declaration for providing the final answer.
-answer_declaration = {
+answer_declaration: Dict[str, Any] = {
     "name": "answer",
     "description": (
         "Provides the final answer to the question and ends the conversation, while listing "
@@ -89,7 +96,16 @@ answer_declaration = {
 # function calling capabilities.
 # -----------------------------------------------------------------------------
 class ReActFunctionCaller:
-    def __init__(self, model: str):
+    # Class-level attribute annotations
+    model_name: str
+    generative_model: genai.GenerativeModel
+    chat: ChatSession  # genai Chat session object
+    tools: List[Tool]
+    _search_history: List[str]
+    _search_urls: List[str]
+    should_continue_prompting: bool
+
+    def __init__(self, model: str) -> None:
         """
         Initializes the ReActFunctionCaller instance by setting up the Gemini model,
         configuring the function declarations, and initializing search history.
@@ -130,7 +146,7 @@ class ReActFunctionCaller:
         """
         return text.replace("\n", " ")
 
-    def search(self, query: str) -> dict:
+    def search(self, query: str) -> Dict[str, str]:
         """
         Searches for a given query using the Wikipedia API and returns a
         summary or alternative suggestions if an error occurs.
@@ -144,17 +160,17 @@ class ReActFunctionCaller:
         query = query.strip()
         try:
             # Attempt to retrieve a summary for the query from Wikipedia.
-            summary_text = wikipedia.summary(query, sentences=4, auto_suggest=False)
+            summary_text: str = wikipedia.summary(query, sentences=4, auto_suggest=False)
             wiki_page = wikipedia.page(query, auto_suggest=False)
-            wiki_url = wiki_page.url
+            wiki_url: str = wiki_page.url
 
             # Clean the summary text.
-            cleaned_summary = self.clean(summary_text)
+            cleaned_summary: str = self.clean(summary_text)
 
             # Generate a shorter version containing the first 2-3 sentences from the summary.
-            observation = self.generative_model.generate_content(
+            observation: str = self.generate_content(
                 f'Return the first 2 or 3 sentences from the following text: {cleaned_summary}'
-            ).text
+            )
 
             # Record the search details for later lookup.
             self._search_history.append(query)
@@ -164,12 +180,12 @@ class ReActFunctionCaller:
         except (DisambiguationError, PageError):
             # Handle ambiguous or non-existent pages.
             observation = f'Could not find ["{query}"].'
-            similar_topics = wikipedia.search(query)
+            similar_topics: List[str] = wikipedia.search(query)
             observation += f' Similar: {similar_topics}. You should search for one of those instead.'
 
         return {"result": observation}
 
-    def lookup(self, phrase: str, context_length: int = 200) -> dict:
+    def lookup(self, phrase: str, context_length: int = 200) -> Dict[str, str]:
         """
         Looks up a given phrase within the content of the most recently
         searched Wikipedia page and returns a context snippet around it.
@@ -188,21 +204,21 @@ class ReActFunctionCaller:
         try:
             # Retrieve the most recently searched page's content.
             page = wikipedia.page(self._search_history[-1], auto_suggest=False)
-            content = self.clean(page.content)
-            start_index = content.find(phrase)
+            content: str = self.clean(page.content)
+            start_index: int = content.find(phrase)
 
             # Compute the context snippet boundaries.
-            snippet_start = max(0, start_index - context_length)
-            snippet_end = start_index + len(phrase) + context_length
-            result = content[snippet_start:snippet_end]
+            snippet_start: int = max(0, start_index - context_length)
+            snippet_end: int = start_index + len(phrase) + context_length
+            result_snippet: str = content[snippet_start:snippet_end]
 
-            print(f"Result: {result}")
+            print(f"Result: {result_snippet}")
             print(f"Information Source: {self._search_urls[-1]}")
-            return {"result": result}
+            return {"result": result_snippet}
         except Exception as e:
             return {"result": f"Error during lookup: {e}"}
 
-    def answer(self, final_answer: str) -> dict:
+    def answer(self, final_answer: str) -> Dict[str, str]:
         """
         Marks the end of the conversation and returns the final answer along
         with sources.
@@ -214,12 +230,71 @@ class ReActFunctionCaller:
             A dictionary with the final answer and sources.
         """
         self.should_continue_prompting = False
-        sources = ", ".join(self._search_urls) if self._search_urls else "None"
-        result = f"Final Answer: {final_answer}\nInformation Sources: {sources}"
+        sources: str = ", ".join(self._search_urls) if self._search_urls else "None"
+        result: str = f"Final Answer: {final_answer}\nInformation Sources: {sources}"
         print(f"Information Sources: {self._search_urls}")
         return {"result": result}
 
-    def __call__(self, user_question: str, max_iterations: int = 8, **generation_kwargs):
+    def send_chat_message(self, message: str, **generation_kwargs: Any) -> GenerateContentResponse:
+        """
+        Sends a message to the chat session and returns the response.
+
+        Args:
+            message: The message to send.
+
+        Returns:
+            The response from the chat session.
+        """
+        # Set up the config with any provided generation parameters
+        config: GenerationConfig = GenerationConfig(**generation_kwargs)
+
+        try:
+            return self.chat.send_message(message,
+                                          generation_config=config,
+                                          tools=self.tools)
+        except ResourceExhausted as e:
+            # Handle rate limit errors by pausing and retrying
+            print()
+            print(f"Rate limit exceeded: {e}. Retrying in 15 seconds...")
+            time.sleep(15)
+            return self.send_chat_message(message, **generation_kwargs)
+        except Exception as e:
+            print(f"Error during chat message sending: {e}")
+            raise
+
+    def generate_content(self, prompt: str, **generation_kwargs: Any) -> str:
+        """
+        Generates content using the generative model.
+
+        Args:
+            prompt: The prompt to send to the generative model.
+
+        Returns:
+            The generated text response.
+        """
+        config: GenerationConfig = GenerationConfig(**generation_kwargs)
+
+        try:
+            response = self.generative_model.generate_content(
+                prompt,
+                generation_config=config
+            )
+            return getattr(response, "text", None) or "[No response text]"
+        except ResourceExhausted as e:
+            print()
+            print(f"Rate limit exceeded: {e}. Retrying in 15 seconds...")
+            time.sleep(15)
+            return self.generate_content(prompt, **generation_kwargs)
+        except Exception as e:
+            print(f"Error during content generation: {e}")
+            raise
+
+    def __call__(
+        self,
+        user_question: str,
+        max_iterations: int = 25,
+        **generation_kwargs: Any,
+    ) -> str:
         """
         Initiates a multi-turn conversation with the generative model, using
         function calls to perform a series of actions until the answer is found
@@ -234,10 +309,10 @@ class ReActFunctionCaller:
             The final response from the model.
         """
         # Validate the maximum allowed number of iterations.
-        assert 0 < max_iterations <= 8, "max_iterations must be between 1 and 8"
+        assert 0 < max_iterations <= 25, "max_iterations must be between 1 and 8"
 
         # Create a prompt for the model that encourages ReAct-style reasoning
-        react_prompt = (
+        react_prompt: str = (
             "Solve this question step by step using the search, lookup, and answer functions. "
             "First, think about how to approach the problem. "
             "Use search to find relevant information from Wikipedia. "
@@ -246,19 +321,15 @@ class ReActFunctionCaller:
             f"Question: {user_question}"
         )
 
-        # Set up the config with any provided generation parameters
-        config = GenerationConfig(**generation_kwargs)
-
         # Use the chat session for conversation management
-        response = self.chat.send_message(
+        response: GenerateContentResponse = self.send_chat_message(
             react_prompt,
-            generation_config=config,
-            tools=self.tools
+            **generation_kwargs
         )
 
         # Main conversation loop
         self.should_continue_prompting = True
-        iteration = 1
+        iteration: int = 1
 
         while self.should_continue_prompting and iteration <= max_iterations:
             # Process the current response
@@ -271,7 +342,7 @@ class ReActFunctionCaller:
                 found_function_call = False
                 function_call = None
 
-                result: dict = {}
+                result: Dict[str, Any] = {}
 
                 for part in content.parts:
                     # Handle text part if present
@@ -284,8 +355,8 @@ class ReActFunctionCaller:
                     if hasattr(part, "function_call") and part.function_call:
                         found_function_call = True
                         function_call = part.function_call
-                        func_name = function_call.name
-                        args = function_call.args
+                        func_name: str = function_call.name
+                        args: Dict[str, Any] = function_call.args
 
                         print(f"\nAction {iteration}:")
                         print(f"<{func_name}>{list(args.values())[0] if args else ''}</{func_name}>")
@@ -294,7 +365,7 @@ class ReActFunctionCaller:
                         if func_name == "search":
                             result = self.search(**args)
                         elif func_name == "lookup":
-                            context_length = args.get("context_length", 200)
+                            context_length: int = args.get("context_length", 200)
                             result = self.lookup(phrase=args["phrase"], context_length=context_length)
                         elif func_name == "answer":
                             result = self.answer(**args)
@@ -313,19 +384,21 @@ class ReActFunctionCaller:
                 # If no function call was found, but we have text, treat it as a final response
                 if not self.should_continue_prompting or (not found_function_call and found_text):
                     print("\nFinal response:")
+                    final_output: str
                     if 'result' in result and result['result']:
-                        print(result["result"])
-                        return result["result"]
+                        final_output = result["result"]
+                        print(final_output)
+                        return final_output
                     elif hasattr(response, "text") and response.text:
-                        print(response.text)
-                        return response.text
+                        final_output = response.text
+                        print(final_output)
+                        return final_output
 
                 # If we've found a function call, continue the conversation with the function response
                 if found_function_call and function_call:
-                    response = self.chat.send_message(
+                    response: GenerateContentResponse = self.send_chat_message(
                         result["result"],
-                        generation_config=config,
-                        tools=self.tools
+                        **generation_kwargs
                     )
                     iteration += 1
                 elif not self.should_continue_prompting:
@@ -349,7 +422,7 @@ class ReActFunctionCaller:
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     # Define the question you want to ask.
-    question = (
+    question: str = (
         "What are the total of ages of the main trio from the new Percy Jackson and the Olympians TV series "
         "in real life?"
     )
@@ -357,10 +430,10 @@ if __name__ == "__main__":
     # Uncomment alternate questions as needed.
     # question = "How many companions did Samuel Meladon have?"
     # question = "What is the most famous case of reincarnation in the world?"
-    # question = "What are the total ages of everyone in the movie Star Wars: A New Hope?"
+    question = "What are the total ages of everyone in the movie Star Wars: A New Hope?"
 
     # Instantiate the ReActFunctionCaller session using the defined model.
-    gemini_react = ReActFunctionCaller(model='gemini-2.0-flash')
+    gemini_react: ReActFunctionCaller = ReActFunctionCaller(model='gemini-2.0-flash')
 
     # Start the conversation using the provided question and generation parameters.
     # Feel free to adjust generation_kwargs such as temperature for varied results.
