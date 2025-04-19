@@ -219,7 +219,7 @@ class ReActFunctionCaller:
         print(f"Information Sources: {self._search_urls}")
         return {"result": result}
 
-    def __call__(self, user_question: str, max_iterations: int = 10, **generation_kwargs):
+    def __call__(self, user_question: str, max_iterations: int = 8, **generation_kwargs):
         """
         Initiates a multi-turn conversation with the generative model, using
         function calls to perform a series of actions until the answer is found
@@ -234,7 +234,7 @@ class ReActFunctionCaller:
             The final response from the model.
         """
         # Validate the maximum allowed number of iterations.
-        assert 0 < max_iterations <= 10, "max_iterations must be between 1 and 10"
+        assert 0 < max_iterations <= 8, "max_iterations must be between 1 and 8"
 
         # Create a prompt for the model that encourages ReAct-style reasoning
         react_prompt = (
@@ -250,7 +250,6 @@ class ReActFunctionCaller:
         config = GenerationConfig(**generation_kwargs)
 
         # Use the chat session for conversation management
-        self.chat = self.generative_model.start_chat(history=[])
         response = self.chat.send_message(
             react_prompt,
             generation_config=config,
@@ -289,7 +288,7 @@ class ReActFunctionCaller:
                         args = function_call.args
 
                         print(f"\nAction {iteration}:")
-                        print(f"<{func_name}>{list(args.values())[0] if args else ''}")
+                        print(f"<{func_name}>{list(args.values())[0] if args else ''}</{func_name}>")
 
                         # Execute the appropriate function
                         if func_name == "search":
@@ -312,10 +311,14 @@ class ReActFunctionCaller:
                         break
 
                 # If no function call was found, but we have text, treat it as a final response
-                if not found_function_call and found_text:
+                if not self.should_continue_prompting or (not found_function_call and found_text):
                     print("\nFinal response:")
-                    print(response.text)
-                    return response.text
+                    if 'result' in result and result['result']:
+                        print(result["result"])
+                        return result["result"]
+                    elif hasattr(response, "text") and response.text:
+                        print(response.text)
+                        return response.text
 
                 # If we've found a function call, continue the conversation with the function response
                 if found_function_call and function_call:
