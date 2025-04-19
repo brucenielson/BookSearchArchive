@@ -23,7 +23,7 @@ class RagChat:
                  postgres_password: str,
                  postgres_user_name: str = "postgres",
                  postgres_db_name: str = "postgres",
-                 postgres_table_name: str = "book_archive",
+                 postgres_table_name: str = "popper_archive",
                  postgres_host: str = 'localhost',
                  postgres_port: int = 5432,
                  postgres_table_recreate: bool = False,
