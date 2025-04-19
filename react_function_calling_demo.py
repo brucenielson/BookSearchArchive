@@ -337,6 +337,10 @@ class ReActFunctionCaller:
                 print("\nNo valid response from model. Ending conversation.")
                 break
 
+        if iteration > max_iterations:
+            print("\nMaximum iterations reached. Ending conversation.")
+            return "Maximum iterations reached."
+
         return "Conversation completed with final answer."
 
 
@@ -353,6 +357,7 @@ if __name__ == "__main__":
     # Uncomment alternate questions as needed.
     # question = "How many companions did Samuel Meladon have?"
     # question = "What is the most famous case of reincarnation in the world?"
+    # question = "What are the total ages of everyone in the movie Star Wars: A New Hope?"
 
     # Instantiate the ReActFunctionCaller session using the defined model.
     gemini_react = ReActFunctionCaller(model='gemini-2.0-flash')
