@@ -374,6 +374,7 @@ if __name__ == "__main__":
     # question = "How many companions did Samuel Meladon have?"
     # question = "What is the most famous case of reincarnation in the world?"
     # question = "What are the total ages of everyone in the movie Star Wars: A New Hope?"
+    # question = "Who was the mayor of Reykjavik in 2015 and what political party did they represent?"
 
     # Instantiate the ReActFunctionCaller session using the defined model.
     gemini_react: ReActFunctionCaller = ReActFunctionCaller(model='gemini-2.0-flash')
