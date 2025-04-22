@@ -9,12 +9,12 @@ from google.generativeai.types import generation_types
 # from google.genai.types import GenerateContentConfig
 # noinspection PyPackageRequirements
 import google.generativeai as genai
-# Import your DocRetrievalPipeline and SearchMode (adjust import paths as needed)
 from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
 from document_processor import DocumentProcessor
 # noinspection PyPackageRequirements
 from haystack import Document
 from typing import Optional, List, Dict, Any, Iterator, Union
+from react_agent import format_document
 
 
 class RagChat:
@@ -46,7 +46,7 @@ class RagChat:
         self._postgres_host: str = postgres_host
         self._postgres_port: int = postgres_port
         # Initialize the document retrieval pipeline.
-        self._doc_pipeline = DocRetrievalPipeline(
+        self._doc_pipeline: DocRetrievalPipeline = DocRetrievalPipeline(
             table_name=self._postgres_table_name,
             db_user_name=self._postgres_user_name,
             db_password=self._postgres_password,
@@ -243,9 +243,9 @@ class RagChat:
             ranked_docs = [doc for doc in retrieved_docs if hasattr(doc, 'score') and doc.score >= threshold]
 
         # Format each retrieved document (quote + metadata).
-        formatted_docs = [self.format_document(doc) for doc in ranked_docs]
+        formatted_docs = [format_document(doc) for doc in ranked_docs]
         retrieved_quotes = "\n\n".join(formatted_docs)
-        formatted_docs = [self.format_document(doc, include_raw_info=True) for doc in all_docs]
+        formatted_docs = [format_document(doc, include_raw_info=True) for doc in all_docs]
         all_quotes = "\n\n".join(formatted_docs)
 
         modified_query: str
@@ -275,32 +275,6 @@ class RagChat:
             if hasattr(chunk, 'text'):
                 answer_text += chunk.text
                 yield chat_history + [(message, answer_text)], retrieved_quotes, all_quotes
-
-    @staticmethod
-    def format_document(doc, include_raw_info: bool = False) -> str:
-        """
-        Format a document by including its metadata followed by the quote.
-        """
-        formatted = ""
-        # If the document has metadata, format each key-value pair.
-        if hasattr(doc, 'meta') and doc.meta:
-            meta_entries = ["Score: {:.4f}".format(doc.score) if hasattr(doc, 'score') else "Score: N/A"]
-            # Add the original score if requested.
-            if include_raw_info and hasattr(doc, 'orig_score'):
-                meta_entries.append("Original Score: {:.4f}".format(doc.orig_score))
-                meta_entries.append("Retrieved By: {}".format(doc.retrieval_method))
-            # Define keys to ignore (customize as needed).
-            ignore_keys = {"file_path", "item_#", "item_id"}
-            for key, value in doc.meta.items():
-                if key.lower() in ignore_keys or key.startswith('_') or key.startswith('split'):
-                    continue
-                # Append each key-value pair.
-                meta_entries.append(f"{key.replace('_', ' ').title()}: {value}")
-            if meta_entries:
-                formatted += "\n".join(meta_entries) + "\n"
-        # Append the main quote.
-        formatted += f"Quote: {doc.content}"
-        return formatted
 
     # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
     @staticmethod
