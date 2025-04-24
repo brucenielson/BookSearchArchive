@@ -432,11 +432,11 @@ def main() -> None:
         user_name = "neo4j"
         db_name = "neo4j"
 
-    hf_secret: str = gen.get_secret(r'D:\Documents\Secrets\huggingface_secret.txt')  # Put your path here
-    # google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')  # Put your path here # noqa: F841
+    # hf_secret: str = gen.get_secret(r'D:\Documents\Secrets\huggingface_secret.txt')  # Put your path here
+    google_secret: str = gen.get_secret(r'D:\Documents\Secrets\gemini_secret.txt')  # Put your path here # noqa: F841
     # model: gen.GeneratorModel = gen.HuggingFaceLocalModel(password=hf_secret, model_name="google/gemma-1.1-2b-it")
-    # model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
-    model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
+    model: gen.GeneratorModel = gen.GoogleGeminiModel(password=google_secret)
+    # model: gen.GeneratorModel = gen.HuggingFaceAPIModel(password=hf_secret, model_name="HuggingFaceH4/zephyr-7b-alpha")  # noqa: E501
     # model: gen.GeneratorModel = gen.OllamaModel(model_name="gemma2")
     # model: gen.GeneratorModel = gen.LlamaCppModel(model_link="https://huggingface.co/TheBloke/zephyr-7B-beta-GGUF/resolve/main/zephyr-7b-beta.Q4_K_M.gguf")   # noqa: E501
     # Possible outputs to include in the debug results: "lex_retriever", "semantic_retriever", "prompt_builder",
@@ -451,7 +451,8 @@ def main() -> None:
                                              db_name=db_name,
                                              document_store_type=doc_store_type,
                                              use_streaming=True,
-                                             verbose=True,
+                                             verbose=False
+                                             ,
                                              llm_top_k=5,
                                              retriever_top_k_docs=5,
                                              include_outputs_from=include_outputs_from,
@@ -468,7 +469,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "How do we test mathematical theories?"
+    query: str = "validity of induction in exploratory data analysis or model building"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"

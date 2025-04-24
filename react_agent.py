@@ -49,12 +49,13 @@ def format_document(doc, include_raw_info: bool = False) -> str:
 search_wikipedia_declaration: Dict[str, Any] = {
     "name": "search_wikipedia",
     "description": (
-        "Pass a wiki page to search for and a question to be answered from that page. "
+        "Pass a Wikipedia page to search for and a question to be answered from that page. "
         "This will search Wikipedia for that page and either return an answer to the question from that page or "
         "if the page is ambiguous or missing, returns alternative search topics. "
-        "Only use this function if you failed to find what you need from the datastore. "
-        "This allows you to look up more recent information that wouldn't be found in the collection of books in the "
-        "datastore."
+        "Only use this function if you failed to find what you need from the datastore. Do not use this function "
+        "before Action 6, as the datastore will provider better answers. Only use this function if you are "
+        "you make it to Action 6 and you are not able to find what you need from the datastore. Going to Wikipedia "
+        "is a last resort."
     ),
     "parameters": {
         "type": "object",
@@ -66,7 +67,7 @@ search_wikipedia_declaration: Dict[str, Any] = {
             "question": {
                 "type": "string",
                 "description": "The question to be answered using the search results."
-            }
+            },
         },
         "required": ["wiki_page_search", "question"],
     },
@@ -77,11 +78,11 @@ search_wikipedia_declaration: Dict[str, Any] = {
 search_datastore_declaration: Dict[str, Any] = {
     "name": "search_datastore",
     "description": (
-        "Pass phrase or question to search for within the document datastore to try to find an improved answer to "
-        "the user's query. Use this function if the user's query didn't return a satisfactory answer from the "
-        "datastore. It allows you to try to refine the search within the datastore or look up multiple different "
-        "datastore entries to synthesize an answer not found in one spot. You should try to use this function "
-        "before you use the search_wikipedia function, as it is more likely to return an authentic answer. "
+        "Pass phrase or question to search for within the document datastore to try to find an answer to "
+        "the user's query. This function allows you to try to refine the search within the datastore or even look up "
+        "multiple different datastore entries to use together to synthesize an answer not found in one spot. "
+        "You should try to use this function before you use the search_wikipedia function, as it is more likely to "
+        "return an authentic answer. "
     ),
     "parameters": {
         "type": "object",
@@ -149,10 +150,11 @@ class ReActAgent:
         ]
 
         # Initialize tracking variables
-        self._wikipedia_search_history = []
-        self._wikipedia_search_urls = []
-        self._datastore_search_history = []
-        self.should_continue_prompting = True
+        self._wikipedia_search_history: List[str] = []
+        self._wikipedia_search_urls: List[str] = []
+        self._datastore_search_history: List[str] = []
+        self.should_continue_prompting: bool = True
+        self._iteration: int = 0
 
     @staticmethod
     def clean(text: str) -> str:
@@ -196,6 +198,13 @@ class ReActAgent:
             observation = f'Could not find ["{wiki_page_search}"].'
             similar_topics: List[str] = wikipedia.search(wiki_page_search)
             observation += f' Similar: {similar_topics}. You should search for one of those instead.'
+
+        # If a search for wikipedia was requested prematurely, still return the result, but remind the
+        # model that it should not have used Wikipedia yet.
+        if self._iteration <= 5:
+            observation = ("You illegally requested Wikipedia information before Action 6. I'll give you the result, "
+                           "but please try using the datastore first before answering, at least until Action 6.\n\n"
+                           + observation)
 
         return {"result": observation}
 
@@ -287,7 +296,7 @@ class ReActAgent:
                 generation_config=config
             )
             return getattr(response, "text", None) or "[No response text]"
-        except ResourceExhausted as e:
+        except ResourceExhausted:
             print()
             print(f"Rate limit exceeded. Retrying in 15 seconds...")
             time.sleep(15)
@@ -317,7 +326,9 @@ class ReActAgent:
         assert 0 < max_iterations <= 25, "max_iterations must be between 1 and 25"
 
         prompt: str = (
-            "Solve this question step by step using the search, lookup, and answer functions. "
+            "Solve this question step by step using the search_datastore and answer functions. "
+            "You can also use the search_wikipedia function starting at 'Action 6' if you can't find the answer in the "
+            "datastore before then. But try to avoid using Wikipedia unless you have to. "
             "First, think how to approach the problem. "
             "When you have the final answer, use the answer function.\n\n"
             f"Question: {user_question}"
@@ -326,6 +337,7 @@ class ReActAgent:
         response: GenerateContentResponse = self.send_chat_message(prompt, **generation_kwargs)
 
         for iteration in range(1, max_iterations + 1):
+            self._iteration = iteration
             # Ensure there's a valid response
             if not getattr(response, 'candidates', None):
                 print("\nNo valid response from model.\n")
@@ -357,9 +369,19 @@ class ReActAgent:
                         return result['result']
                 except AttributeError:
                     result = {"result": f"Unknown function: {name}"}
+                except Exception as e:
+                    result = {"result": f"Error calling function {name}: {e}"}
 
-                print(f"\nObservation {iteration}: {result['result']}")
-                response = self.send_chat_message(result['result'], **generation_kwargs)
+                observation: str = result['result']
+                if observation.strip() == "Answer Not Found":
+                    if self._iteration < 5:
+                        observation = observation.strip() + (". (Wikipedia is not yet available through the "
+                                                             "search_wikipedia function. Do not use it yet.)\n")
+                    else:
+                        observation = observation.strip() + (". (Wikipedia is now available through the "
+                                                             "search_wikipedia function.)\n")
+                print(f"\nObservation {iteration}: {observation}")
+                response = self.send_chat_message(observation, **generation_kwargs)
             else:
                 print(f"\nNo function call detected. Ending conversation.")
                 return getattr(response, 'text', None) or ''
@@ -382,7 +404,8 @@ if __name__ == "__main__":
     # users_question = "What is the most famous case of reincarnation in the world?"
     # users_question = "What are the total ages of everyone in the movie Star Wars: A New Hope?"
     # users_question = "Who was the mayor of Reykjavik in 2015 and what political party did they represent?"
-    users_question = "Did Karl Popper see induction as valid in some cases, particularly when doing statistics?"
+    # users_question = "Is induction valid in some cases, particularly when doing statistics?"
+    users_question = "What is Stephen King's birthday?"
 
     postgres_user_name: str = "postgres"
     postgres_db_name: str = "postgres"
