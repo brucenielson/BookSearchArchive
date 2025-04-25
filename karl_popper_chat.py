@@ -260,6 +260,7 @@ class RagChat:
         retrieved_quotes = "\n\n".join(formatted_docs)
         formatted_docs = [format_document(doc, include_raw_info=True) for doc in all_docs]
         all_quotes = "\n\n".join(formatted_docs)
+        research_quotes = "\n\n".join([format_document(doc) for doc in research_docs])
 
         modified_query: str
         if not retrieved_quotes or retrieved_quotes.strip() == "":
@@ -297,7 +298,7 @@ class RagChat:
         for chunk in chat_response:
             if hasattr(chunk, 'text'):
                 answer_text += chunk.text
-                yield chat_history + [(message, answer_text)], retrieved_quotes, all_quotes
+                yield chat_history + [(message, answer_text)], retrieved_quotes, all_quotes, research_quotes
 
     # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
     @staticmethod
@@ -616,8 +617,8 @@ def build_interface(title: str = 'RAG Chat',
             return "", updated_history
 
         def process_message(message, chat_history):
-            for updated_history, ranked_docs, all_docs in rag_chat.respond(message, chat_history):
-                yield updated_history, ranked_docs.strip(), all_docs.strip()
+            for updated_history, ranked_docs, all_docs, research_docs in rag_chat.respond(message, chat_history):
+                yield updated_history, ranked_docs.strip(), all_docs.strip(), research_docs
 
         def process_with_custom_progress(files, progress=gr.Progress()):
             if files is None or len(files) == 0:
@@ -691,7 +692,7 @@ def build_interface(title: str = 'RAG Chat',
 
         msg.submit(user_message, [msg, chatbot], [msg, chatbot], queue=True)
         msg.submit(process_message, [msg, chatbot],
-                   [chatbot, retrieved_quotes_box, raw_quotes_box], queue=True)
+                   [chatbot, retrieved_quotes_box, raw_quotes_box, research_quote_box], queue=True)
 
         load_button.click(update_progress, inputs=file_input, outputs=file_input)
 
