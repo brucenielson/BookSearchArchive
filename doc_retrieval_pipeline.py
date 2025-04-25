@@ -204,12 +204,13 @@ class DocRetrievalPipeline:
         self._document_store = init_doc_store()
         self._print_verbose("Document Count: " + str(self._document_store.count_documents()))
 
-    def generate_response(self, query: str) -> Tuple[List[Document], List[Document]]:
+    def generate_response(self, query: str, min_score: float = 0.0) -> Tuple[List[Document], List[Document]]:
         """
         Generate a response to a given query using the RAG pipeline.
 
         Args:
             query (str): The input query to process.
+            min_score (float): The minimum score for documents to be included in the response.
         """
         # Prepare inputs for the pipeline
         inputs: Dict[str, Any] = {
@@ -229,8 +230,12 @@ class DocRetrievalPipeline:
         print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
         if self._use_reranker:
+            # Filter documents based on the minimum score
+            ranked_documents = [doc for doc in ranked_documents if doc.score >= min_score]
             return ranked_documents, all_documents
         else:
+            # Filter documents based on the minimum score
+            all_documents = [doc for doc in all_documents if doc.score >= min_score]
             return all_documents, all_documents
 
     def _create_rag_pipeline(self) -> None:

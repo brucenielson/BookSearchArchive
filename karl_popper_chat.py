@@ -13,8 +13,8 @@ from doc_retrieval_pipeline import DocRetrievalPipeline, SearchMode
 from document_processor import DocumentProcessor
 # noinspection PyPackageRequirements
 from haystack import Document
-from typing import Optional, List, Dict, Any, Iterator, Union
-from react_agent import format_document
+from typing import Optional, List, Dict, Any, Iterator, Union, Tuple
+from react_agent import format_document, ReActAgent
 
 
 class RagChat:
@@ -117,6 +117,11 @@ class RagChat:
 
         return self.ask_llm_question(prompt)
 
+    def ask_llm_to_research(self, users_question: str) -> Tuple[str, List[Document]]:
+        # Instantiate the ReActFunctionCaller session using the defined model.
+        gemini_react: ReActAgent = ReActAgent(doc_retriever=self._doc_pipeline)
+        return gemini_react(users_question, temperature=0.2)
+
     def ask_llm_for_improved_query(self, message: str, chat_history: List[Dict[str, Any]]) -> str:
         prompt = (
             f"Given the query: '{message}' and the current chat history, the database of relevant quotes found none "
@@ -130,8 +135,19 @@ class RagChat:
             f"an empty string (without quotes around it). Keep the new query as concise as possible to improve matches."
             f"\n\n"
         )
+        improved_query: str = self.ask_llm_question(prompt, chat_history)
+        # The LLM is sometimes stupid and takes my example too literally and returns "''" instead of "" for an
+        # empty string. So we need to check for that and convert it to an empty string.
+        # Unfortunately, dropping that instruction tends to cause it to think out loud before returning an empty
+        # string at the end. Which sort of defeats the purpose.
 
-        return self.ask_llm_question(prompt, chat_history)
+        # Strip off double or single quotes if the improved query starts and ends with them.
+        if improved_query.startswith(('"', "'")) and improved_query.endswith(('"', "'")):
+            improved_query = improved_query[1:-1]
+        if improved_query.lower() == "empty string":
+            improved_query = ""
+
+        return improved_query
 
     @staticmethod
     def get_max_score(docs: Optional[List[Document]]) -> float:
@@ -187,6 +203,8 @@ class RagChat:
 
         retrieved_docs: List[Document]
         all_docs: List[Document]
+        research_response: Optional[str] = None
+        research_docs: List[Document] = []
         retrieved_docs, all_docs = self._doc_pipeline.generate_response(message)
 
         # Find the largest score
@@ -195,16 +213,6 @@ class RagChat:
         if max_score is not None and max_score < 0.50:
             # If we don't have any good quotes, ask the LLM if it wants to do its own search
             improved_query: str = self.ask_llm_for_improved_query(message, gemini_chat_history)
-            # The LLM is sometimes stupid and takes my example too literally and returns "''" instead of "" for an
-            # empty string. So we need to check for that and convert it to an empty string.
-            # Unfortunately, dropping that instruction tends to cause it to think out loud before returning an empty
-            # string at the end. Which sort of defeats the purpose.
-
-            # Strip off double or single quotes if the improved query starts and ends with them.
-            if improved_query.startswith(('"', "'")) and improved_query.endswith(('"', "'")):
-                improved_query = improved_query[1:-1]
-            if improved_query.lower() == "empty string":
-                improved_query = ""
 
             new_retrieved_docs: List[Document]
             temp_all_docs: List[Document]
@@ -242,6 +250,11 @@ class RagChat:
             threshold = 0.20 if num_high >= 3 else 0.10
             ranked_docs = [doc for doc in retrieved_docs if hasattr(doc, 'score') and doc.score >= threshold]
 
+        # If we have under 5 quotes or the max score is under 0.6 then attempt ReAct research
+        if len(ranked_docs) < 5 or max_score < 0.6:
+            # Ask the LLM to do its own research
+            research_response, research_docs = self.ask_llm_to_research(message)
+
         # Format each retrieved document (quote + metadata).
         formatted_docs = [format_document(doc) for doc in ranked_docs]
         retrieved_quotes = "\n\n".join(formatted_docs)
@@ -250,7 +263,11 @@ class RagChat:
 
         modified_query: str
         if not retrieved_quotes or retrieved_quotes.strip() == "":
-            modified_query = message
+            # We have no quotes to use, so ask for an answer without quotes.
+            modified_query = (
+                f"Answer the following question: {message}\n"
+                f"Use the following research response as reference:\n{research_response}\n\n"
+            )
         elif max_score > 0.50:
             modified_query = (
                 f"Use the following quotes with their metadata as reference in your answer:\n\n{retrieved_quotes}\n\n"
@@ -265,6 +282,12 @@ class RagChat:
                 f"feel obligated to use the quotes if they are not relevant. "
                 f"Now, answer the following question: {message}"
             )
+
+        if research_response is not None and research_response.strip() != "":
+            # We have a research response so tack that on to the end of the query
+            modified_query += (f"\nYou may use your researched response to help answer the question:\n"
+                               f"{research_response}\n\n")
+
         # We start a new chat session each time so that we can control the chat history and remove all the rag docs
         # Send the modified query to Gemini.
         chat_response = self.ask_llm_question(modified_query, chat_history=gemini_chat_history, stream=True)
@@ -308,9 +331,14 @@ def build_chat_tab(title: str, default_tab: str):
                     raw_quotes_box = gr.Markdown(
                         label="Raw Quotes & Metadata", value="", elem_id="QuoteBoxes"
                     )
+                with gr.Tab("Research"):
+                    research_quote_box = gr.Markdown(
+                        label="Quotes found by LLM during research", value="", elem_id="QuoteBoxes"
+                    )
 
         # implement clear button
-        clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box], queue=False)
+        clear.click(lambda: ([], "", ""), None, [chatbot, retrieved_quotes_box, raw_quotes_box,
+                                                 research_quote_box], queue=False)
 
     return {
         "chat_tab": chat_tab,
@@ -320,6 +348,7 @@ def build_chat_tab(title: str, default_tab: str):
         "msg": msg,
         "retrieved_quotes_box": retrieved_quotes_box,
         "raw_quotes_box": raw_quotes_box,
+        "research_quote_box": research_quote_box,
     }
 
 
@@ -553,6 +582,7 @@ def build_interface(title: str = 'RAG Chat',
         msg = chat_components["msg"]
         retrieved_quotes_box = chat_components["retrieved_quotes_box"]
         raw_quotes_box = chat_components["raw_quotes_box"]
+        research_quote_box = chat_components["research_quote_box"]
 
         # Unpack Load Tab components
         load_tab = load_components["load_tab"]

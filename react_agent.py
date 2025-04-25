@@ -12,7 +12,7 @@ from google.generativeai.types import Tool, FunctionDeclaration
 from google.generativeai.types.generation_types import GenerationConfig, GenerateContentResponse
 # noinspection PyPackageRequirements
 from google.generativeai import ChatSession
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from doc_retrieval_pipeline import DocRetrievalPipeline
 # noinspection PyPackageRequirements
 from haystack import Document
@@ -153,6 +153,7 @@ class ReActAgent:
         self._wikipedia_search_history: List[str] = []
         self._wikipedia_search_urls: List[str] = []
         self._datastore_search_history: List[str] = []
+        self._used_documents: List[Document] = []
         self.should_continue_prompting: bool = True
         self._iteration: int = 0
 
@@ -203,7 +204,7 @@ class ReActAgent:
         # model that it should not have used Wikipedia yet.
         if self._iteration <= 5:
             observation = ("You illegally requested Wikipedia information before Action 6. I'll give you the result, "
-                           "but please try using the datastore first before answering, at least until Action 6.\n\n"
+                           "but please try using the datastore first before answering, at least until Action 6:\n"
                            + observation)
 
         return {"result": observation}
@@ -222,7 +223,12 @@ class ReActAgent:
         self._datastore_search_history.append(datastore_query)
         retrieved_docs: List[Document]
         all_docs: List[Document]
-        retrieved_docs, all_docs = self._doc_retriever.generate_response(datastore_query)
+        retrieved_docs, all_docs = self._doc_retriever.generate_response(datastore_query, min_score=0.6)
+        # Add to the retrieved documents list what the search query was that found it
+        for doc in all_docs:
+            if hasattr(doc, 'meta') and doc.meta:
+                doc.meta['search_query'] = datastore_query
+        self._used_documents.extend(retrieved_docs)
         # Format each retrieved document (quote + metadata).
         formatted_docs = [format_document(doc) for doc in retrieved_docs]
         retrieved_quotes = "\n\n".join(formatted_docs)
@@ -247,8 +253,8 @@ class ReActAgent:
         """
         self.should_continue_prompting = False
         sources: str = ", ".join(self._wikipedia_search_urls) if self._wikipedia_search_urls else "None"
-        result: str = f"Final Answer: {final_answer}\nInformation Sources: {sources}"
-        print(f"Information Sources: {self._wikipedia_search_urls}")
+        result: str = f"Answer: {final_answer}"
+        print(f"Information Sources: {sources}")
         return {"result": result}
 
     def send_chat_message(self, message: str, **generation_kwargs: Any) -> GenerateContentResponse:
@@ -310,7 +316,7 @@ class ReActAgent:
             user_question: str,
             max_iterations: int = 25,
             **generation_kwargs: Any,
-    ) -> str:
+    ) -> Tuple[str, List[Document]]:
         """
         Orchestrates a ReAct-style multi-turn conversation until the "answer" function is invoked
         or the maximum number of iterations is reached.
@@ -321,7 +327,7 @@ class ReActAgent:
             **generation_kwargs (Any): Additional keyword arguments for generation.
 
         Returns:
-            str: The final response text from the model.
+            Tuple[str, List[Document]]: The final answer and the list of documents used.
         """
         assert 0 < max_iterations <= 25, "max_iterations must be between 1 and 25"
 
@@ -365,14 +371,14 @@ class ReActAgent:
                     method = getattr(self, name)
                     # Dynamically call the method with the provided arguments
                     result: Dict[str, str] = method(**args)
-                    if name == "answer":
-                        return result['result']
                 except AttributeError:
                     result = {"result": f"Unknown function: {name}"}
                 except Exception as e:
                     result = {"result": f"Error calling function {name}: {e}"}
 
                 observation: str = result['result']
+                if name == "answer":
+                    return observation, self._used_documents
                 if observation.strip() == "Answer Not Found":
                     if self._iteration < 5:
                         observation = observation.strip() + (". (Wikipedia is not yet available through the "
@@ -384,9 +390,9 @@ class ReActAgent:
                 response = self.send_chat_message(observation, **generation_kwargs)
             else:
                 print(f"\nNo function call detected. Ending conversation.")
-                return getattr(response, 'text', None) or ''
+                return getattr(response, 'text', None) or '', self._used_documents
 
-        return "Maximum iterations reached."
+        return "Maximum iterations reached.", self._used_documents
 
 
 # -----------------------------------------------------------------------------
@@ -394,18 +400,17 @@ class ReActAgent:
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     # Define the question you want to ask.
-    users_question: str = (
-        "What are the total of ages of the main trio from the new Percy Jackson and the Olympians TV series "
-        "in real life?"
-    )
-
+    # users_question: str = (
+    #     "What are the total of ages of the main trio from the new Percy Jackson and the Olympians TV series "
+    #     "in real life?"
+    # )
     # Uncomment alternate questions as needed.
     # users_question = "How many companions did Samuel Meladon have?"
     # users_question = "What is the most famous case of reincarnation in the world?"
     # users_question = "What are the total ages of everyone in the movie Star Wars: A New Hope?"
     # users_question = "Who was the mayor of Reykjavik in 2015 and what political party did they represent?"
-    # users_question = "Is induction valid in some cases, particularly when doing statistics?"
-    users_question = "What is Stephen King's birthday?"
+    users_question = "Is induction valid in some cases, particularly when doing statistics?"
+    # users_question = "What is Stephen King's birthday?"
 
     postgres_user_name: str = "postgres"
     postgres_db_name: str = "postgres"
@@ -438,7 +443,9 @@ if __name__ == "__main__":
 
     # Start the conversation using the provided question and generation parameters.
     # Feel free to adjust generation_kwargs such as temperature for varied results.
-    answer: str = gemini_react(users_question, temperature=0.2)
+    answer: str
+    docs: List[Document]
+    answer, docs = gemini_react(users_question, temperature=0.2)
     print()
     print(f"\nFinal Answer:")
     print(answer)
