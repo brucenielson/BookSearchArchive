@@ -175,6 +175,24 @@ class ReActAgent:
         """
         return text.replace("\n", " ")
 
+    @staticmethod
+    def is_no_answer(text: str) -> bool:
+        """
+        Checks if the provided text indicates no response.
+
+        Args:
+            text: The text to check.
+
+        Returns:
+            True if the text indicates no response, False otherwise.
+        """
+        # If the text is 'answer not found' or '[no response text]', or if one of those is found in the text,
+        # surrounded by newlines, then it is considered no response.
+        return (text.strip().lower() == "answer not found"
+                or text.strip().lower() == "[no response text]"
+                or "\nanswer not found\n" in text.lower()
+                or "\n[no response text]\n" in text.lower())
+
     def search_wikipedia(self, wiki_page_search: str, question: str) -> Dict[str, str]:
         wiki_page_search = wiki_page_search.strip()
         question = question.strip()
@@ -199,8 +217,7 @@ class ReActAgent:
             self._wikipedia_search_urls.append(wiki_url)
             print(f"Information Source: {wiki_url}")
             # If an answer was found, put the URL used into a document along with the answer.
-            if (observation.strip().lower() != "answer not found"
-                    and observation.strip().lower() != "[no response text]"):
+            if not self.is_no_answer(observation):
                 doc: Document = Document(
                     content=observation,
                     meta={
@@ -255,7 +272,7 @@ class ReActAgent:
             f"give a partial answer, return 'Answer Not Found':\n{retrieved_quotes}"
         )
         # Save off any documents that were used in coming up with an answer.
-        if observation.strip().lower() != "answer not found" and observation.strip().lower() != "[no response text]":
+        if not self.is_no_answer(observation):
             self._used_documents.extend(retrieved_docs)
         return {"result": observation}
 
@@ -350,7 +367,7 @@ class ReActAgent:
                 observation: str = result['result']
                 if name == "answer":
                     return observation, self._used_documents
-                if observation.strip().lower() == "answer not found":
+                if self.is_no_answer(observation):
                     if self._iteration < 5:
                         observation = observation.strip() + (". (Wikipedia is not yet available through the "
                                                              "search_wikipedia function. Do not use it yet.)\n")
