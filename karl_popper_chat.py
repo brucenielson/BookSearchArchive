@@ -304,6 +304,7 @@ class RagChat:
     @staticmethod
     def transform_history(history) -> List[Dict[str, Any]]:
         new_history = []
+        new_history = []
         for chat_response in history:
             new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
             new_history.append({"parts": [{"text": chat_response[1]}], "role": "model"})

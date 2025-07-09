@@ -296,7 +296,7 @@ def main() -> None:
                                                                postgres_host='localhost',
                                                                postgres_port=5432,
                                                                db_name=db_name,
-                                                               verbose=True,
+                                                               verbose=False,
                                                                llm_top_k=5,
                                                                retriever_top_k_docs=5,
                                                                include_outputs_from=include_outputs_from,
@@ -310,7 +310,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "What is your stance on coercion?"
+    query: str = "Carpetbaggers and clowns"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"
@@ -320,7 +320,8 @@ def main() -> None:
     print()
     # Pause for user to hit enter
     input("Press Enter to continue...")
-    rag_processor.generate_response(query)
+    response = rag_processor.generate_response(query)
+    print(response)
 
 
 if __name__ == "__main__":

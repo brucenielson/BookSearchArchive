@@ -451,8 +451,7 @@ def main() -> None:
                                              db_name=db_name,
                                              document_store_type=doc_store_type,
                                              use_streaming=True,
-                                             verbose=False
-                                             ,
+                                             verbose=True,
                                              llm_top_k=5,
                                              retriever_top_k_docs=5,
                                              include_outputs_from=include_outputs_from,
@@ -469,7 +468,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "validity of induction in exploratory data analysis or model building"
+    query: str = "carpetbaggers and clowns"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"

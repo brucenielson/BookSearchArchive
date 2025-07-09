@@ -225,7 +225,7 @@ class ReActAgent:
         all_docs: List[Document]
         retrieved_docs, all_docs = self._doc_retriever.generate_response(datastore_query, min_score=0.6)
         # Add to the retrieved documents list what the search query was that found it
-        for doc in all_docs:
+        for doc in retrieved_docs:
             if hasattr(doc, 'meta') and doc.meta:
                 doc.meta['search_query'] = datastore_query
         self._used_documents.extend(retrieved_docs)
