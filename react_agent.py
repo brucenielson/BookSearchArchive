@@ -133,10 +133,10 @@ class ReActAgent:
         if password:
             genai.configure(api_key=password)
 
-        self.model_name = model
-        self._doc_retriever = doc_retriever
-        self.generative_model = genai.GenerativeModel(model)
-        self.chat = self.generative_model.start_chat(history=[])
+        self.model_name: str = model
+        self._doc_retriever: DocRetrievalPipeline = doc_retriever
+        self.generative_model: genai.GenerativeModel = genai.GenerativeModel(model)
+        self.chat: ChatSession = self.generative_model.start_chat(history=[])
 
         # Define the tools with our function declarations
         self.tools = [

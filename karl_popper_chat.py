@@ -15,6 +15,11 @@ from document_processor import DocumentProcessor
 from haystack import Document
 from typing import Optional, List, Dict, Any, Iterator, Union, Tuple
 from react_agent import format_document, ReActAgent
+from llm_message_utils import send_message
+# noinspection PyPackageRequirements
+from google.generativeai.types.generation_types import GenerateContentResponse
+# noinspection PyPackageRequirements
+from google.generativeai import ChatSession
 
 
 class RagChat:
@@ -79,8 +84,10 @@ class RagChat:
             chat_history = []
         if self._google_secret is not None and self._google_secret != "":
             # Start a new chat session with no history for this check.
-            chat_session = self._model.start_chat(history=chat_history)
-            chat_response = chat_session.send_message(prompt, stream=stream)
+            # chat_session = self._model.start_chat(history=chat_history)
+            # chat_response = chat_session.send_message(prompt, stream=stream)
+            chat_session: ChatSession = self._model.start_chat(history=chat_history)
+            chat_response: GenerateContentResponse = send_message(chat_session, prompt, stream=stream)
             # If streaming is enabled, return the response object.
             if stream:
                 return chat_response
@@ -292,7 +299,6 @@ class RagChat:
         # We start a new chat session each time so that we can control the chat history and remove all the rag docs
         # Send the modified query to Gemini.
         chat_response = self.ask_llm_question(modified_query, chat_history=gemini_chat_history, stream=True)
-        # chat_response = chat_session.send_message(modified_query, stream=True)
         answer_text = ""
         # # --- Step 3: Stream the answer character-by-character ---
         for chunk in chat_response:
@@ -303,7 +309,6 @@ class RagChat:
     # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
     @staticmethod
     def transform_history(history) -> List[Dict[str, Any]]:
-        new_history = []
         new_history = []
         for chat_response in history:
             new_history.append({"parts": [{"text": chat_response[0]}], "role": "user"})
