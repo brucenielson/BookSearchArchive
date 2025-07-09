@@ -739,5 +739,5 @@ if __name__ == "__main__":
     # gemma-3-27b-it, gemini-2.0-flash, gemini-2.0-flash-exp
     rag_chat_ui = build_interface(title="Karl Popper Chatbot",
                                   system_instructions=sys_instruction,
-                                  model_name="gemma-3-27b-it")
+                                  model_name="gemini-2.0-flash")
     rag_chat_ui.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
