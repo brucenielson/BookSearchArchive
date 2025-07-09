@@ -204,12 +204,13 @@ class DocRetrievalPipeline:
         self._document_store = init_doc_store()
         self._print_verbose("Document Count: " + str(self._document_store.count_documents()))
 
-    def generate_response(self, query: str) -> Tuple[List[Document], List[Document]]:
+    def generate_response(self, query: str, min_score: float = 0.0) -> Tuple[List[Document], List[Document]]:
         """
         Generate a response to a given query using the RAG pipeline.
 
         Args:
             query (str): The input query to process.
+            min_score (float): The minimum score for documents to be included in the response.
         """
         # Prepare inputs for the pipeline
         inputs: Dict[str, Any] = {
@@ -229,8 +230,12 @@ class DocRetrievalPipeline:
         print_debug_results(results, self._include_outputs_from, verbose=self._verbose)
 
         if self._use_reranker:
+            # Filter documents based on the minimum score
+            ranked_documents = [doc for doc in ranked_documents if doc.score >= min_score]
             return ranked_documents, all_documents
         else:
+            # Filter documents based on the minimum score
+            all_documents = [doc for doc in all_documents if doc.score >= min_score]
             return all_documents, all_documents
 
     def _create_rag_pipeline(self) -> None:
@@ -291,7 +296,7 @@ def main() -> None:
                                                                postgres_host='localhost',
                                                                postgres_port=5432,
                                                                db_name=db_name,
-                                                               verbose=True,
+                                                               verbose=False,
                                                                llm_top_k=5,
                                                                retriever_top_k_docs=5,
                                                                include_outputs_from=include_outputs_from,
@@ -305,7 +310,7 @@ def main() -> None:
         print("Sentence Embedder Dims: " + str(rag_processor.sentence_embed_dims))
         print("Sentence Embedder Context Length: " + str(rag_processor.sentence_context_length))
 
-    query: str = "What is your stance on coercion?"
+    query: str = "Carpetbaggers and clowns"
     # "Should we strive to make our theories as severely testable as possible?"
     # "Should you ad hoc save your theory?"
     # "How are refutation, falsification, and testability related?"
@@ -315,7 +320,8 @@ def main() -> None:
     print()
     # Pause for user to hit enter
     input("Press Enter to continue...")
-    rag_processor.generate_response(query)
+    response = rag_processor.generate_response(query)
+    print(response)
 
 
 if __name__ == "__main__":
