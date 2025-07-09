@@ -33,7 +33,7 @@ def send_message(model: Union[ChatSession, genai.GenerativeModel],
                  tools: List[Tool] = None,
                  stream: bool = False,
                  config: GenerationConfig = None,
-                 **generation_kwargs: Any) -> GenerateContentResponse:
+                 **generation_kwargs: Any) -> Union[GenerateContentResponse, str]:
 
     if config is None and generation_kwargs:
         # Set up the config with any provided generation parameters

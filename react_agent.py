@@ -17,6 +17,7 @@ from doc_retrieval_pipeline import DocRetrievalPipeline
 # noinspection PyPackageRequirements
 from haystack import Document
 from generator_model import get_secret
+from llm_message_utils import send_message
 
 
 def format_document(doc, include_raw_info: bool = False) -> str:
@@ -128,7 +129,7 @@ class ReActAgent:
     should_continue_prompting: bool
 
     def __init__(self, doc_retriever: DocRetrievalPipeline,
-                 model: str = 'gemini-2.0-flash-exp',
+                 model: str = 'gemini-2.0-flash',
                  password: str = None) -> None:
         if password:
             genai.configure(api_key=password)
@@ -258,58 +259,10 @@ class ReActAgent:
         return {"result": result}
 
     def send_chat_message(self, message: str, **generation_kwargs: Any) -> GenerateContentResponse:
-        """
-        Sends a message to the chat session and returns the response.
-
-        Args:
-            message: The message to send.
-
-        Returns:
-            The response from the chat session.
-        """
-        # Set up the config with any provided generation parameters
-        config: GenerationConfig = GenerationConfig(**generation_kwargs)
-
-        try:
-            return self.chat.send_message(message,
-                                          generation_config=config,
-                                          tools=self.tools)
-        except ResourceExhausted:
-            # Handle rate limit errors by pausing and retrying
-            print()
-            print(f"Rate limit exceeded. Retrying in 15 seconds...")
-            time.sleep(15)
-            return self.send_chat_message(message, **generation_kwargs)
-        except Exception as e:
-            print(f"Error during chat message sending: {e}")
-            raise
+        return send_message(self.chat, message, tools=self.tools, **generation_kwargs)
 
     def generate_content(self, prompt: str, **generation_kwargs: Any) -> str:
-        """
-        Generates content using the generative model.
-
-        Args:
-            prompt: The prompt to send to the generative model.
-
-        Returns:
-            The generated text response.
-        """
-        config: GenerationConfig = GenerationConfig(**generation_kwargs)
-
-        try:
-            response = self.generative_model.generate_content(
-                prompt,
-                generation_config=config
-            )
-            return getattr(response, "text", None) or "[No response text]"
-        except ResourceExhausted:
-            print()
-            print(f"Rate limit exceeded. Retrying in 15 seconds...")
-            time.sleep(15)
-            return self.generate_content(prompt, **generation_kwargs)
-        except Exception as e:
-            print(f"Error during content generation: {e}")
-            raise
+        return send_message(self.generative_model, prompt, tools=self.tools, **generation_kwargs)
 
     def __call__(
             self,
