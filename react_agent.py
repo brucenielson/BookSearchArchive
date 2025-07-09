@@ -27,7 +27,11 @@ def format_document(doc, include_raw_info: bool = False) -> str:
     formatted = ""
     # If the document has metadata, format each key-value pair.
     if hasattr(doc, 'meta') and doc.meta:
-        meta_entries = ["Score: {:.4f}".format(doc.score) if hasattr(doc, 'score') else "Score: N/A"]
+        meta_entries = []
+        if hasattr(doc, 'score') and doc.score is not None:
+            meta_entries.append("Score: {:.4f}".format(doc.score))
+        else:
+            meta_entries.append("Score: N/A")
         # Add the original score if requested.
         if include_raw_info and hasattr(doc, 'orig_score'):
             meta_entries.append("Original Score: {:.4f}".format(doc.orig_score))
@@ -182,7 +186,7 @@ class ReActAgent:
             # Clean the summary text.
             wiki_page_text: str = self.clean(wiki_page.content)
 
-            # Generate a shorter version containing the first 2-3 sentences from the summary.
+            # Generate a summary of the page content to answer the question.
             observation: str = self.generate_content(
                 f"You are looking for an answer to the question: '{question}'. \n"
                 f"If the following text has an answer to that question, return an answer. "
@@ -194,6 +198,18 @@ class ReActAgent:
             self._wikipedia_search_history.append(wiki_page_search)
             self._wikipedia_search_urls.append(wiki_url)
             print(f"Information Source: {wiki_url}")
+            # If an answer was found, put the URL used into a document along with the answer.
+            if (observation.strip().lower() != "answer not found"
+                    and observation.strip().lower() != "[no response text]"):
+                doc: Document = Document(
+                    content=observation,
+                    meta={
+                        "source": wiki_url,
+                        "wiki_page_search": wiki_page_search,
+                        "question": question,
+                    }
+                )
+                self._used_documents.append(doc)
 
         except (DisambiguationError, PageError):
             # Handle ambiguous or non-existent pages.
@@ -229,7 +245,6 @@ class ReActAgent:
         for doc in retrieved_docs:
             if hasattr(doc, 'meta') and doc.meta:
                 doc.meta['search_query'] = datastore_query
-        self._used_documents.extend(retrieved_docs)
         # Format each retrieved document (quote + metadata).
         formatted_docs = [format_document(doc) for doc in retrieved_docs]
         retrieved_quotes = "\n\n".join(formatted_docs)
@@ -239,6 +254,9 @@ class ReActAgent:
             f"If you can't answer the question entirely, answer it partially. If you can't even "
             f"give a partial answer, return 'Answer Not Found':\n{retrieved_quotes}"
         )
+        # Save off any documents that were used in coming up with an answer.
+        if observation.strip().lower() != "answer not found" and observation.strip().lower() != "[no response text]":
+            self._used_documents.extend(retrieved_docs)
         return {"result": observation}
 
     def answer(self, final_answer: str) -> Dict[str, str]:
@@ -332,7 +350,7 @@ class ReActAgent:
                 observation: str = result['result']
                 if name == "answer":
                     return observation, self._used_documents
-                if observation.strip() == "Answer Not Found":
+                if observation.strip().lower() == "answer not found":
                     if self._iteration < 5:
                         observation = observation.strip() + (". (Wikipedia is not yet available through the "
                                                              "search_wikipedia function. Do not use it yet.)\n")

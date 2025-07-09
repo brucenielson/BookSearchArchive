@@ -736,7 +736,8 @@ def build_interface(title: str = 'RAG Chat',
 if __name__ == "__main__":
     sys_instruction: str = ("You are philosopher Karl Popper. Answer questions with philosophical insights, and use "
                             "the provided quotes along with their metadata as reference.")
+    # gemma-3-27b-it, gemini-2.0-flash, gemini-2.0-flash-exp
     rag_chat_ui = build_interface(title="Karl Popper Chatbot",
                                   system_instructions=sys_instruction,
-                                  model_name="gemini-2.0-flash")  # gemma-3-27b-it"
+                                  model_name="gemma-3-27b-it")
     rag_chat_ui.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
