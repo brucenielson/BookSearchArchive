@@ -33,13 +33,16 @@ class RagChat:
                  postgres_port: int = 5432,
                  postgres_table_recreate: bool = False,
                  postgres_table_embedder_model_name: str = "BAAI/llm-embedder",
+                 model_name: str = "gemini-2.0-flash",
                  system_instruction: Optional[str] = None, ):
 
         # Initialize Gemini Chat with a system instruction to act like philosopher Karl Popper.
         self._model: Optional[genai.GenerativeModel] = None
         self._system_instruction: Optional[str] = system_instruction
         self._google_secret: str = google_secret
-        self.initialize_model(system_instruction=system_instruction, google_secret=google_secret)
+        self.initialize_model(model_name=model_name,
+                              system_instruction=system_instruction,
+                              google_secret=google_secret)
 
         # Initialize the document retrieval pipeline with top-5 quote retrieval.
         self._postgres_password: str = postgres_password
@@ -68,11 +71,18 @@ class RagChat:
         )
         self._load_pipeline: Optional[DocumentProcessor] = None
 
-    def initialize_model(self, system_instruction: Optional[str] = None, google_secret: Optional[str] = None):
+    def initialize_model(self, model_name: str = "gemini-2.0-flash",
+                         system_instruction: Optional[str] = None,
+                         google_secret: Optional[str] = None):
         genai.configure(api_key=google_secret)
         self._google_secret = google_secret
+
+        if 'gemma' in model_name:
+            # If using Gemma, set the system instruction to None as it does not support it.
+            system_instruction = None
+
         model: genai.GenerativeModel = genai.GenerativeModel(
-            model_name="gemini-2.0-flash-exp",
+            model_name=model_name,  # gemini-2.0-flash-exp, gemini-2.0-flash, gemma-3-27b-it
             system_instruction=system_instruction
         )
         self._model = model
@@ -302,9 +312,14 @@ class RagChat:
         answer_text = ""
         # # --- Step 3: Stream the answer character-by-character ---
         for chunk in chat_response:
-            if hasattr(chunk, 'text'):
-                answer_text += chunk.text
-                yield chat_history + [(message, answer_text)], retrieved_quotes, all_quotes, research_quotes
+            try:
+                if hasattr(chunk, 'text'):
+                    answer_text += chunk.text
+                    yield chat_history + [(message, answer_text)], retrieved_quotes, all_quotes, research_quotes
+            except ValueError:
+                # Gemma seems to have some bad responses that cause a ValueError when trying to access
+                # So skip over those.
+                continue
 
     # Taken from https://medium.com/latinxinai/simple-chatbot-gradio-google-gemini-api-4ce02fbaf09f
     @staticmethod
@@ -461,7 +476,8 @@ def build_config_tab(config_data: dict):
 
 
 def build_interface(title: str = 'RAG Chat',
-                    system_instructions: str = "You are a helpful assistant.") -> gr.Interface:
+                    system_instructions: str = "You are a helpful assistant.",
+                    model_name="gemini-2.0-flash") -> gr.Interface:
     def load_rag_chat(google_secret_param: str,
                       postgres_password_param: str,
                       postgres_user_name_param: str,
@@ -478,7 +494,8 @@ def build_interface(title: str = 'RAG Chat',
             postgres_table_name=postgres_table_name_param,
             postgres_host=postgres_host_param,
             postgres_port=postgres_port_param,
-            system_instruction=system_instructions_param
+            system_instruction=system_instructions_param,
+            model_name=model_name,
         )
 
     # noinspection PyShadowingNames
@@ -720,5 +737,6 @@ if __name__ == "__main__":
     sys_instruction: str = ("You are philosopher Karl Popper. Answer questions with philosophical insights, and use "
                             "the provided quotes along with their metadata as reference.")
     rag_chat_ui = build_interface(title="Karl Popper Chatbot",
-                                  system_instructions=sys_instruction)
+                                  system_instructions=sys_instruction,
+                                  model_name="gemini-2.0-flash")  # gemma-3-27b-it"
     rag_chat_ui.launch(debug=True, max_file_size=100 * gr.FileSize.MB)
