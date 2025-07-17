@@ -39,10 +39,11 @@ chat = model.start_chat(history=[])
 
 def format_doc(doc: Document) -> str:
     """Format a Haystack Document into a simple string."""
-    lines = [doc.content]
+    lines = []
     for k, v in doc.meta.items():
         if not k.startswith("_"):
             lines.append(f"{k}: {v}")
+    lines.extend([doc.content])
     return "\n".join(lines)
 
 
@@ -92,77 +93,61 @@ tools = [
                 "required": ["wiki_page_search", "question"],
             },
         ),
-        FunctionDeclaration(
-            name="answer",
-            description="Return the final answer.",
-            parameters={
-                "type": "object",
-                "properties": {"final_answer": {"type": "string"}},
-                "required": ["final_answer"],
-            },
-        ),
     ])
 ]
 
 
 def run(question: str):
-    # Kick things off
     prompt = (
-        "You can call search_datastore or search_wikipedia to gather information. "
-        "When you know the answer, call answer(final_answer).\n\n"
+        "You may call search_datastore and then search_wikipedia to gather information. "
+        "Preferably call both. Then answer the question.\n\n"
         f"Question: {question}"
     )
+    print(f"Prompt: {prompt}\n")
     response: GenerateContentResponse = send_message(chat, prompt, tools=tools)
 
-    # Single-pass: handle one function call or plain response
-    candidate = response.candidates[0]
-    for part in candidate.content.parts:
-        # If it's plain text, print it
-        if getattr(part, "text", None):
-            print(part.text.strip())
+    while True:
+        candidate = response.candidates[0]
+        for part in candidate.content.parts:
+            # If it's plain text, print it
+            if getattr(part, "text", None):
+                print("Response:")
+                print(part.text.strip())
 
-        # If it's a function call, dispatch it immediately
-        if getattr(part, "function_call", None):
-            func = part.function_call
-            name = func.name
-            # Unpack the proto args into a plain dict
-            raw_args = func.args or {}
-            pretty_args = {}
-            for k, v in raw_args.items():
-                if hasattr(v, "WhichOneof"):
-                    kind = v.WhichOneof("kind")
-                    pretty_args[k] = getattr(v, kind)
-                else:
-                    # Already a basic Python type (str, int, etc)
-                    pretty_args[k] = v
+            # If it's a function call, dispatch it
+            if getattr(part, "function_call", None):
+                func = part.function_call
+                name = func.name
+                raw_args = func.args or {}
+                pretty_args = {}
 
-            print(f"\n[Calling {name} with args {pretty_args}]")
+                for k, v in raw_args.items():
+                    if hasattr(v, "WhichOneof"):
+                        kind = v.WhichOneof("kind")
+                        pretty_args[k] = getattr(v, kind)
+                    else:
+                        pretty_args[k] = v
 
-            # Execute the Python implementation
-            # Dispatcher mapping function names to actual functions
-            dispatch = {
-                "search_wikipedia": search_wikipedia,
-                "search_datastore": search_datastore,
-                "answer": answer,
-            }
+                print(f"\n[Calling {name} with args {pretty_args}]")
 
-            # Validate and call
-            if name not in dispatch:
-                raise ValueError(f"Unknown function: {name}")
+                dispatch = {
+                    "search_wikipedia": search_wikipedia,
+                    "search_datastore": search_datastore,
+                }
 
-            func = dispatch[name]
-            response_data = func(**pretty_args)
-            result = response_data["result"]
-            print(f"[Result]: {result}\n")
+                if name not in dispatch:
+                    raise ValueError(f"Unknown function: {name}")
 
-            # If this was the final answer, done
-            if name == "answer":
-                return
+                result = dispatch[name](**pretty_args)["result"]
+                result = result.strip() + ("\n Have you called both functions yet? "
+                                           "If not, please do so before answering.")
+                print(f"[Result]: {result}\n")
 
-            # Otherwise send the result back to Gemini and print its reply
-            followup = send_message(chat, result, tools=tools)
-            print(followup.candidates[0].content.parts[0].text.strip())
-            return
+                response = send_message(chat, result, tools=tools)
+                break  # Break for-loop to handle next full response
+        else:
+            # No function calls left; exit the outer loop
+            break
 
 
 if __name__ == "__main__":
