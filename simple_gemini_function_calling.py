@@ -125,11 +125,34 @@ def run(question: str):
         if getattr(part, "function_call", None):
             func = part.function_call
             name = func.name
-            args: Dict[str, Any] = func.args or {}
-            print(f"\n[Calling {name} with args {args}]")
+            # Unpack the proto args into a plain dict
+            raw_args = func.args or {}
+            pretty_args = {}
+            for k, v in raw_args.items():
+                if hasattr(v, "WhichOneof"):
+                    kind = v.WhichOneof("kind")
+                    pretty_args[k] = getattr(v, kind)
+                else:
+                    # Already a basic Python type (str, int, etc)
+                    pretty_args[k] = v
+
+            print(f"\n[Calling {name} with args {pretty_args}]")
 
             # Execute the Python implementation
-            result = globals()[name](**args)["result"]
+            # Dispatcher mapping function names to actual functions
+            dispatch = {
+                "search_wikipedia": search_wikipedia,
+                "search_datastore": search_datastore,
+                "answer": answer,
+            }
+
+            # Validate and call
+            if name not in dispatch:
+                raise ValueError(f"Unknown function: {name}")
+
+            func = dispatch[name]
+            response_data = func(**pretty_args)
+            result = response_data["result"]
             print(f"[Result]: {result}\n")
 
             # If this was the final answer, done
@@ -140,6 +163,7 @@ def run(question: str):
             followup = send_message(chat, result, tools=tools)
             print(followup.candidates[0].content.parts[0].text.strip())
             return
+
 
 if __name__ == "__main__":
     run("Is induction valid in some cases, particularly when doing statistics?")
